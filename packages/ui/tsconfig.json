@@ -1,7 +1,29 @@
 {
-  "extends": "@repo/typescript-config/react-library.json",
+  "extends": "../../packages/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+
+    /* ✅ Wajib untuk Project References */
+    "composite": true,
+    "incremental": true,
+
+    /* ✅ Agar deklarasi .d.ts dihasilkan */
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+
+    /* ✅ Fix error import React default */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* ✅ Fix untuk JSX pada React 19 */
+    "jsx": "react-jsx",
+
+    /* ✅ Opsional untuk alias internal */
+    "baseUrl": ".",
+    "paths": {
+      "@repo/ui/*": ["src/*"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

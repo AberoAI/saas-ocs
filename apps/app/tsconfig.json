@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../frontend/src/*"]
+    },
+    "typeRoots": ["../frontend/types", "../../node_modules/@types"],
+    "composite": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "../frontend/types/**/*.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}

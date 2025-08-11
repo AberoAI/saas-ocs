@@ -1,0 +1,21 @@
+packages:
+  - apps/web
+  - apps/docs
+  - apps/backend
+  - apps/frontend
+  - apps/worker
+  - packages/ui
+  - packages/eslint-config
+  - packages/typescript-config
+  - packages/shared
+
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@tailwindcss/oxide'
+  - bcrypt
+  - esbuild
+  - msgpackr-extract
+  - prisma
+  - sharp
+  - unrs-resolver

@@ -1,0 +1,61 @@
+// saas-ocs/prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id        String    @id @default(cuid())
+  name      String
+  users     User[]
+  messages  Message[]
+  contacts  Contact[]         // daftar kontak WA
+  createdAt DateTime  @default(now())
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId  String
+}
+
+model Contact {
+  id        String    @id @default(cuid())
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  waPhone   String?   @unique            // nomor WA kontak (E.164), opsional
+  name      String?
+  messages  Message[]                     // relasi message <-> contact
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id          String    @id @default(cuid())
+
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  tenantId    String
+
+  // relasi opsional ke Contact
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  contactId   String?
+
+  // arah pesan (pakai string biar fleksibel)
+  direction   String    // "inbound" | "outbound"
+
+  content     String
+
+  // field untuk WhatsApp Cloud API
+  waMessageId String?   @unique
+  fromNumber  String?
+  toNumber    String?
+  status      String?   // delivered | read | sent | failed
+
+  createdAt   DateTime  @default(now())
+}

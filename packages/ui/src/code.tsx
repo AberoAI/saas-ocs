@@ -1,11 +1,14 @@
-import { type JSX } from "react";
+"use client";
+import React, { ReactNode } from "react";
 
-export function Code({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
+export interface CodeProps {
+  children: ReactNode;
   className?: string;
-}): JSX.Element {
-  return <code className={className}>{children}</code>;
 }
+
+/**
+ * Komponen Code sederhana untuk menampilkan inline code block.
+ */
+export const Code = ({ children, className }: CodeProps) => {
+  return <code className={className ?? "font-mono text-sm"}>{children}</code>;
+};

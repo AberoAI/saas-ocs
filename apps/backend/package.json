@@ -1,0 +1,26 @@
+{
+  "name": "@repo/backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "ws": "tsx src/ws/server.ts"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.4.3",
+    "axios": "^1.11.0",
+    "ioredis": "^5.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "rate-limiter-flexible": "^7.2.0",
+    "ws": "^8.18.3",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.4.1",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.2"
+  }
+}
