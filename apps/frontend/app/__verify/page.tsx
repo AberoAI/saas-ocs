@@ -1,5 +1,3 @@
-"use client";
-
 export default function VerifyPage() {
   const name = process.env.NEXT_PUBLIC_BIZ_NAME || "Your Company";
   const tagline = process.env.NEXT_PUBLIC_BIZ_TAGLINE || "Customer Service Automation";
