@@ -1,9 +1,9 @@
+// apps/frontend/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const ENABLED = process.env.VERIFICATION_MODE === "true";
 
-// Daftar path yang TIDAK boleh terdampak (dashboard, auth, api, assets, dll)
 const SAFE_PREFIXES = [
   "/api",
   "/dashboard",
@@ -15,7 +15,7 @@ const SAFE_PREFIXES = [
   "/sitemap.xml",
   "/privacy",
   "/terms",
-  "/__verify", // halaman verifikasi sendiri
+  "/verify", // <- halaman verifikasi
 ];
 
 export function middleware(req: NextRequest) {
@@ -23,17 +23,25 @@ export function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  // Biarkan semua path selain root dan SAFE_PREFIXES berjalan normal
-  if (pathname !== "/" || SAFE_PREFIXES.some((p) => pathname.startsWith(p))) {
+  // Biarkan request non-GET (POST dsb) lewat agar API tidak terganggu
+  if (req.method !== "GET") return NextResponse.next();
+
+  // Kalau sudah di jalur aman, jangan diutak-atik
+  if (SAFE_PREFIXES.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // Rewrite root ("/") ke halaman verifikasi khusus
-  const url = req.nextUrl.clone();
-  url.pathname = "/__verify";
-  return NextResponse.rewrite(url);
+  // Saat mode verifikasi aktif, akar "/" diarahkan ke /verify
+  if (pathname === "/") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/verify";
+    return NextResponse.rewrite(url);
+  }
+
+  // Selain root, biarkan jalan normal
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/:path*"], // evaluasi semua path
+  matcher: ["/:path*"],
 };
