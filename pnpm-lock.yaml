@@ -163,7 +163,7 @@ importers:
         specifier: ^11.4.4
         version: 11.4.4(typescript@5.8.2)
       '@types/node':
-        specifier: ^20.4.1
+        specifier: ^20.19.9
         version: 20.19.9
       '@types/react':
         specifier: ^19.0.14

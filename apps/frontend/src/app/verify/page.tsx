@@ -1,6 +1,9 @@
+/// <reference types="node" />
+
 export default function VerifyPage() {
   const name = process.env.NEXT_PUBLIC_BIZ_NAME ?? "Your Company";
-  const tagline = process.env.NEXT_PUBLIC_BIZ_TAGLINE ?? "Customer Service Automation";
+  const tagline =
+    process.env.NEXT_PUBLIC_BIZ_TAGLINE ?? "Customer Service Automation";
   const email = process.env.NEXT_PUBLIC_BIZ_EMAIL ?? "contact@example.com";
   const phone = process.env.NEXT_PUBLIC_BIZ_PHONE ?? "+00 000 000 0000";
   const domain = process.env.NEXT_PUBLIC_BIZ_DOMAIN ?? "https://example.com";
@@ -16,13 +19,18 @@ export default function VerifyPage() {
 
         <section className="mt-6 space-y-2 text-gray-800 leading-relaxed">
           <p>
-            <strong>About:</strong> We provide AI-powered WhatsApp Cloud API automation
-            for customer service (OCS + AI), including real-time inbox,
-            auto-replies, dashboards, and analytics.
+            <strong>About:</strong> We provide AI-powered WhatsApp Cloud API
+            automation for customer service (OCS + AI), including real-time
+            inbox, auto-replies, dashboards, and analytics.
           </p>
           <p>
             <strong>Website:</strong>{" "}
-            <a className="underline" href={domain} target="_blank" rel="noreferrer">
+            <a
+              className="underline"
+              href={domain}
+              target="_blank"
+              rel="noreferrer"
+            >
               {domain}
             </a>
           </p>
@@ -33,7 +41,8 @@ export default function VerifyPage() {
             <strong>Address:</strong> {address}
           </p>
           <p>
-            <strong>Legal:</strong> Our Privacy Policy and Terms are available below.
+            <strong>Legal:</strong> Our Privacy Policy and Terms are available
+            below.
           </p>
         </section>
 

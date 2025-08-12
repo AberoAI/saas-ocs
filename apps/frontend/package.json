@@ -22,7 +22,7 @@
     "@eslint/eslintrc": "^3.0.0",
     "@tailwindcss/postcss": "^4.0.1",
     "@trpc/server": "^11.4.4",
-    "@types/node": "^20.4.1",
+    "@types/node": "^20.19.9",
     "@types/react": "^19.0.14",
     "@types/react-dom": "^19.0.14",
     "eslint": "^9.8.0",
