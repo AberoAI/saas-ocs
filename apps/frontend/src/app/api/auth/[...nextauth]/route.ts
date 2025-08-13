@@ -1,70 +1,70 @@
 // apps/frontend/src/app/api/auth/[...nextauth]/route.ts
-import NextAuth, { type NextAuthOptions, type Session } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
-import type { JWT } from "next-auth/jwt";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 
-const prisma = new PrismaClient();
+// Opsional: arahkan validasi ke backend jika ada
+const BACKEND_URL = process.env.BACKEND_URL;
 
-export const authOptions: NextAuthOptions = {
+// Fallback demo (tanpa backend): set di Vercel bila mau coba cepat
+// FRONTEND_DEMO_EMAIL, FRONTEND_DEMO_PASSWORD
+const DEMO_EMAIL = process.env.FRONTEND_DEMO_EMAIL ?? "";
+const DEMO_PASSWORD = process.env.FRONTEND_DEMO_PASSWORD ?? "";
+
+export const runtime = "nodejs";
+
+const handler = NextAuth({
   session: { strategy: "jwt" },
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        const email = credentials?.email ?? "";
+        const password = credentials?.password ?? "";
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: { tenant: true },
-        });
-        if (!user) return null;
+        // Jika ada BACKEND_URL, validasi ke backend
+        if (BACKEND_URL) {
+          const r = await fetch(`${BACKEND_URL}/auth/login`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          if (!r.ok) return null;
+          // Backend sebaiknya balikan minimal: { id, name, email }
+          const user = await r.json();
+          return user ?? null;
+        }
 
-        const ok = await bcrypt.compare(credentials.password, user.password);
-        if (!ok) return null;
+        // Fallback lokal sederhana (tanpa DB)
+        if (DEMO_EMAIL && DEMO_PASSWORD && email === DEMO_EMAIL && password === DEMO_PASSWORD) {
+          return { id: "demo-user", name: "Demo User", email: DEMO_EMAIL };
+        }
 
-        // Nilai ini akan masuk ke callback JWT sebagai 'user'
-        return {
-          id: user.id,
-          email: user.email,
-          tenantId: user.tenantId,
-        };
+        return null;
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }): Promise<JWT> {
-      // 'user' hanya ada saat login pertama kali
+    async jwt({ token, user }) {
+      // lampirkan user ke token saat login
       if (user) {
-        // Field custom ini sudah dideklarasikan di apps/frontend/src/types/next-auth.d.ts
-        token.userId = (user as { id?: string }).id;
-        token.tenantId = (user as { tenantId?: string }).tenantId;
+        token.user = {
+          id: (user as any).id,
+          name: (user as any).name,
+          email: (user as any).email,
+        };
       }
       return token;
     },
-    async session({ session, token }): Promise<Session> {
-      if (session.user) {
-        // Mapping token -> session (menggunakan augmentation yang sudah kamu buat)
-        (session.user as any).id = (token as any).userId ?? (token as any).id;
-        (session.user as any).tenantId = (token as any).tenantId;
-        // (opsional) juga teruskan email
-        if (!(session.user as any).email && (token as any).email) {
-          (session.user as any).email = (token as any).email as string;
-        }
-      }
+    async session({ session, token }) {
+      // kirim user ke session
+      (session as any).user = token.user;
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-};
+});
 
-const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

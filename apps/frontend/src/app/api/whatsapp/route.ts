@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs"; // aman di Vercel
 
-// Jika kamu sudah punya backend terpisah, set BACKEND_URL di env Vercel
+// Jika sudah punya backend terpisah, set BACKEND_URL di Environment Vercel.
 // contoh: https://your-backend.example.com
 const BACKEND_URL = process.env.BACKEND_URL;
 
 /** GET: Meta Webhook Verification */
 export async function GET(req: NextRequest) {
-  // Jika ada BACKEND_URL, proxy ke backend
+  // Proxy ke backend jika disediakan
   if (BACKEND_URL) {
     const search = new URL(req.url).search;
     const r = await fetch(`${BACKEND_URL}/webhooks/whatsapp${search}`, {
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(txt, { status: r.status });
   }
 
-  // Fallback: verifikasi langsung TANPA Prisma
+  // Fallback tanpa backend: verifikasi token langsung (tanpa DB)
   const { searchParams } = new URL(req.url);
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
 /** POST: Inbound Messages */
 export async function POST(req: NextRequest) {
-  // Jika ada BACKEND_URL, proxy ke backend (disarankan)
+  // Proxy ke backend jika ada (disarankan)
   if (BACKEND_URL) {
     const bodyText = await req.text();
     const r = await fetch(`${BACKEND_URL}/webhooks/whatsapp`, {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Fallback: kalau belum ada backend, kembalikan OK sederhana
+  // Fallback: terima saja tanpa proses
   return NextResponse.json(
     { ok: true, note: "Backend not configured; message accepted (no-op)." },
     { status: 200 }
