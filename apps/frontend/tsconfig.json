@@ -23,6 +23,7 @@
       "@repo/backend": ["../../apps/backend/dist/index.d.ts"]
     },
 
+    "types": ["node"],
     "typeRoots": ["./types", "./node_modules/@types"],
     "noEmit": true
   },

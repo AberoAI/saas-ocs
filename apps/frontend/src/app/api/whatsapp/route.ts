@@ -1,10 +1,10 @@
 // apps/frontend/src/app/api/whatsapp/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { Queue } from "bullmq";
 import type { InboundWaJob } from "shared/queue-types";
+import { getPrisma } from "@/lib/prisma"; // <- perbaikan di sini
 
-const prisma = new PrismaClient();
+export const runtime = "nodejs"; // Penting untuk Prisma di Vercel
 
 const inboundQueue = new Queue<InboundWaJob>("wa-inbound", {
   connection: { url: process.env.REDIS_URL! },
@@ -25,10 +25,11 @@ export async function GET(req: NextRequest) {
 
 /** POST: Receive Inbound Messages */
 export async function POST(req: NextRequest) {
+  const prisma = getPrisma();
+
   try {
     const body = await req.json();
 
-    // Ambil struktur standar dari Meta Webhook
     const entry = body?.entry?.[0];
     const change = entry?.changes?.[0];
     const value = change?.value;
@@ -38,7 +39,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "ok", info: "no_messages" }, { status: 200 });
     }
 
-    // Ambil message pertama
     const msg = messages[0];
     const from = String(msg.from);
     const waMessageId = msg.id ? String(msg.id) : undefined;
@@ -47,24 +47,21 @@ export async function POST(req: NextRequest) {
       ? String(value.metadata.display_phone_number)
       : "";
 
-    // Tenant (MVP: ambil tenant pertama)
     const tenant = await prisma.tenant.findFirst();
     if (!tenant) {
       return NextResponse.json({ error: "No tenant configured" }, { status: 500 });
-      }
+    }
 
-    // Pastikan contact ada (unik by waPhone)
     const contact =
       (await prisma.contact.findUnique({ where: { waPhone: from } })) ??
       (await prisma.contact.create({
         data: { tenantId: tenant.id, waPhone: from, name: null },
       }));
 
-    // ✅ Opsi A: pakai foreign key langsung (paling stabil di semua versi Prisma)
     await prisma.message.create({
       data: {
         tenantId: tenant.id,
-        contactId: contact.id,           // <-- kunci fix-nya di sini
+        contactId: contact.id,
         direction: "inbound",
         content: text,
         waMessageId,
@@ -74,7 +71,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Enqueue untuk diproses worker
     await inboundQueue.add("inbound-wa", {
       tenantId: tenant.id,
       from,

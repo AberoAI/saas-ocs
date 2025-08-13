@@ -1,11 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+// Gunakan deklarasi global untuk menghindari re-init di dev (Hot Reload)
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ["query"],
-  });
+export function getPrisma(): PrismaClient {
+  if (!global.prisma) {
+    global.prisma = new PrismaClient({
+      log: ["query"], // setting dari code kamu
+    });
+  }
+  return global.prisma;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Instance siap pakai (opsional)
+export const prisma = getPrisma();
