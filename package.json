@@ -2,6 +2,7 @@
   "name": "saas-ocs",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -37,6 +38,5 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "packageManager": "pnpm@10.14.0"
+  ]
 }
