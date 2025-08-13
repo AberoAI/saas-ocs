@@ -1,17 +1,25 @@
 // apps/frontend/src/app/api/whatsapp/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { Queue } from "bullmq";
-import type { InboundWaJob } from "shared/queue-types";
-import { getPrisma } from "@/lib/prisma"; // <- perbaikan di sini
 
-export const runtime = "nodejs"; // Penting untuk Prisma di Vercel
+export const runtime = "nodejs"; // aman di Vercel
 
-const inboundQueue = new Queue<InboundWaJob>("wa-inbound", {
-  connection: { url: process.env.REDIS_URL! },
-});
+// Jika kamu sudah punya backend terpisah, set BACKEND_URL di env Vercel
+// contoh: https://your-backend.example.com
+const BACKEND_URL = process.env.BACKEND_URL;
 
-/** GET: Verify Token (Meta setup) */
+/** GET: Meta Webhook Verification */
 export async function GET(req: NextRequest) {
+  // Jika ada BACKEND_URL, proxy ke backend
+  if (BACKEND_URL) {
+    const search = new URL(req.url).search;
+    const r = await fetch(`${BACKEND_URL}/webhooks/whatsapp${search}`, {
+      method: "GET",
+    });
+    const txt = await r.text();
+    return new NextResponse(txt, { status: r.status });
+  }
+
+  // Fallback: verifikasi langsung TANPA Prisma
   const { searchParams } = new URL(req.url);
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
@@ -23,66 +31,28 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
-/** POST: Receive Inbound Messages */
+/** POST: Inbound Messages */
 export async function POST(req: NextRequest) {
-  const prisma = getPrisma();
-
-  try {
-    const body = await req.json();
-
-    const entry = body?.entry?.[0];
-    const change = entry?.changes?.[0];
-    const value = change?.value;
-    const messages = value?.messages;
-
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return NextResponse.json({ status: "ok", info: "no_messages" }, { status: 200 });
-    }
-
-    const msg = messages[0];
-    const from = String(msg.from);
-    const waMessageId = msg.id ? String(msg.id) : undefined;
-    const text = msg.text?.body ? String(msg.text.body) : "";
-    const to = value?.metadata?.display_phone_number
-      ? String(value.metadata.display_phone_number)
-      : "";
-
-    const tenant = await prisma.tenant.findFirst();
-    if (!tenant) {
-      return NextResponse.json({ error: "No tenant configured" }, { status: 500 });
-    }
-
-    const contact =
-      (await prisma.contact.findUnique({ where: { waPhone: from } })) ??
-      (await prisma.contact.create({
-        data: { tenantId: tenant.id, waPhone: from, name: null },
-      }));
-
-    await prisma.message.create({
-      data: {
-        tenantId: tenant.id,
-        contactId: contact.id,
-        direction: "inbound",
-        content: text,
-        waMessageId,
-        fromNumber: from,
-        toNumber: to,
-        status: "received",
+  // Jika ada BACKEND_URL, proxy ke backend (disarankan)
+  if (BACKEND_URL) {
+    const bodyText = await req.text();
+    const r = await fetch(`${BACKEND_URL}/webhooks/whatsapp`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: bodyText,
+    });
+    const respText = await r.text();
+    return new NextResponse(respText, {
+      status: r.status,
+      headers: {
+        "content-type": r.headers.get("content-type") ?? "application/json",
       },
     });
-
-    await inboundQueue.add("inbound-wa", {
-      tenantId: tenant.id,
-      from,
-      to,
-      waMessageId: waMessageId ?? "",
-      content: text,
-    });
-
-    return NextResponse.json({ status: "ok" }, { status: 200 });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("WA webhook error:", msg);
-    return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
+
+  // Fallback: kalau belum ada backend, kembalikan OK sederhana
+  return NextResponse.json(
+    { ok: true, note: "Backend not configured; message accepted (no-op)." },
+    { status: 200 }
+  );
 }
