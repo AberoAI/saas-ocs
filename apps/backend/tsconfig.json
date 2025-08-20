@@ -1,47 +1,21 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "outDir": "dist",
-    "rootDir": "../../", // tetap sesuai kerangka kamu
+    "rootDir": "../../",
+    "outDir": "./dist",
     "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "shared/*": [
-        "../../packages/shared/src/*"
-      ],
-      "@repo/backend": [
-        "./src/index.ts"
-      ]
-    }
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
+    "noEmit": false
   },
   "include": [
-    "../../packages/shared/src/**/*",
-    "src/**/*",
-    ".next/types/**/*.ts"
+    "src",
+    "../../packages/shared/src/prisma.ts"
   ],
   "exclude": [
+    "../../packages/shared/src/router.ts",
+    "src/app/**",
+    "src/pages/**",
+    "src/middleware/**",
     "node_modules",
     "dist"
   ]

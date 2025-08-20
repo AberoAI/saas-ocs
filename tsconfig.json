@@ -15,24 +15,18 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
 
-    /* ✅ Alias import */
+    // alias & base url
     "baseUrl": ".",
     "paths": {
       "@/*": ["apps/frontend/src/*"],
       "shared/*": ["packages/shared/src/*"],
       "@repo/ui": ["packages/ui/src/index.tsx"],
       "@repo/ui/*": ["packages/ui/src/*"],
-      "@repo/backend": ["apps/backend/dist/index.d.ts"]
+      "@repo/backend": ["apps/backend/src/index.ts"]
     },
 
-    /* ✅ Custom types */
     "typeRoots": ["./apps/frontend/types", "./node_modules/@types"]
   },
-
-  "include": [
-    "next-env.d.ts",
-    "apps/**/*",
-    "packages/**/*"
-  ],
+  "include": ["next-env.d.ts", "apps/**/*", "packages/**/*"],
   "exclude": ["node_modules"]
 }

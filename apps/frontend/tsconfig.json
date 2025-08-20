@@ -1,8 +1,8 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
-
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -13,16 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-
     "plugins": [{ "name": "next" }],
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "shared/*": ["../../packages/shared/src/*"],
-      "@repo/backend": ["../../apps/backend/dist/index.d.ts"]
-    },
-
     "types": ["node"],
     "typeRoots": ["./types", "./node_modules/@types"],
     "noEmit": true
