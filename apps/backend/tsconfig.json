@@ -1,22 +1,26 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../../",
+    "rootDir": "src",
     "outDir": "./dist",
+
     "composite": true,
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
-    "noEmit": false
+
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true
   },
-  "include": [
-    "src",
-    "../../packages/shared/src/prisma.ts"
-  ],
+  "include": ["src"],
   "exclude": [
-    "../../packages/shared/src/router.ts",
     "src/app/**",
     "src/pages/**",
     "src/middleware/**",
     "node_modules",
-    "dist"
+    "dist",
+    "tests/**"
+  ],
+  "references": [
+    { "path": "../../packages/shared" }
   ]
 }

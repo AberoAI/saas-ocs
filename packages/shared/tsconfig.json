@@ -13,14 +13,20 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+
     "composite": true,
     "declaration": true,
     "emitDeclarationOnly": true,
+
+    "noEmit": false,                  // ⬅️ wajib (override root)
+    "outDir": "./dist",               // ⬅️ hasil .d.ts ke sini
+    "disableSourceOfProjectReferenceRedirect": true,
+
     "typeRoots": ["./types", "./node_modules/@types"],
     "types": ["node"],
     "plugins": [{ "name": "next" }]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*.d.ts"],
-  "exclude": ["node_modules", "dist"],
-  "references": []
+  "exclude": ["node_modules", "dist"]
+  // ⬅️ references dihapus untuk mencegah circular project refs
 }

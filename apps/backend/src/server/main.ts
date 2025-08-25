@@ -6,16 +6,28 @@ import "./bootstrap";
 // 2) Start tRPC HTTP server
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { appRouter } from "./routers";
+import { createContext as makeContext } from "../trpc/context";
 
 // 3) WebSocket sederhana untuk realtime (dipakai FE: ws://localhost:4000)
 import { WebSocketServer } from "ws";
 
 const PORT = Number(process.env.PORT ?? 4000);
 
+// Normalisasi header Node -> Record<string, string>
+function toRecord(headers: unknown): Record<string, string> {
+  const obj = (headers ?? {}) as Record<string, string | string[] | undefined>;
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [k, Array.isArray(v) ? v.join(",") : v ?? ""]),
+  ) as Record<string, string>;
+}
+
 // tRPC HTTP server
 const httpServer = createHTTPServer({
   router: appRouter,
-  createContext: () => ({}),
+
+  // ✅ gunakan context yang benar (prisma, tenantId, userId, ...)
+  createContext: ({ req }) => makeContext({ headers: toRecord(req.headers) }),
+
   // Header CORS dasar agar FE (localhost:3000) bisa akses saat dev
   responseMeta() {
     return {
@@ -41,7 +53,7 @@ httpServer.on("request", (req, res) => {
   }
 });
 
-// WebSocket server share port yang sama (path default, cocok dengan ws://localhost:4000)
+// WebSocket server share port yang sama
 const wss = new WebSocketServer({ server: httpServer });
 
 // Broadcast helper
@@ -54,11 +66,9 @@ function broadcastJSON(payload: unknown) {
 
 // Event koneksi WS
 wss.on("connection", (ws) => {
-  // kirim hello saat connect
   ws.send(JSON.stringify({ type: "hello", ts: Date.now() }));
 
   ws.on("message", (raw) => {
-    // contoh handler sederhana
     try {
       const msg = JSON.parse(String(raw));
       if (msg?.type === "ping") {

@@ -1,4 +1,5 @@
 // apps/backend/src/trpc/router.ts
-// Bridge: re-export dari sumber kebenaran router di server/routers
-export { appRouter } from "../server/routers";
-export type { AppRouter } from "../server/routers";
+// Barrel ringan untuk tRPC primitives (JANGAN export appRouter di sini)
+export { router, procedure } from "./trpc";
+// (opsional) type-only re-export:
+// export type { AppRouter } from "../server/routers";
