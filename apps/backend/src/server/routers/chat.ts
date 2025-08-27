@@ -1,27 +1,26 @@
-// apps/backend/src/server/routers/chat.ts
-import { router, procedure } from "../trpc";
+import { router, procedure } from "../../trpc/trpc";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const chatRouter = router({
-  // ✅ Menangani pengiriman pesan
   sendMessage: procedure
-    .input(z.object({ content: z.string() }))
+    .input(z.object({ content: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Missing tenant" });
       const message = await ctx.prisma.message.create({
         data: {
           content: input.content,
-          tenantId: ctx.tenantId,
           direction: "outbound",
+          tenant: { connect: { id: ctx.tenantId } },
+          ...(ctx.userId ? { user: { connect: { id: ctx.userId } } } : {}),
         },
       });
-
-      // Bisa tambahkan ke queue worker atau broadcast via WebSocket
       return message;
     }),
 
-  // ✅ Mengambil pesan terakhir
   getMessages: procedure.query(async ({ ctx }) => {
-    return await ctx.prisma.message.findMany({
+    if (!ctx.tenantId) throw new TRPCError({ code: "UNAUTHORIZED", message: "Missing tenant" });
+    return ctx.prisma.message.findMany({
       where: { tenantId: ctx.tenantId },
       orderBy: { createdAt: "desc" },
       take: 50,

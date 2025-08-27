@@ -1,48 +1,26 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "outDir": "dist",
-    "rootDir": "../../", // tetap sesuai kerangka kamu
+    "rootDir": "src",
+    "outDir": "./dist",
+
     "composite": true,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
+
+    "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "shared/*": [
-        "../../packages/shared/src/*"
-      ],
-      "@repo/backend": [
-        "./src/index.ts"
-      ]
-    }
+    "emitDeclarationOnly": true
   },
-  "include": [
-    "../../packages/shared/src/**/*",
-    "src/**/*",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["src"],
   "exclude": [
+    "src/app/**",
+    "src/pages/**",
+    "src/middleware/**",
     "node_modules",
-    "dist"
+    "dist",
+    "tests/**"
+  ],
+  "references": [
+    { "path": "../../packages/shared" }
   ]
 }

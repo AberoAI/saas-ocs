@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -14,20 +15,18 @@
     "incremental": true,
 
     "composite": true,
+    "declaration": true,
     "emitDeclarationOnly": true,
 
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "shared/*": ["src/*"],
-      "@repo/backend": ["../../apps/backend/dist/index.d.ts"]
-    },
+    "noEmit": false,                  // ⬅️ wajib (override root)
+    "outDir": "./dist",               // ⬅️ hasil .d.ts ke sini
+    "disableSourceOfProjectReferenceRedirect": true,
 
     "typeRoots": ["./types", "./node_modules/@types"],
     "types": ["node"],
     "plugins": [{ "name": "next" }]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*.d.ts"],
-  "exclude": ["node_modules", "dist"],
-  "references": []
+  "exclude": ["node_modules", "dist"]
+  // ⬅️ references dihapus untuk mencegah circular project refs
 }

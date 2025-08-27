@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt @default(now()) // ← aman untuk data lama & auto-update
+  Contact   Contact[]
+  messages  Message[]
+  User      User[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  tenantId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())  // ← aman untuk data lama & auto-update
+  Tenant    Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  tenantId    String
+  direction   String
+  content     String
+  createdAt   DateTime @default(now())
+  contactId   String?
+  fromNumber  String?
+  status      String?
+  toNumber    String?
+  waMessageId String?  @unique
+  Contact     Contact? @relation(fields: [contactId], references: [id])
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+}
+
+model Contact {
+  id        String    @id
+  tenantId  String
+  waPhone   String?   @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  Tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  Message   Message[]
+}
