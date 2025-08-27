@@ -1,7 +1,7 @@
 // apps/backend/src/server/main.ts
 
 // 1) Jalankan side-effects startup (Redis PING, dsb.)
-import "./bootstrap";
+import "./bootstrap.js"; // ⬅️ tambahkan .js untuk ESM output
 
 // 2) Start tRPC HTTP server
 import { createHTTPServer } from "@trpc/server/adapters/standalone";

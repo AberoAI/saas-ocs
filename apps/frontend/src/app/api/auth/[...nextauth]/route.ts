@@ -1,6 +1,8 @@
 // apps/frontend/src/app/api/auth/[...nextauth]/route.ts
-import NextAuth from "next-auth";
+import NextAuth, { type User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import type { JWT } from "next-auth/jwt";
+import type { Session } from "next-auth";
 
 // Opsional: arahkan validasi ke backend jika ada
 const BACKEND_URL = process.env.BACKEND_URL;
@@ -12,6 +14,10 @@ const DEMO_PASSWORD = process.env.FRONTEND_DEMO_PASSWORD ?? "";
 
 export const runtime = "nodejs";
 
+// Tambah tenantId agar ikut terbawa (opsional)
+type BasicUser = { id: string; name?: string | null; email?: string | null; tenantId?: string | null };
+type WithUser<T> = T & { user?: BasicUser };
+
 const handler = NextAuth({
   session: { strategy: "jwt" },
   providers: [
@@ -21,7 +27,7 @@ const handler = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<User | null> {
         const email = credentials?.email ?? "";
         const password = credentials?.password ?? "";
 
@@ -33,14 +39,30 @@ const handler = NextAuth({
             body: JSON.stringify({ email, password }),
           });
           if (!r.ok) return null;
-          // Backend sebaiknya balikan minimal: { id, name, email }
-          const user = await r.json();
-          return user ?? null;
+
+          // Harapkan backend minimal { id, name, email, tenantId? }
+          const raw = (await r.json()) as Partial<BasicUser> | null;
+          if (!raw?.id) return null;
+
+          // Bentuk User sesuai type NextAuth
+          const user: User = {
+            id: String(raw.id),
+            name: raw.name ?? null,
+            email: raw.email ?? null,
+            // image opsional; biarkan null
+          };
+
+          // Simpan tenantId di properti tambahan saat nanti di JWT (lewat "user" param)
+          // NextAuth akan meneruskan object yang kita return ke callback.jwt sebagai "user"
+          (user as unknown as BasicUser).tenantId = raw.tenantId ?? null;
+
+          return user;
         }
 
         // Fallback lokal sederhana (tanpa DB)
         if (DEMO_EMAIL && DEMO_PASSWORD && email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-          return { id: "demo-user", name: "Demo User", email: DEMO_EMAIL };
+          const user: User = { id: "demo-user", name: "Demo User", email: DEMO_EMAIL };
+          return user;
         }
 
         return null;
@@ -49,19 +71,46 @@ const handler = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // lampirkan user ke token saat login
+      // Saat login berhasil, "user" ada → masukkan ke token
       if (user) {
-        token.user = {
-          id: (user as any).id,
-          name: (user as any).name,
-          email: (user as any).email,
+        const u = user as Partial<BasicUser>;
+        const tok = token as WithUser<JWT>;
+        tok.user = {
+          id: String(u.id ?? ""),
+          name: u.name ?? null,
+          email: u.email ?? null,
+          tenantId: u.tenantId ?? null,
         };
+        return tok;
       }
       return token;
     },
     async session({ session, token }) {
-      // kirim user ke session
-      (session as any).user = token.user;
+      // Pastikan session.user memenuhi augmentation kamu:
+      // { id: string; tenantId?: string; email?: string | null; name?: string | null; image?: string | null }
+      const tok = token as WithUser<JWT>;
+      if (tok.user) {
+        const s = session as Session & {
+          user: {
+            id: string;
+            name?: string | null;
+            email?: string | null;
+            image?: string | null;
+            tenantId?: string | null;
+          };
+        };
+
+        s.user = {
+          id: tok.user.id,
+          name: tok.user.name ?? null,
+          email: tok.user.email ?? null,
+          image: s.user?.image ?? null,
+          ...(tok.user.tenantId ? { tenantId: tok.user.tenantId } : {}),
+        };
+
+        // Tidak perlu lagi menambah field custom `session.userId` → pakai `session.user.id`
+        return s;
+      }
       return session;
     },
   },
