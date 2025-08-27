@@ -10,6 +10,7 @@ import { createContext as makeContext } from "../trpc/context";
 
 // 3) WebSocket sederhana untuk realtime (dipakai FE: ws://localhost:4000)
 import { WebSocketServer } from "ws";
+import type { WebSocket, RawData } from "ws";
 
 const PORT = Number(process.env.PORT ?? 4000);
 
@@ -65,10 +66,10 @@ function broadcastJSON(payload: unknown) {
 }
 
 // Event koneksi WS
-wss.on("connection", (ws) => {
+wss.on("connection", (ws: WebSocket) => {
   ws.send(JSON.stringify({ type: "hello", ts: Date.now() }));
 
-  ws.on("message", (raw) => {
+  ws.on("message", (raw: RawData) => {
     try {
       const msg = JSON.parse(String(raw));
       if (msg?.type === "ping") {
