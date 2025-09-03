@@ -11,9 +11,13 @@
       "default": "./src/index.ts"
     }
   },
+  "engines": { "node": ">=20.0.0" },
   "scripts": {
     "dev": "tsx src/server/main.ts",
     "build": "tsc -p tsconfig.json",
+    "start": "node dist/server/main.js",
+    "postinstall": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "ws": "tsx src/ws/server.ts",
     "test": "vitest run"
   },
