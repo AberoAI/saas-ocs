@@ -3,14 +3,28 @@
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",
-  "types": "dist/apps/backend/src/index.d.ts",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "ws": "tsx src/ws/server.ts"
+  "types": "dist/index.d.ts",
+  "files": ["dist/**/*", "src/**/*"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
   },
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "dev": "tsx src/server/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server/main.js",
+    "postinstall": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "ws": "tsx src/ws/server.ts",
+    "test": "vitest run"
+  },
+  "prisma": { "schema": "./prisma/schema.prisma" },
   "dependencies": {
     "@prisma/client": "^6.14.0",
-    "@trpc/server": "^11.4.4",
+    "@trpc/server": "11.4.4",
     "axios": "^1.11.0",
     "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
@@ -26,6 +40,7 @@
     "@types/ws": "^8.18.1",
     "prisma": "6.14.0",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^1.6.0"
   }
 }

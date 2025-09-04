@@ -1,18 +1,12 @@
 // apps/backend/src/index.ts
 
-// Sumber tunggal router
-import { appRouter } from "./server/root";
+// Ekspor router utama
+export { appRouter } from "./server/routers";
+// Ekspor tipe router untuk konsumen (FE/shared)
+export type AppRouter = typeof import("./server/routers").appRouter;
 
-// (opsional) Import Redis helper agar PING tercetak saat start
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { redis } = require("./lib/redis");
-  void redis;
-} catch {}
-
-// ✅ Type export untuk konsumen (shared/frontend)
-export type AppRouter = typeof appRouter;
-
-// ✅ Runtime export agar frontend route bisa pakai router & context
-export { appRouter } from "./server/root";
+// Ekspor context runtime (jika diperlukan oleh server lain)
 export { createContext } from "./trpc/context";
+
+// (opsional) re-export helper types jika sudah didefinisikan di routers
+export type { RouterInputs, RouterOutputs } from "./server/routers";

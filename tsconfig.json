@@ -14,17 +14,14 @@
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],
-
-    // alias & base url
     "baseUrl": ".",
     "paths": {
       "@/*": ["apps/frontend/src/*"],
       "shared/*": ["packages/shared/src/*"],
       "@repo/ui": ["packages/ui/src/index.tsx"],
       "@repo/ui/*": ["packages/ui/src/*"],
-      "@repo/backend": ["apps/backend/src/index.ts"]
+      "@repo/backend": ["apps/backend/src/index.ts"]   // ⬅️ PENTING: ke src, bukan dist
     },
-
     "typeRoots": ["./apps/frontend/types", "./node_modules/@types"]
   },
   "include": ["next-env.d.ts", "apps/**/*", "packages/**/*"],

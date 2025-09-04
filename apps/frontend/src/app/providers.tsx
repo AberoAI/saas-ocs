@@ -4,25 +4,11 @@
 import React, { useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
-import { trpc } from "@/lib/trpc"; // jika alias '@/*' belum ada, ganti ke "../../lib/trpc"
-
-function getBaseUrl() {
-  if (typeof window !== "undefined") return "";
-  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
-}
+import { createTRPCClient, trpc } from "@/lib/trpc";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-        }),
-      ],
-    })
-  );
+  const [trpcClient] = useState(() => createTRPCClient());
 
   return (
     <SessionProvider>

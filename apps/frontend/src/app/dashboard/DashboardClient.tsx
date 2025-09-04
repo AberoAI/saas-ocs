@@ -3,45 +3,41 @@
 
 import { useState, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
-
-// ✅ type-only imports (tidak masuk bundle)
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "shared/router";
-
 import { useWebSocket } from "@/hooks/useWebSocket";
+import type { RouterOutputs } from "@repo/backend";
 
-// ✅ Infer tipe dari router
-type RouterOutput = inferRouterOutputs<AppRouter>;
-type Message = RouterOutput["chat"]["getMessages"][number];
+type Message = RouterOutputs["chat"]["getMessages"][number];
 
 export default function DashboardClient() {
   const [message, setMessage] = useState("");
+  const utils = trpc.useUtils();
 
-  // ✅ Ambil daftar pesan
-  const messagesQuery = trpc.chat.getMessages.useQuery();
+  // Beri argumen: `undefined` kalau tidak ada input
+  const messagesQuery = trpc.chat.getMessages.useQuery(undefined);
 
-  // ✅ Kirim pesan
-  const sendMessageMutation = trpc.chat.sendMessage.useMutation({
-    onSuccess: () => {
-      messagesQuery.refetch();
-      setMessage("");
-    },
-  });
+  // Tanpa options di hook; pasang onSuccess di argumen mutate
+  const sendMessageMutation = trpc.chat.sendMessage.useMutation();
 
-  // ✅ Dengarkan event realtime dari WebSocket
+  // Realtime: invalidasi cache saat ada event
   useWebSocket("ws://localhost:4000", (data: unknown) => {
     if ((data as { type?: string })?.type === "new_message") {
-      messagesQuery.refetch();
+      utils.chat.getMessages.invalidate();
     }
   });
 
-  // ✅ Hindari re-create fungsi tiap render
   const send = useCallback(() => {
     const content = message.trim();
-    if (content) {
-      sendMessageMutation.mutate({ content });
-    }
-  }, [message, sendMessageMutation]);
+    if (!content) return;
+    sendMessageMutation.mutate(
+      { content },
+      {
+        onSuccess: () => {
+          utils.chat.getMessages.invalidate();
+          setMessage("");
+        },
+      }
+    );
+  }, [message, sendMessageMutation, utils]);
 
   if (messagesQuery.isLoading) return <div>Loading...</div>;
 

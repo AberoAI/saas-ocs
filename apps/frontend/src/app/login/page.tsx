@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMsg(null);
 
@@ -26,18 +26,18 @@ export default function LoginPage() {
       const res = await signIn("credentials", {
         email: emailTrim,
         password: passTrim,
-        redirect: false, // tetap seperti punyamu
+        redirect: false,
       });
 
       if (res?.ok) {
         setMsg("✅ Login sukses. Coba buka /api/auth/session atau refresh halaman utama.");
-        // kalau mau auto-redirect, uncomment:
         // window.location.href = "/";
       } else {
         setMsg(res?.error || "❌ Login gagal. Periksa email/password.");
       }
-    } catch (err: any) {
-      setMsg(`❌ Terjadi kesalahan: ${err?.message || String(err)}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setMsg(`❌ Terjadi kesalahan: ${message}`);
     } finally {
       setLoading(false);
     }
