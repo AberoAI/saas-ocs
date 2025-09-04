@@ -4,12 +4,12 @@
     "rootDir": "src",
     "outDir": "./dist",
 
-    // ⬇️ penting: hasilkan .js, bukan hanya .d.ts
+    // hasilkan .js & .d.ts
     "noEmit": false,
     "declaration": true,
     "emitDeclarationOnly": false,
 
-    // ⬇️ pastikan ESM kompatibel dengan Node
+    // ESM Node style (sesuai import .js di source)
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ES2022",
