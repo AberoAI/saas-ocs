@@ -1,7 +1,5 @@
 ﻿-- apps/backend/prisma/migrations/20250814_baseline/migration.sql
-
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
+-- NOTE: Simpan file ini sebagai UTF-8 TANPA BOM.
 
 -- CreateTable: Tenant
 CREATE TABLE "public"."Tenant" (
