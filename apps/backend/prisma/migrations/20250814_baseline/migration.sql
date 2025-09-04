@@ -1,4 +1,4 @@
-﻿-- apps/backend/prisma/migrations/20250814_baseline/migration.sql
+-- apps/backend/prisma/migrations/20250814_baseline/migration.sql
 -- NOTE: Simpan file ini sebagai UTF-8 TANPA BOM.
 
 -- CreateTable: Tenant
