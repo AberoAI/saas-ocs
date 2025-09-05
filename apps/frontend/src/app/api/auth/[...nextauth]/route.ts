@@ -8,7 +8,6 @@ import type { Session } from "next-auth";
 const BACKEND_URL = process.env.BACKEND_URL;
 
 // Fallback demo (tanpa backend): set di Vercel bila mau coba cepat
-// FRONTEND_DEMO_EMAIL, FRONTEND_DEMO_PASSWORD
 const DEMO_EMAIL = process.env.FRONTEND_DEMO_EMAIL ?? "";
 const DEMO_PASSWORD = process.env.FRONTEND_DEMO_PASSWORD ?? "";
 
@@ -19,6 +18,9 @@ type BasicUser = { id: string; name?: string | null; email?: string | null; tena
 type WithUser<T> = T & { user?: BasicUser };
 
 const handler = NextAuth({
+  // penting → gunakan secret dari ENV
+  secret: process.env.NEXTAUTH_SECRET,
+
   session: { strategy: "jwt" },
   providers: [
     Credentials({
@@ -33,30 +35,30 @@ const handler = NextAuth({
 
         // Jika ada BACKEND_URL, validasi ke backend
         if (BACKEND_URL) {
-          const r = await fetch(`${BACKEND_URL}/auth/login`, {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
-          if (!r.ok) return null;
+          try {
+            const r = await fetch(`${BACKEND_URL}/auth/login`, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
 
-          // Harapkan backend minimal { id, name, email, tenantId? }
-          const raw = (await r.json()) as Partial<BasicUser> | null;
-          if (!raw?.id) return null;
+            if (!r.ok) return null;
 
-          // Bentuk User sesuai type NextAuth
-          const user: User = {
-            id: String(raw.id),
-            name: raw.name ?? null,
-            email: raw.email ?? null,
-            // image opsional; biarkan null
-          };
+            // Harapkan backend minimal { id, name, email, tenantId? }
+            const raw = (await r.json()) as Partial<BasicUser> | null;
+            if (!raw?.id) return null;
 
-          // Simpan tenantId di properti tambahan saat nanti di JWT (lewat "user" param)
-          // NextAuth akan meneruskan object yang kita return ke callback.jwt sebagai "user"
-          (user as unknown as BasicUser).tenantId = raw.tenantId ?? null;
+            const user: User = {
+              id: String(raw.id),
+              name: raw.name ?? null,
+              email: raw.email ?? null,
+            };
 
-          return user;
+            (user as unknown as BasicUser).tenantId = raw.tenantId ?? null;
+            return user;
+          } catch {
+            return null;
+          }
         }
 
         // Fallback lokal sederhana (tanpa DB)
@@ -71,7 +73,6 @@ const handler = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // Saat login berhasil, "user" ada → masukkan ke token
       if (user) {
         const u = user as Partial<BasicUser>;
         const tok = token as WithUser<JWT>;
@@ -86,8 +87,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // Pastikan session.user memenuhi augmentation kamu:
-      // { id: string; tenantId?: string; email?: string | null; name?: string | null; image?: string | null }
       const tok = token as WithUser<JWT>;
       if (tok.user) {
         const s = session as Session & {
@@ -108,7 +107,6 @@ const handler = NextAuth({
           ...(tok.user.tenantId ? { tenantId: tok.user.tenantId } : {}),
         };
 
-        // Tidak perlu lagi menambah field custom `session.userId` → pakai `session.user.id`
         return s;
       }
       return session;
