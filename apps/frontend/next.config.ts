@@ -2,7 +2,9 @@
 import type { NextConfig } from "next";
 
 // Ambil origin backend dari NEXT_PUBLIC_TRPC_URL (fallback ke onrender)
-const TRPC_URL = process.env.NEXT_PUBLIC_TRPC_URL ?? "https://saas-ocs-backend.onrender.com/trpc";
+const TRPC_URL =
+  process.env.NEXT_PUBLIC_TRPC_URL ??
+  "https://saas-ocs-backend.onrender.com/trpc";
 
 let BACKEND_HTTP = "https://saas-ocs-backend.onrender.com";
 let BACKEND_WS = "wss://saas-ocs-backend.onrender.com";
@@ -28,14 +30,28 @@ const CSP = [
   `frame-ancestors 'self'`,
 ].join("; ");
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   eslint: { ignoreDuringBuilds: false },
   typescript: { ignoreBuildErrors: false },
 
   // tetap perlu agar Next men-transpile source dari @repo/backend
   transpilePackages: ["@repo/backend"],
 
-  // ⬇️ tambahkan header CSP agar fetch dari FE ke onrender tidak diblokir
+  // ⬇️ proxy HTTP tRPC ke backend → FE cukup akses /_trpc (same-origin, anti CORS)
+  async rewrites() {
+    return [
+      {
+        source: "/_trpc/:path*",
+        destination: `${TRPC_URL}/:path*`,
+      },
+      {
+        source: "/_healthz",
+        destination: BACKEND_HTTP + "/healthz",
+      },
+    ];
+  },
+
+  // ⬇️ tambahkan header CSP agar fetch dari FE ke backend tidak diblokir
   async headers() {
     return [
       {
@@ -44,6 +60,6 @@ const nextConfig = {
       },
     ];
   },
-} satisfies NextConfig;
+};
 
 export default nextConfig;
