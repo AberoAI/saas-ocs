@@ -16,8 +16,8 @@
     "plugins": [{ "name": "next" }],
     "types": ["node"],
     "typeRoots": [
-      "./src/types",            // ⟵ TAMBAH ini agar file di src/types terbaca
-      "./types",                // (biarkan tetap jika suatu saat kamu pakai folder ini)
+      "./src/types",
+      "./types",
       "./node_modules/@types"
     ],
     "noEmit": true
@@ -26,7 +26,7 @@
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
-    "src/types/**/*.d.ts",      // ⟵ TAMBAH: lokasi file augment kamu sekarang
+    "src/types/**/*.d.ts",
     "types/**/*.d.ts",
     ".next/types/**/*.ts"
   ],

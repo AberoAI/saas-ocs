@@ -12,6 +12,8 @@ const DEMO_EMAIL = process.env.FRONTEND_DEMO_EMAIL ?? "";
 const DEMO_PASSWORD = process.env.FRONTEND_DEMO_PASSWORD ?? "";
 
 export const runtime = "nodejs";
+// Pastikan route ini selalu dynamic (tidak di-cache oleh layer apa pun)
+export const dynamic = "force-dynamic";
 
 // Tambah tenantId agar ikut terbawa (opsional)
 type BasicUser = { id: string; name?: string | null; email?: string | null; tenantId?: string | null };
