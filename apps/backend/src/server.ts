@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT ?? 4000);
 // --- CORS setup (long-term, dinamis dari allowlist) ---
 /**
  * Gunakan ALLOW_ORIGINS sebagai sumber kebenaran:
- * contoh: "https://aberoai.com,https://*.vercel.app,https://aberoai.vercel.app"
+ * contoh: "https://aberoai.com,https://aberoai.vercel.app,https://*.vercel.app"
  * (fallback ke CORS_ORIGIN tunggal jika ALLOW_ORIGINS tidak di-set)
  */
 const RAW_ALLOW = (process.env.ALLOW_ORIGINS ?? process.env.CORS_ORIGIN ?? "")
@@ -19,9 +19,7 @@ const RAW_ALLOW = (process.env.ALLOW_ORIGINS ?? process.env.CORS_ORIGIN ?? "")
   .map((s) => s.trim())
   .filter(Boolean);
 
-const ALLOW_LIST = RAW_ALLOW.length
-  ? RAW_ALLOW
-  : ["http://localhost:3000"]; // default lokal dev
+const ALLOW_LIST = RAW_ALLOW.length ? RAW_ALLOW : ["http://localhost:3000"]; // default lokal dev
 
 function isAllowed(origin: string): boolean {
   if (!origin) return false;
@@ -36,8 +34,22 @@ function isAllowed(origin: string): boolean {
   });
 }
 
+/** Set header CORS global; balas preflight jika OPTIONS. */
 function applyCors(req: http.IncomingMessage, res: http.ServerResponse): boolean {
   const origin = (req.headers.origin as string) ?? "";
+
+  // logging bantu diagnosa di Render Logs
+  if (origin) {
+    const allowed = isAllowed(origin);
+    if (!allowed) {
+      console.warn("[CORS] BLOCKED origin:", origin, "allowlist:", ALLOW_LIST);
+    } else {
+      console.log("[CORS] ALLOW origin:", origin);
+    }
+  } else {
+    console.log("[CORS] no Origin header");
+  }
+
   if (isAllowed(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
@@ -48,6 +60,7 @@ function applyCors(req: http.IncomingMessage, res: http.ServerResponse): boolean
       "content-type, authorization, x-tenant-id, x-user-id"
     );
   }
+
   // tanggapi preflight di level atas biar cepat
   if (req.method === "OPTIONS") {
     res.writeHead(204);
@@ -83,8 +96,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // healthcheck → kembalikan JSON agar gampang dipakai FE/debug
+  // healthcheck → kembalikan JSON; izinkan CORS untuk observability lintas origin
   if (url === "/healthz") {
+    // khusus healthz, bebas CORS agar mudah di-fetch dari FE/debug
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
     res.end('{"ok":true}');
     return;
@@ -130,10 +145,10 @@ const server = http.createServer((req, res) => {
   res.writeHead(404).end("Not found");
 });
 
-server.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
-  console.log(`- tRPC:     http://localhost:${PORT}/trpc`);
-  console.log(`- Healthz:  http://localhost:${PORT}/healthz`);
-  console.log(`- WhatsApp: http://localhost:${PORT}/webhooks/whatsapp`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Backend listening on http://0.0.0.0:${PORT}`);
+  console.log(`- tRPC:     http://0.0.0.0:${PORT}/trpc`);
+  console.log(`- Healthz:  http://0.0.0.0:${PORT}/healthz`);
+  console.log(`- WhatsApp: http://0.0.0.0:${PORT}/webhooks/whatsapp`);
   console.log(`- CORS allowlist:`, ALLOW_LIST.join(", ") || "(empty)");
 });
