@@ -1,12 +1,63 @@
 // apps/backend/src/server.ts
-import "dotenv/config"; // muat .env lebih awal
+// muat .env lebih awal
+import "dotenv/config";
 import http from "http";
 import { createHTTPHandler } from "@trpc/server/adapters/standalone";
 import { appRouter } from "./server/routers";
 import { createContext } from "./trpc/context";
 
 const PORT = Number(process.env.PORT ?? 4000);
-const CORS_ORIGIN = process.env.CORS_ORIGIN ?? "http://localhost:3000";
+
+// --- CORS setup (long-term, dinamis dari allowlist) ---
+/**
+ * Gunakan ALLOW_ORIGINS sebagai sumber kebenaran:
+ * contoh: "https://aberoai.com,https://*.vercel.app,https://aberoai.vercel.app"
+ * (fallback ke CORS_ORIGIN tunggal jika ALLOW_ORIGINS tidak di-set)
+ */
+const RAW_ALLOW = (process.env.ALLOW_ORIGINS ?? process.env.CORS_ORIGIN ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const ALLOW_LIST = RAW_ALLOW.length
+  ? RAW_ALLOW
+  : ["http://localhost:3000"]; // default lokal dev
+
+function isAllowed(origin: string): boolean {
+  if (!origin) return false;
+  return ALLOW_LIST.some((allowed) => {
+    if (allowed === origin) return true;
+    // dukung pola wildcard sederhana: https://*.vercel.app
+    if (allowed.startsWith("https://*.")) {
+      const suffix = allowed.slice("https://*".length); // ".vercel.app"
+      return origin.endsWith(suffix);
+    }
+    return false;
+  });
+}
+
+function applyCors(req: http.IncomingMessage, res: http.ServerResponse): boolean {
+  const origin = (req.headers.origin as string) ?? "";
+  if (isAllowed(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "content-type, authorization, x-tenant-id, x-user-id"
+    );
+  }
+  // tanggapi preflight di level atas biar cepat
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return true;
+  }
+  return false;
+}
+// ------------------------------------------------------
+
 const WA_VERIFY_TOKEN = process.env.WA_VERIFY_TOKEN ?? ""; // dari Meta App
 
 const trpcHandler = createHTTPHandler({
@@ -17,21 +68,9 @@ const trpcHandler = createHTTPHandler({
 });
 
 const server = http.createServer((req, res) => {
-  // --- CORS ---
-  res.setHeader("Access-Control-Allow-Origin", CORS_ORIGIN);
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "content-type, authorization, x-tenant-id, x-user-id"
-  );
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  if (req.method === "OPTIONS") {
-    res.writeHead(204);
-    res.end();
-    return;
-  }
-  // -------------
+  // --- CORS (selalu paling awal) ---
+  if (applyCors(req, res)) return;
+  // -------------------------------
 
   const url = req.url ?? "/";
 
@@ -44,10 +83,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // healthcheck
+  // healthcheck → kembalikan JSON agar gampang dipakai FE/debug
   if (url === "/healthz") {
-    res.writeHead(200, { "content-type": "text/plain" });
-    res.end("ok");
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+    res.end('{"ok":true}');
     return;
   }
 
@@ -96,4 +135,5 @@ server.listen(PORT, () => {
   console.log(`- tRPC:     http://localhost:${PORT}/trpc`);
   console.log(`- Healthz:  http://localhost:${PORT}/healthz`);
   console.log(`- WhatsApp: http://localhost:${PORT}/webhooks/whatsapp`);
+  console.log(`- CORS allowlist:`, ALLOW_LIST.join(", ") || "(empty)");
 });
