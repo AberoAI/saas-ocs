@@ -2,11 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,16 +13,11 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "types": [
-      "node"
-    ],
+    "plugins": [{ "name": "next" }],
+    "types": ["node"],
     "typeRoots": [
-      "./types",
+      "./src/types",            // ⟵ TAMBAH ini agar file di src/types terbaca
+      "./types",                // (biarkan tetap jika suatu saat kamu pakai folder ini)
       "./node_modules/@types"
     ],
     "noEmit": true
@@ -35,11 +26,10 @@
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
+    "src/types/**/*.d.ts",      // ⟵ TAMBAH: lokasi file augment kamu sekarang
     "types/**/*.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "references": []
 }

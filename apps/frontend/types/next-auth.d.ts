@@ -1,25 +1,35 @@
-import { DefaultSession, DefaultUser } from "next-auth";
+// apps/frontend/src/types/next-auth.d.ts
+import type { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
   interface Session {
-    user?: DefaultSession["user"] & {
-      id: string;          // dipakai di UI: session.user.id
-      tenantId?: string;   // multi-tenant awareness
-      email?: string | null;
-    };
+    /**
+     * Saat belum login, NextAuth akan mengembalikan `user: null`.
+     * Saat sudah login, user minimal memiliki `id` dan opsional `tenantId`.
+     */
+    user: (DefaultSession["user"] & {
+      id: string;
+      tenantId?: string | null;
+    }) | null;
   }
 
   interface User extends DefaultUser {
-    tenantId?: string;
+    id: string;
+    tenantId?: string | null;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    // dukung dua-duanya supaya fleksibel dengan callback yang ada
-    id?: string;          // beberapa setup pakai 'id'
-    userId?: string;      // beberapa setup pakai 'userId'
-    tenantId?: string;
-    email?: string | null;
+    /**
+     * Kita menyimpan payload user ke dalam token seperti yang dilakukan di callbacks.jwt
+     * (lihat route handler kamu).
+     */
+    user?: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      tenantId?: string | null;
+    };
   }
 }

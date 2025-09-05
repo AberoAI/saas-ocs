@@ -18,7 +18,7 @@ type BasicUser = { id: string; name?: string | null; email?: string | null; tena
 type WithUser<T> = T & { user?: BasicUser };
 
 const handler = NextAuth({
-  // penting → gunakan secret dari ENV
+  // W A J I B untuk v4
   secret: process.env.NEXTAUTH_SECRET,
 
   session: { strategy: "jwt" },
@@ -33,7 +33,6 @@ const handler = NextAuth({
         const email = credentials?.email ?? "";
         const password = credentials?.password ?? "";
 
-        // Jika ada BACKEND_URL, validasi ke backend
         if (BACKEND_URL) {
           try {
             const r = await fetch(`${BACKEND_URL}/auth/login`, {
@@ -41,10 +40,8 @@ const handler = NextAuth({
               headers: { "content-type": "application/json" },
               body: JSON.stringify({ email, password }),
             });
-
             if (!r.ok) return null;
 
-            // Harapkan backend minimal { id, name, email, tenantId? }
             const raw = (await r.json()) as Partial<BasicUser> | null;
             if (!raw?.id) return null;
 
@@ -53,7 +50,6 @@ const handler = NextAuth({
               name: raw.name ?? null,
               email: raw.email ?? null,
             };
-
             (user as unknown as BasicUser).tenantId = raw.tenantId ?? null;
             return user;
           } catch {
@@ -61,10 +57,8 @@ const handler = NextAuth({
           }
         }
 
-        // Fallback lokal sederhana (tanpa DB)
         if (DEMO_EMAIL && DEMO_PASSWORD && email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-          const user: User = { id: "demo-user", name: "Demo User", email: DEMO_EMAIL };
-          return user;
+          return { id: "demo-user", name: "Demo User", email: DEMO_EMAIL };
         }
 
         return null;
@@ -75,30 +69,30 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         const u = user as Partial<BasicUser>;
-        const tok = token as WithUser<JWT>;
-        tok.user = {
+        (token as WithUser<JWT>).user = {
           id: String(u.id ?? ""),
           name: u.name ?? null,
           email: u.email ?? null,
           tenantId: u.tenantId ?? null,
         };
-        return tok;
       }
       return token;
     },
     async session({ session, token }) {
+      // pastikan selalu return bentuk valid dengan 'user' (null bila belum login)
       const tok = token as WithUser<JWT>;
-      if (tok.user) {
-        const s = session as Session & {
-          user: {
-            id: string;
-            name?: string | null;
-            email?: string | null;
-            image?: string | null;
-            tenantId?: string | null;
-          };
-        };
 
+      const s = session as Session & {
+        user: {
+          id: string;
+          name?: string | null;
+          email?: string | null;
+          image?: string | null;
+          tenantId?: string | null;
+        } | null;
+      };
+
+      if (tok.user) {
         s.user = {
           id: tok.user.id,
           name: tok.user.name ?? null,
@@ -106,10 +100,12 @@ const handler = NextAuth({
           image: s.user?.image ?? null,
           ...(tok.user.tenantId ? { tenantId: tok.user.tenantId } : {}),
         };
-
-        return s;
+      } else {
+        s.user = null;
       }
-      return session;
+
+      // 's.expires' sudah diset oleh NextAuth — jangan dibuang
+      return s;
     },
   },
 });
