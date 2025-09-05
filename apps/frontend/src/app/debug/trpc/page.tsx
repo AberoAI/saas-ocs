@@ -19,7 +19,8 @@ export default function DebugTRPC() {
       setRes({ error: "NEXT_PUBLIC_TRPC_URL is empty" });
       return;
     }
-    // ping /trpc (wajar 405)
+
+    // 1) Ping root tRPC (boleh 405; yang penting bukan CORS/Network error)
     fetch(url, { method: "GET" })
       .then(async (r) => {
         const text = await r.text();
@@ -33,7 +34,7 @@ export default function DebugTRPC() {
       })
       .catch((e) => setRes((prev) => ({ ...prev, url, error: String(e) })));
 
-    // ping /healthz untuk bukti konektivitas HTTP biasa
+    // 2) Ping /healthz untuk bukti konektivitas umum
     fetch("https://saas-ocs-backend.onrender.com/healthz", { cache: "no-store" })
       .then((r) => r.text())
       .then((t) => setRes((prev) => ({ ...prev, healthz: t })))
