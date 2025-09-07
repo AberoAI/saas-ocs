@@ -8,7 +8,12 @@ describe("appRouter shape", () => {
     const keys = Object.keys(rec);
 
     // Tidak boleh ada prosedur/tabu di ROOT
-    const forbidden = new Set(["Provider", "useContext", "useUtils", "createClient"]);
+    const forbidden = new Set([
+      "Provider",
+      "useContext",
+      "useUtils",
+      "createClient",
+    ]);
 
     // Semua nilai root wajib router (punya _def.record)
     for (const k of keys) {

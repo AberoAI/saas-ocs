@@ -7,10 +7,12 @@ declare module "next-auth" {
      * Saat belum login, NextAuth akan mengembalikan `user: null`.
      * Saat sudah login, user minimal memiliki `id` dan opsional `tenantId`.
      */
-    user: (DefaultSession["user"] & {
-      id: string;
-      tenantId?: string | null;
-    }) | null;
+    user:
+      | (DefaultSession["user"] & {
+          id: string;
+          tenantId?: string | null;
+        })
+      | null;
   }
 
   interface User extends DefaultUser {

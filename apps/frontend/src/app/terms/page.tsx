@@ -19,8 +19,8 @@ export default function Terms() {
         <h2 className="text-lg font-medium">2. Service</h2>
         <p>
           {name} provides automation for customer service via WhatsApp Cloud API
-          and AI features (inbox, auto-reply, dashboards). Availability may
-          vary and features can change over time.
+          and AI features (inbox, auto-reply, dashboards). Availability may vary
+          and features can change over time.
         </p>
       </section>
 
@@ -71,9 +71,7 @@ export default function Terms() {
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium">8. Contact</h2>
-        <p>
-          Questions? Contact us at {email}.
-        </p>
+        <p>Questions? Contact us at {email}.</p>
       </section>
 
       <p className="text-sm text-gray-500">Last updated: {updated}</p>

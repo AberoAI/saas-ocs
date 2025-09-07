@@ -10,13 +10,13 @@ const connection = new Redis(
   process.env.REDIS_URL || "redis://127.0.0.1:6379",
   {
     maxRetriesPerRequest: null, // <- WAJIB null untuk BullMQ
-  }
+  },
 );
 
 // Event untuk memantau koneksi Redis
 connection.on("connect", () => console.log("Redis connected ✅"));
 connection.on("error", (err) =>
-  console.error("Redis connection error ❌", err)
+  console.error("Redis connection error ❌", err),
 );
 
 const worker = new Worker(
@@ -25,12 +25,12 @@ const worker = new Worker(
     console.log("Processing job:", job.name, job.data);
     // TODO: Integrasi WhatsApp + AI
   },
-  { connection }
+  { connection },
 );
 
 // Event BullMQ Worker
 worker.on("ready", () =>
-  console.log("Worker is ready and connected to Redis ✅")
+  console.log("Worker is ready and connected to Redis ✅"),
 );
 worker.on("completed", (job: Job) => {
   console.log(`Job ${job.id} completed! ✅`);

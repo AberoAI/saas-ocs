@@ -4,21 +4,22 @@
     "rootDir": "src",
     "outDir": "./dist",
 
-    // hasilkan .js & .d.ts
+    // App backend: jangan emit .d.ts (biar gak tarik tipe internal tRPC)
     "noEmit": false,
-    "declaration": true,
+    "declaration": false,
     "emitDeclarationOnly": false,
 
-    // ESM Node style (sesuai import .js di source)
+    // ESM Node style
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ES2022",
 
-    // kualitas hidup
+    // QoL
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
-    "composite": true
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+
+    // NOTE: tidak ada "composite": true
   },
   "include": ["src"],
   "exclude": [
@@ -28,6 +29,6 @@
     "node_modules",
     "dist",
     "tests/**"
-  ],
-  "references": [{ "path": "../../packages/shared" }]
+  ]
+  // NOTE: tidak ada "references"
 }

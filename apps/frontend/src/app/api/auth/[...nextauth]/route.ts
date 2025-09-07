@@ -16,7 +16,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Tambah tenantId agar ikut terbawa (opsional)
-type BasicUser = { id: string; name?: string | null; email?: string | null; tenantId?: string | null };
+type BasicUser = {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  tenantId?: string | null;
+};
 type WithUser<T> = T & { user?: BasicUser };
 
 const handler = NextAuth({
@@ -59,7 +64,12 @@ const handler = NextAuth({
           }
         }
 
-        if (DEMO_EMAIL && DEMO_PASSWORD && email === DEMO_EMAIL && password === DEMO_PASSWORD) {
+        if (
+          DEMO_EMAIL &&
+          DEMO_PASSWORD &&
+          email === DEMO_EMAIL &&
+          password === DEMO_PASSWORD
+        ) {
           return { id: "demo-user", name: "Demo User", email: DEMO_EMAIL };
         }
 

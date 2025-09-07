@@ -10,7 +10,9 @@ import { redis } from "../lib/redis";
   try {
     const hasRedisUrl = !!process.env.REDIS_URL;
     if (!hasRedisUrl) {
-      console.log("[bootstrap] REDIS_URL tidak diset; lewati inisialisasi Redis.");
+      console.log(
+        "[bootstrap] REDIS_URL tidak diset; lewati inisialisasi Redis.",
+      );
       return;
     }
 

@@ -11,7 +11,7 @@ type WebSocketOptions = {
 export function useWebSocket<T = unknown>(
   url: string,
   onMessage: (data: T) => void,
-  options?: WebSocketOptions
+  options?: WebSocketOptions,
 ) {
   const ws = useRef<WebSocket | null>(null);
   const cbRef = useRef(onMessage);

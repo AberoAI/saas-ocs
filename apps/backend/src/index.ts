@@ -1,12 +1,21 @@
 // apps/backend/src/index.ts
 
-// Ekspor router utama
-export { appRouter } from "./server/routers";
-// Ekspor tipe router untuk konsumen (FE/shared)
-export type AppRouter = typeof import("./server/routers").appRouter;
+// ====== Ekspor (tetap, tapi arahkan ke folder yang benar) ======
+export { appRouter } from "./server/routers"; // ✅ perbaiki path
+export type AppRouter = typeof import("./server/routers").appRouter; // ✅ perbaiki path
+export { createContext } from "./trpc";
+export type { RouterInputs, RouterOutputs } from "./server/routers"; // ✅ perbaiki path
 
-// Ekspor context runtime (jika diperlukan oleh server lain)
-export { createContext } from "./trpc/context";
+// ====== Runtime server: HTTP + WS ======
+import http from "http";
+import { app } from "./http-app";
+import { attachWs } from "./ws";
 
-// (opsional) re-export helper types jika sudah didefinisikan di routers
-export type { RouterInputs, RouterOutputs } from "./server/routers";
+const port = Number(process.env.PORT ?? 3000);
+const server = http.createServer(app);
+
+attachWs(server);
+
+server.listen(port, () => {
+  console.log(`HTTP+WS listening on :${port}`);
+});

@@ -19,9 +19,8 @@ import { providerRouter } from "./provider";
 import { billingRouter } from "./billing";
 import { adminRouter } from "./admin";
 import { webhookRouter } from "./webhook";
+import { eventsRouter } from "./events"; // ✅ ditambahkan
 
-// ────────────────────────────────────────────────────────────────────────────────
-// Root app router: hanya namespace, tanpa prosedur langsung
 // ────────────────────────────────────────────────────────────────────────────────
 export const appRouter = router({
   system: systemRouter,
@@ -31,6 +30,7 @@ export const appRouter = router({
   billing: billingRouter,
   admin: adminRouter,
   webhook: webhookRouter,
+  events: eventsRouter, // ✅ didaftarkan
 });
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -40,7 +40,10 @@ export const appRouter = router({
 export type AppRouter = typeof appRouter;
 
 // Opsi: ekspor helper types agar FE bisa konsumsi tanpa mengimpor '@trpc/server'
-export type { inferRouterInputs as _inferRouterInputs, inferRouterOutputs as _inferRouterOutputs } from "@trpc/server";
+export type {
+  inferRouterInputs as _inferRouterInputs,
+  inferRouterOutputs as _inferRouterOutputs,
+} from "@trpc/server";
 
 // Tipe util yang siap pakai di shared/frontend (tanpa mengimpor '@trpc/server' di FE):
 // Contoh penggunaan di shared/frontend:

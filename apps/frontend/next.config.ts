@@ -6,23 +6,43 @@ const TRPC_URL =
   process.env.NEXT_PUBLIC_TRPC_URL ??
   "https://saas-ocs-backend.onrender.com/trpc";
 
+// Sanitasi trailing slash agar tidak jadi //:path*
+const TRPC_BASE = TRPC_URL.replace(/\/$/, "");
+
 let BACKEND_HTTP = "https://saas-ocs-backend.onrender.com";
 let BACKEND_WS = "wss://saas-ocs-backend.onrender.com";
 
 try {
-  const u = new URL(TRPC_URL);
-  // gunakan host yang sama untuk http(s) & wss
-  BACKEND_HTTP = `${u.protocol.startsWith("http") ? "https" : "https"}://${u.host}`;
-  BACKEND_WS = `wss://${u.host}`;
+  const u = new URL(TRPC_BASE);
+  const isHttps = u.protocol === "https:";
+  // ✅ gunakan protokol yang sesuai (http↔ws, https↔wss)
+  BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
+  BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
 } catch {
   // abaikan — gunakan fallback default di atas
 }
 
+const isDev = process.env.NODE_ENV !== "production";
+
+// Kumpulkan target koneksi yang diizinkan untuk fetch & websocket
+const CONNECT_TARGETS = [
+  `'self'`,
+  BACKEND_HTTP,
+  BACKEND_WS,
+  // ✅ izinkan koneksi lokal saat dev (agar WS http://127.0.0.1:4000 tidak diblokir CSP)
+  ...(isDev
+    ? [
+        "http://127.0.0.1:4000",
+        "ws://127.0.0.1:4000",
+        "http://localhost:4000",
+        "ws://localhost:4000",
+      ]
+    : []),
+].join(" ");
+
 const CSP = [
   `default-src 'self'`,
-  // izinkan fetch & websocket ke backend Render
-  `connect-src 'self' ${BACKEND_HTTP} ${BACKEND_WS}`,
-  // allowances umum; sesuaikan jika perlu
+  `connect-src ${CONNECT_TARGETS}`,
   `img-src 'self' data: blob:`,
   `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
   `style-src 'self' 'unsafe-inline'`,
@@ -42,7 +62,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/_trpc/:path*",
-        destination: `${TRPC_URL}/:path*`,
+        destination: `${TRPC_BASE}/:path*`, // contoh: http://127.0.0.1:4000/trpc/:path*
       },
       {
         source: "/_healthz",
@@ -51,7 +71,7 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // ⬇️ tambahkan header CSP agar fetch dari FE ke backend tidak diblokir
+  // ⬇️ tambahkan header CSP agar fetch/WS dari FE tidak diblokir
   async headers() {
     return [
       {

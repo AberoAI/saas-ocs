@@ -1,5 +1,5 @@
 // apps/frontend/src/app/login/page.tsx
-'use client';
+"use client";
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -30,7 +30,9 @@ export default function LoginPage() {
       });
 
       if (res?.ok) {
-        setMsg("✅ Login sukses. Coba buka /api/auth/session atau refresh halaman utama.");
+        setMsg(
+          "✅ Login sukses. Coba buka /api/auth/session atau refresh halaman utama.",
+        );
         // window.location.href = "/";
       } else {
         setMsg(res?.error || "❌ Login gagal. Periksa email/password.");
@@ -44,7 +46,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={{ maxWidth: 360, margin: "40px auto", fontFamily: "sans-serif" }}>
+    <main
+      style={{ maxWidth: 360, margin: "40px auto", fontFamily: "sans-serif" }}
+    >
       <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Login</h1>
       <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
         <input
@@ -83,11 +87,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      {msg && (
-        <p style={{ marginTop: 12, fontSize: 14 }}>
-          {msg}
-        </p>
-      )}
+      {msg && <p style={{ marginTop: 12, fontSize: 14 }}>{msg}</p>}
     </main>
   );
 }

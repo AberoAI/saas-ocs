@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -23,7 +23,9 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res?.ok) {
-      setMsg("Login sukses. Coba buka /api/auth/session atau pindah ke halaman lain.");
+      setMsg(
+        "Login sukses. Coba buka /api/auth/session atau pindah ke halaman lain.",
+      );
     } else {
       setMsg(res?.error || "Login gagal");
     }

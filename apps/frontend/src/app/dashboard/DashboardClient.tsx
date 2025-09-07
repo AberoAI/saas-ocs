@@ -35,7 +35,7 @@ export default function DashboardClient() {
           utils.chat.getMessages.invalidate();
           setMessage("");
         },
-      }
+      },
     );
   }, [message, sendMessageMutation, utils]);
 
@@ -44,7 +44,8 @@ export default function DashboardClient() {
   if (messagesQuery.error) {
     return (
       <div style={{ color: "crimson" }}>
-        Failed to load messages: {String(messagesQuery.error.message ?? "Unknown error")}
+        Failed to load messages:{" "}
+        {String(messagesQuery.error.message ?? "Unknown error")}
       </div>
     );
   }

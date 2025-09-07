@@ -4,14 +4,19 @@
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*", "src/**/*"],
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
     }
   },
-  "engines": { "node": ">=20.0.0" },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "tsx src/server/main.ts",
     "build": "tsc -p tsconfig.json",
@@ -21,11 +26,15 @@
     "ws": "tsx src/ws/server.ts",
     "test": "vitest run"
   },
-  "prisma": { "schema": "./prisma/schema.prisma" },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
+  },
   "dependencies": {
     "@prisma/client": "^6.14.0",
     "@trpc/server": "11.4.4",
     "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
     "rate-limiter-flexible": "^7.2.0",
@@ -35,6 +44,8 @@
   },
   "devDependencies": {
     "@types/axios": "^0.14.4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.19.10",
     "@types/ws": "^8.18.1",
