@@ -1,4 +1,6 @@
+// apps/frontend/src/app/debug/trpc/page.tsx
 "use client";
+
 import { useEffect, useState } from "react";
 
 type Result = {
@@ -10,40 +12,56 @@ type Result = {
   healthz?: string;
 };
 
+// ✅ aktifkan hanya jika perlu (di Vercel: NEXT_PUBLIC_ENABLE_DEBUG=true)
+const IS_DEBUG = process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true";
+
+// ✅ gunakan same-origin (melewati Next rewrites → anti CORS)
+const TRPC_URL = "/_trpc";
+const HEALTHZ_URL = "/_healthz";
+
 export default function DebugTRPC() {
-  const [res, setRes] = useState<Result>({
-    url: process.env.NEXT_PUBLIC_TRPC_URL,
-  });
+  const [res, setRes] = useState<Result>({ url: TRPC_URL });
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_TRPC_URL;
-    if (!url) {
-      setRes({ error: "NEXT_PUBLIC_TRPC_URL is empty" });
-      return;
-    }
+    if (!IS_DEBUG) return;
 
-    // 1) Ping root tRPC (boleh 405; yang penting bukan CORS/Network error)
-    fetch(url, { method: "GET" })
+    // 1) Probe root tRPC (GET ke root wajar 405; yang penting bukan CORS/Network error)
+    fetch(TRPC_URL, { method: "GET", cache: "no-store" })
       .then(async (r) => {
-        const text = await r.text();
+        const text = await r.text().catch(() => "");
         setRes((prev) => ({
           ...prev,
-          url,
+          url: TRPC_URL,
           ok: r.ok,
           status: r.status,
           bodyPreview: text.slice(0, 200),
         }));
       })
-      .catch((e) => setRes((prev) => ({ ...prev, url, error: String(e) })));
+      .catch((e) =>
+        setRes((prev) => ({ ...prev, url: TRPC_URL, error: toErr(e) })),
+      );
 
-    // 2) Ping /healthz untuk bukti konektivitas umum
-    fetch("https://saas-ocs-backend.onrender.com/healthz", {
-      cache: "no-store",
-    })
+    // 2) Probe /healthz (harus 200 + { ok: true } kalau backend hidup)
+    fetch(HEALTHZ_URL, { cache: "no-store" })
       .then((r) => r.text())
       .then((t) => setRes((prev) => ({ ...prev, healthz: t })))
-      .catch((e) => setRes((prev) => ({ ...prev, healthz: "ERR: " + e })));
+      .catch((e) =>
+        setRes((prev) => ({ ...prev, healthz: "ERR: " + toErr(e) })),
+      );
   }, []);
+
+  if (!IS_DEBUG) {
+    return (
+      <main style={{ padding: 24, fontFamily: "ui-sans-serif, system-ui" }}>
+        <h1 style={{ fontSize: 20, fontWeight: 600 }}>Debug TRPC</h1>
+        <p style={{ marginTop: 8, color: "#6b7280" }}>
+          Debug dimatikan. Set{" "}
+          <code>NEXT_PUBLIC_ENABLE_DEBUG=true</code> untuk mengaktifkan di
+          environment non-production.
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main style={{ padding: 24, fontFamily: "ui-sans-serif, system-ui" }}>
@@ -54,6 +72,7 @@ export default function DebugTRPC() {
           background: "#f6f7f9",
           padding: 12,
           borderRadius: 8,
+          overflow: "auto",
         }}
       >
         {JSON.stringify(res, null, 2)}
@@ -64,4 +83,14 @@ export default function DebugTRPC() {
       </p>
     </main>
   );
+}
+
+function toErr(e: unknown) {
+  if (e instanceof Error) return e.message || e.name;
+  try {
+    const any = e as { message?: string; reason?: string };
+    return any?.message || any?.reason || JSON.stringify(e);
+  } catch {
+    return String(e);
+  }
 }
