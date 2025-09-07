@@ -5,9 +5,23 @@ import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { getWsTRPCUrl } from "@/lib/env";
 
-const t = trpc as any;
-
 type Conn = "idle" | "connecting" | "open" | "error" | "closed";
+
+// Bentuk minimal untuk menghindari `any`
+interface EventsHooks {
+  onTick: {
+    useSubscription: (
+      input: undefined,
+      opts: {
+        onStarted?: () => void;
+        onData: (ts: number) => void;
+        onError?: (err: unknown) => void;
+      },
+    ) => void;
+  };
+}
+
+const t = trpc as unknown as { events: EventsHooks };
 
 export default function Page() {
   // ---- tRPC subscription ----
@@ -21,12 +35,16 @@ export default function Page() {
     onError: (err: unknown) => {
       setStatus("error");
       setErrMsg(toErr(err));
+      // eslint-disable-next-line no-console
       console.error("tRPC WS subscription error:", err);
     },
   });
 
   useEffect(() => {
-    if (last) console.log("tick:", new Date(last).toISOString());
+    if (last) {
+      // eslint-disable-next-line no-console
+      console.log("tick:", new Date(last).toISOString());
+    }
   }, [last]);
 
   // ---- Diag: native WebSocket ----
@@ -58,15 +76,13 @@ export default function Page() {
         setWsProtoStatus("open");
         setWsProtoNote("open ✓ (trpc)");
       };
-      ws1.onerror = (e) => {
+      ws1.onerror = (e: Event) => {
         setWsProtoStatus("error");
         setWsProtoNote(`onerror: ${eventErr(e)}`);
       };
-      ws1.onclose = (e) => {
+      ws1.onclose = (e: CloseEvent) => {
         setWsProtoStatus("closed");
-        setWsProtoNote(
-          `close code=${e.code} reason="${e.reason}" clean=${e.wasClean}`,
-        );
+        setWsProtoNote(`close code=${e.code} reason="${e.reason}" clean=${e.wasClean}`);
       };
     } catch (e) {
       setWsProtoStatus("error");
@@ -82,15 +98,13 @@ export default function Page() {
         setWsNoProtoStatus("open");
         setWsNoProtoNote("open ✓ (no subprotocol)");
       };
-      ws2.onerror = (e) => {
+      ws2.onerror = (e: Event) => {
         setWsNoProtoStatus("error");
         setWsNoProtoNote(`onerror: ${eventErr(e)}`);
       };
-      ws2.onclose = (e) => {
+      ws2.onclose = (e: CloseEvent) => {
         setWsNoProtoStatus("closed");
-        setWsNoProtoNote(
-          `close code=${e.code} reason="${e.reason}" clean=${e.wasClean}`,
-        );
+        setWsNoProtoNote(`close code=${e.code} reason="${e.reason}" clean=${e.wasClean}`);
       };
     } catch (e) {
       setWsNoProtoStatus("error");
@@ -107,26 +121,16 @@ export default function Page() {
 
   return (
     <div className="p-6 space-y-3">
-      <div>
-        WS subscription <code>events.onTick</code> aktif.
-      </div>
-      <div>
-        <b>Status:</b> {status}
-      </div>
-      <div>
-        <b>WS URL:</b> {wsUrl}
-      </div>
-      <div className="text-sm text-gray-600">
-        <b>Last:</b> {last ? new Date(last).toLocaleString() : "—"}
-      </div>
-      {status === "error" && (
-        <pre className="mt-2 text-red-600 whitespace-pre-wrap">{errMsg}</pre>
-      )}
+      <div>WS subscription <code>events.onTick</code> aktif.</div>
+      <div><b>Status:</b> {status}</div>
+      <div><b>WS URL:</b> {wsUrl}</div>
+      <div className="text-sm text-gray-600"><b>Last:</b> {last ? new Date(last).toLocaleString() : "—"}</div>
+      {status === "error" && <pre className="mt-2 text-red-600 whitespace-pre-wrap">{errMsg}</pre>}
 
       <hr className="my-4" />
 
       <div>
-        <b>Diag A (WS + subprotocol 'trpc'):</b> {wsProtoStatus}
+        <b>Diag A (WS + subprotocol &apos;trpc&apos;):</b> {wsProtoStatus}
         <div className="text-sm text-gray-600">{wsProtoNote || "—"}</div>
       </div>
       <div>
@@ -137,18 +141,17 @@ export default function Page() {
   );
 }
 
-function toErr(e: unknown) {
+function toErr(e: unknown): string {
   if (e instanceof Error) return e.message || e.name;
   try {
-    // DOMException kadang berbentuk object polos
-    const any = e as any;
-    return any?.message || any?.reason || JSON.stringify(any);
+    const obj = e as { message?: string; reason?: string };
+    return obj?.message || obj?.reason || JSON.stringify(e);
   } catch {
     return String(e);
   }
 }
 
-function eventErr(e: Event) {
-  // Event.onError sering kosong; beri hint userAgent agar penelusuran mudah
-  return `${(e as any)?.message ?? e.type} (ua: ${navigator.userAgent})`;
+function eventErr(e: Event): string {
+  const maybeMsg = (e as unknown as { message?: string }).message;
+  return `${maybeMsg ?? e.type} (ua: ${navigator.userAgent})`;
 }
