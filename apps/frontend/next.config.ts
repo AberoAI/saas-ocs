@@ -1,24 +1,37 @@
 // apps/frontend/next.config.ts
 import type { NextConfig } from "next";
 
-// ── Sumber kebenaran untuk origin backend tRPC (ABSOLUT)
-const ORIGIN_FROM_ENV =
-  process.env.TRPC_ORIGIN || // ✅ utama: variabel khusus rewrites
-  // fallback: kalau NEXT_PUBLIC_TRPC_URL kebetulan absolut, pakai itu
-  (/^https?:\/\//.test(process.env.NEXT_PUBLIC_TRPC_URL ?? "")
-    ? new URL(process.env.NEXT_PUBLIC_TRPC_URL as string).origin
-    : "") ||
-  "https://saas-ocs-backend.onrender.com"; // fallback terakhir (prod)
+/**
+ * URL backend ABSOLUTE untuk rewrite (harus mengarah ke endpoint /trpc).
+ * Contoh: https://api.aberoai.com/trpc
+ *
+ * Prioritas:
+ * 1) TRPC_BACKEND_URL (disarankan)
+ * 2) TRPC_ORIGIN + "/trpc" (fallback)
+ * 3) onrender fallback (terakhir)
+ */
+const TRPC_BACKEND: string =
+  (process.env.TRPC_BACKEND_URL
+    ? process.env.TRPC_BACKEND_URL.replace(/\/$/, "")
+    : process.env.TRPC_ORIGIN
+      ? `${process.env.TRPC_ORIGIN.replace(/\/$/, "")}/trpc`
+      : "https://saas-ocs-backend.onrender.com/trpc");
 
-// Bentuk pasangan http↔ws
-const u = new URL(ORIGIN_FROM_ENV);
-const isHttps = u.protocol === "https:";
-const BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
-const BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
+/** Ekstrak origin http(s) & ws(s) dari TRPC_BACKEND untuk CSP & /_healthz */
+let BACKEND_HTTP = "https://saas-ocs-backend.onrender.com";
+let BACKEND_WS = "wss://saas-ocs-backend.onrender.com";
+try {
+  const u = new URL(TRPC_BACKEND); // harus absolute
+  const isHttps = u.protocol === "https:";
+  BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
+  BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
+} catch {
+  // biarkan fallback default
+}
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// ── CSP
+/** CSP: izinkan koneksi ke origin backend & (opsional) origin lokal saat dev */
 const CONNECT_TARGETS = [
   `'self'`,
   BACKEND_HTTP,
@@ -48,12 +61,12 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
   transpilePackages: ["@repo/backend"],
 
-  // ✅ FE → /_trpc/:path*  →  http(s)://<ORIGIN>/trpc/:path*
+  // FE memanggil /_trpc/:path* → proxy ke TRPC_BACKEND/:path*
   async rewrites() {
     return [
       {
         source: "/_trpc/:path*",
-        destination: `${BACKEND_HTTP}/trpc/:path*`,
+        destination: `${TRPC_BACKEND.replace(/\/$/, "")}/:path*`,
       },
       {
         source: "/_healthz",
