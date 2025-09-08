@@ -1,35 +1,28 @@
 // apps/frontend/next.config.ts
 import type { NextConfig } from "next";
 
-// Ambil origin backend dari NEXT_PUBLIC_TRPC_URL (fallback ke onrender)
-const TRPC_URL =
-  process.env.NEXT_PUBLIC_TRPC_URL ??
-  "https://saas-ocs-backend.onrender.com/trpc";
+// ── Sumber kebenaran untuk origin backend tRPC (ABSOLUT)
+const ORIGIN_FROM_ENV =
+  process.env.TRPC_ORIGIN || // ✅ utama: variabel khusus rewrites
+  // fallback: kalau NEXT_PUBLIC_TRPC_URL kebetulan absolut, pakai itu
+  (/^https?:\/\//.test(process.env.NEXT_PUBLIC_TRPC_URL ?? "")
+    ? new URL(process.env.NEXT_PUBLIC_TRPC_URL as string).origin
+    : "") ||
+  "https://saas-ocs-backend.onrender.com"; // fallback terakhir (prod)
 
-// Sanitasi trailing slash agar tidak jadi //:path*
-const TRPC_BASE = TRPC_URL.replace(/\/$/, "");
-
-let BACKEND_HTTP = "https://saas-ocs-backend.onrender.com";
-let BACKEND_WS = "wss://saas-ocs-backend.onrender.com";
-
-try {
-  const u = new URL(TRPC_BASE);
-  const isHttps = u.protocol === "https:";
-  // ✅ gunakan protokol yang sesuai (http↔ws, https↔wss)
-  BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
-  BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
-} catch {
-  // abaikan — gunakan fallback default di atas
-}
+// Bentuk pasangan http↔ws
+const u = new URL(ORIGIN_FROM_ENV);
+const isHttps = u.protocol === "https:";
+const BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
+const BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// Kumpulkan target koneksi yang diizinkan untuk fetch & websocket
+// ── CSP
 const CONNECT_TARGETS = [
   `'self'`,
   BACKEND_HTTP,
   BACKEND_WS,
-  // ✅ izinkan koneksi lokal saat dev (agar WS http://127.0.0.1:4000 tidak diblokir CSP)
   ...(isDev
     ? [
         "http://127.0.0.1:4000",
@@ -53,25 +46,22 @@ const CSP = [
 const nextConfig: NextConfig = {
   eslint: { ignoreDuringBuilds: false },
   typescript: { ignoreBuildErrors: false },
-
-  // tetap perlu agar Next men-transpile source dari @repo/backend
   transpilePackages: ["@repo/backend"],
 
-  // ⬇️ proxy HTTP tRPC ke backend → FE cukup akses /_trpc (same-origin, anti CORS)
+  // ✅ FE → /_trpc/:path*  →  http(s)://<ORIGIN>/trpc/:path*
   async rewrites() {
     return [
       {
         source: "/_trpc/:path*",
-        destination: `${TRPC_BASE}/:path*`, // contoh: http://127.0.0.1:4000/trpc/:path*
+        destination: `${BACKEND_HTTP}/trpc/:path*`,
       },
       {
         source: "/_healthz",
-        destination: BACKEND_HTTP + "/healthz",
+        destination: `${BACKEND_HTTP}/healthz`,
       },
     ];
   },
 
-  // ⬇️ tambahkan header CSP agar fetch/WS dari FE tidak diblokir
   async headers() {
     return [
       {
