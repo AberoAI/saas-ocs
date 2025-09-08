@@ -1,19 +1,20 @@
-// apps/frontend/src/middleware.ts
+// apps/frontend/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// ----[1] Toggle fitur via ENV (back-compat disediakan) ----
+// ----[1] Toggle fitur via ENV (back-compat + server-only env) ----
 const VERIFICATION_ON =
   process.env.VERIFICATION_MODE === "true" ||
   process.env.NEXT_PUBLIC_VERIFICATION_MODE === "true";
 
 const ALLOW_DEBUG_ROUTES =
-  process.env.ENABLE_DEBUG_ROUTES === "true" ||
-  process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true";
+  process.env.DEBUG_PAGES_ENABLED === "true" || // ✅ server-only, prioritas
+  process.env.ENABLE_DEBUG_ROUTES === "true" || // back-compat
+  process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true"; // fallback (tidak direkomendasi di prod)
 
 const IS_PROD = process.env.NODE_ENV === "production";
 
-// ----[2] Jalur aman milikmu (tidak diubah) ----
+// ----[2] Jalur aman milikmu (tetap) ----
 const SAFE_PREFIXES = [
   "/api",
   "/dashboard",
@@ -25,43 +26,36 @@ const SAFE_PREFIXES = [
   "/sitemap.xml",
   "/privacy",
   "/terms",
-  "/verify", // <- halaman verifikasi
+  "/verify",
 ];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ----[A] Blokir semua /debug/* di production kecuali diizinkan lewat ENV
+  // ----[A] Proteksi /debug/* di production
   if (IS_PROD && pathname.startsWith("/debug")) {
     if (!ALLOW_DEBUG_ROUTES) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/";
-      url.search = "";
-      return NextResponse.redirect(url);
+      // Samarkan jadi 404 supaya tidak "mengundang"
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
     }
-    // jika diizinkan, teruskan saja
     return NextResponse.next();
   }
 
-  // ----[B] Mode verifikasi PUNYAMU (tidak diubah, hanya rename var) ----
+  // ----[B] Mode verifikasi punyamu (tetap)
   if (!VERIFICATION_ON) return NextResponse.next();
 
-  // Biarkan request non-GET (POST dsb) lewat agar API tidak terganggu
   if (req.method !== "GET") return NextResponse.next();
 
-  // Kalau sudah di jalur aman, jangan diutak-atik
   if (SAFE_PREFIXES.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  // Saat mode verifikasi aktif, akar "/" diarahkan ke /verify
   if (pathname === "/") {
     const url = req.nextUrl.clone();
     url.pathname = "/verify";
     return NextResponse.rewrite(url);
   }
 
-  // Selain root, biarkan jalan normal
   return NextResponse.next();
 }
 
