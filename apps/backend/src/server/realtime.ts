@@ -24,7 +24,7 @@ wss.on("connection", (ws: WebSocket) => {
 export function handleUpgrade(
   request: IncomingMessage,
   socket: Socket,
-  head: Buffer
+  head: Buffer,
 ) {
   wss.handleUpgrade(request, socket, head, (ws: WebSocket) => {
     wss.emit("connection", ws, request);

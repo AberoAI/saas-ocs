@@ -53,6 +53,6 @@ export async function POST(req: NextRequest) {
   // Fallback: terima saja tanpa proses
   return NextResponse.json(
     { ok: true, note: "Backend not configured; message accepted (no-op)." },
-    { status: 200 }
+    { status: 200 },
   );
 }

@@ -1,5 +1,5 @@
 // apps/backend/src/ws/server.ts
-import { WebSocketServer, WebSocket } from "ws";   // ⬅️ WebSocket sebagai VALUE
+import { WebSocketServer, WebSocket } from "ws"; // ⬅️ WebSocket sebagai VALUE
 import type { RawData } from "ws";
 
 const PORT = Number(process.env.WS_PORT ?? 4000);
@@ -10,7 +10,8 @@ const wss = new WebSocketServer({ port: PORT });
 // Helper broadcast supaya bisa dipakai dari tempat lain (misal API)
 export function broadcast(data: unknown) {
   const msg = JSON.stringify(data);
-  for (const client of wss.clients) {              // Set<WebSocket>
+  for (const client of wss.clients) {
+    // Set<WebSocket>
     if (client.readyState === WebSocket.OPEN) {
       client.send(msg);
     }

@@ -87,7 +87,7 @@ const inboundWorker = new Worker<InboundWaJob>(
   {
     // ✅ Gunakan koneksi Redis dari ENV
     connection: { url: process.env.REDIS_URL! },
-  }
+  },
 );
 
 // Logging event

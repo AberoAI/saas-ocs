@@ -8,10 +8,11 @@ const allowList = (process.env.ALLOW_ORIGINS ?? "")
 
 function isAllowed(origin: string): boolean {
   if (!origin) return false;
-  return allowList.some((allowed) =>
-    allowed === origin ||
-    (allowed.startsWith("https://*.") &&
-      origin.endsWith(allowed.slice("https://*".length)))
+  return allowList.some(
+    (allowed) =>
+      allowed === origin ||
+      (allowed.startsWith("https://*.") &&
+        origin.endsWith(allowed.slice("https://*".length))),
   );
 }
 
@@ -27,7 +28,10 @@ export function handleCors(req: IncomingMessage, res: ServerResponse): boolean {
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "content-type, authorization");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "content-type, authorization",
+    );
   }
 
   // Preflight
