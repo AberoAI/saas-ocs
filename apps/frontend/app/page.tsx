@@ -44,6 +44,10 @@ function SiteTopNav({ name }: { name: string }) {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
+          {/* + About (scroll) */}
+          <a href="#about" className="text-sm text-black/70 hover:text-black">
+            About
+          </a>
           <a href="#features" className="text-sm text-black/70 hover:text-black">
             Features
           </a>
@@ -200,6 +204,27 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* About Us (short version) */}
+      <section id="about" className="border-t border-black/10 bg-white">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <h2 className="text-2xl font-semibold md:text-3xl">About AberoAI</h2>
+          <p className="mt-4 text-black/70 md:text-lg max-w-3xl">
+            AberoAI is a technology company based in Izmir, Turkey, specializing in{" "}
+            <strong>Online Customer Service + AI (OCS+AI)</strong> solutions. We integrate WhatsApp Cloud API
+            with AI-powered automation to help businesses improve customer engagement and reduce operational
+            costs.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/about"
+              className="inline-flex items-center rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-black/90"
+            >
+              Learn more →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Features (+ list aslimu dipertahankan) */}
       <section id="features" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
@@ -270,13 +295,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer: link aslimu dipertahankan, pakai Link */}
+      {/* Footer: link aslimu dipertahankan tapi diselaraskan ke /privacy & /terms */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <p className="text-sm text-black/60">© {new Date().getFullYear()} {name}</p>
           <div className="text-sm text-neutral-500">
-            <Link href="/privacy-policy" className="underline">Privacy Policy</Link> ·{" "}
-            <Link href="/terms-of-service" className="underline">Terms of Service</Link>
+            <Link href="/privacy" className="underline">Privacy Policy</Link> ·{" "}
+            <Link href="/terms" className="underline">Terms of Service</Link>
           </div>
         </div>
       </footer>
