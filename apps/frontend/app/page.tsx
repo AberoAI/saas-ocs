@@ -1,5 +1,7 @@
 // apps/frontend/app/page.tsx
 import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 
 /** -- Metadata (tetap) -- */
 export const metadata: Metadata = {
@@ -21,28 +23,42 @@ function getTagline(): string {
   );
 }
 
-/** ---------- Komponen kecil (internal, tanpa dependensi eksternal) ---------- */
+/** ---------- Komponen kecil ---------- */
 
 function SiteTopNav({ name }: { name: string }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[var(--background)]/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <a href="/" className="flex items-center gap-3">
-          <div className="size-8 rounded-lg border border-black/10 bg-white/70 p-1">
-            <img src="/favicon.ico" alt={name} className="size-full object-contain" />
+        <Link href="/" className="flex items-center gap-3">
+          <div className="rounded-lg border border-black/10 bg-white/70 p-1">
+            <Image
+              src="/icon-192.png" // kecil & cepat; ada di /public
+              alt={name}
+              width={32}
+              height={32}
+              className="object-contain"
+              priority
+            />
           </div>
           <span className="text-lg font-semibold">{name}</span>
-        </a>
+        </Link>
+
         <nav className="hidden items-center gap-6 md:flex">
-          <a href="#features" className="text-sm text-black/70 hover:text-black">Features</a>
-          <a href="#pricing" className="text-sm text-black/70 hover:text-black">Pricing</a>
-          <a href="#faq" className="text-sm text-black/70 hover:text-black">FAQ</a>
-          <a
+          <a href="#features" className="text-sm text-black/70 hover:text-black">
+            Features
+          </a>
+          <a href="#pricing" className="text-sm text-black/70 hover:text-black">
+            Pricing
+          </a>
+          <a href="#faq" className="text-sm text-black/70 hover:text-black">
+            FAQ
+          </a>
+          <Link
             href="/login"
             className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90"
           >
             Sign in
-          </a>
+          </Link>
         </nav>
       </div>
     </header>
@@ -53,7 +69,9 @@ function FeatureCard({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
       <div className="mb-3 inline-flex size-9 items-center justify-center rounded-xl bg-black/90 text-white">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8" /></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="8" />
+        </svg>
       </div>
       <h3 className="text-lg font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-black/70">{desc}</p>
@@ -62,7 +80,11 @@ function FeatureCard({ title, desc }: { title: string; desc: string }) {
 }
 
 function Plan({
-  name, price, items, cta, highlight,
+  name,
+  price,
+  items,
+  cta,
+  highlight,
 }: {
   name: string;
   price: string;
@@ -71,20 +93,27 @@ function Plan({
   highlight?: boolean;
 }) {
   return (
-    <div className={["rounded-2xl border p-6 shadow-sm",
-      highlight ? "border-black bg-black text-white" : "border-black/10 bg-white",
-    ].join(" ")}>
+    <div
+      className={[
+        "rounded-2xl border p-6 shadow-sm",
+        highlight ? "border-black bg-black text-white" : "border-black/10 bg-white",
+      ].join(" ")}
+    >
       <h3 className="text-lg font-semibold">{name}</h3>
       <p className="mt-2 text-3xl font-bold">{price}</p>
       <ul className="mt-4 space-y-2 text-sm">
         {items.map((it) => (
           <li key={it} className="flex items-start gap-2">
-            <span className={highlight ? "mt-1 size-2 rounded-full bg-white/70" : "mt-1 size-2 rounded-full bg-black/50"} />
+            <span
+              className={
+                highlight ? "mt-1 size-2 rounded-full bg-white/70" : "mt-1 size-2 rounded-full bg-black/50"
+              }
+            />
             <span className={highlight ? "text-white/90" : "text-black/70"}>{it}</span>
           </li>
         ))}
       </ul>
-      <a
+      <Link
         href={cta.href}
         className={[
           "mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
@@ -92,7 +121,7 @@ function Plan({
         ].join(" ")}
       >
         {cta.label}
-      </a>
+      </Link>
     </div>
   );
 }
@@ -106,7 +135,7 @@ function Faq({ q, a }: { q: string; a: string }) {
   );
 }
 
-/** ---------- Halaman (pakai kerangka kamu, ditingkatkan sectionnya) ---------- */
+/** ---------- Halaman ---------- */
 
 export default function HomePage() {
   const name = getBizName();
@@ -114,10 +143,9 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Navbar baru */}
       <SiteTopNav name={name} />
 
-      {/* Hero: memakai header + CTA kamu (tidak diubah teksnya) */}
+      {/* Hero: kontenmu dipertahankan */}
       <section className="relative">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-20 pt-16 md:grid-cols-2 md:pt-24">
           <div>
@@ -128,18 +156,23 @@ export default function HomePage() {
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">{name}</h1>
             <p className="mt-2 text-lg text-black/70 md:text-xl">{tagline}</p>
 
-            {/* CTA: persis dari file kamu */}
             <div className="mt-8 flex gap-4">
-              <a href="/contact" className="rounded-xl border border-black/10 px-5 py-3 hover:bg-black/5">Contact</a>
-              <a href="/login" className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90">Sign in</a>
+              <Link href="/contact" className="rounded-xl border border-black/10 px-5 py-3 hover:bg-black/5">
+                Contact
+              </Link>
+              <Link href="/login" className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90">
+                Sign in
+              </Link>
             </div>
 
             <div className="mt-6 flex items-center gap-4 text-xs text-black/60">
-              <span>Tanpa kartu kredit</span><span>•</span><span>Cancel kapan saja</span>
+              <span>Tanpa kartu kredit</span>
+              <span>•</span>
+              <span>Cancel kapan saja</span>
             </div>
           </div>
 
-          {/* Mock UI sederhana */}
+          {/* Mock UI */}
           <div className="relative">
             <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm">
               <div className="flex items-center gap-2 border-b border-black/10 bg-black/5 px-4 py-2">
@@ -149,17 +182,25 @@ export default function HomePage() {
                 <span className="ml-2 text-xs text-black/60">AberoAI Bot</span>
               </div>
               <div className="space-y-3 p-4">
-                <div className="max-w-[80%] rounded-2xl bg-black/5 px-3 py-2 text-sm">Halo! Ada yang bisa kami bantu?</div>
-                <div className="ml-auto max-w-[80%] rounded-2xl bg-black px-3 py-2 text-sm text-white">Jadwal buka klinik hari ini?</div>
-                <div className="max-w-[80%] rounded-2xl bg-black/5 px-3 py-2 text-sm">Klinik buka 09.00–21.00 WIB. Ingin buat janji?</div>
-                <div className="mt-4 rounded-xl bg-black/90 px-3 py-2 text-center text-xs text-white">Dibalas oleh AI • &lt;1 detik</div>
+                <div className="max-w-[80%] rounded-2xl bg-black/5 px-3 py-2 text-sm">
+                  Halo! Ada yang bisa kami bantu?
+                </div>
+                <div className="ml-auto max-w-[80%] rounded-2xl bg-black px-3 py-2 text-sm text-white">
+                  Jadwal buka klinik hari ini?
+                </div>
+                <div className="max-w-[80%] rounded-2xl bg-black/5 px-3 py-2 text-sm">
+                  Klinik buka 09.00–21.00 WIB. Ingin buat janji?
+                </div>
+                <div className="mt-4 rounded-xl bg-black/90 px-3 py-2 text-center text-xs text-white">
+                  Dibalas oleh AI • &lt;1 detik
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features: memakai list “Why …” kamu apa adanya */}
+      {/* Features (+ list aslimu dipertahankan) */}
       <section id="features" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-medium md:text-3xl">Why {name}</h2>
@@ -178,7 +219,6 @@ export default function HomePage() {
             />
           </div>
 
-          {/* List asli kamu (dipertahankan) */}
           <ul className="mt-8 list-disc pl-5 text-black/75">
             <li>WhatsApp Cloud API + AI untuk balasan otomatis</li>
             <li>Multi-tenant: cocok untuk klinik, hospitality, furniture</li>
@@ -187,7 +227,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing sederhana */}
+      {/* Pricing */}
       <section id="pricing" className="border-t border-black/10">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">Pricing</h2>
@@ -230,13 +270,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer: link kamu dipertahankan */}
+      {/* Footer: link aslimu dipertahankan, pakai Link */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <p className="text-sm text-black/60">© {new Date().getFullYear()} {name}</p>
           <div className="text-sm text-neutral-500">
-            <a href="/privacy-policy" className="underline">Privacy Policy</a> ·{" "}
-            <a href="/terms-of-service" className="underline">Terms of Service</a>
+            <Link href="/privacy-policy" className="underline">Privacy Policy</Link> ·{" "}
+            <Link href="/terms-of-service" className="underline">Terms of Service</Link>
           </div>
         </div>
       </footer>
