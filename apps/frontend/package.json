@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check-types": "tsc -p tsconfig.build.json --noEmit"
+    "check-types": "tsc -p tsconfig.build.json --noEmit",
+    "favicons": "node scripts/generate-favicon.mjs",
+    "prebuild": "pnpm run favicons"
   },
   "dependencies": {
-    "@repo/backend": "workspace:*",
     "@repo/api-types": "workspace:*",
+    "@repo/backend": "workspace:*",
     "@tanstack/react-query": "^5.85.3",
     "@trpc/client": "11.4.4",
     "@trpc/react-query": "11.4.4",
@@ -30,6 +32,8 @@
     "@types/react-dom": "^19.1.1",
     "eslint": "^9.8.0",
     "eslint-config-next": "15.4.5",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.3",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.8.2"
   }
