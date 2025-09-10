@@ -2,14 +2,35 @@
   "name": "@repo/shared",
   "version": "0.0.1",
   "private": true,
-  "main": "src/index.ts",
+  "type": "module",
+
+  "main": "dist/index.js",
   "types": "src/index.ts",
+
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./router": {
+      "types": "./src/router/index.ts",
+      "default": "./dist/router/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+
+  "files": ["dist"],
+  "sideEffects": false,
+
   "scripts": {
+    "build": "tsc -b tsconfig.build.json",
+    "clean": "rimraf dist",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/backend": "workspace:*",
     "@types/node": "^22.17.0",
+    "rimraf": "^6.0.1",
     "typescript": "^5.8.2"
   },
   "dependencies": {

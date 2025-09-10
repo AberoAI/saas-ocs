@@ -1,53 +1,43 @@
 {
-  "name": "saas-ocs",
+  "name": "@repo/frontend",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@10.14.0",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma generate && prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "seed:user": "tsx apps/backend/src/seed-user.ts",
-    "test": "vitest run"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "check-types": "tsc -p tsconfig.build.json --noEmit",
+
+    "favicons": "node scripts/generate-favicon.mjs",
+    "prebuild": "pnpm run favicons"
   },
   "dependencies": {
-    "@prisma/client": "6.14.0",
-    "bcrypt": "6.0.0",
-    "bullmq": "5.57.0",
-    "ioredis": "5.7.0",
-    "next-auth": "4.24.11",
-    "openai": "5.12.2",
-    "prisma": "6.14.0",
-    "ws": "^8.18.3"
+    "@repo/backend": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "@repo/api-types": "workspace:*",
+    "@tanstack/react-query": "^5.85.3",
+    "@trpc/client": "11.4.4",
+    "@trpc/react-query": "11.4.4",
+    "next": "15.4.5",
+    "next-auth": "^4.24.11",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "superjson": "^2.2.2",
+    "zod": "^4.0.17"
   },
   "devDependencies": {
-    "@types/bcrypt": "6.0.0",
-    "@types/node": "24.2.1",
-    "prettier": "3.6.2",
-    "ts-node": "10.9.2",
-    "tsx": "4.20.4",
-    "turbo": "2.5.5",
-    "typescript": "5.8.2",
-    "vitest": "^1.6.0"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "pnpm": {
-    "overrides": {
-      "@trpc/server": "11.4.4",
-      "@trpc/client": "11.4.4",
-      "@trpc/react-query": "11.4.4",
-      "@tanstack/react-query": "^5.0.0"
-    }
+    "@eslint/eslintrc": "^3.0.0",
+    "@tailwindcss/postcss": "^4.0.1",
+    "@types/node": "^20.19.10",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "eslint": "^9.8.0",
+    "eslint-config-next": "15.4.5",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.8.2",
+
+    "sharp": "^0.33.5",
+    "png-to-ico": "^2.1.8"
   }
 }

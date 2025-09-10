@@ -1,0 +1,56 @@
+/* apps/frontend/app/globals.css */
+@import "tailwindcss";
+
+/* ===== Root tokens (light by default) ===== */
+:root {
+  /* hint browser that both schemes are supported */
+  color-scheme: light dark;
+
+  /* semantic colors (override in dark) */
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Tailwind v4 theme tokens bound to CSS vars */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Use your Next/font vars if present, else safe fallbacks */
+  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji");
+  --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+}
+
+/* ===== Dark scheme overrides ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* ===== Minimal, long-term-safe base styles ===== */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Inputs/buttons inherit font & color cleanly */
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Links: keep Tailwind classes in components, but ensure focus is visible */
+a { text-decoration: none; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

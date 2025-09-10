@@ -1,0 +1,20 @@
+{
+  "name": "@repo/api-types",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts"
+    },
+    "./router": {
+      "types": "./src/router.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["src"],
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

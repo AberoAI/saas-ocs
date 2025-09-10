@@ -8,6 +8,7 @@ packages:
   - packages/eslint-config
   - packages/typescript-config
   - packages/shared
+  - packages/api-types
 
 onlyBuiltDependencies:
   - '@prisma/client'
