@@ -1,32 +1,29 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "isolatedModules": false,
+    "sourceMap": true,
 
     "composite": true,
     "declaration": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
 
-    "noEmit": false,                  // ⬅️ wajib (override root)
-    "outDir": "./dist",               // ⬅️ hasil .d.ts ke sini
+    "noEmit": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "disableSourceOfProjectReferenceRedirect": true,
 
-    "typeRoots": ["./types", "./node_modules/@types"],
-    "types": ["node"],
-    "plugins": [{ "name": "next" }]
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*.d.ts"],
+  "include": ["src/**/*", "types/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
-  // ⬅️ references dihapus untuk mencegah circular project refs
 }

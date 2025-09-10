@@ -1,0 +1,15 @@
+{
+  // Tailwind v4: hilangkan false warning @theme
+  "css.lint.unknownAtRules": "ignore",
+  "files.associations": { "*.css": "tailwindcss" },
+
+  // TypeScript nyaman di monorepo
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+
+  // Format/ESLint (opsional)
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}

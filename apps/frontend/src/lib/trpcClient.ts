@@ -5,12 +5,12 @@ import {
   httpBatchLink,
   loggerLink,
   splitLink,
-  createWSClient, // ⬅️ kembali ke import dari @trpc/client
-  wsLink, // ⬅️ kembali ke import dari @trpc/client
+  createWSClient,
+  wsLink,
   type TRPCLink,
   type Operation,
 } from "@trpc/client";
-import type { AppRouter } from "shared/router";
+import type { AppRouter } from "@repo/api-types/router"; // ⬅️ ganti: ambil tipe dari paket types-only
 import { getHttpTRPCUrl, getWsUrl, isBrowser } from "@/lib/env";
 
 /** Buat list link tRPC yang mendukung WS untuk subscription */
