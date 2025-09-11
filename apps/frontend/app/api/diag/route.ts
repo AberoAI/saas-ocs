@@ -13,18 +13,41 @@ const MESSAGE_PROBES = {
 
 export async function GET() {
   const c = await cookies();
-  const market = c.get(MARKET_COOKIE)?.value || null;
-  const nextLocale = c.get('NEXT_LOCALE')?.value || null;
+  const market = c.get(MARKET_COOKIE)?.value ?? null;
+  const nextLocale = c.get('NEXT_LOCALE')?.value ?? null;
 
-  let hasEn = false, hasTr = false, err: unknown = null;
-  try { await MESSAGE_PROBES.en(); hasEn = true; } catch (e) { err = e; }
-  try { await MESSAGE_PROBES.tr(); hasTr = true; } catch (e) { err = err ?? e; }
+  let hasEn = false;
+  let hasTr = false;
+  let errorSample: string | null = null;
+
+  try {
+    await MESSAGE_PROBES.en();
+    hasEn = true;
+  } catch (e: unknown) {
+    errorSample = toErrorMessage(e);
+  }
+
+  try {
+    await MESSAGE_PROBES.tr();
+    hasTr = true;
+  } catch (e: unknown) {
+    if (!errorSample) errorSample = toErrorMessage(e);
+  }
 
   return NextResponse.json({
     ok: true,
     cookies: { MARKET: market, NEXT_LOCALE: nextLocale },
     messagesFound: { en: hasEn, tr: hasTr },
     note: 'If any is false, cek path: apps/frontend/messages/*.json (dan rebuild).',
-    errorSample: err ? String((err as any)?.message ?? err) : null
+    errorSample
   });
+}
+
+function toErrorMessage(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  try {
+    return JSON.stringify(e);
+  } catch {
+    return String(e);
+  }
 }
