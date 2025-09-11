@@ -44,10 +44,10 @@ function SiteTopNav({ name }: { name: string }) {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {/* + About (scroll) */}
-          <a href="#about" className="text-sm text-black/70 hover:text-black">
+          {/* About -> halaman /about (bukan scroll) */}
+          <Link href="/about" className="text-sm text-black/70 hover:text-black">
             About
-          </a>
+          </Link>
           <a href="#features" className="text-sm text-black/70 hover:text-black">
             Features
           </a>
@@ -256,7 +256,7 @@ export default function HomePage() {
       <section id="pricing" className="border-t border-black/10">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">Pricing</h2>
-          <p className="mt-2 text-black/70 md:text-lg">Mulai gratis, upgrade kapan saja.</p>
+        <p className="mt-2 text-black/70 md:text-lg">Mulai gratis, upgrade kapan saja.</p>
 
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
             <Plan
