@@ -23,6 +23,7 @@ function getLastModified(): string {
  * Kita akan mengeluarkan entri /en/... & /tr/... plus hreflang cross-links.
  */
 const LOCALES = ["en", "tr"] as const;
+type Locale = (typeof LOCALES)[number];
 
 /**
  * Daftar path yang DILOKALISASI (muncul sebagai /en, /tr, /en/pricing, /tr/pricing, dst.)
@@ -30,17 +31,14 @@ const LOCALES = ["en", "tr"] as const;
  * Tambahkan halaman publik lain yang memang berlokalisasi: 'pricing', 'about', dll.
  */
 const LOCALIZED_PATHS = [
-  "",            // → /en dan /tr
+  "", // → /en dan /tr
   // "pricing",
   // "about",
 ] as const;
 
 /**
  * Daftar path yang TIDAK dilokalisasi (single URL saja, tanpa prefix locale).
- * Ini mempertahankan pola yang sudah ada di kerangka kamu.
- *
- * CATATAN: Kita TIDAK lagi mencantumkan "/" di sini,
- * karena root tanpa prefix akan redirect. Root per-locale sudah dihasilkan oleh LOCALIZED_PATHS.
+ * CATATAN: Jangan cantumkan "/" di sini; root tanpa prefix akan redirect.
  */
 const NON_LOCALIZED_PATHS = [
   "/login",
@@ -57,15 +55,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // ── (1) Entri BERLOKALISASI (/en/... & /tr/...) dengan hreflang cross-links
   for (const seg of LOCALIZED_PATHS) {
-    // Bangun URL per-locale
-    const urlsByLocale: Record<(typeof LOCALES)[number], string> = Object.fromEntries(
-      LOCALES.map((loc) => {
-        const path = seg ? `/${loc}/${seg}` : `/${loc}`;
-        return [loc, `${base}${path}`];
-      })
-    ) as any;
+    // Bangun URL per-locale (typed tanpa any)
+    const urlsByLocale = LOCALES.reduce<Record<Locale, string>>((acc, loc) => {
+      const path = seg ? `/${loc}/${seg}` : `/${loc}`;
+      acc[loc] = `${base}${path}`;
+      return acc;
+    }, {} as Record<Locale, string>);
 
-    // Tambahkan satu entri per-locale, masing-masing dengan alternates.languages lengkap
     for (const loc of LOCALES) {
       items.push({
         url: urlsByLocale[loc],
@@ -82,7 +78,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  // ── (2) Entri NON-LOKALISASI (tetap seperti pola lama, 1 URL saja)
+  // ── (2) Entri NON-LOKALISASI (1 URL saja)
   for (const p of NON_LOCALIZED_PATHS) {
     items.push({
       url: `${base}${p}`,

@@ -3,18 +3,22 @@ import {notFound} from 'next/navigation';
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
 import type {Metadata} from 'next';
-import Script from 'next/script'; // <-- DITAMBAHKAN
+import Script from 'next/script';
 import {domain, locales, defaultLocale} from '../i18n';
 
 export const dynamic = 'force-static'; // landing cenderung statis
 
+type Locale = (typeof locales)[number];
 type Props = {children: React.ReactNode; params: {locale: string}};
+
+function isLocale(val: string): val is Locale {
+  return (locales as readonly string[]).includes(val);
+}
 
 export async function generateMetadata(
   {params: {locale}}: Props
 ): Promise<Metadata> {
-  // kecil: hindari reassign parameter
-  const loc = (locales as readonly string[]).includes(locale) ? locale : defaultLocale;
+  const loc: Locale = isLocale(locale) ? locale : defaultLocale;
 
   return {
     metadataBase: new URL(domain),
@@ -35,7 +39,9 @@ export async function generateMetadata(
 }
 
 export default async function LocaleLayout({children, params: {locale}}: Props) {
-  if (!(locales as readonly string[]).includes(locale)) notFound();
+  const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
+  if (!loc) notFound();
+
   const messages = await getMessages();
 
   // Structured Data per-locale (aman tanpa harga; tambahkan offers nanti jika perlu)
@@ -45,21 +51,18 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
     "name": "AberoAI",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
-    "inLanguage": locale,
-    "url": `${domain}/${locale}`,
+    "inLanguage": loc,
+    "url": `${domain}/${loc}`,
     "description":
-      locale === 'tr'
+      loc === 'tr'
         ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
         : "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once."
-    // "brand": {"@type":"Brand","name":"AberoAI"},
-    // "sameAs": ["https://x.com/aberoai","https://www.linkedin.com/company/aberoai"]
-    // "offers": { "@type":"Offer", "price": "49", "priceCurrency": "USD" } // jika harga publik & stabil
   };
 
   return (
-    <html lang={locale}>
+    <html lang={loc}>
       <body>
-        <NextIntlClientProvider messages={messages} locale={locale as any}>
+        <NextIntlClientProvider messages={messages} locale={loc}>
           {children}
         </NextIntlClientProvider>
 

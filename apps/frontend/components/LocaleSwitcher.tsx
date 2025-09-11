@@ -2,8 +2,6 @@
 import {usePathname} from 'next/navigation';
 import Link from 'next/link';
 
-const locales = ['en','tr'] as const;
-
 export default function LocaleSwitcher({current}:{current:'en'|'tr'}) {
   const pathname = usePathname();
   const other = current === 'en' ? 'tr' : 'en';

@@ -1,5 +1,6 @@
 // apps/frontend/app/terms-of-service/page.tsx
 import type { Metadata } from "next";
+import Link from "next/link"; // ← tambahkan
 
 export const metadata: Metadata = {
   title: "Terms of Service – AberoAI",
@@ -71,9 +72,9 @@ export default function TermsOfServicePage() {
         <h2 className="text-lg font-medium">4. Data &amp; Privacy</h2>
         <p>
           We process data to deliver the service as described in our{" "}
-          <a className="underline" href="/privacy">
+          <Link className="underline" href="/privacy">
             Privacy Policy
-          </a>
+          </Link>
           .
         </p>
       </section>
