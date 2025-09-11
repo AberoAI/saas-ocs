@@ -14,6 +14,17 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
+/** Pastikan URL absolut (hindari throw di new URL()) */
+function getAbsoluteSiteUrl(): string {
+  const fromConfig = (domain ?? '').trim();
+  const fromEnv =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    '';
+  const raw = fromConfig || fromEnv || 'https://aberoai.com';
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
 // Muat messages via mapping eksplisit (stabil di prod)
 const MESSAGE_LOADERS: Record<Locale, () => Promise<{default: AbstractIntlMessages}>> = {
   en: () => import('../../messages/en.json'),
@@ -24,9 +35,10 @@ export async function generateMetadata(
   {params: {locale}}: Props
 ): Promise<Metadata> {
   const loc: Locale = isLocale(locale) ? locale : defaultLocale;
+  const site = getAbsoluteSiteUrl();
 
   return {
-    metadataBase: new URL(domain),
+    metadataBase: new URL(site),
     alternates: {
       canonical: `/${loc}`,
       languages: { en: '/en', tr: '/tr' }
@@ -50,19 +62,26 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   try {
     messages = (await MESSAGE_LOADERS[loc]()).default;
   } catch (e) {
-    console.error('i18n: failed to load messages for', loc, e);
+    // fallback ke defaultLocale bila paket pesan locale gagal dimuat
     try {
-      messages = (await MESSAGE_LOADERS[defaultLocale]()).default;
-    } catch (e2) {
-      console.error('i18n: failed to load default messages', e2);
+      messages = (await MESSAGE_LOADERS[defaultLocale as Locale]()).default;
+    } catch {
       notFound();
     }
   }
 
-  // ⚠️ TIDAK ADA <html> / <body> DI SINI — itu hanya milik app/layout.tsx
+  const site = getAbsoluteSiteUrl();
+
+  // ⚠️ TIDAK ADA <html> / <body> DI SINI — itu milik app/layout.tsx
   return (
     <>
-      <NextIntlClientProvider messages={messages} locale={loc}>
+      <NextIntlClientProvider
+        messages={messages}
+        locale={loc}
+        /** Jangan crash jika key belum tersedia */
+        getMessageFallback={({key}) => key}
+        onError={() => { /* swallow intl errors in prod */ }}
+      >
         {children}
       </NextIntlClientProvider>
 
@@ -78,7 +97,7 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "inLanguage": loc,
-            "url": `${domain}/${loc}`,
+            "url": `${site}/${loc}`,
             "description":
               loc === 'tr'
                 ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
