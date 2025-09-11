@@ -1,7 +1,8 @@
 // apps/frontend/app/[locale]/layout.tsx
 import {notFound} from 'next/navigation';
-import {NextIntlClientProvider} from 'next-intl';
-import {getMessages} from 'next-intl/server';
+import {NextIntlClientProvider, type AbstractIntlMessages} from 'next-intl';
+// ⛔️ HAPUS: getMessages (sering memicu 500 di prod)
+// import {getMessages} from 'next-intl/server';
 import type {Metadata} from 'next';
 import Script from 'next/script';
 import {domain, locales, defaultLocale} from '../i18n';
@@ -42,7 +43,14 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  const messages = await getMessages();
+  // ✅ FIX: muat messages langsung dari file JSON per-locale
+  let messages: AbstractIntlMessages;
+  try {
+    // Path relatif dari app/[locale]/layout.tsx → ../../messages/{en|tr}.json
+    messages = (await import(`../../messages/${loc}.json`)).default;
+  } catch {
+    notFound();
+  }
 
   // Structured Data per-locale (aman tanpa harga; tambahkan offers nanti jika perlu)
   const ld = {
