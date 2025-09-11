@@ -1,7 +1,7 @@
 // apps/frontend/app/[locale]/layout.tsx
 import {notFound} from 'next/navigation';
 import {NextIntlClientProvider, type AbstractIntlMessages} from 'next-intl';
-// ⛔️ HAPUS: getMessages (sering memicu 500 di prod)
+// ⛔️ getMessages tidak dipakai agar tidak error lookup di prod
 // import {getMessages} from 'next-intl/server';
 import type {Metadata} from 'next';
 import Script from 'next/script';
@@ -25,17 +25,16 @@ export async function generateMetadata(
     metadataBase: new URL(domain),
     alternates: {
       canonical: `/${loc}`,
-      languages: {
-        en: '/en',
-        tr: '/tr'
-      }
+      languages: { en: '/en', tr: '/tr' }
     },
-    title: loc === 'tr'
-      ? 'AberoAI – WhatsApp AI Müşteri Hizmetleri Otomasyonu'
-      : 'AberoAI – AI-Powered WhatsApp Customer Service Automation',
-    description: loc === 'tr'
-      ? '7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin.'
-      : 'Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.'
+    title:
+      loc === 'tr'
+        ? 'AberoAI – WhatsApp AI Müşteri Hizmetleri Otomasyonu'
+        : 'AberoAI – AI-Powered WhatsApp Customer Service Automation',
+    description:
+      loc === 'tr'
+        ? '7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin.'
+        : 'Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.'
   };
 }
 
@@ -43,16 +42,21 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  // ✅ FIX: muat messages langsung dari file JSON per-locale
+  // ✅ Muat messages langsung dari apps/frontend/messages/{en|tr}.json
   let messages: AbstractIntlMessages;
   try {
-    // Path relatif dari app/[locale]/layout.tsx → ../../messages/{en|tr}.json
+    // Dari app/[locale]/layout.tsx → ../../messages/{loc}.json
     messages = (await import(`../../messages/${loc}.json`)).default;
   } catch {
-    notFound();
+    // Fallback aman ke defaultLocale agar tidak 500/404 jika file locale belum tersedia
+    try {
+      messages = (await import(`../../messages/${defaultLocale}.json`)).default;
+    } catch {
+      notFound();
+    }
   }
 
-  // Structured Data per-locale (aman tanpa harga; tambahkan offers nanti jika perlu)
+  // Structured Data per-locale (opsional, aman tanpa harga)
   const ld = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -75,7 +79,9 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
         </NextIntlClientProvider>
 
         {/* Structured Data (JSON-LD) */}
-        <Script id="ld-softwareapp" type="application/ld+json"
+        <Script
+          id="ld-softwareapp"
+          type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
         />
       </body>
