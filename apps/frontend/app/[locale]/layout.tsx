@@ -25,11 +25,13 @@ function getAbsoluteSiteUrl(): string {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-// Muat messages via mapping eksplisit (stabil di prod)
-const MESSAGE_LOADERS: Record<Locale, () => Promise<{default: AbstractIntlMessages}>> = {
-  en: () => import('../../messages/en.json'),
-  tr: () => import('../../messages/tr.json')
-};
+/** ✅ STATIC import messages → paling stabil di production */
+import enMessages from '../../messages/en.json';
+import trMessages from '../../messages/tr.json';
+const MESSAGES: Record<'en' | 'tr', AbstractIntlMessages> = {
+  en: (enMessages as AbstractIntlMessages) ?? {},
+  tr: (trMessages as AbstractIntlMessages) ?? {}
+} as const;
 
 export async function generateMetadata(
   {params: {locale}}: Props
@@ -58,17 +60,8 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  let messages: AbstractIntlMessages;
-  try {
-    messages = (await MESSAGE_LOADERS[loc]()).default;
-  } catch (e) {
-    // fallback ke defaultLocale bila paket pesan locale gagal dimuat
-    try {
-      messages = (await MESSAGE_LOADERS[defaultLocale as Locale]()).default;
-    } catch {
-      notFound();
-    }
-  }
+  // Ambil messages secara aman
+  const messages = (MESSAGES[loc as 'en' | 'tr'] ?? {}) as AbstractIntlMessages;
 
   const site = getAbsoluteSiteUrl();
 
