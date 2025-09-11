@@ -16,6 +16,12 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
+// ✅ Mapping eksplisit agar bundler menyertakan file JSON (stabil di prod)
+const MESSAGE_LOADERS: Record<Locale, () => Promise<{default: AbstractIntlMessages}>> = {
+  en: () => import('../../messages/en.json'),
+  tr: () => import('../../messages/tr.json')
+};
+
 export async function generateMetadata(
   {params: {locale}}: Props
 ): Promise<Metadata> {
@@ -42,21 +48,21 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  // ✅ Muat messages langsung dari apps/frontend/messages/{en|tr}.json
+  // ✅ Muat messages via mapping eksplisit + fallback ke defaultLocale
   let messages: AbstractIntlMessages;
   try {
-    // Dari app/[locale]/layout.tsx → ../../messages/{loc}.json
-    messages = (await import(`../../messages/${loc}.json`)).default;
-  } catch {
-    // Fallback aman ke defaultLocale agar tidak 500/404 jika file locale belum tersedia
+    messages = (await MESSAGE_LOADERS[loc]()).default;
+  } catch (e) {
+    console.error('i18n: failed to load messages for', loc, e);
     try {
-      messages = (await import(`../../messages/${defaultLocale}.json`)).default;
-    } catch {
+      messages = (await MESSAGE_LOADERS[defaultLocale]()).default;
+    } catch (e2) {
+      console.error('i18n: failed to load default messages', e2);
       notFound();
     }
   }
 
-  // Structured Data per-locale (opsional, aman tanpa harga)
+  // Structured Data per-locale (opsional)
   const ld = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
