@@ -15,21 +15,31 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "types": ["node"],
-    "typeRoots": ["./src/types", "./types", "./node_modules/@types"],
+
+    "typeRoots": ["./types", "./node_modules/@types"],
+
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*", "./app/*"]
+      "@/*": ["*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/lib/*": ["lib/*"],
+      "@/components/*": ["components/*"],
+      "@/i18n/*": ["i18n/*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
-    "src/types/**/*.d.ts",
     "types/**/*.d.ts",
     ".next/types/**/*.ts",
-    "app/**/*"
+    "app/**/*",
+    "components/**/*",
+    "hooks/**/*",
+    "lib/**/*",
+    "i18n/**/*",
+    "middleware.ts"
   ],
   "exclude": ["node_modules", ".next", "dist"],
   "references": []

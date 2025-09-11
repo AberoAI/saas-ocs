@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { getWsTRPCUrl } from "@/lib/env";
+import { trpc } from "lib/trpc";
+import { getWsTRPCUrl } from "lib/env";
 
 type Conn = "idle" | "connecting" | "open" | "error" | "closed";
 

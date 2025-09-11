@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { trpc } from "@/lib/trpc";
-import { useWebSocket } from "@/hooks/useWebSocket";
+import { trpc } from "lib/trpc";
+import { useWebSocket } from "hooks/useWebSocket";
 import type { RouterOutputs } from "@repo/backend";
 
 type Message = RouterOutputs["chat"]["getMessages"][number];

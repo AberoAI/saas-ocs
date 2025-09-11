@@ -1,4 +1,4 @@
-// apps/frontend/src/lib/trpcClient.ts
+// apps/frontend/src/lib/trpcLinks.ts
 "use client";
 
 import {
@@ -10,8 +10,8 @@ import {
   type TRPCLink,
   type Operation,
 } from "@trpc/client";
-import type { AppRouter } from "@repo/api-types/router"; // ⬅️ ganti: ambil tipe dari paket types-only
-import { getHttpTRPCUrl, getWsUrl, isBrowser } from "@/lib/env";
+import type { AppRouter } from "@repo/api-types/router"; // ⬅️ ganti dari "shared/router"
+import { getHttpTRPCUrl, getWsUrl, isBrowser } from "lib/env";
 
 /** Buat list link tRPC yang mendukung WS untuk subscription */
 export function getTRPCLinks(): TRPCLink<AppRouter>[] {

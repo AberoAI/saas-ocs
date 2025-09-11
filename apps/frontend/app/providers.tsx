@@ -4,8 +4,8 @@
 import React, { useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { trpc } from "@/lib/trpc";
-import { getWsEnabledLinks } from "@/lib/trpcLinks";
+import { trpc } from "lib/trpc";
+import { getWsEnabledLinks } from "lib/trpcLinks";
 import type { TRPCLink } from "@trpc/client";
 import type { AppRouter } from "@repo/api-types/router"; // ⬅️ ganti ke paket types-only
 

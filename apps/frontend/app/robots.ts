@@ -2,7 +2,7 @@
 import type { MetadataRoute } from "next";
 
 function getBaseUrl(): string {
-  // Urutan fallback:
+  // Urutan fallback (tetap dari kerangka kamu):
   // 1) SITE_URL (set manual di Vercel, mis. https://aberoai.com)
   // 2) VERCEL_URL (otomatis dari Vercel, tanpa protocol)
   // 3) fallback hardcoded
@@ -19,7 +19,7 @@ export default function robots(): MetadataRoute.Robots {
     process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
 
   if (!isProd) {
-    // Jangan index Preview/Dev
+    // Jangan index Preview/Dev (tetap)
     return {
       rules: [{ userAgent: "*", disallow: "/" }],
     };
