@@ -1,13 +1,11 @@
 // apps/frontend/app/[locale]/layout.tsx
 import {notFound} from 'next/navigation';
 import {NextIntlClientProvider, type AbstractIntlMessages} from 'next-intl';
-// ⛔️ getMessages tidak dipakai agar tidak error lookup di prod
-// import {getMessages} from 'next-intl/server';
 import type {Metadata} from 'next';
 import Script from 'next/script';
 import {domain, locales, defaultLocale} from '../i18n';
 
-export const dynamic = 'force-static'; // landing cenderung statis
+export const dynamic = 'force-static';
 
 type Locale = (typeof locales)[number];
 type Props = {children: React.ReactNode; params: {locale: string}};
@@ -16,7 +14,7 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
-// ✅ Mapping eksplisit agar bundler menyertakan file JSON (stabil di prod)
+// Muat messages via mapping eksplisit (stabil di prod)
 const MESSAGE_LOADERS: Record<Locale, () => Promise<{default: AbstractIntlMessages}>> = {
   en: () => import('../../messages/en.json'),
   tr: () => import('../../messages/tr.json')
@@ -48,7 +46,6 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  // ✅ Muat messages via mapping eksplisit + fallback ke defaultLocale
   let messages: AbstractIntlMessages;
   try {
     messages = (await MESSAGE_LOADERS[loc]()).default;
@@ -62,35 +59,33 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
     }
   }
 
-  // Structured Data per-locale (opsional)
-  const ld = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "AberoAI",
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web",
-    "inLanguage": loc,
-    "url": `${domain}/${loc}`,
-    "description":
-      loc === 'tr'
-        ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
-        : "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once."
-  };
-
+  // ⚠️ TIDAK ADA <html> / <body> DI SINI — itu hanya milik app/layout.tsx
   return (
-    <html lang={loc}>
-      <body>
-        <NextIntlClientProvider messages={messages} locale={loc}>
-          {children}
-        </NextIntlClientProvider>
+    <>
+      <NextIntlClientProvider messages={messages} locale={loc}>
+        {children}
+      </NextIntlClientProvider>
 
-        {/* Structured Data (JSON-LD) */}
-        <Script
-          id="ld-softwareapp"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
-        />
-      </body>
-    </html>
+      {/* Structured Data (JSON-LD) */}
+      <Script
+        id="ld-softwareapp"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "AberoAI",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "inLanguage": loc,
+            "url": `${domain}/${loc}`,
+            "description":
+              loc === 'tr'
+                ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
+                : "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once."
+          })
+        }}
+      />
+    </>
   );
 }
