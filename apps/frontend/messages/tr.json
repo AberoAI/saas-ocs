@@ -1,19 +1,24 @@
 {
-  "hero.headline": "Müşterilerin %65’ten fazlası yavaş yanıtlar nedeniyle işlemi iptal ediyor.",
-  "hero.sub": "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen akıllı AI ile müşteri hizmetlerini otomatikleştirir.",
-  "hero.badge": "Şimdi yayında • WhatsApp AI Desteği",
-
-  "cta.primary": "Otomatikleştirmeye başla",
-  "cta.secondary": "Demoyu gör",
-  "cta.contact": "İletişim",
-  "cta.signin": "Giriş yap",
-
-  "nav.about": "Hakkında",
-  "nav.features": "Özellikler",
-  "nav.pricing": "Fiyatlandırma",
-  "nav.faq": "SSS",
-  "nav.signin": "Giriş",
-
-  "misc.noCard": "Kredi kartı yok",
-  "misc.cancelAnytime": "İstediğin zaman iptal"
+  "nav": {
+    "about": "Hakkında",
+    "features": "Özellikler",
+    "pricing": "Fiyatlandırma",
+    "faq": "SSS",
+    "signin": "Giriş"
+  },
+  "hero": {
+    "headline": "Müşterilerin %65’ten fazlası yavaş yanıtlar nedeniyle işlemi iptal ediyor.",
+    "sub": "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen akıllı AI ile müşteri hizmetlerini otomatikleştirir.",
+    "badge": "Şimdi yayında • WhatsApp AI Desteği"
+  },
+  "cta": {
+    "primary": "Otomatikleştirmeye başla",
+    "secondary": "Demoyu gör",
+    "contact": "İletişim",
+    "signin": "Giriş yap"
+  },
+  "misc": {
+    "noCard": "Kredi kartı yok",
+    "cancelAnytime": "İstediğin zaman iptal"
+  }
 }
