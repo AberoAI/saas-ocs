@@ -1,4 +1,6 @@
 // apps/frontend/lib/market.ts
+import type { Currency } from './currency.server';
+
 export type Market = 'TR' | 'US';
 
 // IP country -> market (sesuaikan kalau perlu)
@@ -15,11 +17,15 @@ export const PRICING_TABLE = {
   ent:   { US: 199, TR: 4999 }
 } as const;
 
-export function formatPrice(amount: number, market: Market): string {
-  const opt: Intl.NumberFormatOptions =
-    market === 'TR'
-      ? { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }
-      : { style: 'currency', currency: 'USD', maximumFractionDigits: 2 };
+/**
+ * Format harga sesuai market & currency
+ */
+export function formatPrice(amount: number, market: Market, currency: Currency): string {
+  const opt: Intl.NumberFormatOptions = {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: currency === 'TRY' ? 0 : 2,
+  };
 
   const localeForNumber = market === 'TR' ? 'tr-TR' : 'en-US';
   return new Intl.NumberFormat(localeForNumber, opt).format(amount);

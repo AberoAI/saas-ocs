@@ -1,8 +1,15 @@
+// apps/frontend/components/PricingClient.tsx
 'use client';
-import {useTranslations} from 'next-intl';
-import {PRICING_TABLE, formatPrice, type Market} from '../lib/market';
+import { useTranslations } from 'next-intl';
+import { PRICING_TABLE, formatPrice, type Market } from '../lib/market';
+import type { Currency } from '../lib/currency.server';
 
-export default function PricingClient({market}:{market: Market}) {
+type PricingClientProps = {
+  market: Market;
+  currency: Currency;
+};
+
+export default function PricingClient({ market, currency }: PricingClientProps) {
   const t = useTranslations('pricing');
 
   return (
@@ -12,27 +19,27 @@ export default function PricingClient({market}:{market: Market}) {
         {t('subtitle')}
       </p>
 
-      {/* Badge market (opsional, biar user paham currency) */}
+      {/* Badge market/currency */}
       <div className="mt-2 text-sm text-muted-foreground">
-        {market === 'TR' ? 'Currency: TRY' : 'Currency: USD'}
+        Market: {market} | Currency: {currency}
       </div>
 
       <div className="mt-10 grid md:grid-cols-3 gap-6">
         <PlanCard
           name={t('plans.basic.name')}
           desc={t('plans.basic.desc')}
-          price={formatPrice(PRICING_TABLE.basic[market], market)}
+          price={formatPrice(PRICING_TABLE.basic[market], market, currency)}
         />
         <PlanCard
           name={t('plans.pro.name')}
           desc={t('plans.pro.desc')}
-          price={formatPrice(PRICING_TABLE.pro[market], market)}
+          price={formatPrice(PRICING_TABLE.pro[market], market, currency)}
           highlighted
         />
         <PlanCard
           name={t('plans.enterprise.name')}
           desc={t('plans.enterprise.desc')}
-          price={formatPrice(PRICING_TABLE.ent[market], market)}
+          price={formatPrice(PRICING_TABLE.ent[market], market, currency)}
         />
       </div>
     </main>
@@ -40,8 +47,8 @@ export default function PricingClient({market}:{market: Market}) {
 }
 
 function PlanCard(
-  {name, desc, price, highlighted}:
-  {name:string; desc:string; price:string; highlighted?:boolean}
+  { name, desc, price, highlighted }:
+  { name: string; desc: string; price: string; highlighted?: boolean }
 ) {
   return (
     <div className={`border rounded-2xl p-6 ${highlighted ? 'ring-1 ring-black/10 shadow-sm' : ''}`}>

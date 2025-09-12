@@ -3,11 +3,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // [i18n] import next-intl middleware & config
-// FIX: default import, sesuai setup kamu
 import createIntlMiddleware from "next-intl/middleware";
 import { locales, defaultLocale, mapCountryToLocale } from "./i18n/config";
 
-// [market] import helper market (BARU)
+// [market] import helper market (tetap)
 import { mapCountryToMarket, MARKET_COOKIE } from "./lib/market";
 
 // ----[1] Toggle via ENV (server-only prefer) ----
@@ -21,6 +20,12 @@ const ALLOW_DEBUG_ROUTES =
   process.env.NEXT_PUBLIC_ENABLE_DEBUG === "true";
 
 const IS_PROD = process.env.NODE_ENV === "production";
+
+// Dev-only override (aktif di Preview/Dev atau saat flag di-on)
+const ENABLE_DEV_OVERRIDE =
+  process.env.NEXT_PUBLIC_ENABLE_LOCALE_GEO_OVERRIDE === "true" ||
+  process.env.VERCEL_ENV === "preview" ||
+  !IS_PROD;
 
 // ----[1b] (Opsional) Guard auth untuk area privat. Default: OFF.
 const AUTH_GUARD_ON =
@@ -52,7 +57,7 @@ const isStaticAsset = (path: string) =>
   path.startsWith("/assets/") ||
   /\.(svg|png|jpg|jpeg|ico|gif|webp|css|js|map|txt|woff2?|ttf|eot)$/i.test(path);
 
-// [i18n] siapkan instance next-intl middleware (honor Accept-Language & cookie NEXT_LOCALE)
+// [i18n] instance next-intl middleware (honor Accept-Language & cookie NEXT_LOCALE)
 const intl = createIntlMiddleware({
   locales,
   defaultLocale,
@@ -67,7 +72,7 @@ export function middleware(req: NextRequest) {
     if (!ALLOW_DEBUG_ROUTES) {
       return NextResponse.json({ error: "Not Found" }, { status: 404 });
     }
-    // jika diizinkan, lanjut ke aturan berikutnya (jangan return dulu)
+    // jika diizinkan, lanjut ke aturan berikutnya
   }
 
   // ----[B] Mode verifikasi (opsi kamu sebelumnya, tetap)
@@ -104,11 +109,96 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // ----[D] [i18n] Enforce prefix locale + IP→cookie redirect + fallback Accept-Language
-  // Lewatkan asset statis & API langsung (tidak perlu i18n processing)
+  // ----[D] Dev-only override (?hl, ?geo, ?currency) → set cookie + redirect 307
+  if (
+    ENABLE_DEV_OVERRIDE &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/_trpc") &&
+    !isStaticAsset(pathname)
+  ) {
+    const url = req.nextUrl;
+
+    // ✅ Tambahan: token guard (opsional tapi direkomendasikan)
+    const secret = process.env.DEV_OVERRIDE_SECRET || "";
+    const token = url.searchParams.get("dev") || "";
+    const tokenOk = Boolean(secret) && token === secret;
+
+    if (tokenOk) {
+      const hl = (url.searchParams.get("hl") || url.searchParams.get("locale"))?.toLowerCase() || null;
+      const geo = url.searchParams.get("geo")?.toUpperCase() || null;
+      const cur = url.searchParams.get("currency")?.toUpperCase() || null;
+
+      const isLocale = (v?: string | null): v is (typeof locales)[number] =>
+        !!v && (locales as readonly string[]).includes(v as any);
+      const isCurrency = (v?: string | null) =>
+        !!v && ["TRY", "USD", "EUR", "GBP"].includes(v.toUpperCase());
+
+      const wantLocale = isLocale(hl) ? (hl as (typeof locales)[number]) : null;
+      const wantGeo = geo || null;
+      const wantCur = isCurrency(cur) ? cur! : null;
+
+      if (wantLocale || wantGeo || wantCur) {
+        // bersihkan query (✅ tambahkan 'dev' juga dibersihkan)
+        url.searchParams.delete("hl");
+        url.searchParams.delete("locale");
+        url.searchParams.delete("geo");
+        url.searchParams.delete("currency");
+        url.searchParams.delete("dev"); // <— tambahan
+
+        // atur prefix locale
+        const segments = url.pathname.split("/").filter(Boolean);
+        if (wantLocale) {
+          if (segments.length && (locales as readonly string[]).includes(segments[0] as any)) {
+            segments[0] = wantLocale;
+          } else {
+            segments.unshift(wantLocale);
+          }
+        }
+
+        const dest = req.nextUrl.clone();
+        dest.pathname = "/" + segments.join("/");
+        dest.search = url.searchParams.toString();
+
+        const secure = dest.protocol === "https:";
+
+        const res = NextResponse.redirect(dest, 307);
+        if (wantLocale)
+          res.cookies.set("NEXT_LOCALE", wantLocale, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
+            httpOnly: true,
+            sameSite: "lax",
+            secure,
+          });
+        if (wantGeo)
+          res.cookies.set("GEO_COUNTRY_OVERRIDE", wantGeo, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
+            httpOnly: true,
+            sameSite: "lax",
+            secure,
+          });
+        if (wantCur)
+          res.cookies.set("CURRENCY_OVERRIDE", wantCur, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
+            httpOnly: true,
+            sameSite: "lax",
+            secure,
+          });
+
+        return res;
+      }
+    }
+    // jika token tidak valid/absen → lanjut (override off)
+  }
+
+  // ----[E] [i18n] Enforce prefix locale + IP→cookie redirect + fallback Accept-Language
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
+    pathname.startsWith("/_trpc") ||
     isStaticAsset(pathname)
   ) {
     return NextResponse.next();
@@ -128,7 +218,7 @@ export function middleware(req: NextRequest) {
     const country = req.headers.get("x-vercel-ip-country") || (req as any).geo?.country;
     const ipLocale = mapCountryToLocale(country);
 
-    // [market] tentukan MARKET dari IP (BARU)
+    // [market] tentukan MARKET dari IP
     const ipMarket = mapCountryToMarket(country);
 
     const url = req.nextUrl.clone();
@@ -136,22 +226,22 @@ export function middleware(req: NextRequest) {
 
     const res = NextResponse.redirect(url);
 
-    // Simpan pilihan supaya konsisten kunjungan berikutnya (→ tambah opsi keamanan)
+    // Simpan preferensi (1 tahun)
     res.cookies.set("NEXT_LOCALE", ipLocale, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       httpOnly: true,
       sameSite: "lax",
-      secure: IS_PROD
+      secure: IS_PROD,
     });
 
-    // [market] simpan MARKET terpisah dari bahasa (→ tambah opsi keamanan)
+    // [market] simpan MARKET terpisah dari bahasa
     res.cookies.set(MARKET_COOKIE, ipMarket, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       httpOnly: true,
       sameSite: "lax",
-      secure: IS_PROD
+      secure: IS_PROD,
     });
     return res;
   }
@@ -160,7 +250,7 @@ export function middleware(req: NextRequest) {
   return intl(req);
 }
 
-// Middleware aktif untuk seluruh rute (sesuai kerangka kamu)
+// Middleware aktif untuk rute publik; exclude assets/API/_trpc agar ringan & aman
 export const config = {
-  matcher: ["/:path*"],
+  matcher: ['/((?!_next|api|_trpc|.*\\..*).*)'],
 };
