@@ -1,6 +1,19 @@
 {
   "hero.headline": "Over 65% of customers cancel due to slow responses.",
   "hero.sub": "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
+  "hero.badge": "Now live • WhatsApp AI Support",
+
   "cta.primary": "Start automation",
-  "cta.secondary": "See demo"
+  "cta.secondary": "See demo",
+  "cta.contact": "Contact",
+  "cta.signin": "Sign in",
+
+  "nav.about": "About",
+  "nav.features": "Features",
+  "nav.pricing": "Pricing",
+  "nav.faq": "FAQ",
+  "nav.signin": "Sign in",
+
+  "misc.noCard": "No credit card",
+  "misc.cancelAnytime": "Cancel anytime"
 }

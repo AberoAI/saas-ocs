@@ -14,6 +14,11 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
+// 🔑 Pastikan Next membangun /en dan /tr (menghilangkan 404 _next/data/.../tr.json)
+export function generateStaticParams() {
+  return locales.map((l) => ({locale: l}));
+}
+
 /** Pastikan URL absolut (hindari throw di new URL()) */
 function getAbsoluteSiteUrl(): string {
   const fromConfig = (domain ?? '').trim();
@@ -62,7 +67,6 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
 
   // Ambil messages secara aman
   const messages = (MESSAGES[loc as 'en' | 'tr'] ?? {}) as AbstractIntlMessages;
-
   const site = getAbsoluteSiteUrl();
 
   // ⚠️ TIDAK ADA <html> / <body> DI SINI — itu milik app/layout.tsx
@@ -71,7 +75,6 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
       <NextIntlClientProvider
         messages={messages}
         locale={loc}
-        /** Jangan crash jika key belum tersedia */
         getMessageFallback={({key}) => key}
         onError={() => { /* swallow intl errors in prod */ }}
       >
