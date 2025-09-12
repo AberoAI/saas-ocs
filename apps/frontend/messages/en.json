@@ -20,5 +20,14 @@
   "misc": {
     "noCard": "No credit card",
     "cancelAnytime": "Cancel anytime"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Choose a plan that fits you.",
+    "plans": {
+      "basic": { "name": "Basic", "desc": "Good for getting started" },
+      "pro": { "name": "Pro", "desc": "Best for growing teams" },
+      "enterprise": { "name": "Enterprise", "desc": "Custom needs & support" }
+    }
   }
 }

@@ -20,5 +20,14 @@
   "misc": {
     "noCard": "Kredi kartı yok",
     "cancelAnytime": "İstediğin zaman iptal"
+  },
+  "pricing": {
+    "title": "Fiyatlar",
+    "subtitle": "Size uyan planı seçin.",
+    "plans": {
+      "basic": { "name": "Basic", "desc": "Başlamak için iyi" },
+      "pro": { "name": "Pro", "desc": "Büyüyen ekipler için en iyi" },
+      "enterprise": { "name": "Kurumsal", "desc": "Özel ihtiyaçlar ve destek" }
+    }
   }
 }
