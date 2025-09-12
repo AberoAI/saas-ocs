@@ -1,5 +1,7 @@
 // apps/frontend/next.config.ts
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin"; // ➜ [ADD] plugin next-intl
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts"); // ➜ [ADD] path eksplisit
 
 /**
  * URL backend ABSOLUTE untuk rewrite (harus mengarah ke endpoint /trpc).
@@ -85,4 +87,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// ➜ [CHANGE] bungkus config dengan plugin next-intl
+export default withNextIntl(nextConfig);
