@@ -72,12 +72,8 @@ export default async function LocaleLayout({children, params: {locale}}: Props) 
   // ⚠️ TIDAK ADA <html> / <body> DI SINI — itu milik app/layout.tsx
   return (
     <>
-      <NextIntlClientProvider
-        messages={messages}
-        locale={loc}
-        getMessageFallback={({key}) => key}
-        onError={() => { /* swallow intl errors in prod */ }}
-      >
+      {/* Hapus function props agar tidak crash di prod */}
+      <NextIntlClientProvider locale={loc} messages={messages}>
         {children}
       </NextIntlClientProvider>
 
