@@ -109,7 +109,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // ----[D] Dev/Preview/Local override (?hl, ?geo, ?currency) → set cookie + redirect 307
+  // ----[D] Dev-only override (?hl, ?geo, ?currency) → set cookie + redirect 307
   if (
     ENABLE_DEV_OVERRIDE &&
     !pathname.startsWith("/_next") &&
@@ -119,19 +119,10 @@ export function middleware(req: NextRequest) {
   ) {
     const url = req.nextUrl;
 
-    // 🔒 Kebijakan token (best practice):
-    // - Production & Preview: WAJIB token cocok → dev=<SECRET>
-    // - Localhost (dev): BOLEH tanpa token jika flag override ON
+    // ✅ Tambahan: token guard (opsional tapi direkomendasikan)
     const secret = process.env.DEV_OVERRIDE_SECRET || "";
     const token = url.searchParams.get("dev") || "";
-    const host = url.hostname;
-    const isLocalhost = host === "localhost" || host === "127.0.0.1" || host === "::1";
-    const isPreview = process.env.VERCEL_ENV === "preview";
-    const devFlagOn = process.env.NEXT_PUBLIC_ENABLE_LOCALE_GEO_OVERRIDE === "true";
-
-    const tokenOk =
-      (isLocalhost && devFlagOn && !IS_PROD && !isPreview) ||
-      (Boolean(secret) && token === secret);
+    const tokenOk = Boolean(secret) && token === secret;
 
     if (tokenOk) {
       const hl = (url.searchParams.get("hl") || url.searchParams.get("locale"))?.toLowerCase() || null;
@@ -148,14 +139,14 @@ export function middleware(req: NextRequest) {
       const wantCur = isCurrency(cur) ? cur! : null;
 
       if (wantLocale || wantGeo || wantCur) {
-        // bersihkan query (termasuk 'dev') agar URL rapi setelah redirect
+        // bersihkan query (✅ tambahkan 'dev' juga dibersihkan)
         url.searchParams.delete("hl");
         url.searchParams.delete("locale");
         url.searchParams.delete("geo");
         url.searchParams.delete("currency");
-        url.searchParams.delete("dev");
+        url.searchParams.delete("dev"); // <— tambahan
 
-        // atur prefix locale pada path
+        // atur prefix locale
         const segments = url.pathname.split("/").filter(Boolean);
         if (wantLocale) {
           if (segments.length && (locales as readonly string[]).includes(segments[0] as any)) {
@@ -169,18 +160,33 @@ export function middleware(req: NextRequest) {
         dest.pathname = "/" + segments.join("/");
         dest.search = url.searchParams.toString();
 
-        const res = NextResponse.redirect(dest, 307);
-        const cookieBase = {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 30,
-          httpOnly: true,
-          sameSite: "lax" as const,
-          secure: IS_PROD,
-        };
+        const secure = dest.protocol === "https:";
 
-        if (wantLocale) res.cookies.set("NEXT_LOCALE", wantLocale, cookieBase);
-        if (wantGeo)    res.cookies.set("GEO_COUNTRY_OVERRIDE", wantGeo, cookieBase);
-        if (wantCur)    res.cookies.set("CURRENCY_OVERRIDE", wantCur, cookieBase);
+        const res = NextResponse.redirect(dest, 307);
+        if (wantLocale)
+          res.cookies.set("NEXT_LOCALE", wantLocale, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
+            httpOnly: true,
+            sameSite: "lax",
+            secure,
+          });
+        if (wantGeo)
+          res.cookies.set("GEO_COUNTRY_OVERRIDE", wantGeo, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
+            httpOnly: true,
+            sameSite: "lax",
+            secure,
+          });
+        if (wantCur)
+          res.cookies.set("CURRENCY_OVERRIDE", wantCur, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
+            httpOnly: true,
+            sameSite: "lax",
+            secure,
+          });
 
         return res;
       }
