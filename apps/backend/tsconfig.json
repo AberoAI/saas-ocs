@@ -19,6 +19,9 @@
     // memastikan tipe Node (process, Buffer, http, net, dll) tersedia saat build
     "types": ["node"],
 
+    // beri tahu TS di mana folder @types berada (package ini & root workspace)
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
+
     // supaya file server lama yang belum diketik tidak memblokir build
     "noImplicitAny": false
   },
