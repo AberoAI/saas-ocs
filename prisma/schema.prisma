@@ -15,6 +15,7 @@ model Tenant {
   messages  Message[]
   contacts  Contact[]         // daftar kontak WA
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt   // ✅ tambahkan agar sync dengan Prisma Client
 }
 
 model User {

@@ -4,22 +4,17 @@
     "rootDir": "src",
     "outDir": "./dist",
 
-    // App backend: jangan emit .d.ts (biar gak tarik tipe internal tRPC)
     "noEmit": false,
     "declaration": false,
     "emitDeclarationOnly": false,
 
-    // ESM Node style
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ES2022",
 
-    // QoL
     "esModuleInterop": true,
     "skipLibCheck": true,
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
-
-    // NOTE: tidak ada "composite": true
   },
   "include": ["src"],
   "exclude": [
@@ -28,7 +23,8 @@
     "src/middleware/**",
     "node_modules",
     "dist",
-    "tests/**"
+    "tests/**",
+    "src/scripts/**",
+    "src/queue-ping.ts"
   ]
-  // NOTE: tidak ada "references"
 }
