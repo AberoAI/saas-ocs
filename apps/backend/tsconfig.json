@@ -14,7 +14,10 @@
 
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
+
+    // memastikan tipe Node (process, Buffer, http, net, dll) tersedia saat build
+    "types": ["node"]
   },
   "include": ["src"],
   "exclude": [

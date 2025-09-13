@@ -87,6 +87,12 @@ importers:
       '@trpc/server':
         specifier: 11.4.4
         version: 11.4.4(typescript@5.8.2)
+      '@types/node':
+        specifier: ^20.19.10
+        version: 20.19.10
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       axios:
         specifier: ^1.11.0
         version: 1.11.0
@@ -114,6 +120,12 @@ importers:
       redis:
         specifier: ^5.8.1
         version: 5.8.1
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.4
+      typescript:
+        specifier: ^5.8.2
+        version: 5.8.2
       ws:
         specifier: ^8.18.3
         version: 8.18.3
@@ -136,18 +148,6 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
-      '@types/node':
-        specifier: ^20.19.10
-        version: 20.19.10
-      '@types/ws':
-        specifier: ^8.18.1
-        version: 8.18.1
-      tsx:
-        specifier: ^4.20.3
-        version: 4.20.4
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
       vitest:
         specifier: ^1.6.0
         version: 1.6.1(@types/node@20.19.10)(lightningcss@1.30.1)
