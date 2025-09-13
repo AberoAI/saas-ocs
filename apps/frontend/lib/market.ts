@@ -5,10 +5,11 @@ export type Market = 'TR' | 'US';
 
 // IP country -> market (sesuaikan kalau perlu)
 export function mapCountryToMarket(country?: string): Market {
-  return country?.toUpperCase() === 'TR' ? 'TR' : 'US';
+  const c = (country || '').toUpperCase();
+  return c === 'TR' ? 'TR' : 'US';
 }
 
-export const MARKET_COOKIE = 'MARKET';
+export const MARKET_COOKIE = 'MARKET' as const;
 
 // (Opsional) Jika nanti butuh pricing table & formatter:
 export const PRICING_TABLE = {

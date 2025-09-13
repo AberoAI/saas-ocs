@@ -9,7 +9,10 @@
     "lint": "next lint",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
     "favicons": "node scripts/generate-favicon.mjs",
-    "prebuild": "pnpm run favicons"
+    "prebuild": "pnpm run favicons",
+
+    "test:e2e": "playwright test",
+    "playwright:install": "playwright install"
   },
   "dependencies": {
     "@repo/api-types": "workspace:*",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.0",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.0.1",
     "@types/node": "^20.19.10",
     "@types/react": "^19.1.0",

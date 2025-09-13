@@ -68,6 +68,10 @@ const intl = createIntlMiddleware({
 export function middleware(req: NextRequest) {
   const {pathname} = req.nextUrl;
 
+  // Satu sumber kebenaran untuk 'secure' cookie
+  const proto = req.headers.get('x-forwarded-proto') || req.nextUrl.protocol.replace(':','');
+  const SECURE = IS_PROD || proto === 'https';
+
   // Early-pass: asset/api/_trpc
   if (
     pathname.startsWith('/_next') ||
@@ -160,7 +164,6 @@ export function middleware(req: NextRequest) {
         dest.pathname = '/' + segments.join('/');
         dest.search = url.searchParams.toString();
 
-        const secure = req.nextUrl.protocol === 'https:';
         const res = NextResponse.redirect(dest, 307);
 
         if (wantLocale)
@@ -169,7 +172,7 @@ export function middleware(req: NextRequest) {
             maxAge: 60 * 60 * 24 * 30,
             httpOnly: true,
             sameSite: 'lax',
-            secure
+            secure: SECURE
           });
 
         if (wantGeo)
@@ -178,7 +181,7 @@ export function middleware(req: NextRequest) {
             maxAge: 60 * 60 * 24 * 30,
             httpOnly: true,
             sameSite: 'lax',
-            secure
+            secure: SECURE
           });
 
         if (wantCur)
@@ -187,7 +190,7 @@ export function middleware(req: NextRequest) {
             maxAge: 60 * 60 * 24 * 30,
             httpOnly: true,
             sameSite: 'lax',
-            secure
+            secure: SECURE
           });
 
         return res;
@@ -216,14 +219,14 @@ export function middleware(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 365,
       httpOnly: true,
       sameSite: 'lax',
-      secure: IS_PROD
+      secure: SECURE
     });
     res.cookies.set(MARKET_COOKIE, ipMarket, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365,
       httpOnly: true,
       sameSite: 'lax',
-      secure: IS_PROD
+      secure: SECURE
     });
     return res;
   }
