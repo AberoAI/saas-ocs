@@ -8,44 +8,28 @@ import { NAV_LINKS } from "@/lib/nav";
 
 export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
-  // Normalisasi trailing slash biar perbandingan stabil
+  // Normalisasi trailing slash agar perbandingan stabil
   const pathname = pathnameRaw.replace(/\/+$/, "") || "/";
 
   const name = "AberoAI";
 
-  // Deteksi locale prefix di URL (contoh: /en, /id, /en-US)
+  // Deteksi prefix locale (contoh: /en, /id, /en-US)
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
-  // Helper untuk mem-prefix href dengan locale bila perlu
+  // Prefix href dengan locale bila perlu
   const withLocale = (href: string) => {
-    // eksternal / anchor / hash-only / sudah ada prefix locale
-    if (
-      !href.startsWith("/") ||
-      href.startsWith("//") ||
-      href.startsWith("/#")
-    ) {
+    // eksternal / anchor / hash-only → biarkan
+    if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) {
       return href;
     }
     return `${localePrefix}${href}`;
   };
 
-  // Apakah sedang berada di /about (termasuk /en/about, dst)
-  const onAbout =
-    pathname === "/about" ||
-    (localePrefix && pathname === `${localePrefix}/about`);
+  // Bangun daftar link TANPA mengganti “About” → “Home”
+  const links = NAV_LINKS.map((l) => ({ label: l.label, href: withLocale(l.href) }));
 
-  // Build daftar link:
-  // - Jika sedang di about, link About → Home (ke root dengan prefix locale)
-  // - Semua href diprefix locale bila ada
-  const links = NAV_LINKS.map((l) => {
-    if (l.href === "/about" && onAbout) {
-      return { label: "Home", href: localePrefix || "/" };
-    }
-    return { label: l.label, href: withLocale(l.href) };
-  });
-
-  // Penanda aktif (exact atau prefix untuk sub-rute)
+  // Penanda aktif (exact atau prefix)
   const isActive = (href: string) => {
     const target = href.replace(/\/+$/, "") || "/";
     // Home aktif di "/" atau "/<locale>"
@@ -62,7 +46,7 @@ export default function Navbar() {
         <Link href={localePrefix || "/"} className="flex items-center gap-3" aria-label="AberoAI home">
           <div className="rounded-lg border border-black/10 bg-white/70 p-1">
             <Image
-              src="/icon.svg" // konsisten dengan layout.tsx
+              src="/icon.svg"
               alt={name}
               width={32}
               height={32}
