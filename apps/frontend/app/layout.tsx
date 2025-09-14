@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import Navbar from "@/components/Navbar"; // ⬅️ ADDED
 
 // Font configuration (CSS vars dipakai di globals.css)
 const geistSans = Geist({
@@ -54,7 +55,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ].join(" ")}
       >
         {/* Global providers (NextAuth, tRPC, Theme, dsb) */}
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />        {/* ⬅️ ADDED: navbar global */}
+          {children}
+        </Providers>
       </body>
     </html>
   );
