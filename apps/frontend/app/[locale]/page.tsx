@@ -2,8 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import {useTranslations} from "next-intl";
+import { useTranslations } from "next-intl";
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
@@ -14,56 +13,6 @@ function getTagline(): string {
     process.env.BIZ_TAGLINE ||
     process.env.NEXT_PUBLIC_BIZ_TAGLINE ||
     "AI-powered Online Customer Service Automation"
-  );
-}
-
-/** ---------- Komponen kecil (sedikit disesuaikan agar bisa menerima label i18n) ---------- */
-function SiteTopNav({
-  name,
-  labels
-}: {
-  name: string;
-  labels: { about: string; features: string; pricing: string; faq: string; signin: string };
-}) {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[var(--background)]/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="rounded-lg border border-black/10 bg-white/70 p-1">
-            <Image
-              src="/icon-192.png"
-              alt={name}
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <span className="text-lg font-semibold">{name}</span>
-        </Link>
-
-        <nav className="hidden items-center gap-6 md:flex">
-          <Link href="/about" className="text-sm text-black/70 hover:text-black">
-            {labels.about}
-          </Link>
-          <a href="#features" className="text-sm text-black/70 hover:text-black">
-            {labels.features}
-          </a>
-          <Link href="/pricing" className="text-sm text-black/70 hover:text-black">
-            {labels.pricing}
-          </Link>
-          <a href="#faq" className="text-sm text-black/70 hover:text-black">
-            {labels.faq}
-          </a>
-          <Link
-            href="/login"
-            className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90"
-          >
-            {labels.signin}
-          </Link>
-        </nav>
-      </div>
-    </header>
   );
 }
 
@@ -98,16 +47,7 @@ export default function LocaleHomePage() {
 
   return (
     <>
-      <SiteTopNav
-        name={name}
-        labels={{
-          about: t("nav.about"),
-          features: t("nav.features"),
-          pricing: t("nav.pricing"),
-          faq: t("nav.faq"),
-          signin: t("nav.signin")
-        }}
-      />
+      {/* Navbar global sudah dirender oleh app/layout.tsx */}
 
       {/* Hero */}
       <section className="relative">
@@ -216,7 +156,7 @@ export default function LocaleHomePage() {
       <section id="faq" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
             <Faq q="Bisakah pakai banyak cabang?" a="Bisa. Fitur multi-tenant memudahkan kelola banyak unit bisnis dalam satu akun." />
             <Faq q="Ada free trial?" a="Ada. Daftar dan mulai uji coba langsung tanpa kartu kredit." />
