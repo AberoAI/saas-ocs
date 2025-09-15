@@ -42,8 +42,14 @@ function Faq({ q, a }: { q: string; a: string }) {
 /** ---------- Halaman ---------- */
 export default function LocaleHomePage() {
   const name = getBizName();
-  const tagline = getTagline();
+  const tagline = getTagline(); // tetap dibiarkan (walau tidak dipakai) agar tidak mengubah bagian lain
   const t = useTranslations();
+
+  // ✅ Teks hero baru (sesuai permintaan)
+  const headline =
+    "More than 65% of customers abandon purchases because businesses reply too slowly.";
+  const subheadline =
+    "AberoAI solves this problem with instant 24/7 responses, multilingual support, and automated booking workflows.";
 
   return (
     <>
@@ -57,8 +63,14 @@ export default function LocaleHomePage() {
               <span className="size-2 rounded-full bg-emerald-500"></span>
               {t("hero.badge")}
             </p>
-            <h1 className="text-4xl font-semibold leading-tight md:text-5xl">{name}</h1>
-            <p className="mt-2 text-lg text-black/70 md:text-xl">{tagline}</p>
+
+            {/* ⬇️ Diganti ke headline/subheadline baru */}
+            <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
+              {headline}
+            </h1>
+            <p className="mt-2 text-lg text-black/70 md:text-xl">
+              {subheadline}
+            </p>
 
             <div className="mt-8 flex gap-4">
               <Link href="/contact" className="rounded-xl border border-black/10 px-5 py-3 hover:bg-black/5">
