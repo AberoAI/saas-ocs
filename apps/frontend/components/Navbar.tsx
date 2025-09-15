@@ -8,31 +8,24 @@ import { NAV_LINKS } from "@/lib/nav";
 
 export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
-  // Normalisasi trailing slash agar perbandingan stabil
   const pathname = pathnameRaw.replace(/\/+$/, "") || "/";
 
   const name = "AberoAI";
 
-  // Deteksi prefix locale (contoh: /en, /id, /en-US)
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
-  // Prefix href dengan locale bila perlu
   const withLocale = (href: string) => {
-    // eksternal / anchor / hash-only → biarkan
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) {
       return href;
     }
     return `${localePrefix}${href}`;
   };
 
-  // Bangun daftar link TANPA mengganti “About” → “Home”
   const links = NAV_LINKS.map((l) => ({ label: l.label, href: withLocale(l.href) }));
 
-  // Penanda aktif (exact atau prefix)
   const isActive = (href: string) => {
     const target = href.replace(/\/+$/, "") || "/";
-    // Home aktif di "/" atau "/<locale>"
     if (target === "/" || target === localePrefix) {
       return pathname === "/" || pathname === localePrefix;
     }
@@ -42,17 +35,17 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-background/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        {/* Brand (logo transparan, teks lebih dekat & lebih besar) */}
+        {/* Brand */}
         <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
           <Image
-            src="/icon.svg" // pastikan file ini background-nya transparan
+            src="/icon.svg"
             alt={name}
             width={32}
             height={32}
             className="object-contain"
             priority
           />
-          <span className="text-2xl font-semibold text-brand">{name}</span>
+          <span className="text-2xl font-semibold text-navbar">{name}</span>
         </Link>
 
         {/* Nav */}
