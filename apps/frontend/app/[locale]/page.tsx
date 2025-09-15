@@ -42,12 +42,11 @@ function Faq({ q, a }: { q: string; a: string }) {
 /** ---------- Halaman ---------- */
 export default function LocaleHomePage() {
   const name = getBizName();
-  const tagline = getTagline(); // tetap dibiarkan (walau tidak dipakai) agar tidak mengubah bagian lain
+  const tagline = getTagline(); // tetap dibiarkan agar konsisten
   const t = useTranslations();
 
-  // ✅ Teks hero baru (sesuai permintaan)
-  const headline =
-    "More than 65% of customers abandon purchases because businesses reply too slowly.";
+  // ✅ Headline baru sesuai permintaan
+  const headline = "Over 65% of customers cancel due to slow responses";
   const subheadline =
     "AberoAI solves this problem with instant 24/7 responses, multilingual support, and automated booking workflows.";
 
@@ -64,7 +63,7 @@ export default function LocaleHomePage() {
               {t("hero.badge")}
             </p>
 
-            {/* ⬇️ Headline/Subheadline baru */}
+            {/* Headline/Subheadline */}
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
               {headline}
             </h1>
@@ -73,10 +72,16 @@ export default function LocaleHomePage() {
             </p>
 
             <div className="mt-8 flex gap-4">
-              <Link href="/contact" className="rounded-xl border border-black/10 px-5 py-3 hover:bg-black/5">
+              <Link
+                href="/contact"
+                className="rounded-xl border border-black/10 px-5 py-3 hover:bg-black/5"
+              >
                 {t("cta.contact")}
               </Link>
-              <Link href="/login" className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90">
+              <Link
+                href="/login"
+                className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
+              >
                 {t("cta.signin")}
               </Link>
             </div>
