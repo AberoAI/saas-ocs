@@ -42,18 +42,16 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[var(--background)]/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        {/* Brand */}
+        {/* Brand (tanpa border & bg agar logo transparan) */}
         <Link href={localePrefix || "/"} className="flex items-center gap-3" aria-label="AberoAI home">
-          <div className="rounded-lg border border-black/10 bg-white/70 p-1">
-            <Image
-              src="/icon.svg"
-              alt={name}
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-            />
-          </div>
+          <Image
+            src="/icon.svg"         // pastikan file ini transparan
+            alt={name}
+            width={32}
+            height={32}
+            className="object-contain"
+            priority
+          />
           <span className="text-lg font-semibold">{name}</span>
         </Link>
 
