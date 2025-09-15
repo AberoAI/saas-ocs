@@ -1,14 +1,7 @@
 // apps/frontend/tailwind.config.ts
 import type { Config } from "tailwindcss";
 
-const withOpacity =
-  (variable: string) =>
-  ({ opacityValue }: { opacityValue?: string }) =>
-    opacityValue === undefined
-      ? `rgb(var(${variable}))`
-      : `rgb(var(${variable}) / ${opacityValue})`;
-
-export default {
+const config: Config = {
   darkMode: "class",
   content: [
     "./app/**/*.{ts,tsx}",
@@ -18,11 +11,11 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        // brand → text-brand, bg-brand, border-brand, etc.
-        brand: withOpacity("--color-brand"),
-      },
+      // warna brand tidak perlu di-extend di sini,
+      // karena sudah didefinisikan lewat @theme inline di globals.css
     },
   },
   plugins: [],
-} satisfies Config;
+};
+
+export default config;

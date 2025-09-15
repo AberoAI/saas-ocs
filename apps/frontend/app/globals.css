@@ -11,8 +11,8 @@
   --foreground: #171717;
 
   /* brand token (RGB triplet agar /opacity Tailwind bekerja) */
-  /* #26658C → 38 101 140 */
-  --color-brand: 38 101 140;
+  /* #1800AD → 24 0 173 */
+  --color-brand: 24 0 173;
 }
 
 /* Tailwind v4 theme tokens bound to CSS vars */
@@ -34,9 +34,9 @@
     --background: #0a0a0a;
     --foreground: #ededed;
 
-    /* opsional: sedikit lebih cerah agar kontras di dark */
-    /* #3C96C8 → 60 150 200 */
-    --color-brand: 60 150 200;
+    /* opsional: tweak brand untuk kontras di dark */
+    /* contoh: sedikit lebih terang dari #1800AD → 96 64 230 (#6040E6) */
+    --color-brand: 96 64 230;
   }
 }
 
@@ -54,10 +54,7 @@ body {
 }
 
 /* Inputs/buttons inherit font & color cleanly */
-input, button, textarea, select {
-  font: inherit;
-  color: inherit;
-}
+input, button, textarea, select { font: inherit; color: inherit; }
 
 /* Links: keep Tailwind classes in components, but ensure focus is visible */
 a { text-decoration: none; }

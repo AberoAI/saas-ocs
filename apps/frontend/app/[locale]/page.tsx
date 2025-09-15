@@ -45,8 +45,8 @@ export default function LocaleHomePage() {
   const tagline = getTagline(); // tetap dibiarkan agar konsisten
   const t = useTranslations();
 
-  // ✅ Headline baru sesuai permintaan
-  const headline = "Over 65% of customers cancel due to slow responses";
+  // ✅ Headline tetap sama, tapi bagian "Over 65%" diberi span agar bisa di-highlight
+  const headlineRest = " of customers cancel due to slow responses";
   const subheadline =
     "AberoAI solves this problem with instant 24/7 responses, multilingual support, and automated booking workflows.";
 
@@ -65,7 +65,8 @@ export default function LocaleHomePage() {
 
             {/* Headline/Subheadline */}
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-              {headline}
+              <span className="text-brand">Over 65%</span>
+              {headlineRest}
             </h1>
             <p className="mt-2 text-lg text-black/70 md:text-xl">
               {subheadline}
