@@ -71,13 +71,21 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* KANAN: CTA Sign in (tetap di kanan) */}
-        <Link
-          href={withLocale("/login")}
-          className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90"
-        >
-          Sign in
-        </Link>
+        {/* KANAN: Log in (teks seperti link nav) + Sign in (tombol) */}
+        <div className="flex items-center gap-4">
+          <Link
+            href={withLocale("/login")} // ganti ke /signin jika rute berbeda
+            className="text-sm text-foreground/70 hover:text-foreground transition-colors"
+          >
+            Log in
+          </Link>
+          <Link
+            href={withLocale("/login")}
+            className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
     </header>
   );
