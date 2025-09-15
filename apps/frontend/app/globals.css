@@ -7,7 +7,7 @@
   color-scheme: light dark;
 
   /* semantic colors (override in dark) */
-  --background: #ffffff;
+  --background: #f4fbff; /* ⬅️ diganti dari #ffffff ke #f4fbff */
   --foreground: #171717;
 }
 
