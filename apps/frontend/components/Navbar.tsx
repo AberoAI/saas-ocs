@@ -43,7 +43,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[var(--background)]/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         {/* Brand (logo transparan, teks lebih dekat & lebih besar) */}
-        <Link href={localePrefix || "/"} className="flex items-center gap-2" aria-label="AberoAI home">
+        <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
           <Image
             src="/icon.svg" // pastikan file ini background-nya transparan
             alt={name}
@@ -52,7 +52,7 @@ export default function Navbar() {
             className="object-contain"
             priority
           />
-          <span className="text-xl font-semibold">{name}</span>
+          <span className="text-2xl font-semibold">{name}</span>
         </Link>
 
         {/* Nav */}
