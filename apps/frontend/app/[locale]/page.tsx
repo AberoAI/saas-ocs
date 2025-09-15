@@ -45,7 +45,7 @@ export default function LocaleHomePage() {
   const tagline = getTagline(); // tetap dibiarkan agar konsisten
   const t = useTranslations();
 
-  // ✅ Headline tetap sama, tapi bagian "Over 65%" diberi span agar bisa di-highlight
+  // Headline: bagi jadi dua agar “Over 65%” bisa diberi warna khusus
   const headlineRest = " of customers cancel due to slow responses";
   const subheadline =
     "AberoAI solves this problem with instant 24/7 responses, multilingual support, and automated booking workflows.";
@@ -65,7 +65,8 @@ export default function LocaleHomePage() {
 
             {/* Headline/Subheadline */}
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-              <span className="text-brand">Over 65%</span>
+              {/* Warna disamakan dengan brand (#26658C) */}
+              <span style={{ color: "#26658C" }}>Over 65%</span>
               {headlineRest}
             </h1>
             <p className="mt-2 text-lg text-black/70 md:text-xl">
@@ -174,7 +175,7 @@ export default function LocaleHomePage() {
       <section id="faq" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
             <Faq q="Bisakah pakai banyak cabang?" a="Bisa. Fitur multi-tenant memudahkan kelola banyak unit bisnis dalam satu akun." />
             <Faq q="Ada free trial?" a="Ada. Daftar dan mulai uji coba langsung tanpa kartu kredit." />
