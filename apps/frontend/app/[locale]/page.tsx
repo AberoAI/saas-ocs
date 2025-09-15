@@ -73,18 +73,13 @@ export default function LocaleHomePage() {
               {subheadline}
             </p>
 
-            <div className="mt-8 flex gap-4">
-              <Link
-                href="/contact"
-                className="rounded-xl border border-black/10 px-5 py-3 hover:bg-black/5"
-              >
-                {t("cta.contact")}
-              </Link>
+            {/* CTA: dibuat 1 tombol saja (Try Live Demo) */}
+            <div className="mt-8">
               <Link
                 href="/login"
                 className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
               >
-                {t("cta.signin")}
+                Try Live Demo
               </Link>
             </div>
 
@@ -175,7 +170,7 @@ export default function LocaleHomePage() {
       <section id="faq" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
             <Faq q="Bisakah pakai banyak cabang?" a="Bisa. Fitur multi-tenant memudahkan kelola banyak unit bisnis dalam satu akun." />
             <Faq q="Ada free trial?" a="Ada. Daftar dan mulai uji coba langsung tanpa kartu kredit." />
