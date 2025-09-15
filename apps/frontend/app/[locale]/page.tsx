@@ -57,14 +57,14 @@ export default function LocaleHomePage() {
 
       {/* Hero */}
       <section className="relative">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-20 pt-16 md:grid-cols-2 md:pt-24">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-16 pt-12 md:grid-cols-2 md:pt-16">
           <div>
             <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-black/70">
               <span className="size-2 rounded-full bg-emerald-500"></span>
               {t("hero.badge")}
             </p>
 
-            {/* ⬇️ Diganti ke headline/subheadline baru */}
+            {/* ⬇️ Headline/Subheadline baru */}
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
               {headline}
             </h1>
