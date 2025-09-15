@@ -40,7 +40,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[var(--background)]/80 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-background/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         {/* Brand (logo transparan, teks lebih dekat & lebih besar) */}
         <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
@@ -52,7 +52,7 @@ export default function Navbar() {
             className="object-contain"
             priority
           />
-          <span className="text-2xl font-semibold">{name}</span>
+          <span className="text-2xl font-semibold text-brand">{name}</span>
         </Link>
 
         {/* Nav */}
@@ -64,7 +64,7 @@ export default function Navbar() {
               aria-current={isActive(l.href) ? "page" : undefined}
               className={[
                 "text-sm transition-colors",
-                isActive(l.href) ? "text-black font-medium" : "text-black/70 hover:text-black",
+                isActive(l.href) ? "text-foreground font-medium" : "text-foreground/70 hover:text-foreground",
               ].join(" ")}
             >
               {l.label}

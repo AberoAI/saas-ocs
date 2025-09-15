@@ -7,14 +7,21 @@
   color-scheme: light dark;
 
   /* semantic colors (override in dark) */
-  --background: #f4fbff; /* ⬅️ diganti dari #ffffff ke #f4fbff */
+  --background: #f4fbff; /* ⬅️ kamu sudah set: aman */
   --foreground: #171717;
+
+  /* brand token (RGB triplet agar /opacity Tailwind bekerja) */
+  /* #26658C → 38 101 140 */
+  --color-brand: 38 101 140;
 }
 
 /* Tailwind v4 theme tokens bound to CSS vars */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* mapping token brand → bisa dipakai sebagai text-brand, bg-brand, border-brand */
+  --color-brand: rgb(var(--color-brand));
 
   /* Use your Next/font vars if present, else safe fallbacks */
   --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji");
@@ -26,6 +33,10 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    /* opsional: sedikit lebih cerah agar kontras di dark */
+    /* #3C96C8 → 60 150 200 */
+    --color-brand: 60 150 200;
   }
 }
 
