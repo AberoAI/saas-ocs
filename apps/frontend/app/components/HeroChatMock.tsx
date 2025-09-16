@@ -1,76 +1,58 @@
 // apps/frontend/app/components/HeroChatMock.tsx
+// Mock Chat UI gaya "pill" (header avatar + last seen, date divider, bubble ungu di kanan)
 
 export default function HeroChatMock() {
   return (
     <div className="relative">
-      {/* background grid halus */}
+      {/* background grid halus (dipertahankan) */}
       <div className="absolute inset-0 -z-10 rounded-[20px] bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.06)_1px,transparent_1px)] bg-[length:18px_18px]" />
 
       <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/70">
-        {/* Titlebar */}
-        <div className="flex items-center gap-2 border-b border-black/10 bg-gradient-to-b from-white to-black/5 px-4 py-2">
-          <span className="size-2.5 rounded-full bg-red-400" />
-          <span className="size-2.5 rounded-full bg-amber-400" />
-          <span className="size-2.5 rounded-full bg-emerald-400" />
-          <span className="ml-2 text-xs text-black/60">AberoAI Bot</span>
-          <span className="ml-auto rounded-full border border-black/10 px-2 py-0.5 text-[10px] text-black/60">
-            Demo
-          </span>
-        </div>
-
-        {/* Chat area */}
-        <div className="space-y-3 bg-gradient-to-b from-white to-slate-50 p-4">
-          {/* bot bubble */}
-          <div className="flex items-start gap-2">
-            <div className="grid size-6 place-items-center rounded-full bg-black/90 text-[10px] font-medium text-white">AI</div>
+        {/* Header: avatar + last seen */}
+        <div className="flex items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-black/5 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Avatar />
             <div>
-              <div className="rounded-2xl rounded-tl-md bg-black/5 px-3 py-2 text-sm shadow-sm">
-                Halo! Ada yang bisa kami bantu?
-              </div>
-              <span className="mt-1 block text-[10px] text-black/50">09:12</span>
+              <div className="text-sm font-semibold">Kirti Yadav</div>
+              <div className="text-[11px] text-black/50">Last seen 3 hours ago</div>
             </div>
           </div>
-
-          {/* user bubble (aksen brand) */}
-          <div className="flex items-start justify-end gap-2">
-            <div>
-              <div
-                className="ml-auto rounded-2xl rounded-tr-md px-3 py-2 text-sm text-white shadow-sm"
-                style={{ backgroundColor: "#26658C" }}
-              >
-                Jadwal buka klinik hari ini?
-              </div>
-              <span className="mt-1 block text-right text-[10px] text-black/50">09:12</span>
-            </div>
-            <div className="grid size-6 place-items-center rounded-full border border-black/10 bg-white text-[10px]">You</div>
-          </div>
-
-          {/* bot reply + typing indicator pill */}
-          <div className="flex items-start gap-2">
-            <div className="grid size-6 place-items-center rounded-full bg-black/90 text-[10px] font-medium text-white">AI</div>
-            <div>
-              <div className="rounded-2xl rounded-tl-md bg-black/5 px-3 py-2 text-sm shadow-sm">
-                Klinik buka 09.00–21.00 WIB. Ingin buat janji?
-              </div>
-
-              <div
-                className="mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] text-white shadow-sm"
-                style={{ backgroundColor: "#0b0b0b" }}
-              >
-                <span className="inline-flex items-center">
-                  <span className="size-1.5 animate-pulse rounded-full bg-white/80" />
-                  <span className="mx-1 size-1.5 animate-pulse rounded-full bg-white/80 [animation-delay:120ms]" />
-                  <span className="size-1.5 animate-pulse rounded-full bg-white/80 [animation-delay:240ms]" />
-                </span>
-                <span className="ml-2">
-                  AI replied in <span className="font-medium">&lt;1s</span>
-                </span>
-              </div>
-            </div>
+          <div className="flex items-center gap-2 text-black/60">
+            <IconCall />
+            <IconVideo />
+            <IconMore />
           </div>
         </div>
 
-        {/* Quick replies */}
+        {/* Chat area (gaya pill) */}
+        <div className="bg-white">
+          {/* Date divider */}
+          <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
+            <div className="h-px flex-1 bg-black/10" />
+            <span>Today 12:31 AM</span>
+            <div className="h-px flex-1 bg-black/10" />
+          </div>
+
+          <div className="space-y-4 px-4 pb-5">
+            {/* Stack user messages (ungu di kanan) */}
+            <Msg side="user" color="#7C3AED">Hey! Listen</Msg>
+            <Msg side="user" color="#7C3AED">
+              I really like your idea, but I still think we can do more in this.
+            </Msg>
+            <Msg side="user" color="#7C3AED">I will share something</Msg>
+
+            {/* Bot (abu muda di kiri) */}
+            <Msg side="bot">Let’s together work on this and create something more awesome.</Msg>
+
+            {/* User singkat */}
+            <Msg side="user" color="#7C3AED">Sounds perfect</Msg>
+
+            {/* Bot lagi */}
+            <Msg side="bot">So, can you come at my place at around 8 PM today ?</Msg>
+          </div>
+        </div>
+
+        {/* Quick replies (dipertahankan dari kerangka awal) */}
         <div className="flex flex-wrap gap-2 border-t border-black/10 bg-white/70 px-4 py-3">
           <button className="rounded-full border border-black/10 px-3 py-1 text-xs hover:bg-black/5">Pricing?</button>
           <button className="rounded-full border border-black/10 px-3 py-1 text-xs hover:bg-black/5">Book appointment</button>
@@ -78,9 +60,72 @@ export default function HeroChatMock() {
         </div>
       </div>
 
+      {/* Caption bawah (dipertahankan) */}
       <p className="mt-2 text-center text-[10px] text-black/50">
         Works with WhatsApp Cloud API • Demo UI
       </p>
     </div>
+  );
+}
+
+/* ========= Sub-komponen kecil (internal) ========= */
+
+function Avatar() {
+  return (
+    <div className="grid size-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
+      KY
+    </div>
+  );
+}
+
+function Msg({
+  side,
+  children,
+  color = "#7C3AED", // default ungu untuk user
+}: {
+  side: "user" | "bot";
+  children: React.ReactNode;
+  color?: string;
+}) {
+  const isUser = side === "user";
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={[
+          "max-w-[78%] px-4 py-2 text-sm shadow-sm",
+          "rounded-full",                         // gaya pill
+          isUser ? "text-white" : "text-black",
+        ].join(" ")}
+        style={{
+          background: isUser ? color : "rgba(0,0,0,0.06)", // user ungu, bot abu
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* Ikon kecil (outline/simple) */
+function IconMore() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
+    </svg>
+  );
+}
+function IconCall() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.89.3 1.76.57 2.6a2 2 0 0 1-.45 2.11L9.1 10.9a16 16 0 0 0 4 4l1.46-1.13a2 2 0 0 1 2.11-.45c.84.27 1.71.45 2.6.57A2 2 0 0 1 22 16.92Z" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+function IconVideo() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M23 7l-7 5 7 5V7z" fill="currentColor" />
+      <rect x="1" y="5" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
+    </svg>
   );
 }
