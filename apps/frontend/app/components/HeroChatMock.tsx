@@ -69,11 +69,27 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Quick replies (dipertahankan dari kerangka awal) */}
-        <div className="flex flex-wrap gap-2 border-t border-black/10 bg-white/70 px-4 py-3">
-          <button className="rounded-full border border-black/10 px-3 py-1 text-xs hover:bg-black/5">Pricing?</button>
-          <button className="rounded-full border border-black/10 px-3 py-1 text-xs hover:bg-black/5">Book appointment</button>
-          <button className="rounded-full border border-black/10 px-3 py-1 text-xs hover:bg-black/5">TR / EN</button>
+        {/* Input bar (mengganti quick replies) */}
+        <div className="border-t border-black/10 bg-white/70 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10">
+              <IconPaperclip />
+              <input
+                type="text"
+                placeholder="Type a message here..."
+                className="flex-1 bg-transparent text-sm outline-none placeholder-black/40"
+                readOnly
+              />
+              <IconEmoji />
+              <IconMic />
+            </div>
+            <button
+              aria-label="Send"
+              className="grid size-9 place-items-center rounded-full bg-[#7C3AED] text-white shadow-sm hover:brightness-95 active:scale-95 transition"
+            >
+              <IconSend />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -126,23 +142,56 @@ function Msg({
 /* Ikon kecil (outline/simple) */
 function IconMore() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
     </svg>
   );
 }
 function IconCall() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.89.3 1.76.57 2.6a2 2 0 0 1-.45 2.11L9.1 10.9a16 16 0 0 0 4 4l1.46-1.13a2 2 0 0 1 2.11-.45c.84.27 1.71.45 2.6.57A2 2 0 0 1 22 16.92Z" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
 }
 function IconVideo() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M23 7l-7 5 7 5V7z" fill="currentColor" />
       <rect x="1" y="5" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+function IconPaperclip() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M21 12.5l-8.5 8.5a6 6 0 1 1-8.49-8.49L12 4.99a4 4 0 0 1 5.66 5.66L9.76 18.56a2 2 0 1 1-2.83-2.83L14 8.66" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+function IconEmoji() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="9" cy="10" r="1.25" fill="currentColor"/>
+      <circle cx="15" cy="10" r="1.25" fill="currentColor"/>
+      <path d="M8 14c1 .8 2.3 1.2 4 1.2S15 14.8 16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+function IconMic() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="9" y="3" width="6" height="10" rx="3" stroke="currentColor" strokeWidth="2"/>
+      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+function IconSend() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M22 2L11 13" />
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   );
 }
