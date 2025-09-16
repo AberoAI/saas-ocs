@@ -7,7 +7,17 @@ export default function HeroChatMock() {
       {/* background grid halus (dipertahankan) */}
       <div className="absolute inset-0 -z-10 rounded-[20px] bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.06)_1px,transparent_1px)] bg-[length:18px_18px]" />
 
-      <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/70">
+      <div
+        className="
+          mx-auto
+          w-[340px] sm:w-[360px]          /* lebar target */
+          h-[400px] sm:h-[420px]          /* tinggi target */
+          overflow-hidden rounded-2xl
+          ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur
+          supports-[backdrop-filter]:bg-white/70
+          flex flex-col                   /* body chat = flex-1 */
+        "
+      >
         {/* Header: avatar + last seen */}
         <div className="flex items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-black/5 px-4 py-3">
           <div className="flex items-center gap-3">
@@ -25,7 +35,7 @@ export default function HeroChatMock() {
         </div>
 
         {/* Chat area (gaya pill) */}
-        <div className="bg-white">
+        <div className="flex-1 overflow-y-auto bg-white">
           {/* Date divider */}
           <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
             <div className="h-px flex-1 bg-black/10" />

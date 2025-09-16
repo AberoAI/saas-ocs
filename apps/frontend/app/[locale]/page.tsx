@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import HeroChatMock from "../components/HeroChatMock"; // ⬅️ UPDATED: import relatif
+import HeroChatMock from "../components/HeroChatMock"; // ⬅️ import relatif
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
@@ -92,7 +92,7 @@ export default function LocaleHomePage() {
           </div>
 
           {/* Mock UI (dipisah ke komponen) */}
-          <div className="relative">
+          <div className="relative justify-self-center md:justify-self-end">
             <HeroChatMock />
           </div>
         </div>
