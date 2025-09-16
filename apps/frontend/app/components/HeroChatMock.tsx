@@ -169,11 +169,8 @@ function Avatar() {
       <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
         YC
       </div>
-      {/* Dot hijau status (pojok kanan bawah) — NEON */}
-      <span
-        className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full"
-        style={{ backgroundColor: "#39FF14" }} // neon green
-      />
+      {/* Dot hijau status (pojok kanan bawah) — hijau cerah */}
+      <span className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full bg-green-500" />
     </div>
   );
 }
