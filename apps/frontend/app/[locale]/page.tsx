@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import HeroChatMock from "../components/HeroChatMock"; // ⬅️ UPDATED: import relatif
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
@@ -76,7 +77,7 @@ export default function LocaleHomePage() {
             {/* CTA: dibuat 1 tombol saja (Try Live Demo) */}
             <div className="mt-8">
               <Link
-                href="/login"
+                href="/demo"
                 className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
               >
                 Try Live Demo
@@ -90,30 +91,9 @@ export default function LocaleHomePage() {
             </div>
           </div>
 
-          {/* Mock UI */}
+          {/* Mock UI (dipisah ke komponen) */}
           <div className="relative">
-            <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm">
-              <div className="flex items-center gap-2 border-b border-black/10 bg-black/5 px-4 py-2">
-                <span className="size-2.5 rounded-full bg-red-400"></span>
-                <span className="size-2.5 rounded-full bg-amber-400"></span>
-                <span className="size-2.5 rounded-full bg-emerald-400"></span>
-                <span className="ml-2 text-xs text-black/60">AberoAI Bot</span>
-              </div>
-              <div className="space-y-3 p-4">
-                <div className="max-w-[80%] rounded-2xl bg-black/5 px-3 py-2 text-sm">
-                  Halo! Ada yang bisa kami bantu?
-                </div>
-                <div className="ml-auto max-w-[80%] rounded-2xl bg-black px-3 py-2 text-sm text-white">
-                  Jadwal buka klinik hari ini?
-                </div>
-                <div className="max-w-[80%] rounded-2xl bg-black/5 px-3 py-2 text-sm">
-                  Klinik buka 09.00–21.00 WIB. Ingin buat janji?
-                </div>
-                <div className="mt-4 rounded-xl bg-black/90 px-3 py-2 text-center text-xs text-white">
-                  Dibalas oleh AI • &lt;1 detik
-                </div>
-              </div>
-            </div>
+            <HeroChatMock />
           </div>
         </div>
       </section>
