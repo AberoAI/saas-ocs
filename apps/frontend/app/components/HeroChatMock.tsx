@@ -1,14 +1,18 @@
 // apps/frontend/app/components/HeroChatMock.tsx
-// MCUI proporsional (340–360 × 400–430), non-scroll.
+// MCUI proporsional (340–360 × 400–430), fixed-size.
 // Flow: user tanya → typing (…) → bot #1 → typing (…) → bot #2 (+ badge)
+// Auto-scroll ke bawah saat balasan baru muncul agar bubble terakhir tidak terpotong.
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function HeroChatMock() {
   // urutan: typing1 → bot1 → typing2 → bot2
   const [stage, setStage] = useState<"idle" | "typing1" | "bot1" | "typing2" | "bot2">("idle");
+
+  // ref untuk body chat agar bisa auto-scroll
+  const chatRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // simulasi AI mengetik dua kali
@@ -19,6 +23,16 @@ export default function HeroChatMock() {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
   }, []);
 
+  // setiap stage berubah, scroll ke bottom supaya bubble terakhir tak terpotong
+  useEffect(() => {
+    const el = chatRef.current;
+    if (!el) return;
+    // gunakan requestAnimationFrame agar DOM sudah ter-render sebelum scroll
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
+  }, [stage]);
+
   return (
     <div className="relative">
       {/* background grid halus */}
@@ -28,7 +42,7 @@ export default function HeroChatMock() {
         aria-label="AberoAI Mock Chat UI"
         className={[
           "mx-auto",
-          // lebar & tinggi target (non-scroll)
+          // lebar & tinggi target (non-scroll ukuran; body boleh auto-scroll jika perlu)
           "w-[340px] h-[400px] sm:w-[360px] sm:h-[420px]",
           "rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur",
           "supports-[backdrop-filter]:bg-white/70",
@@ -51,8 +65,8 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Chat body: konten sengaja sedikit agar muat tanpa scroll */}
-        <div className="flex-1 overflow-hidden bg-white">
+        {/* Chat body: sedikit konten; izinkan vertical auto-scroll agar bubble panjang tidak kepotong */}
+        <div ref={chatRef} className="flex-1 overflow-y-auto bg-white">
           {/* Date divider */}
           <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
             <div className="h-px flex-1 bg-black/10" />
