@@ -58,8 +58,8 @@ export default function HeroChatMock() {
             <Avatar />
             <div>
               <div className="text-sm font-semibold">Your Company</div>
-              {/* ⬇️ GANTI status jadi Active now */}
-              <div className="text-[11px] font-medium text-emerald-600">Active now</div>
+              {/* status */}
+              <div className="text-[11px] font-medium text-black">Active now</div>
             </div>
           </div>
           <div className="flex items-center gap-2 text-black/60">
@@ -169,8 +169,8 @@ function Avatar() {
       <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
         YC
       </div>
-      {/* Dot hijau status (pojok kanan bawah) — dihilangkan border putihnya */}
-      <span className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full bg-emerald-500" />
+      {/* Dot hijau status (pojok kanan bawah) — hijau cerah */}
+      <span className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full bg-green-500" />
     </div>
   );
 }
