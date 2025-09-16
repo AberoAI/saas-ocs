@@ -57,7 +57,7 @@ export default function HeroChatMock() {
           <div className="flex items-center gap-3">
             <Avatar />
             <div>
-              <div className="text-sm font-semibold">Kirti Yadav</div>
+              <div className="text-sm font-semibold">Your Company</div>
               <div className="text-[11px] text-black/50">Last seen 3 hours ago</div>
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function HeroChatMock() {
 function Avatar() {
   return (
     <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
-      KY
+      YC
     </div>
   );
 }
