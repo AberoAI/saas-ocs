@@ -169,8 +169,8 @@ function Avatar() {
       <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
         YC
       </div>
-      {/* Dot hijau status (pojok kanan bawah) */}
-      <span className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+      {/* Dot hijau status (pojok kanan bawah) — dihilangkan border putihnya */}
+      <span className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full bg-emerald-500" />
     </div>
   );
 }
