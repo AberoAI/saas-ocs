@@ -1,24 +1,25 @@
 // apps/frontend/app/components/HeroChatMock.tsx
-// Mock Chat UI gaya "pill" (header avatar + last seen, date divider, bubble ungu di kanan)
+// MCUI proporsional: 1 user msg → typing bubble → 1 bot msg (+ TR) + badge.
+// Fixed size (340–360 × 400–430), tidak scrollable, Tailwind/Next siap pakai.
 
 export default function HeroChatMock() {
   return (
     <div className="relative">
-      {/* background grid halus (dipertahankan) */}
+      {/* background grid halus */}
       <div className="absolute inset-0 -z-10 rounded-[20px] bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.06)_1px,transparent_1px)] bg-[length:18px_18px]" />
 
       <div
         className="
           mx-auto
-          w-[340px] sm:w-[360px]          /* lebar target */
-          h-[400px] sm:h-[420px]          /* tinggi target */
-          overflow-hidden rounded-2xl
-          ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur
+          w-[340px] sm:w-[360px]   /* lebar target */
+          h-[400px] sm:h-[420px]   /* tinggi target */
+          rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur
           supports-[backdrop-filter]:bg-white/70
-          flex flex-col                   /* body chat = flex-1 */
+          flex flex-col overflow-hidden   /* tidak scrollable */
         "
+        aria-label="AberoAI Mock Chat UI"
       >
-        {/* Header: avatar + last seen */}
+        {/* Header ringkas */}
         <div className="flex items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-black/5 px-4 py-3">
           <div className="flex items-center gap-3">
             <Avatar />
@@ -34,8 +35,8 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Chat area (gaya pill) */}
-        <div className="flex-1 overflow-y-auto bg-white">
+        {/* Chat body: konten sengaja sedikit agar muat tanpa scroll */}
+        <div className="bg-white">
           {/* Date divider */}
           <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
             <div className="h-px flex-1 bg-black/10" />
@@ -43,49 +44,53 @@ export default function HeroChatMock() {
             <div className="h-px flex-1 bg-black/10" />
           </div>
 
-          <div className="space-y-4 px-4 pb-5">
-            {/* 1) ungu */}
-            <Msg side="user" color="#7C3AED">
-              Hi, can I ask about your products?
+          <div className="space-y-3 px-4 pb-3">
+            {/* 1) User bertanya */}
+            <Msg side="user" color="#26658C">
+              Hi, may I ask about your pricing?
             </Msg>
 
-            {/* 2) abu */}
+            {/* 2) Typing indicator (balon dengan 3 titik animasi) */}
+            <TypingBubble />
+
+            {/* 3) Bot jawab + terjemahan TR */}
             <Msg side="bot">
-              Of course, Which product are you interested in?
+              Sure — our Starter plan is <strong>$19/month</strong>.{" "}
+              <span className="text-black/60">TR:</span> Başlangıç paketi{" "}
+              <strong>$19/ay</strong>’dan başlar. Would you like the full catalog or a quick demo?
             </Msg>
 
-            {/* 3) ungu */}
-            <Msg side="user" color="#7C3AED">
-              I’d like to know your prices.
-            </Msg>
-
-            {/* 4) abu */}
-            <Msg side="bot">Our plans start at $19/month.</Msg>
-
-            {/* 5) abu */}
-            <Msg side="bot">
-              Would you like me to send you the full catalog or book a demo?
-            </Msg>
+            {/* Badge kecepatan tepat di bawah bubble terakhir */}
+            <div className="pl-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-black text-white px-3 py-1 text-[10px] shadow-sm">
+                <span className="inline-flex items-center">
+                  <span className="mx-[1px] inline-block size-1.5 rounded-full bg-white/90 animate-bounce" />
+                  <span className="mx-[1px] inline-block size-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:120ms]" />
+                  <span className="mx-[1px] inline-block size-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
+                </span>
+                AI replied in &lt;1s
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Input bar (mengganti quick replies) */}
-        <div className="border-t border-black/10 bg-white/70 px-3 py-2">
+        {/* Input bar mock (non-interaktif) */}
+        <div className="mt-auto border-t border-black/10 bg-white/70 px-3 py-2">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10">
               <IconPaperclip />
               <input
-                type="text"
-                placeholder="Type a message here..."
-                className="flex-1 bg-transparent text-sm outline-none placeholder-black/40"
                 readOnly
+                placeholder="Type a message here..."
+                className="flex-1 bg-transparent text-[13px] outline-none placeholder-black/40"
               />
               <IconEmoji />
               <IconMic />
             </div>
             <button
               aria-label="Send"
-              className="grid size-9 place-items-center rounded-full bg-[#7C3AED] text-white shadow-sm hover:brightness-95 active:scale-95 transition"
+              className="grid size-9 place-items-center rounded-full text-white shadow-sm hover:brightness-95 active:scale-95 transition"
+              style={{ backgroundColor: "#26658C" }} /* brand */
             >
               <IconSend />
             </button>
@@ -93,7 +98,7 @@ export default function HeroChatMock() {
         </div>
       </div>
 
-      {/* Caption bawah (dipertahankan) */}
+      {/* Caption kecil */}
       <p className="mt-2 text-center text-[10px] text-black/50">
         Works with WhatsApp Cloud API • Demo UI
       </p>
@@ -101,7 +106,7 @@ export default function HeroChatMock() {
   );
 }
 
-/* ========= Sub-komponen kecil (internal) ========= */
+/* ========= Sub-komponen kecil ========= */
 
 function Avatar() {
   return (
@@ -114,7 +119,7 @@ function Avatar() {
 function Msg({
   side,
   children,
-  color = "#7C3AED", // default ungu untuk user
+  color = "#26658C", // default brand untuk user
 }: {
   side: "user" | "bot";
   children: React.ReactNode;
@@ -125,12 +130,12 @@ function Msg({
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={[
-          "max-w-[78%] px-4 py-2 text-sm shadow-sm",
-          "rounded-full", // gaya pill
+          "max-w-[82%] px-4 py-2 text-[13px] shadow-sm",
+          "rounded-full",
           isUser ? "text-white" : "text-black",
         ].join(" ")}
         style={{
-          background: isUser ? color : "rgba(0,0,0,0.06)", // user ungu, bot abu
+          background: isUser ? color : "rgba(0,0,0,0.06)",
         }}
       >
         {children}
@@ -139,7 +144,20 @@ function Msg({
   );
 }
 
-/* Ikon kecil (outline/simple) */
+/* Typing indicator sebagai balon */
+function TypingBubble() {
+  return (
+    <div className="flex justify-start">
+      <div className="inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-3 py-2 text-[13px] text-black shadow-sm">
+        <span className="inline-block size-1.5 rounded-full bg-black/50 animate-bounce" />
+        <span className="inline-block size-1.5 rounded-full bg-black/50 animate-bounce [animation-delay:120ms]" />
+        <span className="inline-block size-1.5 rounded-full bg-black/50 animate-bounce [animation-delay:240ms]" />
+      </div>
+    </div>
+  );
+}
+
+/* Ikon minimal */
 function IconMore() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
