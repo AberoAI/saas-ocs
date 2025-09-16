@@ -73,7 +73,7 @@ export default function HeroChatMock() {
           {/* Date divider */}
           <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
             <div className="h-px flex-1 bg-black/10" />
-            <span>Today 12:31 AM</span>
+            <span>Today 7:00 PM</span>
             <div className="h-px flex-1 bg-black/10" />
           </div>
 
