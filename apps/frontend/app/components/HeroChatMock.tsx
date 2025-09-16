@@ -34,21 +34,28 @@ export default function HeroChatMock() {
           </div>
 
           <div className="space-y-4 px-4 pb-5">
-            {/* Stack user messages (ungu di kanan) */}
-            <Msg side="user" color="#7C3AED">Hey! Listen</Msg>
+            {/* 1) ungu */}
             <Msg side="user" color="#7C3AED">
-              I really like your idea, but I still think we can do more in this.
+              Hi, can I ask about your products?
             </Msg>
-            <Msg side="user" color="#7C3AED">I will share something</Msg>
 
-            {/* Bot (abu muda di kiri) */}
-            <Msg side="bot">Let’s together work on this and create something more awesome.</Msg>
+            {/* 2) abu */}
+            <Msg side="bot">
+              Of course, Which product are you interested in?
+            </Msg>
 
-            {/* User singkat */}
-            <Msg side="user" color="#7C3AED">Sounds perfect</Msg>
+            {/* 3) ungu */}
+            <Msg side="user" color="#7C3AED">
+              I’d like to know your prices.
+            </Msg>
 
-            {/* Bot lagi */}
-            <Msg side="bot">So, can you come at my place at around 8 PM today ?</Msg>
+            {/* 4) abu */}
+            <Msg side="bot">Our plans start at $19/month.</Msg>
+
+            {/* 5) abu */}
+            <Msg side="bot">
+              Would you like me to send you the full catalog or book a demo?
+            </Msg>
           </div>
         </div>
 
@@ -93,7 +100,7 @@ function Msg({
       <div
         className={[
           "max-w-[78%] px-4 py-2 text-sm shadow-sm",
-          "rounded-full",                         // gaya pill
+          "rounded-full", // gaya pill
           isUser ? "text-white" : "text-black",
         ].join(" ")}
         style={{
