@@ -42,7 +42,7 @@ export default function HeroChatMock() {
         aria-label="AberoAI Mock Chat UI"
         className={[
           "mx-auto",
-          // lebar & tinggi diperlebar di tablet/desktop agar gap dengan headline lebih kecil
+          // ukuran compact (pendek)
           "w-[340px] h-[360px]",
           "sm:w-[380px] sm:h-[380px]",
           "md:w-[420px] md:h-[400px]",
@@ -79,8 +79,8 @@ export default function HeroChatMock() {
           </div>
 
           <div className="space-y-3 px-4 pb-3">
-            {/* 1) User pembuka */}
-            <Msg side="user" color="#26658C">
+            {/* 1) User pembuka (dengan jam & centang dua) */}
+            <Msg side="user" color="#26658C" time="07:00" status="read">
               Hi, can I ask about your products?
             </Msg>
 
@@ -89,8 +89,8 @@ export default function HeroChatMock() {
               Of course, Which product are you interested in?
             </Msg>
 
-            {/* 3) User tanya harga */}
-            <Msg side="user" color="#26658C">
+            {/* 3) User tanya harga (dengan jam & centang dua) */}
+            <Msg side="user" color="#26658C" time="07:00" status="read">
               I’d like to know your prices.
             </Msg>
 
@@ -182,12 +182,21 @@ function Msg({
   side,
   children,
   color = "#26658C", // default brand untuk user
+  time,
+  status,
 }: {
   side: "user" | "bot";
   children: React.ReactNode;
   color?: string;
+  /** 07:00, 21:05, etc. */
+  time?: string;
+  /** status untuk user message */
+  status?: "sent" | "delivered" | "read";
 }) {
   const isUser = side === "user";
+  const metaColor =
+    status === "read" ? "text-sky-500" : "text-black/50"; // read = biru ala WA, lainnya abu
+
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -200,7 +209,19 @@ function Msg({
           background: isUser ? color : "rgba(0,0,0,0.06)",
         }}
       >
-        {children}
+        <div>{children}</div>
+
+        {/* Meta (jam + centang dua) hanya tampil jika ada time/status */}
+        {(time || (isUser && status)) && (
+          <div className="mt-1 flex items-center gap-1 justify-end text-[10px]">
+            {time && <span className="text-black/60">{time}</span>}
+            {isUser && status && (
+              <span className={metaColor}>
+                <IconDoubleCheck />
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -272,6 +293,16 @@ function IconSend() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M22 2L11 13" />
       <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+    </svg>
+  );
+}
+
+/* Centang dua ala WhatsApp */
+function IconDoubleCheck() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M10.2 16.6l-3.8-3.8 1.4-1.4 2.4 2.4 5.2-5.2 1.4 1.4-6.6 6.6z" />
+      <path d="M7.8 18l-3.8-3.8 1.4-1.4 2.4 2.4" />
     </svg>
   );
 }
