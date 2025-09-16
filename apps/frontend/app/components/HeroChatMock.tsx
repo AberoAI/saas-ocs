@@ -43,10 +43,10 @@ export default function HeroChatMock() {
         className={[
           "mx-auto",
           // lebar & tinggi diperlebar di tablet/desktop agar gap dengan headline lebih kecil
-          "w-[340px] h-[400px]",
-          "sm:w-[380px] sm:h-[420px]",
-          "md:w-[420px] md:h-[440px]",
-          "lg:w-[460px] lg:h-[460px]",
+          "w-[340px] h-[360px]",
+          "sm:w-[380px] sm:h-[380px]",
+          "md:w-[420px] md:h-[400px]",
+          "lg:w-[460px] lg:h-[420px]",
           "rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur",
           "supports-[backdrop-filter]:bg-white/70",
           "flex flex-col overflow-hidden"
