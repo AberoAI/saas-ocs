@@ -133,7 +133,7 @@ export default function HeroChatMock() {
             </div>
             <button
               aria-label="Send"
-              className="grid h-12 w-12 place-items-center rounded-full text-white shadow-sm hover:brightness-95 active:scale-95 transition"
+              className="grid h-9 w-9 place-items-center rounded-full text-white shadow-sm hover:brightness-95 active:scale-95 transition"
               style={{ backgroundColor: "var(--brand, #26658C)" }}
             >
               <IconSend />
@@ -308,8 +308,8 @@ function IconSend() {
   return (
     <img
       src="/icons/paper-plane-white.svg"
-      width={48}
-      height={48}
+      width={32}               // ← 2x lebih besar (dari 16)
+      height={32}              // ← 2x lebih besar
       alt=""
       aria-hidden="true"
       decoding="async"
