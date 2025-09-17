@@ -172,24 +172,21 @@ function Msg({
   color = "var(--brand, #26658C)",
   time,
   status,
-  className, // ✅ NEW: hook styling opsional
+  className, // ✅ hook styling opsional
 }: {
   side: "user" | "bot";
   children: React.ReactNode;
   color?: string;
   time?: string;
   status?: "sent" | "delivered" | "read";
-  className?: string; // ✅ NEW
+  className?: string; // ✅
 }) {
   const isUser = side === "user";
 
-  // meta: user → putih, bot → abu
   const metaTextClass = isUser ? "text-white" : "text-black/60";
 
-  // ruang untuk jam & centang agar tidak overlap
-  // font meta 10px; ikon ≈ 14px
-  const basePR = 12; // px-3
-  const extraForTime = time ? 26 : 0; // "07:00"
+  const basePR = 12;
+  const extraForTime = time ? 26 : 0;
   const extraForTicks = isUser && status ? 18 : 0;
   const paddingRight = basePR + extraForTime + extraForTicks;
 
@@ -198,7 +195,7 @@ function Msg({
       <div
         className={`max-w-[82%] px-3 py-2 text-[13px] shadow-sm rounded-2xl relative ${
           isUser ? "text-white" : "text-black"
-        } ${className ?? ""}`} // ✅ apply className
+        } ${className ?? ""}`}
         style={{ background: isUser ? color : "rgba(0,0,0,0.06)", paddingRight }}
       >
         <span>{children}</span>
@@ -210,7 +207,6 @@ function Msg({
             {time && <span>{time}</span>}
             {isUser && status && (
               <span className="inline-flex items-center align-middle leading-none" aria-label={status}>
-                {/* Pakai SVG inline dengan warna asli dari file (#38B6FF) */}
                 <InlineDoubleCheck className="w-[14px] h-[14px]" />
               </span>
             )}
@@ -260,7 +256,7 @@ function IconCall() {
   return (
     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
       <path
-        d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12.89.3 1.76.57 2.6a2 2 0 0 1-.45 2.11L9.1 10.9a16 16 0 0 0 4 4l1.46-1.13a2 2 0 0 1 2.11-.45c.84 .27 1.71 .45 2.6 .57A2 2 0 0 1 22 16.92Z"
+        d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.11 3h3a2 2 0 0 1 2 1.72c.12 .89 .3 1.76 .57 2.6a2 2 0 0 1-.45 2.11L9.1 10.9a16 16 0 0 0 4 4l1.46-1.13a2 2 0 0 1 2.11-.45c.84 .27 1.71 .45 2.6 .57A2 2 0 0 1 22 16.92Z"
         stroke="currentColor"
         strokeWidth="2"
       />
@@ -315,25 +311,35 @@ function IconSend() {
   );
 }
 
-/* ========= SVG Inline warna asli (#38B6FF), bentuk ceklis ganda ========= */
+/* ========= SVG Inline warna asli (#38B6FF), bentuk ceklis ganda (fix) ========= */
 function InlineDoubleCheck({ className = "" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 384 384" width="100%" height="100%" fill="none" aria-hidden="true">
-      {/* ceklis belakang (panjang) */}
-      <polyline
-        points="95,260 205,370 360,180"
-        stroke="#38B6FF"
-        strokeWidth="36"
+    <svg
+      className={className}
+      viewBox="0 0 28 24"              // viewBox kecil biar proporsional di 14–16px
+      width="100%"
+      height="100%"
+      fill="none"
+      aria-hidden="true"
+      shapeRendering="geometricPrecision"
+    >
+      {/* ceklis belakang (lebih panjang) */}
+      <path
+        d="M2 13 L9.2 20.2 L26 3.5"
+        stroke="#38B6FF"              // warna DIKUNCI (tidak ikut currentColor)
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
       />
-      {/* ceklis depan (pendek) */}
-      <polyline
-        points="25,210 150,335 190,290"
-        stroke="#38B6FF"
-        strokeWidth="36"
+      {/* ceklis depan (lebih pendek, sedikit offset) */}
+      <path
+        d="M2 13 L9.2 20.2 L12.8 16.6"
+        stroke="#38B6FF"              // warna DIKUNCI
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
       />
     </svg>
   );
