@@ -15,6 +15,10 @@
   /* brand khusus navbar */
   /* #26658C → 38 101 140 */
   --color-navbar: 38 101 140;
+
+  /* ✅ Tambahan agar komponen bisa konsumsi langsung */
+  --brand: #26658C; /* dipakai komponen (var(--brand, #26658C)) */
+  --ok: #39FF14;   /* indikator online pada Avatar */
 }
 
 /* Tailwind v4 theme tokens bound to CSS vars */
@@ -40,6 +44,9 @@
 
     /* navbar biarkan tetap sama (#26658C) */
     --color-navbar: 38 101 140;
+
+    /* ✅ Opsional: tweak brand khusus dark (kalau mau) */
+    /* --brand: #2a7aa6; */
   }
 }
 
