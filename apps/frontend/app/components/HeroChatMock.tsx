@@ -67,27 +67,27 @@ export default function HeroChatMock() {
         >
           <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
             <div className="h-px flex-1 bg-black/10" />
-            <span>Today 7:00 PM</span>
+            <span>Today 21:13</span>
             <div className="h-px flex-1 bg-black/10" />
           </div>
 
           <div className="space-y-3 px-4 pb-3">
-            <Msg side="user" time="07:00" status="read">
+            <Msg side="user" time="21:13" status="read">
               Hi, can I ask about your products?
             </Msg>
 
-            <Msg side="bot" time="07:00">
+            <Msg side="bot" time="21:13">
               Of course, Which product are you interested in?
             </Msg>
 
-            <Msg side="user" time="07:00" status="read">
+            <Msg side="user" time="21:13" status="read">
               I’d like to know your prices.
             </Msg>
 
             {stage === "typing1" && <TypingBubble />}
 
             {(stage === "bot1" || stage === "typing2" || stage === "bot2") && (
-              <Msg side="bot" time="07:00">
+              <Msg side="bot" time="21:13">
                 Our plans start at <strong>$19/month</strong>.
               </Msg>
             )}
@@ -96,7 +96,7 @@ export default function HeroChatMock() {
 
             {stage === "bot2" && (
               <>
-                <Msg side="bot" time="07:00">
+                <Msg side="bot" time="21:13">
                   Would you like me to send you the full catalog or book a demo?
                 </Msg>
                 <div className="pl-2">
