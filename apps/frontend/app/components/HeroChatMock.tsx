@@ -162,10 +162,10 @@ function Msg({
   const metaTextClass = isUser ? "text-white" : "text-black/60";
 
   // Sisihkan ruang kanan untuk jam & centang agar tidak overlap
-  // Meta font-size = 10px; ikon 1.3em ≈ 13px.
+  // Meta font-size = 10px; ikon 1.2–1.3em ≈ 12–13px.
   const basePR = 12;                  // padding dasar (px-3)
   const extraForTime = time ? 26 : 0; // ruang untuk "07:00"
-  const extraForTicks = isUser && status ? 20 : 0;
+  const extraForTicks = isUser && status ? 18 : 0; // pas untuk ikon 1.2–1.3em
   const paddingRight = basePR + extraForTime + extraForTicks;
 
   return (
@@ -219,23 +219,24 @@ function IconEmoji() { return (<svg width="18" height="18" viewBox="0 0 24 24" f
 function IconMic() { return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="10" rx="3" stroke="currentColor" strokeWidth="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>); }
 function IconSend() { return (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>); }
 
-/** Double check WhatsApp-style: ukuran & bentuk mirip WA, warna ikut teks (currentColor) */
+/** Double check WhatsApp-style: proporsional & bentuk mirip WA, warna ikut teks (currentColor) */
 function IconDoubleCheck() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="1.3em"
-      height="1.3em"
+      width="1.2em"
+      height="1.2em"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      style={{ transform: "translateY(0.5px)" }} // align optik dengan angka jam
     >
       {/* centang kiri (lebih pendek) */}
       <polyline points="3 12 8 17 12 13" />
-      {/* centang kanan (sedikit di atas/kanan) */}
+      {/* centang kanan (sedikit lebih ke kanan/atas) */}
       <polyline points="9 12 14 17 21 9" />
     </svg>
   );
