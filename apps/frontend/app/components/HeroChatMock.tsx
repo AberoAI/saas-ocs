@@ -311,36 +311,18 @@ function IconSend() {
   );
 }
 
-/* ========= SVG Inline warna asli (#38B6FF), bentuk ceklis ganda (fix) ========= */
+/* ========= Double Check pakai file statis (warna & bentuk terkunci) ========= */
 function InlineDoubleCheck({ className = "" }: { className?: string }) {
   return (
-    <svg
+    <img
+      src="/icons/DoubleChecklist.svg"
+      width={14}
+      height={14}
       className={className}
-      viewBox="0 0 28 24"              // viewBox kecil biar proporsional di 14–16px
-      width="100%"
-      height="100%"
-      fill="none"
+      alt=""
       aria-hidden="true"
-      shapeRendering="geometricPrecision"
-    >
-      {/* ceklis belakang (lebih panjang) */}
-      <path
-        d="M2 13 L9.2 20.2 L26 3.5"
-        stroke="#38B6FF"              // warna DIKUNCI (tidak ikut currentColor)
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-      />
-      {/* ceklis depan (lebih pendek, sedikit offset) */}
-      <path
-        d="M2 13 L9.2 20.2 L12.8 16.6"
-        stroke="#38B6FF"              // warna DIKUNCI
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
+      decoding="async"
+      style={{ display: "block" }} // hindari celah baseline kecil
+    />
   );
 }
