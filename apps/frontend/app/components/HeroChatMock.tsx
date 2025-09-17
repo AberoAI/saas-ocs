@@ -308,8 +308,8 @@ function IconSend() {
   return (
     <img
       src="/icons/paper-plane-white.svg"
-      width={32}               // ← 2x lebih besar (dari 16)
-      height={32}              // ← 2x lebih besar
+      width={32}               // 2x lebih besar dari sebelumnya (16px)
+      height={32}
       alt=""
       aria-hidden="true"
       decoding="async"
