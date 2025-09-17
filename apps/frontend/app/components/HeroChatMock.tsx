@@ -160,10 +160,10 @@ function Msg({
   const metaTextClass = isUser ? "text-white" : "text-black/60";
 
   // Sisihkan ruang kanan untuk jam & centang agar tidak overlap
-  // Meta font-size = 10px (text-[10px]); ikon dibuat 5em => ~50px.
+  // Meta font-size = 10px (text-[10px]); ikon 1.4em ≈ 14px.
   const basePR = 12;                    // padding dasar (px-3)
   const extraForTime = time ? 26 : 0;   // ruang untuk "07:00"
-  const extraForTicks = isUser && status ? 52 : 0; // ruang untuk ikon 5em (+ buffer)
+  const extraForTicks = isUser && status ? 20 : 0; // cukup untuk ikon 1.4em
   const paddingRight = basePR + extraForTime + extraForTicks;
 
   return (
@@ -215,12 +215,12 @@ function IconEmoji() { return (<svg width="18" height="18" viewBox="0 0 24 24" f
 function IconMic() { return (<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="10" rx="3" stroke="currentColor" strokeWidth="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>); }
 function IconSend() { return (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" /></svg>); }
 
-/** Double check ala WhatsApp: biru terang & besar (5em terhadap meta 10px) */
+/** Double check ala WhatsApp: biru terang & proporsional (1.4em dari font meta) */
 function IconDoubleCheck() {
   return (
     <svg
-      width="5em"
-      height="5em"
+      width="1.4em"
+      height="1.4em"
       viewBox="0 0 24 24"
       fill="none"
       stroke="#1DA1F2"
