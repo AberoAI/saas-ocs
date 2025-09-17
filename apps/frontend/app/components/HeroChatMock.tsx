@@ -1,4 +1,5 @@
 // apps/frontend/app/components/HeroChatMock.tsx
+// apps/frontend/app/components/HeroChatMock.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -154,6 +155,14 @@ function Msg({
   const isUser = side === "user";
   const metaColor = status === "read" ? "text-sky-500" : "text-black/50";
 
+  // SISIHKAN RUANG untuk jam/centang agar tidak menabrak teks
+  // Base padding-right ±12px (px-3). Tambah:
+  // ~26px untuk "07:00" + ~18px untuk icon double check.
+  const basePR = 12;
+  const extraForTime = time ? 26 : 0;
+  const extraForTicks = isUser && status ? 18 : 0;
+  const paddingRight = basePR + extraForTime + extraForTicks;
+
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -162,9 +171,11 @@ function Msg({
         }`}
         style={{
           background: isUser ? color : "rgba(0,0,0,0.06)",
+          paddingRight, // ← kunci supaya teks tidak menabrak meta
         }}
       >
         <span>{children}</span>
+
         {(time || (isUser && status)) && (
           <span className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-black/60">
             {time && <span>{time}</span>}
