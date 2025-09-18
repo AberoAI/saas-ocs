@@ -151,23 +151,25 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-// UPDATED: pakai SVG /icons/company-avatar.svg dengan fallback "YC"
+// UPDATED: avatar tanpa bingkai hitam (stroke SVG ter-crop), fallback "YC" jika SVG gagal
 function Avatar() {
   const [imgError, setImgError] = useState(false);
 
   return (
     <div className="relative">
       <div
-        className="grid h-9 w-9 place-items-center rounded-full overflow-hidden bg-black/90 text-white text-[11px]"
+        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden ${
+          imgError ? "bg-black/90 text-white" : ""
+        }`}
         aria-label="Profile"
       >
         {!imgError ? (
           <img
             src="/icons/company-avatar.svg"
             alt="Your Company avatar"
-            width={36}
-            height={36}
-            className="h-full w-full object-contain select-none pointer-events-none"
+            width={38}
+            height={38}
+            className="block h-[38px] w-[38px] object-cover object-center select-none pointer-events-none"
             decoding="async"
             draggable={false}
             onError={() => setImgError(true)}
