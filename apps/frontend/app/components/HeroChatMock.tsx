@@ -50,9 +50,8 @@ export default function HeroChatMock() {
               <div className="text-[11px] font-medium text-black">Active now</div>
             </div>
           </div>
+          {/* Hanya titik-tiga; call & video call dihilangkan */}
           <div className="flex items-center gap-2 text-black/60">
-            <IconCall />
-            <IconVideo />
             <IconMore />
           </div>
         </div>
