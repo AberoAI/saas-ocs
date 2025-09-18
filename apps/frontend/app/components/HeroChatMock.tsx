@@ -151,11 +151,30 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
+// UPDATED: pakai SVG /icons/company-avatar.svg dengan fallback "YC"
 function Avatar() {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className="relative">
-      <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
-        YC
+      <div
+        className="grid h-9 w-9 place-items-center rounded-full overflow-hidden bg-black/90 text-white text-[11px]"
+        aria-label="Profile"
+      >
+        {!imgError ? (
+          <img
+            src="/icons/company-avatar.svg"
+            alt="Your Company avatar"
+            width={36}
+            height={36}
+            className="h-full w-full object-contain select-none pointer-events-none"
+            decoding="async"
+            draggable={false}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          "YC"
+        )}
       </div>
       <span
         className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full"
@@ -172,14 +191,14 @@ function Msg({
   color = "var(--brand, #26658C)",
   time,
   status,
-  className, // ✅ hook styling opsional
+  className,
 }: {
   side: "user" | "bot";
   children: React.ReactNode;
   color?: string;
   time?: string;
   status?: "sent" | "delivered" | "read";
-  className?: string; // ✅
+  className?: string;
 }) {
   const isUser = side === "user";
 
@@ -314,7 +333,7 @@ function IconSend() {
       aria-hidden="true"
       decoding="async"
       draggable={false}
-      style={{ display: "block" }} // cegah celah baseline
+      style={{ display: "block" }}
     />
   );
 }
@@ -330,7 +349,7 @@ function InlineDoubleCheck({ className = "" }: { className?: string }) {
       alt=""
       aria-hidden="true"
       decoding="async"
-      style={{ display: "block" }} // hindari celah baseline kecil
+      style={{ display: "block" }}
     />
   );
 }
