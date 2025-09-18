@@ -42,7 +42,7 @@ export default function HeroChatMock() {
         className="mx-auto w-[340px] h-[360px] sm:w-[380px] sm:h-[380px] md:w-[420px] md:h-[400px] lg:w-[460px] lg:h-[420px] rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/70 flex flex-col overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/10 bg-gradient-to-b from-white to-black/5 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
             <Avatar />
             <div>
@@ -328,7 +328,7 @@ function IconSend() {
   return (
     <img
       src="/icons/paper-plane-white.svg"
-      width={32}               // 2x lebih besar dari sebelumnya (16px)
+      width={32}
       height={32}
       alt=""
       aria-hidden="true"
