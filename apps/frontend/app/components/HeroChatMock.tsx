@@ -150,34 +150,40 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-// Avatar: tampilkan SVG apa adanya (tanpa backplate putih paksa),
-// tetap bulat + overflow hidden + ring putih tipis agar edge rapi.
-// Cache-bust v=8 untuk memastikan ambil aset terbaru.
+/* Avatar bersih: TANPA ring, TANPA halo.
+   Trik: radial CSS mask "mencukur" ~0.6px tepi agar anti-aliasing tidak bleed. */
 function Avatar() {
   const [err, setErr] = useState(false);
 
   return (
     <div className="relative">
       <div
-        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden ring-1 ring-white ${
+        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden [isolation:isolate] ${
           err ? "bg-black/90 text-white" : ""
         }`}
         aria-label="Profile"
+        style={{
+          WebkitMaskImage:
+            "radial-gradient(circle at 50% 50%, #000 calc(100% - 0.6px), transparent 100%)",
+          maskImage:
+            "radial-gradient(circle at 50% 50%, #000 calc(100% - 0.6px), transparent 100%)",
+        }}
       >
         {!err ? (
           <img
-            src="/icons/company-avatar.svg?v=8"
+            src="/icons/company-avatar.svg?v=10"
             width={36}
             height={36}
             alt="Your Company avatar"
-            className="block h-full w-full object-cover object-center select-none pointer-events-none"
+            className="block h-full w-full object-cover object-center select-none pointer-events-none will-change-transform"
             loading="eager"
             decoding="sync"
             draggable={false}
             onError={() => setErr(true)}
+            style={{ transform: "translateZ(0)" }}
           />
         ) : (
-          <span className="text-[11px]">YC</span>
+          <span className="text-[11px] leading-none">YC</span>
         )}
       </div>
       <span
