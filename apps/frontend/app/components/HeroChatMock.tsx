@@ -1,7 +1,7 @@
 // apps/frontend/app/components/HeroChatMock.tsx
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 
 export default function HeroChatMock() {
   const [stage, setStage] = useState<"idle" | "typing1" | "bot1" | "typing2" | "bot2">("idle");
@@ -106,7 +106,7 @@ export default function HeroChatMock() {
                     <span className="inline-flex items-center" aria-hidden="true">
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce" />
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:120ms]" />
-                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
+                      <span className="mx/[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
                     </span>
                     AI replied in &lt;1s
                   </span>
@@ -150,13 +150,15 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-/** Avatar anti-halo:
- *  - Inline SVG 36×36 dengan lingkaran putih sebagai latar (fill #fff)
- *  - Artwork asli ditempel sebagai <image> dan di-clip ke lingkaran
- *  - Fallback "YC" jika image error
+/** Avatar anti-halo (inline SVG):
+ *  - backplate putih penuh (circle r=18)
+ *  - artwork di-clip ke r=17.5 (memberi inner margin ~0.5px)
+ *  - white stroke 1px paling luar menutup sisa fringe
+ *  - gunakan useId untuk clipPath agar tidak bentrok di banyak instance
  */
 function Avatar() {
   const [imgError, setImgError] = useState(false);
+  const clipId = useId();
 
   return (
     <div className="relative">
@@ -173,27 +175,31 @@ function Avatar() {
           aria-hidden="true"
         >
           <defs>
-            <clipPath id="avatarClip">
-              <circle cx="18" cy="18" r="18" />
+            <clipPath id={clipId}>
+              {/* lebih kecil sedikit agar ada inner white safety */}
+              <circle cx="18" cy="18" r="17.5" />
             </clipPath>
           </defs>
 
-          {/* Latar putih keras meniadakan AA pada tepi */}
-          <circle cx="18" cy="18" r="18" fill="#fff" />
+          {/* 1) backplate putih */}
+          <circle cx="18" cy="18" r="18" fill="#fff" shapeRendering="crispEdges" />
 
-          {/* Artwork kamu, di-clip ke lingkaran */}
+          {/* 2) artwork kamu */}
           <image
-            href="/icons/company-avatar.svg"
+            href="/icons/company-avatar.svg?v=4"
             width="36"
             height="36"
             preserveAspectRatio="xMidYMid slice"
-            clipPath="url(#avatarClip)"
+            clipPath={`url(#${clipId})`}
             onError={() => setImgError(true)}
           />
+
+          {/* 3) top white stroke untuk nutup fringe */}
+          <circle cx="18" cy="18" r="18" fill="none" stroke="#fff" strokeWidth="1" shapeRendering="crispEdges" />
         </svg>
       )}
 
-      {/* status online (beri border putih agar terlihat di atas avatar) */}
+      {/* status online dengan border putih */}
       <span
         className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full border-2 border-white"
         style={{ backgroundColor: "var(--ok, #39FF14)" }}
