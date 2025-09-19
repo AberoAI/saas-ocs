@@ -106,7 +106,8 @@ export default function HeroChatMock() {
                     <span className="inline-flex items-center" aria-hidden="true">
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce" />
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:120ms]" />
-                      <span className="mx/[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
+                      {/* fix typo: mx/[1px] -> mx-[1px] */}
+                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
                     </span>
                     AI replied in &lt;1s
                   </span>
