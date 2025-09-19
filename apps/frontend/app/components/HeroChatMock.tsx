@@ -173,12 +173,13 @@ function Avatar() {
       >
         {!imgError ? (
           <img
-            src="/icons/company-avatar.svg"
+            src="/icons/company-avatar.svg?v=2"
             alt="Your Company avatar"
             width={36}
             height={36}
             className="block h-full w-full select-none pointer-events-none"
             decoding="async"
+            loading="eager"
             draggable={false}
             onError={() => setImgError(true)}
           />
@@ -187,8 +188,8 @@ function Avatar() {
         )}
       </div>
       <span
-        className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full"
-        style={{ backgroundColor: "var(--ok, #39FF14)" }}
+        className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full border-2"
+        style={{ backgroundColor: "var(--ok, #39FF14)", borderColor: "#fff" }}
         aria-label="Online"
       />
     </div>
