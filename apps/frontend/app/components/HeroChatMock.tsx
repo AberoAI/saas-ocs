@@ -106,7 +106,6 @@ export default function HeroChatMock() {
                     <span className="inline-flex items-center" aria-hidden="true">
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce" />
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:120ms]" />
-                      {/* fix typo: mx/[1px] -> mx-[1px] */}
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
                     </span>
                     AI replied in &lt;1s
@@ -153,9 +152,10 @@ export default function HeroChatMock() {
 
 /** Avatar anti-halo (inline SVG):
  *  - backplate putih penuh (circle r=18)
- *  - artwork di-clip ke r=17.5 (memberi inner margin ~0.5px)
- *  - white stroke 1px paling luar menutup sisa fringe
- *  - gunakan useId untuk clipPath agar tidak bentrok di banyak instance
+ *  - artwork di-clip lebih dalam (r=17.0) agar ring bawaan asset terpotong
+ *  - inner white matte (stroke putih tipis r=17.2) menutup sisa ring
+ *  - outer white stroke r=18 merapikan fringe AA
+ *  - useId untuk clipPath agar tidak bentrok di banyak instance
  */
 function Avatar() {
   const [imgError, setImgError] = useState(false);
@@ -176,18 +176,18 @@ function Avatar() {
           aria-hidden="true"
         >
           <defs>
+            {/* crop lebih dalam */}
             <clipPath id={clipId}>
-              {/* lebih kecil sedikit agar ada inner white safety */}
-              <circle cx="18" cy="18" r="17.5" />
+              <circle cx="18" cy="18" r="17.0" />
             </clipPath>
           </defs>
 
-          {/* 1) backplate putih */}
+          {/* 1) backplate putih penuh */}
           <circle cx="18" cy="18" r="18" fill="#fff" shapeRendering="crispEdges" />
 
-          {/* 2) artwork kamu */}
+          {/* 2) artwork (transparan) di-clip ke r=17.0 */}
           <image
-            href="/icons/company-avatar.svg?v=4"
+            href="/icons/company-avatar.svg?v=5"
             width="36"
             height="36"
             preserveAspectRatio="xMidYMid slice"
@@ -195,8 +195,28 @@ function Avatar() {
             onError={() => setImgError(true)}
           />
 
-          {/* 3) top white stroke untuk nutup fringe */}
-          <circle cx="18" cy="18" r="18" fill="none" stroke="#fff" strokeWidth="1" shapeRendering="crispEdges" />
+          {/* 3) inner white matte (nutup ring bawaan di bagian dalam tepi) */}
+          <circle
+            cx="18"
+            cy="18"
+            r="17.2"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="0.8"
+            vectorEffect="non-scaling-stroke"
+          />
+
+          {/* 4) outer white stroke – rapikan fringe AA di outermost edge */}
+          <circle
+            cx="18"
+            cy="18"
+            r="18"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
       )}
 
