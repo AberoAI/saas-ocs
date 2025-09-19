@@ -150,7 +150,7 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-// UPDATED: avatar tanpa bingkai hitam (stroke SVG ter-crop), fallback "YC" jika SVG gagal
+// Avatar tanpa bingkai; ukuran SVG = container persis (36px) + bg putih default
 function Avatar() {
   const [imgError, setImgError] = useState(false);
 
@@ -158,7 +158,7 @@ function Avatar() {
     <div className="relative">
       <div
         className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden ${
-          imgError ? "bg-black/90 text-white" : ""
+          imgError ? "bg-black/90 text-white" : "bg-white"
         }`}
         aria-label="Profile"
       >
@@ -166,9 +166,9 @@ function Avatar() {
           <img
             src="/icons/company-avatar.svg"
             alt="Your Company avatar"
-            width={38}
-            height={38}
-            className="block h-[38px] w-[38px] object-cover object-center select-none pointer-events-none"
+            width={36}
+            height={36}
+            className="block h-full w-full select-none pointer-events-none"
             decoding="async"
             draggable={false}
             onError={() => setImgError(true)}
