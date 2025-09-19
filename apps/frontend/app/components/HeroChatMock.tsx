@@ -150,25 +150,23 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-// Avatar anti-halo stabil: container bulat + backplate & ring putih,
-// pakai aset NON-transparan 36x36 + srcset untuk DPR tinggi.
-// Tidak pakai clipPath/masking agar first paint tidak resample.
+// Avatar: tampilkan SVG apa adanya (tanpa backplate putih paksa),
+// tetap bulat + overflow hidden + ring putih tipis agar edge rapi.
+// Cache-bust v=8 untuk memastikan ambil aset terbaru.
 function Avatar() {
   const [err, setErr] = useState(false);
 
   return (
     <div className="relative">
       <div
-        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden bg-white ring-2 ring-white ${
+        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden ring-1 ring-white ${
           err ? "bg-black/90 text-white" : ""
         }`}
         aria-label="Profile"
       >
         {!err ? (
           <img
-            src="/icons/company-avatar.jpg?v=1"
-            srcSet="/icons/company-avatar.jpg?v=1 36w, /icons/company-avatar@2x.jpg?v=1 72w, /icons/company-avatar@3x.jpg?v=1 108w"
-            sizes="36px"
+            src="/icons/company-avatar.svg?v=8"
             width={36}
             height={36}
             alt="Your Company avatar"
