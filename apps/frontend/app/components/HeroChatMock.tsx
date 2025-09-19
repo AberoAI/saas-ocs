@@ -150,46 +150,53 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-/** Avatar tanpa halo/bingkai tipis:
- *  - bg putih pada container
- *  - mask radial untuk hard-clip (hindari anti-alias ring)
- *  - inset shadow putih 1px untuk nutup sisa piksel transparan
- *  - transform-gpu agar rasterisasi rapi di berbagai zoom/DPI
+/** Avatar anti-halo:
+ *  - Inline SVG 36×36 dengan lingkaran putih sebagai latar (fill #fff)
+ *  - Artwork asli ditempel sebagai <image> dan di-clip ke lingkaran
+ *  - Fallback "YC" jika image error
  */
 function Avatar() {
   const [imgError, setImgError] = useState(false);
 
   return (
     <div className="relative">
-      <div
-        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden ${
-          imgError ? "bg-black/90 text-white" : "bg-white"
-        } shadow-[inset_0_0_0_1px_#fff] transform-gpu`}
-        aria-label="Profile"
-        style={{
-          WebkitMaskImage: "radial-gradient(circle, #000 99.5%, transparent 100%)",
-          maskImage: "radial-gradient(circle, #000 99.5%, transparent 100%)",
-        }}
-      >
-        {!imgError ? (
-          <img
-            src="/icons/company-avatar.svg?v=2"
-            alt="Your Company avatar"
-            width={36}
-            height={36}
-            className="block h-full w-full select-none pointer-events-none"
-            decoding="async"
-            loading="eager"
-            draggable={false}
+      {imgError ? (
+        <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
+          YC
+        </div>
+      ) : (
+        <svg
+          width={36}
+          height={36}
+          viewBox="0 0 36 36"
+          className="block select-none pointer-events-none"
+          aria-hidden="true"
+        >
+          <defs>
+            <clipPath id="avatarClip">
+              <circle cx="18" cy="18" r="18" />
+            </clipPath>
+          </defs>
+
+          {/* Latar putih keras meniadakan AA pada tepi */}
+          <circle cx="18" cy="18" r="18" fill="#fff" />
+
+          {/* Artwork kamu, di-clip ke lingkaran */}
+          <image
+            href="/icons/company-avatar.svg"
+            width="36"
+            height="36"
+            preserveAspectRatio="xMidYMid slice"
+            clipPath="url(#avatarClip)"
             onError={() => setImgError(true)}
           />
-        ) : (
-          "YC"
-        )}
-      </div>
+        </svg>
+      )}
+
+      {/* status online (beri border putih agar terlihat di atas avatar) */}
       <span
-        className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full border-2"
-        style={{ backgroundColor: "var(--ok, #39FF14)", borderColor: "#fff" }}
+        className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full border-2 border-white"
+        style={{ backgroundColor: "var(--ok, #39FF14)" }}
         aria-label="Online"
       />
     </div>
