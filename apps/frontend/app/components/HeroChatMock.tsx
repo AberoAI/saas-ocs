@@ -150,7 +150,12 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-// Avatar tanpa bingkai; ukuran SVG = container persis (36px) + bg putih default
+/** Avatar tanpa halo/bingkai tipis:
+ *  - bg putih pada container
+ *  - mask radial untuk hard-clip (hindari anti-alias ring)
+ *  - inset shadow putih 1px untuk nutup sisa piksel transparan
+ *  - transform-gpu agar rasterisasi rapi di berbagai zoom/DPI
+ */
 function Avatar() {
   const [imgError, setImgError] = useState(false);
 
@@ -159,8 +164,12 @@ function Avatar() {
       <div
         className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden ${
           imgError ? "bg-black/90 text-white" : "bg-white"
-        }`}
+        } shadow-[inset_0_0_0_1px_#fff] transform-gpu`}
         aria-label="Profile"
+        style={{
+          WebkitMaskImage: "radial-gradient(circle, #000 99.5%, transparent 100%)",
+          maskImage: "radial-gradient(circle, #000 99.5%, transparent 100%)",
+        }}
       >
         {!imgError ? (
           <img
