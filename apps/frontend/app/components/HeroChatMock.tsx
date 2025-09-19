@@ -1,7 +1,7 @@
 // apps/frontend/app/components/HeroChatMock.tsx
 "use client";
 
-import { useEffect, useRef, useState, useId } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function HeroChatMock() {
   const [stage, setStage] = useState<"idle" | "typing1" | "bot1" | "typing2" | "bot2">("idle");
@@ -150,77 +150,30 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-/** Avatar anti-halo (inline SVG):
- *  - backplate putih penuh (circle r=18)
- *  - artwork di-clip lebih dalam (r=17.0) agar ring bawaan asset terpotong
- *  - inner white matte (stroke putih tipis r=17.2) menutup sisa ring
- *  - outer white stroke r=18 merapikan fringe AA
- *  - useId untuk clipPath agar tidak bentrok di banyak instance
- */
+// Avatar sederhana: aset sudah non-transparan → tidak perlu mask/clip.
+// Container bundar + bg-white untuk konsistensi di semua tema.
 function Avatar() {
-  const [imgError, setImgError] = useState(false);
-  const clipId = useId();
+  const [err, setErr] = useState(false);
 
   return (
     <div className="relative">
-      {imgError ? (
-        <div className="grid h-9 w-9 place-items-center rounded-full bg-black/90 text-white text-[11px]">
-          YC
-        </div>
-      ) : (
-        <svg
-          width={36}
-          height={36}
-          viewBox="0 0 36 36"
-          className="block select-none pointer-events-none"
-          aria-hidden="true"
-        >
-          <defs>
-            {/* crop lebih dalam */}
-            <clipPath id={clipId}>
-              <circle cx="18" cy="18" r="17.0" />
-            </clipPath>
-          </defs>
-
-          {/* 1) backplate putih penuh */}
-          <circle cx="18" cy="18" r="18" fill="#fff" shapeRendering="crispEdges" />
-
-          {/* 2) artwork (transparan) di-clip ke r=17.0 */}
-          <image
-            href="/icons/company-avatar.svg?v=5"
-            width="36"
-            height="36"
-            preserveAspectRatio="xMidYMid slice"
-            clipPath={`url(#${clipId})`}
-            onError={() => setImgError(true)}
+      <div className="grid h-9 w-9 place-items-center rounded-full overflow-hidden bg-white">
+        {!err ? (
+          <img
+            src="/icons/company-avatar.svg?v=6"
+            width={36}
+            height={36}
+            alt="Your Company avatar"
+            className="block h-full w-full object-cover object-center select-none pointer-events-none"
+            decoding="async"
+            loading="eager"
+            draggable={false}
+            onError={() => setErr(true)}
           />
-
-          {/* 3) inner white matte (nutup ring bawaan di bagian dalam tepi) */}
-          <circle
-            cx="18"
-            cy="18"
-            r="17.2"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="0.8"
-            vectorEffect="non-scaling-stroke"
-          />
-
-          {/* 4) outer white stroke – rapikan fringe AA di outermost edge */}
-          <circle
-            cx="18"
-            cy="18"
-            r="18"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="1"
-            shapeRendering="crispEdges"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-      )}
-
-      {/* status online dengan border putih */}
+        ) : (
+          <span className="text-[11px] text-black/80">YC</span>
+        )}
+      </div>
       <span
         className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full border-2 border-white"
         style={{ backgroundColor: "var(--ok, #39FF14)" }}
@@ -246,7 +199,6 @@ function Msg({
   className?: string;
 }) {
   const isUser = side === "user";
-
   const metaTextClass = isUser ? "text-white" : "text-black/60";
 
   const basePR = 12;
