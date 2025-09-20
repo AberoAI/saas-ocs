@@ -3,7 +3,12 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import Navbar from "@/components/Navbar"; // ⬅️ ADDED
+import Navbar from "@/components/Navbar"; // ⬅️ tetap
+// ⬇️⬇️ ADD: fallback i18n provider untuk route spesial (/_not-found)
+import { NextIntlClientProvider } from "next-intl";
+import enMessages from "../messages/en.json";
+import { defaultLocale } from "./i18n";
+// ⬆️⬆️
 
 // Font configuration (CSS vars dipakai di globals.css)
 const geistSans = Geist({
@@ -54,11 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "bg-[var(--background)] text-[var(--foreground)]",
         ].join(" ")}
       >
-        {/* Global providers (NextAuth, tRPC, Theme, dsb) */}
-        <Providers>
-          <Navbar />        {/* ⬅️ ADDED: navbar global */}
-          {children}
-        </Providers>
+        {/* ✅ Fallback i18n provider agar komponen global (Navbar) tidak crash saat /_not-found */}
+        <NextIntlClientProvider locale={defaultLocale} messages={enMessages as any}>
+          {/* Global providers (NextAuth, tRPC, Theme, dsb) */}
+          <Providers>
+            <Navbar />        {/* navbar global */}
+            {children}
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
