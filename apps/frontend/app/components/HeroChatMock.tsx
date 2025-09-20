@@ -161,8 +161,9 @@ export default function HeroChatMock() {
         </div>
       </div>
 
+      {/* ⬇️ Footer text diperbarui sesuai permintaan */}
       <p className="mt-2 text-center text-[10px] text-black/50">
-        Works with WhatsApp Cloud API • Demo UI
+        Integrated with WhatsApp Cloud API • Demo Conversation
       </p>
     </div>
   );
