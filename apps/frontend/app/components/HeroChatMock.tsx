@@ -55,6 +55,8 @@ export default function HeroChatMock() {
                      shadow-[inset_0_-1px_0_rgba(255,255,255,0.35)]"
         >
           <div className="flex items-center gap-3">
+            {/* ⬇️ ikon back ditambahkan */}
+            <IconBack />
             <Avatar />
             <div>
               <div className="text-sm font-semibold">Your Company</div>
@@ -161,7 +163,7 @@ export default function HeroChatMock() {
         </div>
       </div>
 
-      {/* ⬇️ Footer text diperbarui sesuai permintaan */}
+      {/* Footer text */}
       <p className="mt-2 text-center text-[10px] text-black/50">
         Integrated with WhatsApp Cloud API • Demo Conversation
       </p>
@@ -300,6 +302,27 @@ function IconMore() {
     </svg>
   );
 }
+
+/* ⬇️ Ikon back (warna sama dengan titik-tiga) */
+function IconBack() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-black/60"
+    >
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+
 function IconCall() {
   return (
     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
