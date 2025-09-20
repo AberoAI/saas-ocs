@@ -96,7 +96,7 @@ export default function HeroChatMock() {
             {stage === "bot2" && (
               <>
                 <Msg side="bot" time="21:13">
-                  Anything else I can help with?
+                  Would you like me to send you a reminder?
                 </Msg>
                 <div className="pl-2">
                   <span
