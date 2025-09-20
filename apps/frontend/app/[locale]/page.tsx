@@ -46,10 +46,16 @@ export default function LocaleHomePage() {
   const tagline = getTagline(); // tetap dibiarkan agar konsisten
   const t = useTranslations();
 
-  // Headline: bagi jadi dua agar “Over 65%” bisa diberi warna khusus
-  const headlineRest = " of customers cancel due to slow responses";
-  const subheadline =
-    "AberoAI solves this problem with instant 24/7 responses, multilingual support, and automated booking workflows.";
+  // Ambil headline & subheadline dari i18n
+  const rawHeadline = t("hero.headline");
+  const subheadline = t("hero.sub");
+
+  // Otomatis highlight segmen angka/persentase (mis. "Over 65%" / "%65")
+  // Menangkap variasi: "Over 65%", "65%", "%65", "65", "%65’ten"
+  const hlMatch = rawHeadline.match(/Over 65%|%?\d+[.,]?\d*%?/);
+  const before = hlMatch ? rawHeadline.slice(0, hlMatch.index!) : rawHeadline;
+  const highlight = hlMatch ? hlMatch[0] : "";
+  const after = hlMatch ? rawHeadline.slice(hlMatch.index! + hlMatch[0].length) : "";
 
   return (
     <>
@@ -66,21 +72,21 @@ export default function LocaleHomePage() {
 
             {/* Headline/Subheadline */}
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-              {/* Warna disamakan dengan brand (#26658C) */}
-              <span style={{ color: "#26658C" }}>Over 65%</span>
-              {headlineRest}
+              {before}
+              {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
+              {after}
             </h1>
             <p className="mt-2 text-lg text-black/70 md:text-xl">
               {subheadline}
             </p>
 
-            {/* CTA: dibuat 1 tombol saja (Try Live Demo) */}
+            {/* CTA: mengikuti i18n */}
             <div className="mt-8">
               <Link
                 href="/demo"
                 className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
               >
-                Try Live Demo
+                {t("cta.secondary")}
               </Link>
             </div>
 
