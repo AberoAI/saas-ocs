@@ -4,8 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import Navbar from "@/components/Navbar"; // ⬅️ tetap
-// ⬇️⬇️ ADD: fallback i18n provider untuk route spesial (/_not-found)
+// ⬇️⬇️ Fallback i18n provider untuk route spesial (/_not-found)
 import { NextIntlClientProvider } from "next-intl";
+import type { AbstractIntlMessages } from "next-intl";
 import enMessages from "../messages/en.json";
 import { defaultLocale } from "./i18n";
 // ⬆️⬆️
@@ -48,6 +49,9 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // ✅ Hindari 'any': ketik fallback messages sebagai AbstractIntlMessages
+  const fallbackMessages = enMessages as unknown as AbstractIntlMessages;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -60,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ].join(" ")}
       >
         {/* ✅ Fallback i18n provider agar komponen global (Navbar) tidak crash saat /_not-found */}
-        <NextIntlClientProvider locale={defaultLocale} messages={enMessages as any}>
+        <NextIntlClientProvider locale={defaultLocale} messages={fallbackMessages}>
           {/* Global providers (NextAuth, tRPC, Theme, dsb) */}
           <Providers>
             <Navbar />        {/* navbar global */}
