@@ -45,14 +45,12 @@ export default function HeroChatMock() {
                    shadow-xl backdrop-blur supports-[backdrop-filter]:bg-transparent
                    flex flex-col overflow-hidden"
       >
-        {/* Header (glass enhanced) */}
+        {/* Header (shadow, no border) */}
         <div
-          className="flex items-center justify-between
-                     border-b border-white/30
-                     bg-gradient-to-b from-white/35 to-white/10
-                     backdrop-blur-lg backdrop-saturate-150
+          className="relative z-10 flex items-center justify-between
+                     bg-white/55 backdrop-blur-md
                      px-4 py-3
-                     shadow-[inset_0_-1px_0_rgba(255,255,255,0.35)]"
+                     shadow-[0_6px_22px_-12px_rgba(38,101,140,0.35),0_1px_3px_rgba(0,0,0,0.06)]"
         >
           <div className="flex items-center gap-3">
             <Avatar />
@@ -70,7 +68,7 @@ export default function HeroChatMock() {
         {/* Body */}
         <div
           ref={chatRef}
-          className="flex-1 overflow-y-auto bg-transparent"
+          className="relative z-0 flex-1 overflow-y-auto bg-transparent"
           role="log"
           aria-live="polite"
           aria-relevant="additions"
@@ -127,14 +125,12 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Input (glass enhanced) */}
+        {/* Input (shadow, no border) */}
         <div
-          className="mt-auto
-                     border-t border-white/30
-                     bg-gradient-to-t from-white/28 to-white/10
-                     backdrop-blur-lg backdrop-saturate-150
+          className="relative z-10 mt-auto
+                     bg-white/55 backdrop-blur-md
                      px-3 py-2
-                     shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                     shadow-[0_-6px_22px_-12px_rgba(38,101,140,0.35),0_-1px_3px_rgba(0,0,0,0.06)]"
         >
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10">
