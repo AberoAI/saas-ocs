@@ -2,14 +2,10 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
 
-// i18n: next-intl middleware & config kamu
 import createIntlMiddleware from 'next-intl/middleware';
 import {locales, defaultLocale, mapCountryToLocale} from './i18n/config';
-
-// market helper
 import {mapCountryToMarket, MARKET_COOKIE} from './lib/market';
 
-// ----[Flags & constants]-------------------------------------------------------
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 const VERIFICATION_ON =
@@ -21,20 +17,17 @@ const ALLOW_DEBUG_ROUTES =
   process.env.ENABLE_DEBUG_ROUTES === 'true' ||
   process.env.NEXT_PUBLIC_ENABLE_DEBUG === 'true';
 
-// ✅ Dev-override hanya aktif di Preview/Dev (TIDAK PERNAH di Production)
 const ENABLE_DEV_OVERRIDE =
   !IS_PROD &&
   (process.env.NEXT_PUBLIC_ENABLE_LOCALE_GEO_OVERRIDE === 'true' ||
     process.env.VERCEL_ENV === 'preview');
 
-// Opsional: guard auth area privat (tidak diubah)
 const AUTH_GUARD_ON =
   process.env.AUTH_GUARD_ON === 'true' ||
   process.env.NEXT_PUBLIC_AUTH_GUARD_ON === 'true';
 const PROTECTED_PREFIXES = ['/app', '/dashboard', '/settings'];
 const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME ?? 'access_token';
 
-// Public routes (selalu bebas)
 const PUBLIC_PREFIXES = [
   '/api',
   '/auth',
@@ -57,23 +50,22 @@ const isStaticAsset = (path: string) =>
   path.startsWith('/assets/') ||
   /\.(svg|png|jpg|jpeg|ico|gif|webp|css|js|map|txt|woff2?|ttf|eot)$/i.test(path);
 
-// next-intl instance
 const intl = createIntlMiddleware({
   locales,
   defaultLocale,
   localeDetection: true
 });
 
-// -----------------------------------------------------------------------------
 export function middleware(req: NextRequest) {
   const {pathname} = req.nextUrl;
 
-  // Satu sumber kebenaran untuk 'secure' cookie
   const proto = req.headers.get('x-forwarded-proto') || req.nextUrl.protocol.replace(':','');
   const SECURE = IS_PROD || proto === 'https';
 
-  // Early-pass: asset/api/_trpc
+  // ✅ Early-pass: internal routes & assets
   if (
+    pathname === '/_not-found' ||        // penting untuk build
+    pathname.startsWith('/_vercel') ||   // internal vercel
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_trpc') ||
@@ -87,7 +79,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.json({error: 'Not Found'}, {status: 404});
   }
 
-  // [B] Verification mode (tetap sesuai punyamu)
+  // [B] Verification mode
   if (VERIFICATION_ON) {
     if (req.method === 'GET') {
       if (PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
@@ -103,7 +95,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // [C] Auth guard (opsional, tidak diubah)
+  // [C] Auth guard
   if (AUTH_GUARD_ON) {
     if (!PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
       const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
@@ -119,11 +111,9 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // [D] Dev-only override (?hl, ?geo, ?currency) -> set cookie + redirect 307
+  // [D] Dev-only override
   if (ENABLE_DEV_OVERRIDE) {
     const url = req.nextUrl;
-
-    // ✅ Token wajib: jika DEV_OVERRIDE_SECRET kosong atau dev salah → override OFF
     const DEV_SECRET = (process.env.DEV_OVERRIDE_SECRET || '').trim();
     const provided = (url.searchParams.get('dev') || '').trim();
     const tokenOk = Boolean(DEV_SECRET) && provided === DEV_SECRET;
@@ -143,14 +133,12 @@ export function middleware(req: NextRequest) {
       const wantCur = isCurrency(cur) ? cur! : null;
 
       if (wantLocale || wantGeo || wantCur) {
-        // Bersihkan query
         url.searchParams.delete('hl');
         url.searchParams.delete('locale');
         url.searchParams.delete('geo');
         url.searchParams.delete('currency');
         url.searchParams.delete('dev');
 
-        // Pastikan prefix locale di path
         const segments = url.pathname.split('/').filter(Boolean);
         if (wantLocale) {
           if (segments.length && (locales as readonly string[]).includes(segments[0] as any)) {
@@ -235,7 +223,7 @@ export function middleware(req: NextRequest) {
   return intl(req);
 }
 
-// Aktif untuk semua rute publik (exclude assets/API/_trpc)
+// ⚠️ Exclude _vercel & _not-found juga di matcher
 export const config = {
-  matcher: ['/((?!_next|api|_trpc|.*\\..*).*)']
+  matcher: ['/((?!_next|api|_trpc|_vercel|_not-found|.*\\..*).*)']
 };
