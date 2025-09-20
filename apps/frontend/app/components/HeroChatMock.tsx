@@ -72,15 +72,15 @@ export default function HeroChatMock() {
 
           <div className="space-y-3 px-4 pb-3">
             <Msg side="user" time="21:13" status="read">
-              Hi, can I ask about your products?
+              Is it too late to book for tomorrow?
             </Msg>
 
             <Msg side="bot" time="21:13">
-              Of course, Which product are you interested in?
+              No worries, I’m here 24/7. What time suits you?
             </Msg>
 
             <Msg side="user" time="21:13" status="read">
-              I’d like to know your prices.
+              Perfect, I’ve booked your appointment for 10 AM tomorrow.
             </Msg>
 
             {stage === "typing1" && <TypingBubble />}
@@ -96,7 +96,7 @@ export default function HeroChatMock() {
             {stage === "bot2" && (
               <>
                 <Msg side="bot" time="21:13">
-                  Would you like me to send you the full catalog or book a demo?
+                  Anything else I can help with?
                 </Msg>
                 <div className="pl-2">
                   <span
