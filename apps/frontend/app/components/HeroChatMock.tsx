@@ -45,14 +45,14 @@ export default function HeroChatMock() {
                    shadow-xl backdrop-blur supports-[backdrop-filter]:bg-transparent
                    flex flex-col overflow-hidden"
       >
-        {/* Header (garis super tipis, nyaris tidak terlihat) */}
+        {/* Header (glass enhanced) */}
         <div
           className="flex items-center justify-between
-                     border-b-[0.5px] border-white/10
+                     border-b border-white/30
                      bg-gradient-to-b from-white/35 to-white/10
                      backdrop-blur-lg backdrop-saturate-150
                      px-4 py-3
-                     shadow-[inset_0_-0.5px_0_rgba(255,255,255,0.08)]"
+                     shadow-[inset_0_-1px_0_rgba(255,255,255,0.35)]"
         >
           <div className="flex items-center gap-3">
             <Avatar />
@@ -127,23 +127,25 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Input (garis super tipis, nyaris tidak terlihat) */}
+        {/* Input (glass enhanced) */}
         <div
           className="mt-auto
-                     border-t-[0.5px] border-white/10
+                     border-t border-white/30
                      bg-gradient-to-t from-white/28 to-white/10
                      backdrop-blur-lg backdrop-saturate-150
                      px-3 py-2
-                     shadow-[inset_0_0.5px_0_rgba(255,255,255,0.08)]"
+                     shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
         >
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10">
+            {/* ⬇️ Tambahan: text-black/40 agar ikon mewarisi warna yang sama dengan placeholder */}
+            <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10 text-black/40">
               <IconPaperclip />
               <input
                 readOnly
                 aria-readonly="true"
                 placeholder="Type a message here..."
-                className="flex-1 bg-transparent text-[13px] outline-none placeholder-black/40"
+                /* ⬇️ Tambahan: text-black agar teks yang diketik tetap jelas */
+                className="flex-1 bg-transparent text-[13px] text-black outline-none placeholder-black/40"
               />
               <IconEmoji />
               <IconMic />
