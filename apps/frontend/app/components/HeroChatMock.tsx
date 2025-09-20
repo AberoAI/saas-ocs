@@ -39,7 +39,11 @@ export default function HeroChatMock() {
 
       <div
         aria-label="AberoAI Mock Chat UI"
-        className="mx-auto w-[340px] h-[360px] sm:w-[380px] sm:h-[380px] md:w-[420px] md:h-[400px] lg:w-[460px] lg:h-[420px] rounded-2xl ring-1 ring-black/10 bg-white/80 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-white/70 flex flex-col overflow-hidden"
+        className="mx-auto w-[340px] h-[360px] sm:w-[380px] sm:h-[380px] md:w-[420px] md:h-[400px] lg:w-[460px] lg:h-[420px]
+                   rounded-2xl ring-1 ring-black/10
+                   bg-gradient-to-br from-[#ffffff] via-[#f0f6fa] to-[#dceef6]
+                   shadow-xl backdrop-blur supports-[backdrop-filter]:bg-transparent
+                   flex flex-col overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-3">
@@ -59,7 +63,7 @@ export default function HeroChatMock() {
         {/* Body */}
         <div
           ref={chatRef}
-          className="flex-1 overflow-y-auto bg-white"
+          className="flex-1 overflow-y-auto bg-transparent"
           role="log"
           aria-live="polite"
           aria-relevant="additions"
@@ -150,10 +154,6 @@ export default function HeroChatMock() {
 
 /* ========= Sub-komponen kecil ========= */
 
-/* Avatar bersih: TANPA ring, TANPA halo.
-   - radial CSS mask "mencukur" ~0.6px tepi
-   - bg-white di container agar piksel transparan SVG 512x512 blend ke putih (matching header)
-   - contain: paint untuk compositing yang stabil */
 function Avatar() {
   const [err, setErr] = useState(false);
 
