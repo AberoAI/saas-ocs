@@ -45,14 +45,14 @@ export default function HeroChatMock() {
                    shadow-xl backdrop-blur supports-[backdrop-filter]:bg-transparent
                    flex flex-col overflow-hidden"
       >
-        {/* Header (glass enhanced) */}
+        {/* Header (garis super tipis, nyaris tidak terlihat) */}
         <div
           className="flex items-center justify-between
-                     border-b border-white/30
+                     border-b-[0.5px] border-white/10
                      bg-gradient-to-b from-white/35 to-white/10
                      backdrop-blur-lg backdrop-saturate-150
                      px-4 py-3
-                     shadow-[inset_0_-1px_0_rgba(255,255,255,0.35)]"
+                     shadow-[inset_0_-0.5px_0_rgba(255,255,255,0.08)]"
         >
           <div className="flex items-center gap-3">
             <Avatar />
@@ -127,14 +127,14 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Input (glass enhanced) */}
+        {/* Input (garis super tipis, nyaris tidak terlihat) */}
         <div
           className="mt-auto
-                     border-t border-white/30
+                     border-t-[0.5px] border-white/10
                      bg-gradient-to-t from-white/28 to-white/10
                      backdrop-blur-lg backdrop-saturate-150
                      px-3 py-2
-                     shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                     shadow-[inset_0_0.5px_0_rgba(255,255,255,0.08)]"
         >
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10">
