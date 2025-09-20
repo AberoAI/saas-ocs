@@ -45,8 +45,8 @@ export default function HeroChatMock() {
                    shadow-xl backdrop-blur supports-[backdrop-filter]:bg-transparent
                    flex flex-col overflow-hidden"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-3">
+        {/* Header (glass) */}
+        <div className="flex items-center justify-between border-b border-black/10 bg-white/30 backdrop-blur-md px-4 py-3">
           <div className="flex items-center gap-3">
             <Avatar />
             <div>
@@ -120,8 +120,8 @@ export default function HeroChatMock() {
           </div>
         </div>
 
-        {/* Input */}
-        <div className="mt-auto border-t border-black/10 bg-white/70 px-3 py-2">
+        {/* Input (glass) */}
+        <div className="mt-auto border-t border-black/10 bg-white/30 backdrop-blur-md px-3 py-2">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 flex-1 rounded-full bg-white px-3 py-2 ring-1 ring-black/10">
               <IconPaperclip />
