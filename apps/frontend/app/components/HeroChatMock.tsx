@@ -151,18 +151,21 @@ export default function HeroChatMock() {
 /* ========= Sub-komponen kecil ========= */
 
 /* Avatar bersih: TANPA ring, TANPA halo.
-   Trik: radial CSS mask "mencukur" ~0.6px tepi agar anti-aliasing tidak bleed. */
+   - radial CSS mask "mencukur" ~0.6px tepi
+   - bg-white di container agar piksel transparan SVG 512x512 blend ke putih (matching header)
+   - contain: paint untuk compositing yang stabil */
 function Avatar() {
   const [err, setErr] = useState(false);
 
   return (
     <div className="relative">
       <div
-        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden [isolation:isolate] ${
+        className={`grid h-9 w-9 place-items-center rounded-full overflow-hidden bg-white [isolation:isolate] ${
           err ? "bg-black/90 text-white" : ""
         }`}
         aria-label="Profile"
         style={{
+          contain: "paint",
           WebkitMaskImage:
             "radial-gradient(circle at 50% 50%, #000 calc(100% - 0.6px), transparent 100%)",
           maskImage:
@@ -171,7 +174,7 @@ function Avatar() {
       >
         {!err ? (
           <img
-            src="/icons/company-avatar.svg?v=10"
+            src="/icons/company-avatar.svg?v=12"
             width={36}
             height={36}
             alt="Your Company avatar"
