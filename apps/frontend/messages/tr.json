@@ -29,5 +29,18 @@
       "pro": { "name": "Pro", "desc": "Büyüyen ekipler için en iyi" },
       "enterprise": { "name": "Kurumsal", "desc": "Özel ihtiyaçlar ve destek" }
     }
+  },
+  "mcui": {
+    "title": "Şirketiniz",
+    "status": "Şu anda aktif",
+    "today": "Bugün",
+    "user1": "Yarın için randevu almak için çok mu geç?",
+    "bot1": "Sorun değil, 7/24 buradayım. Size hangi saat uygundur?",
+    "user2": "Saat 10:00 uygundur.",
+    "bot2": "Harika, yarın saat 10:00 için randevunuzu ayarladım.",
+    "bot3": "Size bir hatırlatıcı göndermemi ister misiniz?",
+    "aiReplied": "YZ <1 sn'de yanıtladı",
+    "inputPlaceholder": "Buraya mesaj yazın...",
+    "footer": "WhatsApp Cloud API ile entegre • Demo Konuşma"
   }
 }

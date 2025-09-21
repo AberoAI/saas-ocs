@@ -2,10 +2,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl"; // ⬅️ ADD
 
 export default function HeroChatMock() {
   const [stage, setStage] = useState<"idle" | "typing1" | "bot1" | "typing2" | "bot2">("idle");
   const chatRef = useRef<HTMLDivElement | null>(null);
+  const t = useTranslations(); // ⬅️ ADD
 
   useEffect(() => {
     const t1 = setTimeout(() => setStage("typing1"), 250);
@@ -59,8 +61,8 @@ export default function HeroChatMock() {
             <IconBack />
             <Avatar />
             <div>
-              <div className="text-sm font-semibold">Your Company</div>
-              <div className="text-[11px] font-medium text-black">Active now</div>
+              <div className="text-sm font-semibold">{t("mcui.title")}</div>
+              <div className="text-[11px] font-medium text-black">{t("mcui.status")}</div>
             </div>
           </div>
           {/* Hanya titik-tiga; call & video call dihilangkan */}
@@ -79,28 +81,28 @@ export default function HeroChatMock() {
         >
           <div className="flex items-center gap-3 px-4 py-3 text-[11px] text-black/50">
             <div className="h-px flex-1 bg-black/10" />
-            <span>Today 21:13</span>
+            <span>{t("mcui.today")} 21:13</span>
             <div className="h-px flex-1 bg-black/10" />
           </div>
 
           <div className="space-y-3 px-4 pb-3">
             <Msg side="user" time="21:13" status="read">
-              Is it too late to book for tomorrow?
+              {t("mcui.user1")}
             </Msg>
 
             <Msg side="bot" time="21:13">
-              No worries, I’m here 24/7. What time suits you?
+              {t("mcui.bot1")}
             </Msg>
 
             <Msg side="user" time="21:13" status="read">
-              10 AM would be great.
+              {t("mcui.user2")}
             </Msg>
 
             {stage === "typing1" && <TypingBubble />}
 
             {(stage === "bot1" || stage === "typing2" || stage === "bot2") && (
               <Msg side="bot" time="21:13">
-                Perfect, I’ve booked your appointment for 10 AM tomorrow.
+                {t("mcui.bot2")}
               </Msg>
             )}
 
@@ -109,7 +111,7 @@ export default function HeroChatMock() {
             {stage === "bot2" && (
               <>
                 <Msg side="bot" time="21:13">
-                  Would you like me to send you a reminder?
+                  {t("mcui.bot3")}
                 </Msg>
                 <div className="pl-2">
                   <span
@@ -121,7 +123,7 @@ export default function HeroChatMock() {
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:120ms]" />
                       <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
                     </span>
-                    AI replied in &lt;1s
+                    {t("mcui.aiReplied")}
                   </span>
                 </div>
               </>
@@ -145,8 +147,7 @@ export default function HeroChatMock() {
               <input
                 readOnly
                 aria-readonly="true"
-                placeholder="Type a message here..."
-                /* ⬇️ Tambahan: text-black agar teks yang diketik tetap jelas */
+                placeholder={t("mcui.inputPlaceholder")}
                 className="flex-1 bg-transparent text-[13px] text-black outline-none placeholder-black/40"
               />
               <IconEmoji />
@@ -165,7 +166,7 @@ export default function HeroChatMock() {
 
       {/* Footer text */}
       <p className="mt-2 text-center text-[10px] text-black/50">
-        Integrated with WhatsApp Cloud API • Demo Conversation
+        {t("mcui.footer")}
       </p>
     </div>
   );

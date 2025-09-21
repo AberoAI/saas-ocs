@@ -29,5 +29,18 @@
       "pro": { "name": "Pro", "desc": "Best for growing teams" },
       "enterprise": { "name": "Enterprise", "desc": "Custom needs & support" }
     }
+  },
+  "mcui": {
+    "title": "Your Company",
+    "status": "Active now",
+    "today": "Today",
+    "user1": "Is it too late to book for tomorrow?",
+    "bot1": "No worries, I’m here 24/7. What time suits you?",
+    "user2": "10 AM would be great.",
+    "bot2": "Perfect, I’ve booked your appointment for 10 AM tomorrow.",
+    "bot3": "Would you like me to send you a reminder?",
+    "aiReplied": "AI replied in <1s",
+    "inputPlaceholder": "Type a message here...",
+    "footer": "Integrated with WhatsApp Cloud API • Demo Conversation"
   }
 }
