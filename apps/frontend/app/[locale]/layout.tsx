@@ -4,6 +4,7 @@ import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { domain, locales, defaultLocale } from "../i18n";
+import Navbar from "@/components/Navbar"; // ✅ ADD
 
 export const dynamic = "force-static";
 
@@ -14,12 +15,11 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
-// 🔑 Pastikan Next membangun /en dan /tr (menghilangkan 404 _next/data/.../tr.json)
+// 🔑 Pastikan Next membangun /en dan /tr
 export function generateStaticParams() {
   return locales.map((l) => ({ locale: l }));
 }
 
-/** Pastikan URL absolut (hindari throw di new URL()) */
 function getAbsoluteSiteUrl(): string {
   const fromConfig = (domain ?? "").trim();
   const fromEnv =
@@ -30,7 +30,6 @@ function getAbsoluteSiteUrl(): string {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-/** ✅ STATIC import messages → paling stabil di production */
 import enMessages from "../../messages/en.json";
 import trMessages from "../../messages/tr.json";
 const MESSAGES: Record<"en" | "tr", AbstractIntlMessages> = {
@@ -48,7 +47,6 @@ export async function generateMetadata(
     metadataBase: new URL(site),
     alternates: {
       canonical: `/${loc}`,
-      // ✅ tambahkan x-default untuk SEO multi-language
       languages: { "x-default": "/", en: "/en", tr: "/tr" },
     },
     title:
@@ -69,14 +67,14 @@ export default async function LocaleLayout({
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  // Ambil messages secara aman
   const messages = (MESSAGES[loc as "en" | "tr"] ?? {}) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
 
-  // ⚠️ TIDAK ADA <html> / <body> / NAVBAR DI SINI — navbar sudah di-root layout
   return (
     <>
       <NextIntlClientProvider locale={loc} messages={messages}>
+        {/* ✅ Navbar sekarang di dalam provider lokal → i18n benar di /tr & /en */}
+        <Navbar />
         {children}
       </NextIntlClientProvider>
 
