@@ -40,7 +40,7 @@
     "user2": "Saat 10:00 uygundur.",
     "bot2": "Harika, yarın saat 10:00 için randevunuzu ayarladım.",
     "bot3": "Size bir hatırlatıcı göndermemi ister misiniz?",
-    "aiReplied": "YZ <1 sn'de yanıtladı",
+    "aiReplied": "YZ <1 sn'de cevapladı",
     "inputPlaceholder": "Buraya mesaj yazın...",
     "footer": "WhatsApp Cloud API ile entegre • Demo Konuşma"
   }
