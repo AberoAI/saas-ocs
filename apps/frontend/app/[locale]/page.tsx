@@ -62,7 +62,14 @@ export default function LocaleHomePage() {
 
       {/* Hero */}
       <section className="relative">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 pb-16 pt-12 md:grid-cols-2 md:pt-16">
+        <div
+          className="
+            mx-auto grid max-w-6xl grid-cols-1 items-center
+            gap-10 px-6
+            py-[clamp(32px,6vh,72px)]
+            md:grid-cols-2
+          "
+        >
           <div>
             <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-black/70">
               <span className="size-2 rounded-full bg-emerald-500"></span>
@@ -75,9 +82,7 @@ export default function LocaleHomePage() {
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </h1>
-            <p className="mt-2 text-lg text-black/70 md:text-xl">
-              {subheadline}
-            </p>
+            <p className="mt-2 text-lg text-black/70 md:text-xl">{subheadline}</p>
 
             {/* CTA: mengikuti i18n */}
             <div className="mt-8">
