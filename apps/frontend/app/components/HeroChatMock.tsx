@@ -113,15 +113,17 @@ export default function HeroChatMock() {
                 <Msg side="bot" time="21:13">
                   {t("mcui.bot3")}
                 </Msg>
+
+                {/* ⬇️ Latency **label** tanpa bubble hitam (teks + tiga titik dipertahankan) */}
                 <div className="pl-2">
                   <span
-                    className="inline-flex items-center gap-2 rounded-full bg-black text-white px-3 py-1 text-[10px] shadow-sm"
+                    className="inline-flex items-center gap-2 text-[10px] text-black/60 select-none"
                     aria-label="AI response time under one second"
                   >
                     <span className="inline-flex items-center" aria-hidden="true">
-                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce" />
-                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:120ms]" />
-                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-white/90 animate-bounce [animation-delay:240ms]" />
+                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-black/50 animate-bounce" />
+                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-black/50 animate-bounce [animation-delay:120ms]" />
+                      <span className="mx-[1px] inline-block h-1.5 w-1.5 rounded-full bg-black/50 animate-bounce [animation-delay:240ms]" />
                     </span>
                     {t("mcui.aiReplied")}
                   </span>
