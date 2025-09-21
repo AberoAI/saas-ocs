@@ -89,9 +89,9 @@ export default function LocaleHomePage() {
               </Link>
             </div>
 
-            {/* Footnotes di bawah CTA: render 3 item */}
+            {/* Footnotes di bawah CTA: 2 item saja */}
             <ul className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-black/60">
-              {[t("misc.noCard"), t("misc.cancelAnytime"), t("misc.noCreditCard")].map((label, idx) => (
+              {[t("misc.cancelAnytime"), t("misc.noCreditCard")].map((label, idx) => (
                 <li key={idx} className="inline-flex items-center">
                   {idx > 0 && <span aria-hidden className="mx-2">•</span>}
                   <span>{label}</span>
