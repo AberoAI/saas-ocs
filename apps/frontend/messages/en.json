@@ -18,8 +18,9 @@
     "signin": "Sign in"
   },
   "misc": {
-    "noCard": "No credit card",
-    "cancelAnytime": "Cancel anytime"
+    "noCard": "Live demo",
+    "cancelAnytime": "No sign-up",
+    "noCreditCard": "No credit card"
   },
   "pricing": {
     "title": "Pricing",

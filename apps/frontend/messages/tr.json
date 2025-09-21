@@ -18,8 +18,9 @@
     "signin": "Giriş yap"
   },
   "misc": {
-    "noCard": "Kredi kartı yok",
-    "cancelAnytime": "İstediğin zaman iptal"
+    "noCard": "Canlı demo",
+    "cancelAnytime": "Üyelik gerekmez",
+    "noCreditCard": "Kredi kartı istemez"
   },
   "pricing": {
     "title": "Fiyatlar",
