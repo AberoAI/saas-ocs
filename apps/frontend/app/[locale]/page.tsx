@@ -51,7 +51,6 @@ export default function LocaleHomePage() {
   const subheadline = t("hero.sub");
 
   // Otomatis highlight segmen angka/persentase (mis. "Over 65%" / "%65")
-  // Menangkap variasi: "Over 65%", "65%", "%65", "65", "%65’ten"
   const hlMatch = rawHeadline.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? rawHeadline.slice(0, hlMatch.index!) : rawHeadline;
   const highlight = hlMatch ? hlMatch[0] : "";
@@ -90,11 +89,15 @@ export default function LocaleHomePage() {
               </Link>
             </div>
 
-            <div className="mt-6 flex items-center gap-4 text-xs text-black/60">
-              <span>{t("misc.noCard")}</span>
-              <span>•</span>
-              <span>{t("misc.cancelAnytime")}</span>
-            </div>
+            {/* Footnotes di bawah CTA: render 3 item */}
+            <ul className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-black/60">
+              {[t("misc.noCard"), t("misc.cancelAnytime"), t("misc.noCreditCard")].map((label, idx) => (
+                <li key={idx} className="inline-flex items-center">
+                  {idx > 0 && <span aria-hidden className="mx-2">•</span>}
+                  <span>{label}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Mock UI (dipisah ke komponen) */}
