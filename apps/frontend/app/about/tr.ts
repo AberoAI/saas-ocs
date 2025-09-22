@@ -6,63 +6,66 @@ export const aboutTr: AboutCopy = {
   mission: {
     title: "Misyonumuz",
     ps: [
-      "Müşterilerin %65’ten fazlası, yalnızca geç ya da tutarsız yanıtlar nedeniyle işlemlerini yarıda bırakıyor.",
-      "Klasik WhatsApp Business otomatik yanıtları genellikle katı ve tekdüze; yani “anında yanıt” tek başına sorunu çözmüyor.",
-      "AberoAI’nin misyonu bu boşluğu kapatmak: 7/24 tutarlı ve anında yanıtlar, çok dilli destek ve her konuşmaya uygun esnek çözümler.",
-      "AberoAI ayrıca randevu ve takip süreçlerini yönetir; her etkileşimde marka dilinizi korur.",
+      "Müşterilerin %65’ten fazlası, yalnızca geç veya tutarsız yanıtlar yüzünden işlemlerini yarıda bırakıyor.",
+      "Artan mesaj yoğunluğu müşteri hizmetleri ekiplerini zorlarken, müşteriler her geçen gün daha sabırsız hale geliyor.",
+      "WhatsApp Business’ın geleneksel otomatik yanıtları ise genellikle katı ve tekdüze kalıyor; bu nedenle “anında yanıt” gerçekte sorunu çözmüyor.",
+      "AberoAI’nin misyonu, bu boşluğu kapatmak: 7/24 tutarlı ve anında yanıtlar sunmak, çoklu dil desteği sağlamak ve her konuşmaya bağlama uygun esnek çözümler üretmek.",
+      "AberoAI ayrıca rezervasyon ve takip süreçlerini yönetir, her etkileşimde markanızın sesini korur. Verimli ve ölçeklenebilirdir — ek personel gerekmeden saniyeler içinde binlerce konuşmayı yönetebilir, böylece ekibiniz daha değerli işlere odaklanabilir.",
+      "Biz inanıyoruz ki: hızlı ve tutarlı iletişim, müşterilere verilen gerçek önemi gösterir — ve güven, iş büyümesinin yakıtıdır."
     ],
   },
   what: {
     title: "Ne Yapıyoruz",
-    p1: "AberoAI, işletmelerin daha hızlı, daha tutarlı ve daha insancıl müşteri hizmeti sunmasına yardımcı olur — yalnızca yanıt vermekle kalmaz, müşteri ihtiyacını gerçekten çözer.",
+    p1: "AberoAI, işletmelerin daha hızlı, daha tutarlı ve daha insancıl müşteri deneyimleri sunmasına yardımcı olur. En yeni yapay zeka teknolojisiyle geliştirilen ve hizmet sektörüne özel tasarlanan AberoAI, sadece mesajlara yanıt vermekle kalmaz, müşteri ihtiyaçlarını doğrudan çözüme kavuşturur.",
   },
   features: {
     title: "Temel Özellikler",
     items: [
-      "Sezgisel kontrol paneli — kolay kullanılır, özelleştirilebilir, yoğun temaslı sektörler için.",
-      "7/24 çok dilli yanıtlar — yerel ve uluslararası müşterilere kesintisiz hizmet.",
-      "Hazır konuşma akışları — randevu, SSS, hatırlatıcı ve takip.",
-      "Sorunsuz entegrasyon — resmi WhatsApp Cloud API + web panel, karmaşık kurulum yok.",
-      "İnsan devri (ileri) — karmaşık durumlarda ekibinize yumuşak geçiş.",
-      "Analiz ve içgörüler (ileri) — performansı izleyin, iyileştirme fırsatlarını görün.",
+      "Sezgisel kontrol paneli → kullanımı kolay, özelleştirilebilir ve yoğun müşteri etkileşimi olan sektörler için tasarlandı.",
+      "7/24 çok dilli yanıtlar → yerel ve uluslararası müşterilerin sorunsuz hizmet almasını sağlar.",
+      "Hazır konuşma akışları → randevu, SSS, hatırlatıcılar ve takip süreçleri.",
+      "Sorunsuz entegrasyon → resmi WhatsApp Cloud API ve AberoAI web paneliyle, karmaşık kurulum olmadan hemen çalışır.",
+      "İnsan devri (gelişmiş) → karmaşık durumlarda ekibinize yumuşak geçiş yapar.",
+      "Analiz ve içgörüler (gelişmiş) → performansı izlemenize ve iyileştirme fırsatlarını görmenize yardımcı olur."
     ],
   },
   value: {
     title: "Katma Değer",
     items: [
-      "Esnek ve bağlamsal — yanıtlar duruma uyum sağlar (kalıp mesajlar değil).",
-      "Verimli ve ölçeklenebilir — ek personel olmadan binlerce konuşmayı yönetir.",
-      "Marka-öncelikli — dil ve üslup daima markanızla uyumlu.",
-      "Ekip uyumlu — birden fazla ekip üyesi aynı anda çalışabilir.",
-      "Merkezi ve kayıtlı — tüm konuşmalar tek yerde, cihazlara dağılmaz.",
-      "Hizmet sektörüne odaklı — klinikler, turizm/otelcilik ve diğer hizmet işletmeleri.",
+      "Esnek & bağlamsal → yanıtlar duruma uyum sağlar, kalıplaşmış botlar gibi değildir.",
+      "Verimli & ölçeklenebilir → aynı anda binlerce konuşmayı yönetebilir.",
+      "Marka-öncelikli → dil ve üslup markanızla her zaman uyumlu kalır.",
+      "Ekip uyumlu → birden fazla ekip üyesi aynı anda erişebilir.",
+      "Merkezi & kayıtlı → tüm konuşmalar tek yerde saklanır, dağınıklık ortadan kalkar.",
+      "Hizmet sektörüne odaklı → klinikler, turizm/otelcilik ve diğer hizmet işletmeleri için özel tasarlanmıştır."
     ],
   },
   how: {
     title: "Nasıl Çalışıyoruz",
-    p1: "Mükemmel hizmet; bağlamı anlamak ve doğru çözümü sunmaktır. AberoAI, proaktif ve uyumlu bir asistan gibi çalışır — yalnızca bir bot değil.",
+    p1: "Mükemmel müşteri hizmeti yalnızca hızlı yanıt vermek değil, aynı zamanda bağlamı anlamak ve doğru çözümü sunmaktır. Bu nedenle AberoAI, proaktif ve uyumlu bir dijital asistan olarak tasarlandı — yalnızca bir bot değil.",
   },
   principles: {
-    title: "İlkeler",
+    title: "AberoAI’nin Çalışma İlkeleri",
     items: [
-      "Bağlamsal ve proaktif — niyeti anlar, sonraki adımı önerir.",
-      "Eyleme geçirilebilir — randevu, onay, hatırlatma gibi işlemler hemen yapılır.",
-      "Sorunsuz entegrasyon — WhatsApp Cloud API ya da web panel ile zahmetsiz kurulum.",
-      "Gerektiğinde insan dokunuşu — karmaşık konuşmalarda ekibinize devreder.",
-      "Markanızla uyumlu — doğal ve tutarlı iletişim.",
-      "Güvenli ve kontrollü — şifreli, gizli ve veriler işletmenize aittir.",
+      "Bağlamsal & proaktif → niyeti anlar ve sonraki adımı önerir.",
+      "Örn: Randevu soran hasta doğrudan uygun boşluklara yönlendirilir; oda soran misafir rezervasyona aktarılır.",
+      "Eyleme geçirilebilir → her etkileşim anında işleme konabilir; rezervasyon, onay veya hatırlatma dahil. Sadece kalıp yanıtlar değil, ihtiyacı gerçekten çözen esnek yaklaşımlar.",
+      "Sorunsuz entegrasyon → resmi WhatsApp Cloud API veya AberoAI web paneliyle teknik zahmet olmadan devreye alınır.",
+      "Gerektiğinde insan dokunuşu → karmaşık konuşmalarda ekibinize geçiş yapar.",
+      "Markanızla uyumlu → dil, üslup ve iletişim tarzı markanıza göre ayarlanır.",
+      "Güvenli & kontrollü → tüm konuşmalar şifrelenir, gizlidir ve tamamen işletmenize aittir."
     ],
   },
   outcomes: {
-    title: "Bu yaklaşımla:",
+    title: "Bu yaklaşımla işletmeniz:",
     items: [
-      "Ek personel almadan daha fazla müşteriye hizmet verirsiniz.",
-      "Geç yanıt kaynaklı iptaller azalır.",
-      "Anında ve alakalı yanıtlarla memnuniyet artar.",
-      "Tutarlı ve güvenli iletişimle uzun vadeli güven oluşur.",
+      "Ek personel almadan daha fazla müşteriye hizmet verebilir,",
+      "Geciken yanıtların neden olduğu iptalleri azaltabilir,",
+      "Anında ve alakalı yanıtlarla müşteri memnuniyetini artırabilir,",
+      "Tutarlı ve güvenli iletişimle uzun vadeli güven inşa edebilir."
     ],
     closer:
-      "Hızlı ve tutarlı her konuşma, sadece bir hizmet değil — güveni ve büyümeyi besleyen bir özen göstergesidir.",
+      "Sonuç: daha verimli bir işletme, daha mutlu müşteriler ve daha güçlü bir marka. Her hızlı ve tutarlı konuşma sadece bir hizmet değil — güveni ve sürdürülebilir büyümeyi besleyen bir özen göstergesidir.",
   },
   contact: {
     prefix: "📬 Bizimle iletişime geçmek ister misiniz? Şu sayfayı ziyaret edin:",

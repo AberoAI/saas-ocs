@@ -7,62 +7,65 @@ export const aboutEn: AboutCopy = {
     title: "Our Mission",
     ps: [
       "More than 65% of customers abandon transactions simply because responses are delayed or inconsistent.",
-      "Traditional WhatsApp Business auto-replies often feel rigid and generic — instant responses don’t actually solve the problem.",
-      "AberoAI’s mission is to bridge that gap: consistent, instant, 24/7 replies with multilingual support and answers tailored to each conversation.",
-      "AberoAI also manages bookings and follow-ups while keeping your brand voice consistent across every interaction.",
+      "The growing volume of messages overwhelms customer service teams, while customers are becoming increasingly impatient.",
+      "Traditional WhatsApp Business auto-replies often feel rigid and generic, which means instant responses don’t actually solve the problem.",
+      "AberoAI’s mission is to bridge that gap — delivering consistent, 24/7 instant responses, supporting multiple languages, and providing flexible answers tailored to each conversation.",
+      "AberoAI also manages bookings and follow-ups while keeping your brand voice consistent across every interaction. It is efficient and scalable — handling thousands of conversations in seconds without additional staff, so your team can stay focused on high-value work.",
+      "We believe fast, consistent conversations show genuine care for customers — and trust is the fuel for business growth."
     ],
   },
   what: {
     title: "What We Do",
-    p1: "AberoAI helps businesses deliver customer service that is faster, more consistent, and more human — going beyond simple replies to actually resolving customer needs.",
+    p1: "AberoAI helps businesses deliver customer service that is faster, more consistent, and more human. Built with the latest generation of AI technology and designed specifically for service industries, AberoAI provides conversational automation that goes beyond simple replies to actually resolving customer needs.",
   },
   features: {
     title: "Key Features",
     items: [
-      "Intuitive dashboard — easy, customizable, built for high-touch industries.",
-      "24/7 multilingual responses — serve local and international customers without barriers.",
-      "Ready-made conversation flows — booking, Q&A, reminders, follow-ups.",
-      "Seamless integration — official WhatsApp Cloud API + web dashboard, no complex setup.",
-      "Human handoff (advanced) — smooth transition to your team for complex cases.",
-      "Insights & analytics (advanced) — track performance and find improvement opportunities.",
+      "Intuitive dashboard → easy to use, customizable to your business, and built for high-touch industries.",
+      "24/7 multilingual responses → ensuring local and international customers are always served without barriers.",
+      "Ready-made conversation flows → appointment booking, Q&A, reminders, and follow-ups.",
+      "Seamless integration → connect via the official WhatsApp Cloud API and AberoAI’s web dashboard, ready to use without complex setup.",
+      "Human handoff (advanced) → smooth transitions to your team for complex cases that require a personal touch.",
+      "Insights & analytics (advanced) → helping businesses track performance and uncover opportunities for improvement."
     ],
   },
   value: {
     title: "Added Value",
     items: [
-      "Flexible & contextual — responses adapt to the situation (not rigid templates).",
-      "Efficient & scalable — handle thousands of conversations in seconds without extra staff.",
-      "Brand-first — tone, style, and language match your brand identity.",
-      "Collaborative — multiple team members can work together smoothly.",
-      "Centralized & documented — all conversations in one place, no device sprawl.",
-      "Service-industry focus — clinics, hospitality, and other service businesses.",
+      "Flexible & contextual → responses adapt to each customer’s situation, unlike old bots with rigid templates.",
+      "Efficient & scalable → capable of handling thousands of conversations in seconds without extra staff.",
+      "Brand-first → tone, style, and language always reflect your brand identity.",
+      "Collaborative → accessible to multiple team members at once for smoother coordination.",
+      "Centralized & documented → all conversations are stored in one place, no longer scattered across devices.",
+      "Service-industry focus → purpose-built for high-touch sectors such as clinics, hospitality, and other service-driven businesses."
     ],
   },
   how: {
     title: "How We Work",
-    p1: "Great service means understanding context and providing the right solution. AberoAI acts as a proactive, adaptive assistant — not just another bot.",
+    p1: "We believe great customer service is not just about replying quickly, but also about understanding context and providing the right solution. That’s why AberoAI is designed to work as a proactive, adaptive digital assistant — not just another bot.",
   },
   principles: {
-    title: "Principles",
+    title: "AberoAI Principles",
     items: [
-      "Contextual & proactive — understands intent and suggests next steps.",
-      "Actionable by default — bookings, confirmations, reminders.",
-      "Seamless integrations — WhatsApp Cloud API or web dashboard, hassle-free.",
-      "Human touch when needed — smooth handoff to your team.",
-      "Aligned with your brand — natural and consistent communication.",
-      "Secure & controlled — encrypted, private, and owned by your business.",
+      "Contextual & proactive → AberoAI understands intent and suggests the next step.",
+      "Example: a patient asking about schedules can be guided directly to available booking slots, while a hotel guest asking about rooms can be directed straight to reservations.",
+      "Actionable by default → every interaction can be followed up immediately, from booking and confirmations to reminders. Not just canned responses, but flexible solutions that actually resolve customer needs.",
+      "Seamless integration → connect with the official WhatsApp Cloud API or use AberoAI’s web dashboard — no technical hassle required.",
+      "Human touch when needed → for complex conversations, AberoAI smoothly hands over to your team so customers always feel supported.",
+      "Aligned with your brand → tone, style, and communication always match your brand, ensuring natural and consistent interactions.",
+      "Secure & controlled → all conversations are encrypted, private, and remain fully owned by your business, following modern security standards."
     ],
   },
   outcomes: {
-    title: "With this approach, you can:",
+    title: "With this approach, your business can:",
     items: [
-      "Serve more customers without increasing headcount.",
-      "Reduce drop-offs caused by delayed responses.",
-      "Improve satisfaction with instant, relevant replies.",
-      "Build long-term trust with consistent, secure interactions.",
+      "Serve more customers without increasing headcount,",
+      "Reduce transaction drop-offs caused by delayed responses,",
+      "Improve customer satisfaction with instant, relevant replies,",
+      "Build long-term trust through consistent and secure interactions."
     ],
     closer:
-      "Every fast, consistent conversation is not just service — it’s proof of care that compounds into trust and growth.",
+      "The result: greater efficiency, happier customers, and a stronger, more trusted brand. Every fast, consistent conversation is not just service — it’s proof of care that builds trust and sustainable growth for your business.",
   },
   contact: { prefix: "📬 Want to reach us? Visit our", link: "Contact page" },
 };
