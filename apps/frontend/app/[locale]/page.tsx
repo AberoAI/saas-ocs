@@ -115,12 +115,12 @@ export default function LocaleHomePage() {
       {/* About Us (short version) */}
       <section id="about" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-2xl font-semibold md:text-3xl">About AberoAI</h2>
+          <h2 className="text-2xl font-semibold md:text-3xl">{t("landing.about.title")}</h2>
           <p className="mt-4 text-black/70 md:text-lg max-w-3xl">
-            AberoAI is a technology company based in Izmir, Turkey, specializing in{" "}
-            <strong>Online Customer Service + AI (OCS+AI)</strong> solutions. We integrate WhatsApp Cloud API
-            with AI-powered automation to help businesses improve customer engagement and reduce operational
-            costs.
+            {t("landing.about.text1")}
+          </p>
+          <p className="mt-3 text-black/70 md:text-lg max-w-3xl">
+            {t("landing.about.text2")}
           </p>
           <div className="mt-6">
             <Link
