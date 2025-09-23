@@ -63,6 +63,20 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
   transpilePackages: ["@repo/backend"],
 
+  // ➜ [ADD] redirects untuk kanonik TR & dukung diakritik
+  async redirects() {
+    return [
+      // kalau ada legacy global /about, arahkan ke EN kanonik
+      { source: "/about", destination: "/en/about", permanent: true },
+
+      // TR kanonik ASCII
+      { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
+
+      // dukung pengguna yang mengetik diakritik penuh
+      { source: "/tr/hakkında", destination: "/tr/hakkinda", permanent: true },
+    ];
+  },
+
   // FE memanggil /_trpc/:path* → proxy ke TRPC_BACKEND/:path*
   async rewrites() {
     return [

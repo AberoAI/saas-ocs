@@ -19,16 +19,21 @@ export default function Navbar() {
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
   const withLocale = (href: string) => {
+    // biarkan href eksternal/anchor
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) {
       return href;
+    }
+    // ➜ [ADD] khusus locale TR: About harus ke /hakkinda
+    if (localePrefix === "/tr" && href === "/about") {
+      return "/tr/hakkinda";
     }
     return `${localePrefix}${href}`;
   };
 
   // map key → label i18n
   const links = NAV_LINKS.map((l) => {
-    const label =
-      l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
+    const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
+    // ➜ [KEEP] gunakan withLocale supaya TR→/hakkinda otomatis
     return { label, href: withLocale(l.href) };
   });
 
