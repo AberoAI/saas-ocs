@@ -93,25 +93,16 @@ export default function Navbar() {
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
                       className={[
-                        // samakan baseline (leading) & display
-                        "inline-flex items-center gap-1 text-sm leading-[1] transition-colors cursor-pointer select-none",
-                        // sedikit naikkan 1px utk optik (Ü & caret)
-                        "-translate-y-px",
+                        // SAMAKAN BASELINE & DISPLAY dengan link lain
+                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none",
+                        // state warna/berat font
                         activeInProduct || openProduct
                           ? "text-foreground font-medium"
                           : "text-foreground/70 font-normal hover:text-foreground",
                       ].join(" ")}
                     >
                       {t("nav.product")}
-                      {/* caret SVG supaya tinggi konsisten */}
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 20 20"
-                        className="ml-1 h-[14px] w-[14px] shrink-0"
-                        focusable="false"
-                      >
-                        <path d="M5.5 7.5L10 12l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <span aria-hidden className="relative top-px">▾</span>
                     </span>
 
                     {openProduct && (
@@ -139,14 +130,14 @@ export default function Navbar() {
                 );
               }
 
-              // link default — samakan leading supaya baseline identik
+              // link default (About, Pricing, Contact, dll.) — tambahkan kelas align yang sama
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
                   href={l.href}
                   aria-current={isActive(l.href) ? "page" : undefined}
                   className={[
-                    "inline-flex items-center text-sm leading-[1] transition-colors",
+                    "inline-flex items-center text-sm leading-none transition-colors",
                     isActive(l.href)
                       ? "text-foreground font-medium"
                       : "text-foreground/70 hover:text-foreground",
