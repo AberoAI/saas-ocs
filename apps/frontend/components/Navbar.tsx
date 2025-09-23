@@ -82,23 +82,26 @@ export default function Navbar() {
                     onMouseEnter={() => setOpenProduct(true)}
                     onMouseLeave={() => setOpenProduct(false)}
                   >
-                    <button
-                      type="button"
-                      className={[
-                        // normalisasi button agar sama seperti link
-                        "text-sm inline-flex items-center gap-1 transition-colors",
-                        "appearance-none bg-transparent p-0 focus:outline-none focus-visible:outline-none cursor-pointer",
-                        // state warna/berat font
-                        openProduct || activeInProduct
-                          ? "text-foreground font-medium"
-                          : "text-foreground/70 font-normal hover:text-foreground",
-                      ].join(" ")}
+                    {/* GANTI BUTTON -> SPAN, agar style identik dg <a> */}
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") setOpenProduct((v) => !v);
+                        if (e.key === "Escape") setOpenProduct(false);
+                      }}
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
+                      className={[
+                        // sama persis dengan link lain: ukuran, warna, weight
+                        "text-sm transition-colors cursor-pointer select-none align-middle",
+                        activeInProduct || openProduct
+                          ? "text-foreground font-medium"
+                          : "text-foreground/70 hover:text-foreground font-normal",
+                      ].join(" ")}
                     >
-                      {t("nav.product")}
-                      <span aria-hidden>▾</span>
-                    </button>
+                      {t("nav.product")} <span aria-hidden>▾</span>
+                    </span>
 
                     {openProduct && (
                       <div
