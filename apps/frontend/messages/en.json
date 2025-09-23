@@ -47,8 +47,8 @@
   "landing": {
     "about": {
       "title": "About AberoAI",
-      "text1": "AberoAI delivers AI-powered Online Customer Service (OCS+AI) solutions.",
-      "text2": "By integrating the official WhatsApp Cloud API with intelligent automation, we help businesses provide faster, consistent, and multilingual customer engagement — while cutting operational costs.",
+      "text1": "AberoAI goes beyond generic chatbots. We specialize in AI-powered Online Customer Service for high-touch sectors like clinics and hospitality.",
+      "text2": "By integrating the official WhatsApp Cloud API, we help businesses deliver instant, multilingual, and 24/7 engagement — boosting bookings, reducing no-shows, and lowering operational costs.",
       "cta": "Learn more →"
     }
   }

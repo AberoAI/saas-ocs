@@ -47,9 +47,9 @@
   "landing": {
     "about": {
       "title": "AberoAI Hakkında",
-      "text1": "AberoAI, Yapay Zekâ Destekli Çevrim İçi Müşteri Hizmetleri (OCS+AI) çözümleri sunar.",
-      "text2": "Resmi WhatsApp Cloud API’yi akıllı otomasyonla entegre ederek işletmelerin daha hızlı, tutarlı ve çok dilli müşteri iletişimi kurmalarına, aynı zamanda operasyonel maliyetleri düşürmelerine yardımcı olur.",
-      "cta": "Daha fazla bilgi"
+      "text1": "AberoAI, sıradan chatbot’ların ötesine geçer. Klinikler ve turizm gibi yüksek temaslı sektörlere özel yapay zekâ destekli çevrim içi müşteri hizmetlerinde uzmanız.",
+      "text2": "Resmî WhatsApp Cloud API ile entegre çalışarak işletmelere anında, çok dilli ve 7/24 iletişim sunar — rezervasyonları artırır, iptalleri azaltır ve operasyonel maliyetleri düşürür.",
+      "cta": "Daha fazla bilgi →"
     }
   }
 }
