@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { domain, locales, defaultLocale } from "@/i18n";
+// ⬇️ GANTI baris ini:
+import { domain, locales, defaultLocale } from "../../i18n";
+// ⬆️ dari sebelumnya: import { domain, locales, defaultLocale } from "@/i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
 
@@ -16,8 +18,9 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
+// tetap: tipe eksplisit agar tidak implicit-any
 export function generateStaticParams() {
-  return locales.map((l) => ({ locale: l }));
+  return (locales as ReadonlyArray<Locale>).map((l: Locale) => ({ locale: l }));
 }
 
 function getAbsoluteSiteUrl(): string {
