@@ -85,10 +85,13 @@ export default function Navbar() {
                     <button
                       type="button"
                       className={[
-                        "text-sm transition-colors inline-flex items-center gap-1",
+                        // normalisasi button agar sama seperti link
+                        "text-sm inline-flex items-center gap-1 transition-colors",
+                        "appearance-none bg-transparent p-0 focus:outline-none focus-visible:outline-none cursor-pointer",
+                        // state warna/berat font
                         openProduct || activeInProduct
                           ? "text-foreground font-medium"
-                          : "text-foreground/70 hover:text-foreground",
+                          : "text-foreground/70 font-normal hover:text-foreground",
                       ].join(" ")}
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
