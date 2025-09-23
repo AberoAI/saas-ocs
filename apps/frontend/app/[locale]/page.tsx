@@ -43,7 +43,7 @@ function Faq({ q, a }: { q: string; a: string }) {
 /** ---------- Halaman ---------- */
 export default function LocaleHomePage() {
   const name = getBizName();
-  const tagline = getTagline(); // tetap dibiarkan agar konsisten
+  // const tagline = getTagline(); // 🔇 dihapus karena tidak dipakai (menghilangkan warning)
   const t = useTranslations();
 
   // Ambil headline & subheadline dari i18n
