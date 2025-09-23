@@ -1,7 +1,9 @@
 // apps/frontend/next.config.ts
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin"; // ➜ [ADD] plugin next-intl
-const withNextIntl = createNextIntlPlugin("./i18n/request.ts"); // ➜ [ADD] path eksplisit
+import createNextIntlPlugin from "next-intl/plugin";
+
+// ✅ Tanpa argumen: plugin aktif tapi TIDAK mencari ./i18n/request.ts
+const withNextIntl = createNextIntlPlugin();
 
 /**
  * URL backend ABSOLUTE untuk rewrite (harus mengarah ke endpoint /trpc).
@@ -63,16 +65,11 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
   transpilePackages: ["@repo/backend"],
 
-  // ➜ [ADD] redirects untuk kanonik TR & dukung diakritik
+  // ➜ redirects untuk kanonik TR & dukung diakritik
   async redirects() {
     return [
-      // kalau ada legacy global /about, arahkan ke EN kanonik
       { source: "/about", destination: "/en/about", permanent: true },
-
-      // TR kanonik ASCII
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
-
-      // dukung pengguna yang mengetik diakritik penuh
       { source: "/tr/hakkında", destination: "/tr/hakkinda", permanent: true },
     ];
   },
@@ -101,5 +98,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// ➜ [CHANGE] bungkus config dengan plugin next-intl
 export default withNextIntl(nextConfig);
