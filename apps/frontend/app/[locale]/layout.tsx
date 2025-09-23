@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { domain, locales, defaultLocale } from "../i18n";
-import Navbar from "@/components/Navbar"; // ✅ ADD
-import { setRequestLocale } from "next-intl/server"; // ✅ [ADD] penting agar statik
+import { domain, locales, defaultLocale } from "@/i18n"; // ⬅️ was ../i18n
+import Navbar from "@/components/Navbar";
+import { setRequestLocale } from "next-intl/server";
 
 export const dynamic = "force-static";
 
@@ -16,7 +16,6 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
-// 🔑 Pastikan Next membangun /en dan /tr
 export function generateStaticParams() {
   return locales.map((l) => ({ locale: l }));
 }
@@ -68,7 +67,6 @@ export default async function LocaleLayout({
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
 
-  // ✅ [ADD] kunci locale di level layout agar next-intl tidak memicu dynamic headers
   setRequestLocale(loc);
 
   const messages = (MESSAGES[loc as "en" | "tr"] ?? {}) as AbstractIntlMessages;
@@ -77,12 +75,10 @@ export default async function LocaleLayout({
   return (
     <>
       <NextIntlClientProvider locale={loc} messages={messages}>
-        {/* ✅ Navbar sekarang di dalam provider lokal → i18n benar di /tr & /en */}
         <Navbar />
         {children}
       </NextIntlClientProvider>
 
-      {/* Structured Data (JSON-LD) */}
       <Script
         id="ld-softwareapp"
         type="application/ld+json"

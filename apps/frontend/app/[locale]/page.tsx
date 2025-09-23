@@ -2,19 +2,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing"; // ⬅️ gunakan Link yang locale-aware
-import HeroChatMock from "../components/HeroChatMock"; // ⬅️ import relatif
+import { Link } from "@/i18n/routing";
+import HeroChatMock from "../components/HeroChatMock";
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
-}
-function getTagline(): string {
-  return (
-    process.env.BIZ_TAGLINE ||
-    process.env.NEXT_PUBLIC_BIZ_TAGLINE ||
-    "AI-powered Online Customer Service Automation"
-  );
 }
 
 function FeatureCard({ title, desc }: { title: string; desc: string }) {
@@ -43,7 +36,6 @@ function Faq({ q, a }: { q: string; a: string }) {
 /** ---------- Halaman ---------- */
 export default function LocaleHomePage() {
   const name = getBizName();
-  // const tagline = getTagline(); // 🔇 dihapus karena tidak dipakai (menghilangkan warning)
   const t = useTranslations();
 
   // Ambil headline & subheadline dari i18n
@@ -87,7 +79,7 @@ export default function LocaleHomePage() {
             {/* CTA: mengikuti i18n */}
             <div className="mt-8">
               <Link
-                href="/demo" // ⬅️ otomatis /en/demo atau /tr/demo
+                href="/demo"
                 className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
               >
                 {t("cta.secondary")}
@@ -124,7 +116,7 @@ export default function LocaleHomePage() {
           </p>
           <div className="mt-6">
             <Link
-              href="/about" // ⬅️ otomatis /en/about atau /tr/hakkinda (via mapping)
+              href="/about"
               className="inline-flex items-center rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-black/90"
             >
               {t("landing.about.cta")}
