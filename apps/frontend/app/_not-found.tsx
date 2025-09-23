@@ -1,7 +1,9 @@
 // apps/frontend/app/_not-found.tsx
 // Root 404 yang benar-benar statik (tanpa next-intl / headers)
 
-export const dynamic = 'force-static';
+import Link from "next/link";
+
+export const dynamic = "force-static";
 
 export default function RootNotFound() {
   return (
@@ -13,12 +15,12 @@ export default function RootNotFound() {
           The page you’re looking for doesn’t exist or might have been moved.
         </p>
         <div className="mt-6">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-black/90"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </main>
