@@ -1,8 +1,8 @@
 // apps/frontend/app/[locale]/page.tsx
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing"; // ⬅️ gunakan Link yang locale-aware
 import HeroChatMock from "../components/HeroChatMock"; // ⬅️ import relatif
 
 /** -- Helper (tetap) -- */
@@ -87,7 +87,7 @@ export default function LocaleHomePage() {
             {/* CTA: mengikuti i18n */}
             <div className="mt-8">
               <Link
-                href="/demo"
+                href="/demo" // ⬅️ otomatis /en/demo atau /tr/demo
                 className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
               >
                 {t("cta.secondary")}
@@ -124,10 +124,10 @@ export default function LocaleHomePage() {
           </p>
           <div className="mt-6">
             <Link
-              href="/about"
+              href="/about" // ⬅️ otomatis /en/about atau /tr/hakkinda (via mapping)
               className="inline-flex items-center rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-black/90"
             >
-              Learn more →
+              {t("landing.about.cta")}
             </Link>
           </div>
         </div>

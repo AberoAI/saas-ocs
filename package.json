@@ -8,19 +8,19 @@
     "start": "next start",
     "lint": "next lint",
     "check-types": "tsc -p tsconfig.build.json --noEmit",
-
     "favicons": "node scripts/generate-favicon.mjs",
     "prebuild": "pnpm run favicons"
   },
   "dependencies": {
+    "@repo/api-types": "workspace:*",
     "@repo/backend": "workspace:*",
     "@repo/shared": "workspace:*",
-    "@repo/api-types": "workspace:*",
     "@tanstack/react-query": "^5.85.3",
     "@trpc/client": "11.4.4",
     "@trpc/react-query": "11.4.4",
     "next": "15.4.5",
     "next-auth": "^4.24.11",
+    "next-intl": "^3.26.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "superjson": "^2.2.2",
@@ -34,10 +34,9 @@
     "@types/react-dom": "^19.1.1",
     "eslint": "^9.8.0",
     "eslint-config-next": "15.4.5",
-    "tailwindcss": "^4.1.12",
-    "typescript": "^5.8.2",
-
+    "png-to-ico": "^2.1.8",
     "sharp": "^0.33.5",
-    "png-to-ico": "^2.1.8"
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.8.2"
   }
 }
