@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { domain, locales, defaultLocale } from "../i18n";
 import Navbar from "@/components/Navbar"; // ✅ ADD
+import { setRequestLocale } from "next-intl/server"; // ✅ [ADD] penting agar statik
 
 export const dynamic = "force-static";
 
@@ -66,6 +67,9 @@ export default async function LocaleLayout({
 }: Props) {
   const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!loc) notFound();
+
+  // ✅ [ADD] kunci locale di level layout agar next-intl tidak memicu dynamic headers
+  setRequestLocale(loc);
 
   const messages = (MESSAGES[loc as "en" | "tr"] ?? {}) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
