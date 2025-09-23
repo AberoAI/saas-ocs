@@ -18,5 +18,14 @@ export function mapCountryToLocale(country?: string | null): Locale {
   return c === 'TR' ? 'tr' : 'en';
 }
 
-// (opsional) jika dipakai di tempat lain
+// Domain publik
 export const domain = 'https://aberoai.com';
+
+// (opsional) prefix strategi
+export const localePrefix = 'always' as const;
+
+// (opsional) mapping pathnames
+export const pathnames = {
+  '/': '/',
+  '/about': { en: '/about', tr: '/hakkinda' },
+} as const;

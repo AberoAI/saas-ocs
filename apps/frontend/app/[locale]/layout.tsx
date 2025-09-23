@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { domain, locales, defaultLocale } from "@/i18n"; // ⬅️ was ../i18n
+import { domain, locales, defaultLocale } from "@/i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
 
