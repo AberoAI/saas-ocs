@@ -43,5 +43,12 @@
     "aiReplied": "YZ <1 sn'de cevapladı",
     "inputPlaceholder": "Buraya mesaj yazın...",
     "footer": "WhatsApp Cloud API ile entegre • Demo Konuşma"
+  },
+  "landing": {
+    "about": {
+      "title": "AberoAI Hakkında",
+      "text1": "AberoAI, Yapay Zekâ Destekli Çevrim İçi Müşteri Hizmetleri (OCS+AI) çözümleri sunar.",
+      "text2": "Resmi WhatsApp Cloud API’yi akıllı otomasyonla entegre ederek işletmelerin daha hızlı, tutarlı ve çok dilli müşteri iletişimi kurmalarına, aynı zamanda operasyonel maliyetleri düşürmelerine yardımcı olur."
+    }
   }
 }

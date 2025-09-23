@@ -43,5 +43,12 @@
     "aiReplied": "AI replied in <1s",
     "inputPlaceholder": "Type a message here...",
     "footer": "Integrated with WhatsApp Cloud API • Demo Conversation"
+  },
+  "landing": {
+    "about": {
+      "title": "About AberoAI",
+      "text1": "AberoAI delivers AI-powered Online Customer Service (OCS+AI) solutions.",
+      "text2": "By integrating the official WhatsApp Cloud API with intelligent automation, we help businesses provide faster, consistent, and multilingual customer engagement — while cutting operational costs."
+    }
   }
 }
