@@ -6,10 +6,14 @@ import {locales} from './routing';
 export const defaultLocale = 'en' as const;
 type Locale = (typeof locales)[number];
 
-export default getRequestConfig(async ({locale}) => {
-  // Validasi locale yang masuk
-  const supported = (locales as readonly string[]).includes(locale as string);
-  const loc = (supported ? locale : defaultLocale) as Locale;
+/**
+ * Penting:
+ * - Jangan pakai param { locale } di sini (deprecated & memicu dynamic headers).
+ * - Locale sudah dikunci di app/[locale]/layout.tsx via setRequestLocale(loc).
+ * - Di sini cukup kembalikan messages untuk defaultLocale agar tetap statik saat build.
+ */
+export default getRequestConfig(async () => {
+  const loc = defaultLocale as Locale;
 
   // Import messages dan cast ke AbstractIntlMessages (sesuai v3)
   const messages = (await import(`../messages/${loc}.json`))
