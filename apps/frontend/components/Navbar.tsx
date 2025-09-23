@@ -82,7 +82,7 @@ export default function Navbar() {
                     onMouseEnter={() => setOpenProduct(true)}
                     onMouseLeave={() => setOpenProduct(false)}
                   >
-                    {/* GANTI BUTTON -> SPAN, agar style identik dg <a> */}
+                    {/* trigger dropdown */}
                     <span
                       role="button"
                       tabIndex={0}
@@ -93,14 +93,16 @@ export default function Navbar() {
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
                       className={[
-                        // sama persis dengan link lain: ukuran, warna, weight
-                        "text-sm transition-colors cursor-pointer select-none align-middle",
+                        // SAMAKAN BASELINE & DISPLAY dengan link lain
+                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none",
+                        // state warna/berat font
                         activeInProduct || openProduct
                           ? "text-foreground font-medium"
-                          : "text-foreground/70 hover:text-foreground font-normal",
+                          : "text-foreground/70 font-normal hover:text-foreground",
                       ].join(" ")}
                     >
-                      {t("nav.product")} <span aria-hidden>▾</span>
+                      {t("nav.product")}
+                      <span aria-hidden className="relative top-px">▾</span>
                     </span>
 
                     {openProduct && (
@@ -128,14 +130,14 @@ export default function Navbar() {
                 );
               }
 
-              // default link (About, Pricing, Contact, dll.)
+              // link default (About, Pricing, Contact, dll.) — tambahkan kelas align yang sama
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
                   href={l.href}
                   aria-current={isActive(l.href) ? "page" : undefined}
                   className={[
-                    "text-sm transition-colors",
+                    "inline-flex items-center text-sm leading-none transition-colors",
                     isActive(l.href)
                       ? "text-foreground font-medium"
                       : "text-foreground/70 hover:text-foreground",
