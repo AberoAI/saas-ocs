@@ -1,6 +1,8 @@
 {
   "nav": {
     "about": "About",
+    "product": "Product",
+    "features": "Features",
     "solutions": "Solutions",
     "pricing": "Pricing",
     "faq": "FAQ",

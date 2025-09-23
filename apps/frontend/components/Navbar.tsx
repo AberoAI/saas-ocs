@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/nav";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
@@ -23,18 +24,19 @@ export default function Navbar() {
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) {
       return href;
     }
-    // ➜ [ADD] khusus locale TR: About harus ke /hakkinda
-    if (localePrefix === "/tr" && href === "/about") {
-      return "/tr/hakkinda";
-    }
+    // ➜ khusus locale TR: About → /hakkinda
+    if (localePrefix === "/tr" && href === "/about") return "/tr/hakkinda";
+    // ➜ khusus locale TR: Features & Solutions (jika kamu pakai URL lokal)
+    if (localePrefix === "/tr" && href === "/features") return "/tr/ozellikler";
+    if (localePrefix === "/tr" && href === "/solutions") return "/tr/cozumler";
+
     return `${localePrefix}${href}`;
   };
 
   // map key → label i18n
   const links = NAV_LINKS.map((l) => {
     const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
-    // ➜ [KEEP] gunakan withLocale supaya TR→/hakkinda otomatis
-    return { label, href: withLocale(l.href) };
+    return { key: l.key, label, href: withLocale(l.href) };
   });
 
   const isActive = (href: string) => {
@@ -44,6 +46,9 @@ export default function Navbar() {
     }
     return pathname === target || pathname.startsWith(target + "/");
   };
+
+  // state dropdown Product
+  const [openProduct, setOpenProduct] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-background/80 backdrop-blur">
@@ -65,21 +70,75 @@ export default function Navbar() {
 
           {/* Nav links */}
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
-            {links.map((l) => (
-              <Link
-                key={`${l.href}-${l.label}`}
-                href={l.href}
-                aria-current={isActive(l.href) ? "page" : undefined}
-                className={[
-                  "text-sm transition-colors",
-                  isActive(l.href)
-                    ? "text-foreground font-medium"
-                    : "text-foreground/70 hover:text-foreground",
-                ].join(" ")}
-              >
-                {l.label}
-              </Link>
-            ))}
+            {links.map((l) => {
+              // render khusus untuk Product sebagai dropdown
+              if (l.key === "product") {
+                const activeInProduct =
+                  isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
+                return (
+                  <div
+                    key="product-dropdown"
+                    className="relative"
+                    onMouseEnter={() => setOpenProduct(true)}
+                    onMouseLeave={() => setOpenProduct(false)}
+                  >
+                    <button
+                      type="button"
+                      className={[
+                        "text-sm transition-colors inline-flex items-center gap-1",
+                        openProduct || activeInProduct
+                          ? "text-foreground font-medium"
+                          : "text-foreground/70 hover:text-foreground",
+                      ].join(" ")}
+                      aria-haspopup="menu"
+                      aria-expanded={openProduct}
+                    >
+                      {t("nav.product")}
+                      <span aria-hidden>▾</span>
+                    </button>
+
+                    {openProduct && (
+                      <div
+                        role="menu"
+                        className="absolute left-0 mt-2 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl"
+                      >
+                        <Link
+                          role="menuitem"
+                          href={withLocale("/features")}
+                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
+                        >
+                          {t("nav.features")}
+                        </Link>
+                        <Link
+                          role="menuitem"
+                          href={withLocale("/solutions")}
+                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
+                        >
+                          {t("nav.solutions")}
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // default link (About, Pricing, Contact, dll.)
+              return (
+                <Link
+                  key={`${l.href}-${l.label}`}
+                  href={l.href}
+                  aria-current={isActive(l.href) ? "page" : undefined}
+                  className={[
+                    "text-sm transition-colors",
+                    isActive(l.href)
+                      ? "text-foreground font-medium"
+                      : "text-foreground/70 hover:text-foreground",
+                  ].join(" ")}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
