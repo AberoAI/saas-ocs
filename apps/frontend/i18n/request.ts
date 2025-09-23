@@ -1,22 +1,22 @@
 // apps/frontend/i18n/request.ts
-import { getRequestConfig } from 'next-intl/server';
-import { locales, defaultLocale } from '../app/i18n';
+import {getRequestConfig} from 'next-intl/server';
+import type {AbstractIntlMessages} from 'next-intl';
+import {locales} from './routing'; // ⬅️ pakai file routing sendiri
 
+export const defaultLocale = 'en' as const;
 type Locale = (typeof locales)[number];
 
-export default getRequestConfig(async ({ locale }) => {
-  // Validasi locale yang masuk
+export default getRequestConfig(async ({locale}) => {
+  // Validasi locale
   const supported = (locales as readonly string[]).includes(locale as string);
   const loc = (supported ? locale : defaultLocale) as Locale;
 
-  // Muat messages; aman meskipun file belum lengkap
-  let messages: Record<string, unknown> = {};
-  try {
-    messages = (await import(`../messages/${loc}.json`)).default;
-  } catch {
-    messages = {};
-  }
+  // Import pesan i18n lalu cast ke AbstractIntlMessages (sesuai next-intl v3)
+  const messages = (await import(`../messages/${loc}.json`))
+    .default as AbstractIntlMessages;
 
-  // next-intl@4 mengharuskan ada { locale, messages }
-  return { locale: loc, messages };
+  return {
+    locale: loc,
+    messages
+  };
 });
