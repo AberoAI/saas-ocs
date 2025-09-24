@@ -24,12 +24,10 @@ export default function Navbar() {
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) {
       return href;
     }
-    // ➜ khusus locale TR: About → /hakkinda
+    // ➜ khusus locale TR
     if (localePrefix === "/tr" && href === "/about") return "/tr/hakkinda";
-    // ➜ khusus locale TR: Features & Solutions (jika kamu pakai URL lokal)
     if (localePrefix === "/tr" && href === "/features") return "/tr/ozellikler";
     if (localePrefix === "/tr" && href === "/solutions") return "/tr/cozumler";
-
     return `${localePrefix}${href}`;
   };
 
@@ -86,6 +84,7 @@ export default function Navbar() {
                     <span
                       role="button"
                       tabIndex={0}
+                      onClick={() => setOpenProduct((v) => !v)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") setOpenProduct((v) => !v);
                         if (e.key === "Escape") setOpenProduct(false);
@@ -100,17 +99,22 @@ export default function Navbar() {
                       ].join(" ")}
                     >
                       {t("nav.product")}
+                      {/* caret: ikut ukuran font, center optik, dan berubah saat open/hover */}
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
-                        className="ml-0 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]"
+                        className={[
+                          "ml-0 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
+                          "transition-transform transition-colors duration-150",
+                          openProduct ? "rotate-180 text-navbar" : "",
+                        ].join(" ")}
                         focusable="false"
                       >
                         <path
                           d="M5.5 7.5L10 12l4.5-4.5"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="1.5"
+                          strokeWidth={openProduct ? 2 : 1.5} // tebal saat aktif
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
