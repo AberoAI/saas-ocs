@@ -36,7 +36,7 @@ export default function Navbar() {
   // map key → label i18n
   const links = NAV_LINKS.map((l) => {
     const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
-    return { key: l.key, label, href: withLocale(l.href) };
+    return { key: l.key, label: l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`), href: withLocale(l.href) };
   });
 
   const isActive = (href: string) => {
@@ -82,7 +82,7 @@ export default function Navbar() {
                     onMouseEnter={() => setOpenProduct(true)}
                     onMouseLeave={() => setOpenProduct(false)}
                   >
-                    {/* trigger dropdown (caret SVG, tanpa translate hack) */}
+                    {/* trigger dropdown */}
                     <span
                       role="button"
                       tabIndex={0}
@@ -93,7 +93,8 @@ export default function Navbar() {
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
                       className={[
-                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none",
+                        // rapatkan jarak ikon
+                        "inline-flex items-center gap-0.5 text-sm leading-none transition-colors cursor-pointer select-none",
                         activeInProduct || openProduct
                           ? "text-foreground font-medium"
                           : "text-foreground/70 font-normal hover:text-foreground",
@@ -103,7 +104,7 @@ export default function Navbar() {
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
-                        className="ml-1 h-[14px] w-[14px] shrink-0 align-middle"
+                        className="ml-0 h-[14px] w-[14px] shrink-0 align-middle"
                         focusable="false"
                       >
                         <path
@@ -142,7 +143,7 @@ export default function Navbar() {
                 );
               }
 
-              // default link (About, Pricing, Contact, dll.) — baseline seragam
+              // default link (About, Pricing, Contact, dll.)
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
