@@ -93,7 +93,6 @@ export default function Navbar() {
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
                       className={[
-                        // rapatkan jarak ikon
                         "inline-flex items-center gap-0.5 text-sm leading-none transition-colors cursor-pointer select-none",
                         activeInProduct || openProduct
                           ? "text-foreground font-medium"
@@ -104,7 +103,7 @@ export default function Navbar() {
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
-                        className="ml-0 h-[14px] w-[14px] shrink-0 align-middle"
+                        className="ml-0 h-[1em] w-[1em] shrink-0 align-middle"
                         focusable="false"
                       >
                         <path
@@ -143,7 +142,7 @@ export default function Navbar() {
                 );
               }
 
-              // default link (About, Pricing, Contact, dll.)
+              // default link (About, Pricing, Contact, dll.) — baseline seragam
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
