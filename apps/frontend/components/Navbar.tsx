@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/nav";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
@@ -48,6 +48,20 @@ export default function Navbar() {
   // state dropdown Product
   const [openProduct, setOpenProduct] = useState(false);
 
+  // delay kecil agar tidak kedip/ketutup saat pindah ke menu
+  const leaveTimer = useRef<number | null>(null);
+  const handleEnter = () => {
+    if (leaveTimer.current) {
+      window.clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
+    setOpenProduct(true);
+  };
+  const handleLeave = () => {
+    if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
+    leaveTimer.current = window.setTimeout(() => setOpenProduct(false), 120);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-background/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
@@ -76,9 +90,9 @@ export default function Navbar() {
                 return (
                   <div
                     key="product-dropdown"
-                    className="relative"
-                    onMouseEnter={() => setOpenProduct(true)}
-                    onMouseLeave={() => setOpenProduct(false)}
+                    className="relative pb-2"        // hover-bridge untuk menutup gap
+                    onMouseEnter={handleEnter}
+                    onMouseLeave={handleLeave}
                   >
                     {/* trigger dropdown */}
                     <span
@@ -124,7 +138,7 @@ export default function Navbar() {
                     {openProduct && (
                       <div
                         role="menu"
-                        className="absolute left-0 mt-2 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl"
+                        className="absolute left-0 top-full min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl"
                       >
                         <Link
                           role="menuitem"
