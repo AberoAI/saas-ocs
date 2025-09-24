@@ -82,7 +82,7 @@ export default function Navbar() {
                     onMouseEnter={() => setOpenProduct(true)}
                     onMouseLeave={() => setOpenProduct(false)}
                   >
-                    {/* trigger dropdown */}
+                    {/* trigger dropdown (caret SVG, tanpa translate hack) */}
                     <span
                       role="button"
                       tabIndex={0}
@@ -93,17 +93,28 @@ export default function Navbar() {
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
                       className={[
-                        // samakan baseline & display dengan link lain, lalu naikkan 1px
-                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none -translate-y-px",
-                        // state warna/berat font
+                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none",
                         activeInProduct || openProduct
                           ? "text-foreground font-medium"
                           : "text-foreground/70 font-normal hover:text-foreground",
                       ].join(" ")}
                     >
                       {t("nav.product")}
-                      {/* caret teks tanpa offset supaya tidak mengganggu optik */}
-                      <span aria-hidden className="relative top-0">▾</span>
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 20 20"
+                        className="ml-1 h-[14px] w-[14px] shrink-0 align-middle"
+                        focusable="false"
+                      >
+                        <path
+                          d="M5.5 7.5L10 12l4.5-4.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </span>
 
                     {openProduct && (
@@ -131,7 +142,7 @@ export default function Navbar() {
                 );
               }
 
-              // link default (About, Pricing, Contact, dll.) — samakan baseline
+              // default link (About, Pricing, Contact, dll.) — baseline seragam
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
