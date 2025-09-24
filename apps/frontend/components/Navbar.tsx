@@ -103,7 +103,7 @@ export default function Navbar() {
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
-                        className="ml-0 h-[1em] w-[1em] shrink-0 align-middle"
+                        className="ml-0 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]"
                         focusable="false"
                       >
                         <path
