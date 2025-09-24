@@ -69,14 +69,7 @@ export default function Navbar() {
         <div className="flex items-center gap-8">
           {/* Brand */}
           <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
-            <Image
-              src="/icon.svg"
-              alt={name}
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-            />
+            <Image src="/icon.svg" alt={name} width={32} height={32} className="object-contain" priority />
             <span className="text-2xl font-semibold text-navbar">{name}</span>
           </Link>
 
@@ -90,7 +83,7 @@ export default function Navbar() {
                 return (
                   <div
                     key="product-dropdown"
-                    className="relative pb-2"        // hover-bridge untuk menutup gap
+                    className="relative inline-flex items-center"  // ⚑ samakan tinggi & alignment (hapus pb-2)
                     onMouseEnter={handleEnter}
                     onMouseLeave={handleLeave}
                   >
@@ -113,7 +106,7 @@ export default function Navbar() {
                       ].join(" ")}
                     >
                       {t("nav.product")}
-                      {/* caret: ikut ukuran font, center optik, dan berubah saat open/hover */}
+                      {/* caret: ikut ukuran font, center optik, berubah saat open */}
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
@@ -128,12 +121,15 @@ export default function Navbar() {
                           d="M5.5 7.5L10 12l4.5-4.5"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth={openProduct ? 2 : 1.5} // tebal saat aktif
+                          strokeWidth={openProduct ? 2 : 1.5}
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
                       </svg>
                     </span>
+
+                    {/* hover-bridge transparan agar tidak ada gap tanpa mengubah layout */}
+                    <div className="absolute left-0 right-0 top-full h-2" aria-hidden="true" />
 
                     {openProduct && (
                       <div
@@ -160,7 +156,7 @@ export default function Navbar() {
                 );
               }
 
-              // default link (About, Pricing, Contact, dll.) — baseline seragam
+              // default link (About, Pricing, Contact, dll.)
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
