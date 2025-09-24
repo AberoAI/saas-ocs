@@ -93,8 +93,8 @@ export default function Navbar() {
                       aria-haspopup="menu"
                       aria-expanded={openProduct}
                       className={[
-                        // SAMAKAN BASELINE & DISPLAY dengan link lain
-                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none",
+                        // samakan baseline & display dengan link lain, lalu naikkan 1px
+                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none -translate-y-px",
                         // state warna/berat font
                         activeInProduct || openProduct
                           ? "text-foreground font-medium"
@@ -102,7 +102,8 @@ export default function Navbar() {
                       ].join(" ")}
                     >
                       {t("nav.product")}
-                      <span aria-hidden className="relative top-px">▾</span>
+                      {/* caret teks tanpa offset supaya tidak mengganggu optik */}
+                      <span aria-hidden className="relative top-0">▾</span>
                     </span>
 
                     {openProduct && (
@@ -130,7 +131,7 @@ export default function Navbar() {
                 );
               }
 
-              // link default (About, Pricing, Contact, dll.) — tambahkan kelas align yang sama
+              // link default (About, Pricing, Contact, dll.) — samakan baseline
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
