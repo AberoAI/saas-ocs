@@ -20,10 +20,7 @@ export default function Navbar() {
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
   const withLocale = (href: string) => {
-    // biarkan href eksternal/anchor
-    if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) {
-      return href;
-    }
+    if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
     // ➜ khusus locale TR
     if (localePrefix === "/tr" && href === "/about") return "/tr/hakkinda";
     if (localePrefix === "/tr" && href === "/features") return "/tr/ozellikler";
@@ -83,7 +80,7 @@ export default function Navbar() {
                 return (
                   <div
                     key="product-dropdown"
-                    className="relative inline-flex items-center"  // ⚑ samakan tinggi & alignment (hapus pb-2)
+                    className="relative inline-flex items-center"
                     onMouseEnter={handleEnter}
                     onMouseLeave={handleLeave}
                   >
@@ -128,13 +125,13 @@ export default function Navbar() {
                       </svg>
                     </span>
 
-                    {/* hover-bridge transparan agar tidak ada gap tanpa mengubah layout */}
-                    <div className="absolute left-0 right-0 top-full h-2" aria-hidden="true" />
+                    {/* hover-bridge transparan = cocokkan dengan jarak dropdown (mt-3) */}
+                    <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
 
                     {openProduct && (
                       <div
                         role="menu"
-                        className="absolute left-0 top-full min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl"
+                        className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
                       >
                         <Link
                           role="menuitem"
