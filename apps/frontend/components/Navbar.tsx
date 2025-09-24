@@ -183,7 +183,7 @@ export default function Navbar() {
           </Link>
           <Link
             href={withLocale("/login")}
-            className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90"
+            className="rounded-xl bg-[#7D948A] hover:bg-[#64786f] px-4 py-2 text-sm font-medium text-white shadow-md transition"
           >
             {t("cta.signin")}
           </Link>
