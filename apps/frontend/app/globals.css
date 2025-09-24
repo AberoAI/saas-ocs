@@ -5,7 +5,8 @@
 :root {
   color-scheme: light dark;
 
-  --background: #f4fbff;
+  /* ⬇️ Ganti ke putih polos (sebelumnya #f4fbff) */
+  --background: #ffffff;
   --foreground: #171717;
 
   /* brand utama */
