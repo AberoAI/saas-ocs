@@ -80,7 +80,7 @@ export default function LocaleHomePage() {
             <div className="mt-8">
               <Link
                 href="/demo"
-                className="rounded-xl bg-black px-5 py-3 text-white hover:bg-black/90"
+                className="rounded-xl bg-[#7D948A] hover:bg-[#64786f] px-5 py-3 text-white font-medium shadow-md transition"
               >
                 {t("cta.secondary")}
               </Link>
@@ -117,7 +117,7 @@ export default function LocaleHomePage() {
           <div className="mt-6">
             <Link
               href="/about"
-              className="inline-flex items-center rounded-xl bg-black px-5 py-3 text-sm font-medium text-white hover:bg-black/90"
+              className="inline-flex items-center rounded-xl bg-[#7D948A] hover:bg-[#64786f] px-5 py-3 text-sm font-medium text-white shadow-md transition"
             >
               {t("landing.about.cta")}
             </Link>
