@@ -5,27 +5,27 @@
   "cards": {
     "instant": {
       "title": "Yapay Zekâ ile 7/24 Otomatik Yanıt",
-      "desc": "“Müşterileriniz ne zaman, nereden yazarsa yazsın; 60 saniyeden kısa sürede yanıt alın.” AberoAI 7/24 aktif kalarak konuşmaları sürdürür. Personeliniz çevrimdışı olsa bile müşteriler beklemez. Sonuç: kurtarılan randevular, artan memnuniyet ve kaçırılmayan satış fırsatları."
+      "desc": "“Müşterileriniz ne zaman, nereden yazarsa yazsın; 60 saniyeden kısa sürede yanıt alın.” AberoAI, 7/24 aktif kalarak konuşmaları sürdürür. Personeliniz çevrimdışı olsa bile müşteriler beklemez. Sonuç: kurtarılan randevular, artan memnuniyet ve kaçırılmayan satış fırsatları."
     },
     "multitenant": {
       "title": "Çoklu Şube Yönetimi",
-      "desc": "“Tek panel, tüm şubeler kontrol altında.” Merkezden en küçük şubeye kadar tüm ekipleri tek bir platformda yönetin. Her şube veya çalışan için ayrı yetkilendirme; daha düzenli, güvenli ve ölçeklenmeye hazır."
+      "desc": "“Tek panel, tüm şubeler kontrol altında.” Merkezden en küçük şubeye kadar tüm ekipleri tek bir platformda yönetin. Her şube veya çalışan için ayrı yetkilendirme tanımlayın; daha düzenli, güvenli ve büyümeye hazır bir yapı elde edin."
     },
     "analytics": {
       "title": "Gerçek Zamanlı Analitik Paneli",
-      "desc": "“Sezgilere değil, verilere dayalı kararlar.” Konuşmaları, yanıt hızını ve müşteri memnuniyetini anlık izleyin. Bu içgörüler ROI’yi artırmanıza ve iş trendlerini ilk günden görmenize yardımcı olur."
+      "desc": "“Sezgilere değil, verilere dayalı kararlar.” Konuşmaları, yanıt hızını ve müşteri memnuniyetini anlık olarak izleyin. Bu içgörüler ROI’yi artırmanıza ve iş trendlerini ilk günden görmenize yardımcı olur."
     },
     "handoff": {
-      "title": "İnsana Devretme",
+      "title": "İnsan Destek Aktarımı",
       "desc": "“Akıllı yapay zekâ, ama kahraman hâlâ ekibiniz.” Sorular karmaşık veya hassas olduğunda, AberoAI sohbeti kesintisiz şekilde insan personele aktarır. Akış bozulmaz, müşteri değer görür, verimlilik korunur."
     },
     "multilingual": {
       "title": "Çok Dilli Destek",
-      "desc": "“Sınır tanımayan otomatik çok dilli hizmet.” AberoAI; Türkçe, İngilizce ve birçok dili destekler. Uluslararası müşteriler güvende hisseder, markanız profesyonel görünür ve pazarınız kolayca genişler."
+      "desc": "“Sınır tanımayan otomatik çok dilli hizmet.” AberoAI; Türkçe, İngilizce ve birçok dili destekler. Uluslararası müşteriler kendini güvende hisseder, markanız profesyonel görünür ve pazarınız hızla genişler."
     },
     "booking": {
       "title": "Rezervasyon ve Sonrası Takip Otomasyonu",
-      "desc": "“Daha hızlı rezervasyon, garanti altına alınmış takip.” Randevu planlamasından hatırlatmalara, hizmet sonrası mesajlara kadar her şey otomatik işler. No-show’lar azalır, sadakat güçlenir."
+      "desc": "“Daha hızlı rezervasyon, garanti altına alınmış takip.” Randevu planlamasından hatırlatmalara, hizmet sonrası mesajlara kadar her şey otomatik işler. Kaçırılan randevular artık tarih olur, müşteri sadakati güçlenir."
     }
   },
   "cta": {
