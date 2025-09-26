@@ -1,52 +1,49 @@
-// apps/frontend/app/about/tr.ts
-import type { AboutCopy } from "./types";
-
-export const aboutTr: AboutCopy = {
-  title: "AberoAI Hakkında",
-  mission: {
-    title: "Misyonumuz",
-    ps: [
+{
+  "title": "AberoAI Hakkında",
+  "mission": {
+    "title": "Misyonumuz",
+    "ps": [
       "Müşterilerin %65’ten fazlası, yalnızca geç veya tutarsız yanıtlar yüzünden işlemlerini yarıda bırakıyor.",
       "Artan mesaj yoğunluğu müşteri hizmetleri ekiplerini zorlarken, müşteriler her geçen gün daha sabırsız hale geliyor.",
       "WhatsApp Business’ın geleneksel otomatik yanıtları ise genellikle katı ve tekdüze kalıyor; bu nedenle “anında yanıt” gerçekte sorunu çözmüyor.",
       "AberoAI’nin misyonu, bu boşluğu kapatmak: 7/24 tutarlı ve anında yanıtlar sunmak, çoklu dil desteği sağlamak ve her konuşmaya bağlama uygun esnek çözümler üretmek.",
       "AberoAI ayrıca rezervasyon ve takip süreçlerini yönetir, her etkileşimde markanızın sesini korur. Verimli ve ölçeklenebilirdir — ek personel gerekmeden saniyeler içinde binlerce konuşmayı yönetebilir, böylece ekibiniz daha değerli işlere odaklanabilir.",
       "Biz inanıyoruz ki: hızlı ve tutarlı iletişim, müşterilere verilen gerçek önemi gösterir — ve güven, iş büyümesinin yakıtıdır."
-    ],
+    ]
   },
-  what: {
-    title: "Ne Yapıyoruz",
-    p1: "AberoAI, işletmelerin daha hızlı, daha tutarlı ve daha insancıl müşteri deneyimleri sunmasına yardımcı olur. En yeni yapay zeka teknolojisiyle geliştirilen ve hizmet sektörüne özel tasarlanan AberoAI, sadece mesajlara yanıt vermekle kalmaz, müşteri ihtiyaçlarını doğrudan çözüme kavuşturur.",
+  "what": {
+    "title": "Ne Yapıyoruz",
+    "p1": "AberoAI, işletmelerin daha hızlı, daha tutarlı ve daha insancıl müşteri deneyimleri sunmasına yardımcı olur. En yeni yapay zeka teknolojisiyle geliştirilen ve hizmet sektörüne özel tasarlanan AberoAI, sadece mesajlara yanıt vermekle kalmaz, müşteri ihtiyaçlarını doğrudan çözüme kavuşturur."
   },
-  features: {
-    title: "Temel Özellikler",
-    items: [
+  "features": {
+    "title": "Temel Özellikler",
+    "items": [
       "Sezgisel kontrol paneli → kullanımı kolay, özelleştirilebilir ve yoğun müşteri etkileşimi olan sektörler için tasarlandı.",
       "7/24 çok dilli yanıtlar → yerel ve uluslararası müşterilerin sorunsuz hizmet almasını sağlar.",
       "Hazır konuşma akışları → randevu, SSS, hatırlatıcılar ve takip süreçleri.",
       "Sorunsuz entegrasyon → resmi WhatsApp Cloud API ve AberoAI web paneliyle, karmaşık kurulum olmadan hemen çalışır.",
       "İnsan devri (gelişmiş) → karmaşık durumlarda ekibinize yumuşak geçiş yapar.",
       "Analiz ve içgörüler (gelişmiş) → performansı izlemenize ve iyileştirme fırsatlarını görmenize yardımcı olur."
-    ],
+    ]
   },
-  value: {
-    title: "Katma Değer",
-    items: [
+  "value": {
+    "title": "Katma Değer",
+    "items": [
       "Esnek & bağlamsal → yanıtlar duruma uyum sağlar, kalıplaşmış botlar gibi değildir.",
       "Verimli & ölçeklenebilir → aynı anda binlerce konuşmayı yönetebilir.",
       "Marka-öncelikli → dil ve üslup markanızla her zaman uyumlu kalır.",
       "Ekip uyumlu → birden fazla ekip üyesi aynı anda erişebilir.",
       "Merkezi & kayıtlı → tüm konuşmalar tek yerde saklanır, dağınıklık ortadan kalkar.",
       "Hizmet sektörüne odaklı → klinikler, turizm/otelcilik ve diğer hizmet işletmeleri için özel tasarlanmıştır."
-    ],
+    ]
   },
-  how: {
-    title: "Nasıl Çalışıyoruz",
-    p1: "Mükemmel müşteri hizmeti yalnızca hızlı yanıt vermek değil, aynı zamanda bağlamı anlamak ve doğru çözümü sunmaktır. Bu nedenle AberoAI, proaktif ve uyumlu bir dijital asistan olarak tasarlandı — yalnızca bir bot değil.",
+  "how": {
+    "title": "Nasıl Çalışıyoruz",
+    "p1": "Mükemmel müşteri hizmeti yalnızca hızlı yanıt vermek değil, aynı zamanda bağlamı anlamak ve doğru çözümü sunmaktır. Bu nedenle AberoAI, proaktif ve uyumlu bir dijital asistan olarak tasarlandı — yalnızca bir bot değil."
   },
-  principles: {
-    title: "AberoAI’nin Çalışma İlkeleri",
-    items: [
+  "principles": {
+    "title": "AberoAI’nin Çalışma İlkeleri",
+    "items": [
       "Bağlamsal & proaktif → niyeti anlar ve sonraki adımı önerir.",
       "Örn: Randevu soran hasta doğrudan uygun boşluklara yönlendirilir; oda soran misafir rezervasyona aktarılır.",
       "Eyleme geçirilebilir → her etkileşim anında işleme konabilir; rezervasyon, onay veya hatırlatma dahil. Sadece kalıp yanıtlar değil, ihtiyacı gerçekten çözen esnek yaklaşımlar.",
@@ -54,21 +51,20 @@ export const aboutTr: AboutCopy = {
       "Gerektiğinde insan dokunuşu → karmaşık konuşmalarda ekibinize geçiş yapar.",
       "Markanızla uyumlu → dil, üslup ve iletişim tarzı markanıza göre ayarlanır.",
       "Güvenli & kontrollü → tüm konuşmalar şifrelenir, gizlidir ve tamamen işletmenize aittir."
-    ],
+    ]
   },
-  outcomes: {
-    title: "Bu yaklaşımla işletmeniz:",
-    items: [
+  "outcomes": {
+    "title": "Bu yaklaşımla işletmeniz:",
+    "items": [
       "Ek personel almadan daha fazla müşteriye hizmet verebilir,",
       "Geciken yanıtların neden olduğu iptalleri azaltabilir,",
       "Anında ve alakalı yanıtlarla müşteri memnuniyetini artırabilir,",
       "Tutarlı ve güvenli iletişimle uzun vadeli güven inşa edebilir."
     ],
-    closer:
-      "Sonuç: daha verimli bir işletme, daha mutlu müşteriler ve daha güçlü bir marka. Her hızlı ve tutarlı konuşma sadece bir hizmet değil — güveni ve sürdürülebilir büyümeyi besleyen bir özen göstergesidir.",
+    "closer": "Sonuç: daha verimli bir işletme, daha mutlu müşteriler ve daha güçlü bir marka. Her hızlı ve tutarlı konuşma sadece bir hizmet değil — güveni ve sürdürülebilir büyümeyi besleyen bir özen göstergesidir."
   },
-  contact: {
-    prefix: "📬 Bizimle iletişime geçmek ister misiniz? Şu sayfayı ziyaret edin:",
-    link: "İletişim",
-  },
-};
+  "contact": {
+    "prefix": "📬 Bizimle iletişime geçmek ister misiniz? Şu sayfayı ziyaret edin:",
+    "link": "İletişim"
+  }
+}
