@@ -2,7 +2,10 @@
 import Link from "next/link";
 import type { AboutCopy } from "./types";
 
-export default function AboutView({ copy }: { copy: AboutCopy }) {
+export default function AboutView({
+  copy,
+  localePrefix = "",
+}: { copy: AboutCopy; localePrefix?: string }) {
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="text-3xl font-bold mb-6">{copy.title}</h1>
@@ -42,7 +45,7 @@ export default function AboutView({ copy }: { copy: AboutCopy }) {
 
       <p className="text-black/70">
         {copy.contact.prefix}{" "}
-        <Link href="/contact" className="text-blue-600 hover:underline">
+        <Link href={`${localePrefix}/contact`} className="text-blue-600 hover:underline">
           {copy.contact.link}
         </Link>.
       </p>
