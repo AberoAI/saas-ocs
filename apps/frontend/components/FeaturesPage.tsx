@@ -1,32 +1,29 @@
 // apps/frontend/components/FeaturesPage.tsx
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 export default function FeaturesPage() {
   const t = useTranslations("features");
-  const locale = useLocale();
   const pathnameRaw = usePathname() || "/";
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : ""; // konsisten dgn Navbar-mu
 
   const withLocale = (href: string) => {
-    // biarkan external/absolute apa adanya
-    if (/^https?:\/\//.test(href)) return href;
-    // kalau anchor lokal (mis. "#demo"), tetap relatif
-    if (href.startsWith("#")) return href;
-    // pastikan prefix locale
+    if (/^https?:\/\//.test(href)) return href; // biarkan external/absolute
+    if (href.startsWith("#")) return href;      // anchor lokal
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
+  // 6 poin fitur final (whatsapp → multitenant, booking diperluas)
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
-    { key: "instant", icon: "⚡️" },
-    { key: "whatsapp", icon: "💬" },
-    { key: "multilingual", icon: "🌐" },
-    { key: "booking", icon: "📅" },
-    { key: "handoff", icon: "🤝" },
-    { key: "analytics", icon: "📊" },
+    { key: "instant",      icon: "⚡️" }, // AI Autoreply 24/7
+    { key: "multitenant",  icon: "🏢" }, // Multi-tenant Management
+    { key: "analytics",    icon: "📊" }, // Realtime Analytics Dashboard
+    { key: "handoff",      icon: "🤝" }, // Human Handoff
+    { key: "multilingual", icon: "🌐" }, // Multilingual Support
+    { key: "booking",      icon: "📅" }, // Booking & After-care Automation
   ];
 
   return (
@@ -74,6 +71,7 @@ export default function FeaturesPage() {
   );
 }
 
+/** Tipe i18n khusus halaman (per-namespace) */
 type IntlMessages = {
   features: {
     badge: string;
@@ -81,11 +79,11 @@ type IntlMessages = {
     subtitle: string;
     cards: {
       instant: { title: string; desc: string };
-      whatsapp: { title: string; desc: string };
+      multitenant: { title: string; desc: string };
+      analytics: { title: string; desc: string };
+      handoff: { title: string; desc: string };
       multilingual: { title: string; desc: string };
       booking: { title: string; desc: string };
-      handoff: { title: string; desc: string };
-      analytics: { title: string; desc: string };
     };
     cta: { primary: string; secondary: string };
   };

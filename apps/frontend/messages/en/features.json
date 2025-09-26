@@ -1,0 +1,35 @@
+{
+  "badge": "Product",
+  "title": "Powerful Features to Automate Customer Service",
+  "subtitle": "AberoAI keeps conversations moving, routes to humans when needed, and gives you data to improve—all on WhatsApp.",
+  "cards": {
+    "instant": {
+      "title": "AI Autoreply 24/7",
+      "desc": "“Reply in under 60 seconds, anytime, anywhere.” AberoAI keeps conversations alive 24/7, even when your staff is offline. The result: saved bookings, happier customers, and no lost sales opportunities."
+    },
+    "multitenant": {
+      "title": "Multi-tenant Management",
+      "desc": "“One dashboard, complete control of every branch.” Manage HQ and branches in one platform with role-based access per branch or staff. Organized, secure, and ready to scale."
+    },
+    "analytics": {
+      "title": "Realtime Analytics Dashboard",
+      "desc": "“Decisions powered by data, not guesswork.” Track conversations, response times, and customer satisfaction in real time to optimize ROI and spot trends from day one."
+    },
+    "handoff": {
+      "title": "Human Handoff",
+      "desc": "“Smart AI, your staff are still the heroes.” When things get complex or sensitive, AberoAI routes the chat to a human agent—without breaking the flow."
+    },
+    "multilingual": {
+      "title": "Multilingual Support",
+      "desc": "“Automatic multilingual service without limits.” Serve customers in multiple languages including English and Turkish—feel professional and expand globally with ease."
+    },
+    "booking": {
+      "title": "Booking & After-care Automation",
+      "desc": "“Faster bookings, guaranteed follow-ups.” From scheduling and reminders to after-care messages—everything runs automatically to reduce no-shows and grow loyalty."
+    }
+  },
+  "cta": {
+    "primary": "See demo",
+    "secondary": "Contact sales"
+  }
+}

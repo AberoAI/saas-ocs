@@ -1,0 +1,35 @@
+{
+  "badge": "Ürün",
+  "title": "Müşteri Hizmetlerini Otomatikleştiren Güçlü Özellikler",
+  "subtitle": "AberoAI konuşmaları kesintisiz sürdürür, gerektiğinde insana devreder ve iyileştirme için veri sunar—hepsi WhatsApp üzerinde.",
+  "cards": {
+    "instant": {
+      "title": "Yapay Zekâ ile 7/24 Otomatik Yanıt",
+      "desc": "“Müşterileriniz ne zaman, nereden yazarsa yazsın; 60 saniyeden kısa sürede yanıt alın.” AberoAI 7/24 aktif kalarak konuşmaları sürdürür. Personeliniz çevrimdışı olsa bile müşteriler beklemez. Sonuç: kurtarılan randevular, artan memnuniyet ve kaçırılmayan satış fırsatları."
+    },
+    "multitenant": {
+      "title": "Çoklu Şube Yönetimi",
+      "desc": "“Tek panel, tüm şubeler kontrol altında.” Merkezden en küçük şubeye kadar tüm ekipleri tek bir platformda yönetin. Her şube veya çalışan için ayrı yetkilendirme; daha düzenli, güvenli ve ölçeklenmeye hazır."
+    },
+    "analytics": {
+      "title": "Gerçek Zamanlı Analitik Paneli",
+      "desc": "“Sezgilere değil, verilere dayalı kararlar.” Konuşmaları, yanıt hızını ve müşteri memnuniyetini anlık izleyin. Bu içgörüler ROI’yi artırmanıza ve iş trendlerini ilk günden görmenize yardımcı olur."
+    },
+    "handoff": {
+      "title": "İnsana Devretme",
+      "desc": "“Akıllı yapay zekâ, ama kahraman hâlâ ekibiniz.” Sorular karmaşık veya hassas olduğunda, AberoAI sohbeti kesintisiz şekilde insan personele aktarır. Akış bozulmaz, müşteri değer görür, verimlilik korunur."
+    },
+    "multilingual": {
+      "title": "Çok Dilli Destek",
+      "desc": "“Sınır tanımayan otomatik çok dilli hizmet.” AberoAI; Türkçe, İngilizce ve birçok dili destekler. Uluslararası müşteriler güvende hisseder, markanız profesyonel görünür ve pazarınız kolayca genişler."
+    },
+    "booking": {
+      "title": "Rezervasyon ve Sonrası Takip Otomasyonu",
+      "desc": "“Daha hızlı rezervasyon, garanti altına alınmış takip.” Randevu planlamasından hatırlatmalara, hizmet sonrası mesajlara kadar her şey otomatik işler. No-show’lar azalır, sadakat güçlenir."
+    }
+  },
+  "cta": {
+    "primary": "Demoyu gör",
+    "secondary": "Satışla iletişime geç"
+  }
+}
