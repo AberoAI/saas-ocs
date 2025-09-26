@@ -8,22 +8,21 @@ export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
-  const localePrefix = m?.[1] ? `/${m[1]}` : ""; // konsisten dgn Navbar-mu
+  const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
   const withLocale = (href: string) => {
-    if (/^https?:\/\//.test(href)) return href; // biarkan external/absolute
+    if (/^https?:\/\//.test(href)) return href; // eksternal/absolute
     if (href.startsWith("#")) return href;      // anchor lokal
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
-  // 6 poin fitur final (whatsapp → multitenant, booking diperluas)
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
-    { key: "instant",      icon: "⚡️" }, // AI Autoreply 24/7
-    { key: "multitenant",  icon: "🏢" }, // Multi-tenant Management
-    { key: "analytics",    icon: "📊" }, // Realtime Analytics Dashboard
-    { key: "handoff",      icon: "🤝" }, // Human Handoff
-    { key: "multilingual", icon: "🌐" }, // Multilingual Support
-    { key: "booking",      icon: "📅" }, // Booking & After-care Automation
+    { key: "instant",      icon: "⚡️" },
+    { key: "multitenant",  icon: "🏢" },
+    { key: "analytics",    icon: "📊" },
+    { key: "handoff",      icon: "🤝" },
+    { key: "multilingual", icon: "🌐" },
+    { key: "booking",      icon: "📅" },
   ];
 
   return (
@@ -52,14 +51,9 @@ export default function FeaturesPage() {
       </section>
 
       <div className="mt-10 flex gap-3">
-        {/* anchor lokal: tetap di halaman saat ini */}
-        <a
-          href="#demo"
-          className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90"
-        >
+        <a href="#demo" className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/90">
           {t("cta.primary")}
         </a>
-        {/* route lain: locale-aware */}
         <a
           href={withLocale("/contact")}
           className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5"
@@ -71,7 +65,6 @@ export default function FeaturesPage() {
   );
 }
 
-/** Tipe i18n khusus halaman (per-namespace) */
 type IntlMessages = {
   features: {
     badge: string;

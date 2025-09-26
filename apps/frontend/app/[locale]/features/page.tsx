@@ -1,6 +1,4 @@
 // apps/frontend/app/[locale]/features/page.tsx
-import {NextIntlClientProvider} from "next-intl";
-import {getLocale} from "next-intl/server";
 import FeaturesPage from "@/components/FeaturesPage";
 
 export const metadata = {
@@ -12,14 +10,7 @@ export const metadata = {
   },
 };
 
-export default async function Page() {
-  const locale = await getLocale();
-  // muat hanya namespace 'features' untuk locale aktif
-  const features = (await import(`@/messages/${locale}/features.json`)).default;
-
-  return (
-    <NextIntlClientProvider messages={{features}}>
-      <FeaturesPage />
-    </NextIntlClientProvider>
-  );
+export default function Page() {
+  // Provider sudah disiapkan di [locale]/layout.tsx; cukup render komponennya.
+  return <FeaturesPage />;
 }

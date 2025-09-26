@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
-// ⬇️ GANTI baris ini:
+// ⬇️ tetap pakai relatif seperti versi kamu
 import { domain, locales, defaultLocale } from "../../i18n";
-// ⬆️ dari sebelumnya: import { domain, locales, defaultLocale } from "@/i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
 
@@ -18,7 +17,6 @@ function isLocale(val: string): val is Locale {
   return (locales as readonly string[]).includes(val);
 }
 
-// tetap: tipe eksplisit agar tidak implicit-any
 export function generateStaticParams() {
   return (locales as ReadonlyArray<Locale>).map((l: Locale) => ({ locale: l }));
 }
@@ -33,12 +31,31 @@ function getAbsoluteSiteUrl(): string {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-import enMessages from "../../messages/en.json";
-import trMessages from "../../messages/tr.json";
-const MESSAGES: Record<"en" | "tr", AbstractIntlMessages> = {
-  en: (enMessages as AbstractIntlMessages) ?? {},
-  tr: (trMessages as AbstractIntlMessages) ?? {},
-} as const;
+// === NEW: loader yang merge root + per-namespace (features, dst.)
+async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
+  // root messages (nav, hero, dsb)
+  const base =
+    (await import(`../../messages/${loc}.json`)
+      .then((m) => m.default)
+      .catch(() => ({}))) as AbstractIntlMessages;
+
+  // daftar namespace per-halaman yang mau kamu split (bisa ditambah sewaktu-waktu)
+  const namespaces = ["features"] as const;
+
+  const extraPairs = await Promise.all(
+    namespaces.map(async (ns) => {
+      try {
+        const mod = (await import(`@/messages/${loc}/${ns}.json`)).default;
+        return { [ns]: mod } as AbstractIntlMessages;
+      } catch {
+        return {} as AbstractIntlMessages;
+      }
+    })
+  );
+
+  // merge menjadi satu objek messages
+  return Object.assign({}, base, ...extraPairs);
+}
 
 export async function generateMetadata(
   { params: { locale } }: Props
@@ -72,7 +89,7 @@ export default async function LocaleLayout({
 
   setRequestLocale(loc);
 
-  const messages = (MESSAGES[loc as "en" | "tr"] ?? {}) as AbstractIntlMessages;
+  const messages = (await loadMessages(loc)) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
 
   return (
@@ -85,7 +102,6 @@ export default async function LocaleLayout({
       <Script
         id="ld-softwareapp"
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
