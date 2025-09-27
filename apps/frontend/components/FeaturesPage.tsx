@@ -52,18 +52,20 @@ export default function FeaturesPage() {
     }),
   };
 
-  // ---------- Sticky viewport + staged content ----------
+  // ---------- Sticky viewport + staged content + scroll-snap ----------
   // 3 stage: 0=Hero, 1=Grid Fitur, 2=CTA
   const STAGES = 3;
-  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // inner scroller dengan scroll-snap; progress mengikuti scroller ini
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"], // 0..1 sepanjang container
+    container: scrollRef,
   });
 
   const [stage, setStage] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(STAGES - 1, Math.floor(v * STAGES + 1e-6));
+    // v 0..1 → 0..(STAGES-1) ; pembulatan agar “snap” pas 1 gesture
+    const idx = Math.max(0, Math.min(STAGES - 1, Math.round(v * (STAGES - 1))));
     if (idx !== stage) setStage(idx);
   });
 
@@ -77,112 +79,122 @@ export default function FeaturesPage() {
     [prefersReduced]
   );
 
-  // transisi halus saat beranjak dari hero ke stage berikutnya
-  const yOnScroll = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const heroY = prefersReduced ? 0 : yOnScroll;
+  // transisi halus dari hero ke stage berikutnya
+  const heroYOnScroll = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroY = prefersReduced ? 0 : heroYOnScroll;
   const heroOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
 
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* Container tinggi = STAGES * 100vh agar ada ruang scroll */}
-      <div ref={containerRef} className="relative" style={{ height: `${STAGES * 100}vh` }}>
-        {/* Viewport sticky yang selalu 1 layar → terasa satu halaman */}
-        <div className="sticky top-0 h-screen flex items-center">
-          <div className="w-full">
-            <AnimatePresence mode="wait">
-              {/* Stage 0: HERO */}
-              {stage === 0 && (
-                <motion.section key="stage-hero" {...stageFade} className="text-center">
-                  <motion.div style={{ y: heroY, opacity: heroOpacity }}>
-                    <motion.span
-                      className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-                      style={{ background: `${BRAND}14` }}
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.05}
-                    >
-                      {t("badge")}
-                    </motion.span>
-
-                    <motion.h1
-                      className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.12}
-                    >
-                      {t("title")}
-                    </motion.h1>
-
-                    <motion.p
-                      className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto"
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.2}
-                    >
-                      {t("subtitle")}
-                    </motion.p>
-                  </motion.div>
-
-                  <div className="mt-10 inline-flex items-center gap-2 text-foreground/60">
-                    <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
-                  </div>
-                </motion.section>
-              )}
-
-              {/* Stage 1: GRID FITUR */}
-              {stage === 1 && (
-                <motion.section key="stage-grid" {...stageFade}>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {items.map(({ key, icon }) => (
-                      <div
-                        key={String(key)}
-                        className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      {/* INNER SCROLLER: tinggi 1 layar + snap; satu gesture → pindah stage */}
+      <div
+        ref={scrollRef}
+        className="h-screen overflow-y-auto snap-y snap-mandatory"
+      >
+        <div className="relative">
+          {/* Viewport sticky yang selalu 1 layar → terasa satu halaman */}
+          <div className="sticky top-0 h-screen flex items-center">
+            <div className="w-full">
+              <AnimatePresence mode="wait">
+                {/* Stage 0: HERO */}
+                {stage === 0 && (
+                  <motion.section key="stage-hero" {...stageFade} className="text-center">
+                    <motion.div style={{ y: heroY, opacity: heroOpacity }}>
+                      <motion.span
+                        className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
+                        style={{ background: `${BRAND}14` }}
+                        variants={rise}
+                        initial="hidden"
+                        animate="visible"
+                        custom={0.05}
                       >
+                        {t("badge")}
+                      </motion.span>
+
+                      <motion.h1
+                        className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                        variants={rise}
+                        initial="hidden"
+                        animate="visible"
+                        custom={0.12}
+                      >
+                        {t("title")}
+                      </motion.h1>
+
+                      <motion.p
+                        className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto"
+                        variants={rise}
+                        initial="hidden"
+                        animate="visible"
+                        custom={0.2}
+                      >
+                        {t("subtitle")}
+                      </motion.p>
+                    </motion.div>
+
+                    <div className="mt-10 inline-flex items-center gap-2 text-foreground/60">
+                      <span className="text-sm">Scroll</span>
+                      <span className="animate-bounce" aria-hidden>↓</span>
+                    </div>
+                  </motion.section>
+                )}
+
+                {/* Stage 1: GRID FITUR */}
+                {stage === 1 && (
+                  <motion.section key="stage-grid" {...stageFade}>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {items.map(({ key, icon }) => (
                         <div
-                          className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
-                          aria-hidden
-                          style={{ background: `${BRAND}14`, color: BRAND }}
+                          key={String(key)}
+                          className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
                         >
-                          {icon}
+                          <div
+                            className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
+                            aria-hidden
+                            style={{ background: `${BRAND}14`, color: BRAND }}
+                          >
+                            {icon}
+                          </div>
+
+                          <h3 className="text-base font-medium">{t(`cards.${key}.title`)}</h3>
+                          <p className="mt-1 text-sm text-foreground/70">{t(`cards.${key}.desc`)}</p>
                         </div>
+                      ))}
+                    </div>
+                  </motion.section>
+                )}
 
-                        <h3 className="text-base font-medium">{t(`cards.${key}.title`)}</h3>
-                        <p className="mt-1 text-sm text-foreground/70">{t(`cards.${key}.desc`)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </motion.section>
-              )}
+                {/* Stage 2: CTA */}
+                {stage === 2 && (
+                  <motion.section key="stage-cta" {...stageFade} className="text-center">
+                    <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
+                    <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
 
-              {/* Stage 2: CTA */}
-              {stage === 2 && (
-                <motion.section key="stage-cta" {...stageFade} className="text-center">
-                  <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
-                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
-
-                  <div className="mt-8 flex justify-center gap-3">
-                    <a
-                      href="#demo"
-                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
-                      style={{ backgroundColor: BRAND }}
-                    >
-                      {t("cta.primary")}
-                    </a>
-                    <a
-                      href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
-                    >
-                      {t("cta.secondary")}
-                    </a>
-                  </div>
-                </motion.section>
-              )}
-            </AnimatePresence>
+                    <div className="mt-8 flex justify-center gap-3">
+                      <a
+                        href="#demo"
+                        className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
+                        style={{ backgroundColor: BRAND }}
+                      >
+                        {t("cta.primary")}
+                      </a>
+                      <a
+                        href={withLocale("/contact")}
+                        className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
+                      >
+                        {t("cta.secondary")}
+                      </a>
+                    </div>
+                  </motion.section>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
+
+          {/* Sentinel snap points: tepat 1 layar per stage */}
+          {Array.from({ length: STAGES }).map((_, i) => (
+            <div key={i} className="h-screen snap-start" aria-hidden />
+          ))}
         </div>
       </div>
     </main>
