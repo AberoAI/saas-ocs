@@ -3,7 +3,14 @@
 
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  type Variants,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { useRef } from "react";
 
 export default function FeaturesPage() {
   const t = useTranslations("features");
@@ -43,40 +50,57 @@ export default function FeaturesPage() {
     }),
   };
 
+  // ----- Hide on scroll untuk hero -----
+  const heroRef = useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"], // saat bawah hero menyentuh top → 1
+  });
+
+  // jika reduce motion aktif, jangan gerakkan Y
+  const hideY = prefersReduced ? 0 : useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const hideOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       {/* HERO — tampil di tengah layar saat pertama kali masuk */}
-      <section className="min-h-screen flex flex-col items-center justify-center text-center">
-        <motion.span
-          className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-          style={{ background: `${BRAND}14` }}
-          variants={rise}
-          initial="hidden"
-          animate="visible"
-          custom={0.05}
-        >
-          {t("badge")}
-        </motion.span>
+      <section
+        ref={heroRef}
+        className="min-h-screen flex flex-col items-center justify-center text-center"
+      >
+        {/* wrapper untuk efek turun + fade saat scroll */}
+        <motion.div style={{ y: hideY, opacity: hideOpacity }}>
+          <motion.span
+            className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
+            style={{ background: `${BRAND}14` }}
+            variants={rise}
+            initial="hidden"
+            animate="visible"
+            custom={0.05}
+          >
+            {t("badge")}
+          </motion.span>
 
-        <motion.h1
-          className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-          variants={rise}
-          initial="hidden"
-          animate="visible"
-          custom={0.12}
-        >
-          {t("title")}
-        </motion.h1>
+          <motion.h1
+            className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+            variants={rise}
+            initial="hidden"
+            animate="visible"
+            custom={0.12}
+          >
+            {t("title")}
+          </motion.h1>
 
-        <motion.p
-          className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70"
-          variants={rise}
-          initial="hidden"
-          animate="visible"
-          custom={0.2}
-        >
-          {t("subtitle")}
-        </motion.p>
+          <motion.p
+            className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70"
+            variants={rise}
+            initial="hidden"
+            animate="visible"
+            custom={0.2}
+          >
+            {t("subtitle")}
+          </motion.p>
+        </motion.div>
 
         {/* scroll cue */}
         <a
