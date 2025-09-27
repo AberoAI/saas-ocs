@@ -49,7 +49,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // fitur cards (digunakan saat “reveal” grid biasa – dibiarkan untuk reuse)
+  // (tetap disimpan untuk reuse jika perlu)
   const cardRise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
     visible: (i: number = 0) => ({
@@ -80,13 +80,11 @@ export default function FeaturesPage() {
 
   const [stage, setStage] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    // cocokkan dengan titik snap (0, 1/(STAGES-1), ... , 1)
     const idx = Math.max(0, Math.min(STAGES - 1, Math.round(v * (STAGES - 1))));
     if (idx !== stage) setStage(idx);
   });
 
   // ---- sub-stage untuk "points" di stage grid ----
-  // map progress [1/3 .. 2/3] -> [0..1] lalu bulatkan ke index item
   const STAGE1_START = 1 / STAGES;
   const STAGE1_END = 2 / STAGES;
   const stage1Progress = useTransform(
@@ -95,10 +93,34 @@ export default function FeaturesPage() {
     [0, 1],
     { clamp: true }
   );
+
+  // >>> Perbaikan sensitivitas di sini <<<
   const [point, setPoint] = useState(0);
+  const pointRef = useRef(0);
+  useEffect(() => {
+    pointRef.current = point;
+  }, [point]);
+
   useMotionValueEvent(stage1Progress, "change", (p) => {
-    const idx = Math.max(0, Math.min(items.length - 1, Math.round(p * (items.length - 1))));
-    if (idx !== point) setPoint(idx);
+    const steps = items.length - 1;      // jumlah langkah
+    const current = pointRef.current;    // poin aktif saat ini
+    const pos = p * steps;               // posisi kontinyu (0..steps)
+    const rawTarget = Math.round(pos);   // target ideal (boleh loncat)
+
+    // hysteresis: perlu melewati ~60% dari langkah berikut
+    let target = current;
+    const HYST = 0.60;
+
+    if (pos > current + HYST) target = current + 1;
+    else if (pos < current - HYST) target = current - 1;
+
+    // jika scroll sangat cepat (rawTarget beda > 1), batasi max 1 langkah
+    if (Math.abs(rawTarget - current) > 1) {
+      target = current + Math.sign(rawTarget - current);
+    }
+
+    target = Math.max(0, Math.min(steps, target));
+    if (target !== current) setPoint(target);
   });
 
   const stageFade = useMemo(
@@ -251,7 +273,7 @@ export default function FeaturesPage() {
           </div>
         </div>
 
-        {/* Sentinel snap points: 1 layar per stage (tanpa snap-stop:always) */}
+        {/* Sentinel snap points: 1 layar per stage */}
         {Array.from({ length: STAGES }).map((_, i) => (
           <div key={i} className="h-screen snap-start" aria-hidden />
         ))}
