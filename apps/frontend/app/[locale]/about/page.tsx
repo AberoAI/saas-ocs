@@ -2,7 +2,6 @@
 import type { Metadata } from "next";
 import AboutView from "../../about/_AboutView";
 import type { AboutCopy } from "../../about/types";
-import { getLocale } from "next-intl/server";
 
 export const dynamic = "force-static";
 
@@ -15,12 +14,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function AboutLocalePage() {
-  const locale = (await getLocale()).toLowerCase();
-  const isTR = locale.startsWith("tr");
+type PageProps = { params: { locale: string } };
+
+// ✅ Ambil locale dari params (BUKAN getLocale) agar TR benar-benar memuat copy TR
+export default async function AboutLocalePage({ params: { locale } }: PageProps) {
+  const isTR = (locale ?? "").toLowerCase().startsWith("tr");
   const localePrefix = isTR ? "/tr" : "/en";
 
-  // Muat JSON per-locale; fallback aman ke EN kalau file tidak ditemukan
+  // Muat JSON per-locale; fallback aman ke EN jika file tidak ditemukan
   let copy: AboutCopy;
   try {
     copy = (
