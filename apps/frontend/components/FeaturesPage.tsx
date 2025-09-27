@@ -12,7 +12,7 @@ import {
   AnimatePresence,
   useMotionValueEvent,
 } from "framer-motion";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 export default function FeaturesPage() {
   const t = useTranslations("features");
@@ -63,7 +63,8 @@ export default function FeaturesPage() {
 
   const [stage, setStage] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(STAGES - 1, Math.floor(v * STAGES + 1e-6));
+    // tanpa inner scroller, biar pas dengan snap body kita pakai pembulatan
+    const idx = Math.max(0, Math.min(STAGES - 1, Math.round(v * (STAGES - 1))));
     if (idx !== stage) setStage(idx);
   });
 
@@ -81,6 +82,20 @@ export default function FeaturesPage() {
   const yOnScroll = useTransform(scrollYProgress, [0, 1], [0, 80]);
   const heroY = prefersReduced ? 0 : yOnScroll;
   const heroOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
+
+  // ===== Enable scroll-snap di html/body hanya di halaman ini =====
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.scrollSnapType;
+    const prevBody = body.style.scrollSnapType;
+    html.style.scrollSnapType = "y mandatory";
+    body.style.scrollSnapType = "y mandatory";
+    return () => {
+      html.style.scrollSnapType = prevHtml;
+      body.style.scrollSnapType = prevBody;
+    };
+  }, []);
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -184,6 +199,11 @@ export default function FeaturesPage() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Sentinel snap points di flow dokumen (1 layar per stage) */}
+        {Array.from({ length: STAGES }).map((_, i) => (
+          <div key={i} className="h-screen snap-start" aria-hidden />
+        ))}
       </div>
     </main>
   );
