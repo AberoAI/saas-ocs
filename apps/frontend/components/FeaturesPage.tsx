@@ -69,23 +69,30 @@ export default function FeaturesPage() {
     pointRef.current = point;
   }, [point]);
 
+  // dipakai untuk mengunci perubahan saat kita sedang smooth-scroll
+  const lockRef = useRef(false);
+
   const stepperHeightVh = items.length * 100;
 
-  // Sinkronkan highlight saat drag scrollbar / PageUpDown / touch
+  // Sinkronkan highlight saat drag scrollbar / PageUpDown / touch (tanpa intersep)
   useEffect(() => {
     const onScroll = () => {
+      if (lockRef.current) return; // biar nggak rebutan saat smooth-scroll
       const root = stepperRef.current;
       if (!root) return;
 
       const rect = root.getBoundingClientRect();
       const vh = window.innerHeight;
 
+      // hanya saat area terlihat cukup di viewport
       const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
       if (!visible) return;
 
       const startY = window.scrollY + rect.top;
       const pos = window.scrollY - startY;
-      const idx = Math.round(Math.max(0, Math.min(items.length - 1, pos / vh)));
+      const idx = Math.round(
+        Math.max(0, Math.min(items.length - 1, pos / vh))
+      );
       if (idx !== pointRef.current) setPoint(idx);
     };
 
@@ -98,13 +105,12 @@ export default function FeaturesPage() {
     };
   }, [items.length, stepperHeightVh]);
 
-  // Intersepsi wheel/touch di area stepper: 1 gerakan ⇒ ±1 poin
+  // Intersepsi wheel/touch di area stepper: 1 gerakan ⇒ ±1 poin (stabil)
   useEffect(() => {
     if (prefersReduced) return;
     const root = stepperRef.current;
     if (!root) return;
 
-    let animating = false;
     let unlockTimer: number | null = null;
 
     const scrollToIndex = (next: number) => {
@@ -112,24 +118,31 @@ export default function FeaturesPage() {
       const startTop = window.scrollY + rect.top;
       const target = startTop + next * window.innerHeight;
 
-      animating = true;
+      lockRef.current = true;
       setPoint(next);
       window.scrollTo({ top: target, behavior: "smooth" });
 
       if (unlockTimer) window.clearTimeout(unlockTimer);
+      // buffer sedikit di atas durasi native smooth-scroll
       unlockTimer = window.setTimeout(() => {
-        animating = false;
-      }, 500);
+        lockRef.current = false;
+      }, 420);
+    };
+
+    const inViewport = () => {
+      const rect = root.getBoundingClientRect();
+      const vh = window.innerHeight;
+      return rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
     };
 
     const onWheel = (e: WheelEvent) => {
-      const rect = root.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
-      if (!visible) return;
+      // jangan intersep saat pinch-zoom / gesture lain
+      if (e.ctrlKey) return;
+      if (!inViewport()) return;
 
+      // cegah inertial scroll menembus stepper
       e.preventDefault();
-      if (animating) return;
+      if (lockRef.current) return;
 
       const dir = e.deltaY > 0 ? 1 : -1;
       const next = Math.max(0, Math.min(items.length - 1, pointRef.current + dir));
@@ -139,22 +152,18 @@ export default function FeaturesPage() {
     // Sentuh (mobile)
     let touchStartY = 0;
     const onTouchStart = (e: TouchEvent) => {
-      const rect = root.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
-      if (!visible) return;
+      if (!inViewport()) return;
       touchStartY = e.touches[0].clientY;
     };
     const onTouchMove = (e: TouchEvent) => {
-      const rect = root.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
-      if (!visible) return;
+      if (!inViewport()) return;
+      if (lockRef.current) return;
 
       const delta = touchStartY - e.touches[0].clientY;
-      if (Math.abs(delta) < 24 || animating) return;
-      e.preventDefault();
+      // filter geser kecil agar tidak sensitif
+      if (Math.abs(delta) < 28) return;
 
+      e.preventDefault();
       const dir = delta > 0 ? 1 : -1;
       const next = Math.max(0, Math.min(items.length - 1, pointRef.current + dir));
       if (next !== pointRef.current) scrollToIndex(next);
