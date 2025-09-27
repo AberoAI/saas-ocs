@@ -57,8 +57,9 @@ export default function FeaturesPage() {
     offset: ["start start", "end start"], // saat bawah hero menyentuh top → 1
   });
 
-  // jika reduce motion aktif, jangan gerakkan Y
-  const hideY = prefersReduced ? 0 : useTransform(scrollYProgress, [0, 1], [0, 80]);
+  // panggil hooks SELALU, lalu pilih hasilnya saat dipakai (hindari conditional hooks)
+  const yOnScroll = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const hideY = prefersReduced ? 0 : yOnScroll;
   const hideOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
 
   return (
