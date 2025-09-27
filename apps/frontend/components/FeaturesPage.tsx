@@ -11,6 +11,7 @@ import {
   useTransform,
   AnimatePresence,
   useMotionValueEvent,
+  useSpring, // ⟵ tambah
 } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 
@@ -49,7 +50,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // (tetap disimpan untuk reuse jika perlu)
+  // (tetap untuk reuse bila perlu)
   const cardRise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
     visible: (i: number = 0) => ({
@@ -60,7 +61,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // aktifkan scroll-snap di <html> hanya saat halaman ini hidup
+  // aktifkan scroll-snap di <html> selama halaman ini aktif
   useEffect(() => {
     const html = document.documentElement;
     const prev = html.style.scrollSnapType;
@@ -94,40 +95,57 @@ export default function FeaturesPage() {
     { clamp: true }
   );
 
-  // >>> Perbaikan sensitivitas di sini <<<
+  // smoothing + anti-loncat
+  const smoothP = useSpring(stage1Progress, {
+    stiffness: 140,
+    damping: 24,
+    mass: 0.7,
+  });
+
   const [point, setPoint] = useState(0);
   const pointRef = useRef(0);
   useEffect(() => {
     pointRef.current = point;
   }, [point]);
 
-  useMotionValueEvent(stage1Progress, "change", (p) => {
-    const steps = items.length - 1;      // jumlah langkah
-    const current = pointRef.current;    // poin aktif saat ini
-    const pos = p * steps;               // posisi kontinyu (0..steps)
-    const rawTarget = Math.round(pos);   // target ideal (boleh loncat)
+  const lastSwitchRef = useRef(0);
 
-    // hysteresis: perlu melewati ~60% dari langkah berikut
+  useMotionValueEvent(smoothP, "change", (p) => {
+    const steps = items.length - 1;
+    const current = pointRef.current;
+    const pos = p * steps; // posisi kontinyu 0..steps
+
+    // throttle agar tidak spam pindah
+    const now = performance.now();
+    const MIN_INTERVAL = 140; // ms
+    if (now - lastSwitchRef.current < MIN_INTERVAL) return;
+
+    // hysteresis (butuh lewat ~55% untuk pindah)
+    const HYST = 0.55;
     let target = current;
-    const HYST = 0.60;
-
     if (pos > current + HYST) target = current + 1;
     else if (pos < current - HYST) target = current - 1;
 
-    // jika scroll sangat cepat (rawTarget beda > 1), batasi max 1 langkah
+    // kalau input terlalu cepat, batasi max 1 langkah
+    const rawTarget = Math.round(pos);
     if (Math.abs(rawTarget - current) > 1) {
       target = current + Math.sign(rawTarget - current);
     }
 
     target = Math.max(0, Math.min(steps, target));
-    if (target !== current) setPoint(target);
+    if (target !== current) {
+      setPoint(target);
+      pointRef.current = target;
+      lastSwitchRef.current = now;
+    }
   });
 
+  // ringankan animasi (hapus blur yang berat)
   const stageFade = useMemo(
     () => ({
-      initial: { opacity: 0, y: prefersReduced ? 0 : 14, filter: "blur(2px)" },
-      animate: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.45, ease: EASE } },
-      exit: { opacity: 0, y: prefersReduced ? 0 : -12, filter: "blur(2px)", transition: { duration: 0.35, ease: EASE } },
+      initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
+      animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+      exit: { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.3, ease: EASE } },
     }),
     [prefersReduced]
   );
@@ -138,7 +156,6 @@ export default function FeaturesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* container tinggi 3 layar agar ada ruang scroll */}
       <div
         ref={containerRef}
         className="relative snap-start"
@@ -149,8 +166,8 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* ===== Stage 0: HERO ===== */}
               {stage === 0 && (
-                <motion.section key="stage-hero" {...stageFade} className="text-center">
-                  <motion.div style={{ y: heroY, opacity: heroOpacity }}>
+                <motion.section key="stage-hero" {...stageFade} className="text-center will-change-[transform,opacity]">
+                  <motion.div style={{ y: heroY, opacity: heroOpacity }} className="will-change-[transform,opacity]">
                     <motion.span
                       className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                       style={{ background: `${BRAND}14` }}
@@ -192,7 +209,7 @@ export default function FeaturesPage() {
 
               {/* ===== Stage 1: FEATURES STEP-BY-STEP ===== */}
               {stage === 1 && (
-                <motion.section key="stage-grid" {...stageFade}>
+                <motion.section key="stage-grid" {...stageFade} className="will-change-[transform,opacity]">
                   <div className="grid gap-8 md:grid-cols-3 items-start">
                     {/* daftar poin (kiri) */}
                     <ol className="hidden md:flex md:flex-col md:gap-4">
@@ -225,10 +242,10 @@ export default function FeaturesPage() {
                       <AnimatePresence mode="wait">
                         <motion.div
                           key={items[point].key}
-                          initial={{ opacity: 0, y: prefersReduced ? 0 : 12, filter: "blur(2px)" }}
-                          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.35, ease: EASE } }}
-                          exit={{ opacity: 0, y: prefersReduced ? 0 : -10, filter: "blur(2px)", transition: { duration: 0.25, ease: EASE } }}
-                          className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm"
+                          initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
+                          animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } }}
+                          exit={{ opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } }}
+                          className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm will-change-[transform,opacity]"
                         >
                           <div
                             className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
@@ -248,7 +265,7 @@ export default function FeaturesPage() {
 
               {/* ===== Stage 2: CTA ===== */}
               {stage === 2 && (
-                <motion.section key="stage-cta" {...stageFade} className="text-center">
+                <motion.section key="stage-cta" {...stageFade} className="text-center will-change-[transform,opacity]">
                   <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
                   <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
 
