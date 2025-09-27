@@ -3,12 +3,14 @@
 
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
+  const prefersReduced = useReducedMotion();
 
   const withLocale = (href: string) => {
     if (/^https?:\/\//.test(href)) return href; // eksternal/absolute
@@ -28,24 +30,53 @@ export default function FeaturesPage() {
   // BRAND color dipakai halus untuk badge/icon background (tidak mengubah sistem warna lain)
   const BRAND = "#26658C";
 
+  // Easing cubic-bezier (v12 butuh array, bukan string)
+  const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+  // Variants animasi “muncul & naik”
+  const rise: Variants = {
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 18 },
+    visible: (delay: number = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: EASE, delay },
+    }),
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       {/* HERO — tampil di tengah layar saat pertama kali masuk */}
       <section className="min-h-screen flex flex-col items-center justify-center text-center">
-        <span
+        <motion.span
           className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
           style={{ background: `${BRAND}14` }}
+          variants={rise}
+          initial="hidden"
+          animate="visible"
+          custom={0.05}
         >
           {t("badge")}
-        </span>
+        </motion.span>
 
-        <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+        <motion.h1
+          className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+          variants={rise}
+          initial="hidden"
+          animate="visible"
+          custom={0.12}
+        >
           {t("title")}
-        </h1>
+        </motion.h1>
 
-        <p className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70">
+        <motion.p
+          className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70"
+          variants={rise}
+          initial="hidden"
+          animate="visible"
+          custom={0.2}
+        >
           {t("subtitle")}
-        </p>
+        </motion.p>
 
         {/* scroll cue */}
         <a
