@@ -49,7 +49,6 @@ export default function FeaturesPage() {
     }),
   };
 
-  // disimpan untuk reuse; matikan warning unused-var
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const cardRise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
@@ -61,15 +60,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.scrollSnapType;
-    html.style.scrollSnapType = "y proximity";
-    return () => {
-      html.style.scrollSnapType = prev;
-    };
-  }, []);
-
+  // HAPUS scroll-snap global (biar gak auto balik). Jangan set apa-apa di <html>.
   // ---------- Sticky viewport + staged content ----------
   const STAGES = 3;
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -94,10 +85,11 @@ export default function FeaturesPage() {
     { clamp: true }
   );
 
+  // Pegas lebih berat → lembut, anti overshoot
   const smoothP = useSpring(stage1Progress, {
-    stiffness: 70,
-    damping: 36,
-    mass: 0.8,
+    stiffness: 60,
+    damping: 40,
+    mass: 0.9,
   });
 
   const [point, setPoint] = useState(0);
@@ -106,18 +98,28 @@ export default function FeaturesPage() {
     pointRef.current = point;
   }, [point]);
 
+  // cooldown + deadzone arming
   const lastSwitchRef = useRef(0);
+  const [armed, setArmed] = useState(true);
 
   useMotionValueEvent(smoothP, "change", (p) => {
-    const steps = items.length - 1;  // 0..5
-    const current = pointRef.current; // <-- const (fix prefer-const)
-    const pos = p * steps;
+    const steps = items.length - 1;    // 0..5
+    const current = pointRef.current;
+    const pos = p * steps;             // posisi kontinyu (0..steps)
+
+    // re-arm ketika sudah stabil di pusat current (deadzone ±0.25 langkah)
+    const CENTER_REARM = 0.25;
+    if (!armed) {
+      if (Math.abs(pos - current) <= CENTER_REARM) setArmed(true);
+      return;
+    }
 
     const now = performance.now();
-    const MIN_INTERVAL = 300;        // ms
+    const MIN_INTERVAL = 500;          // ms — lebih tinggi = makin kalem
     if (now - lastSwitchRef.current < MIN_INTERVAL) return;
 
-    const EPS = 0.001;
+    // threshold arah: harus lewat tengah (0.5) dengan margin kecil
+    const EPS = 0.02;
     let target = current;
 
     if (pos >= current + 0.5 + EPS && current < steps) {
@@ -130,6 +132,7 @@ export default function FeaturesPage() {
       setPoint(target);
       pointRef.current = target;
       lastSwitchRef.current = now;
+      setArmed(false); // kunci dulu sampai stabil di pusat poin baru
     }
   });
 
@@ -139,7 +142,7 @@ export default function FeaturesPage() {
       animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
       exit:    { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.3, ease: EASE } },
     }),
-    [prefersReduced, EASE] // tambahkan EASE ke deps
+    [prefersReduced, EASE]
   );
 
   const yOnScroll = useTransform(scrollYProgress, [0, 1], [0, 80]);
@@ -148,14 +151,16 @@ export default function FeaturesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6">
+      {/* container tinggi 3 layar agar ada ruang scroll */}
       <div
         ref={containerRef}
-        className="relative snap-start"
+        className="relative"
         style={{ height: `${STAGES * 100}vh` }}
       >
         <div className="sticky top-0 h-screen flex items-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
+              {/* ===== Stage 0: HERO ===== */}
               {stage === 0 && (
                 <motion.section key="stage-hero" {...stageFade} className="text-center will-change-[transform,opacity]">
                   <motion.div style={{ y: heroY, opacity: heroOpacity }} className="will-change-[transform,opacity]">
@@ -198,9 +203,11 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
+              {/* ===== Stage 1: FEATURES STEP-BY-STEP ===== */}
               {stage === 1 && (
                 <motion.section key="stage-grid" {...stageFade} className="will-change-[transform,opacity]">
                   <div className="grid gap-8 md:grid-cols-3 items-start">
+                    {/* daftar poin (kiri) */}
                     <ol className="hidden md:flex md:flex-col md:gap-4">
                       {items.map(({ key }, idx) => (
                         <li key={String(key)} className="flex items-start gap-3">
@@ -226,6 +233,7 @@ export default function FeaturesPage() {
                       ))}
                     </ol>
 
+                    {/* konten poin aktif (kanan, 2 kolom) */}
                     <div className="md:col-span-2">
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -251,6 +259,7 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
+              {/* ===== Stage 2: CTA ===== */}
               {stage === 2 && (
                 <motion.section key="stage-cta" {...stageFade} className="text-center will-change-[transform,opacity]">
                   <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
@@ -277,8 +286,9 @@ export default function FeaturesPage() {
           </div>
         </div>
 
+        {/* Sentinel tinggi layar untuk memberi ruang scroll per stage */}
         {Array.from({ length: STAGES }).map((_, i) => (
-          <div key={i} className="h-screen snap-start" aria-hidden />
+          <div key={i} className="h-screen" aria-hidden />
         ))}
       </div>
     </main>
