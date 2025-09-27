@@ -49,7 +49,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // fitur cards: muncul satu-per-satu saat grid terlihat
+  // fitur cards (digunakan saat “reveal” grid biasa – dibiarkan untuk reuse)
   const cardRise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
     visible: (i: number = 0) => ({
@@ -85,6 +85,22 @@ export default function FeaturesPage() {
     if (idx !== stage) setStage(idx);
   });
 
+  // ---- sub-stage untuk "points" di stage grid ----
+  // map progress [1/3 .. 2/3] -> [0..1] lalu bulatkan ke index item
+  const STAGE1_START = 1 / STAGES;
+  const STAGE1_END = 2 / STAGES;
+  const stage1Progress = useTransform(
+    scrollYProgress,
+    [STAGE1_START, STAGE1_END],
+    [0, 1],
+    { clamp: true }
+  );
+  const [point, setPoint] = useState(0);
+  useMotionValueEvent(stage1Progress, "change", (p) => {
+    const idx = Math.max(0, Math.min(items.length - 1, Math.round(p * (items.length - 1))));
+    if (idx !== point) setPoint(idx);
+  });
+
   const stageFade = useMemo(
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 14, filter: "blur(2px)" },
@@ -100,7 +116,7 @@ export default function FeaturesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* tambah snap-start di container supaya gampang balik ke atas */}
+      {/* container tinggi 3 layar agar ada ruang scroll */}
       <div
         ref={containerRef}
         className="relative snap-start"
@@ -109,6 +125,7 @@ export default function FeaturesPage() {
         <div className="sticky top-0 h-screen flex items-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
+              {/* ===== Stage 0: HERO ===== */}
               {stage === 0 && (
                 <motion.section key="stage-hero" {...stageFade} className="text-center">
                   <motion.div style={{ y: heroY, opacity: heroOpacity }}>
@@ -151,38 +168,63 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
+              {/* ===== Stage 1: FEATURES STEP-BY-STEP ===== */}
               {stage === 1 && (
                 <motion.section key="stage-grid" {...stageFade}>
-                  {/* Grid: reveal satu-per-satu ketika masuk viewport */}
-                  <motion.div
-                    className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: prefersReduced ? 0 : 0.3 }}
-                  >
-                    {items.map(({ key, icon }, idx) => (
-                      <motion.div
-                        key={String(key)}
-                        className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                        variants={cardRise}
-                        custom={idx}
-                      >
-                        <div
-                          className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
-                          aria-hidden
-                          style={{ background: `${BRAND}14`, color: BRAND }}
-                        >
-                          {icon}
-                        </div>
+                  <div className="grid gap-8 md:grid-cols-3 items-start">
+                    {/* daftar poin (kiri) */}
+                    <ol className="hidden md:flex md:flex-col md:gap-4">
+                      {items.map(({ key }, idx) => (
+                        <li key={String(key)} className="flex items-start gap-3">
+                          <span
+                            className={[
+                              "mt-1 h-7 w-7 shrink-0 rounded-full border flex items-center justify-center text-xs font-medium",
+                              idx === point
+                                ? "bg-black text-white border-black"
+                                : "text-foreground/50 border-black/15",
+                            ].join(" ")}
+                          >
+                            {idx + 1}
+                          </span>
+                          <span
+                            className={[
+                              "leading-6",
+                              idx === point ? "text-foreground font-medium" : "text-foreground/60",
+                            ].join(" ")}
+                          >
+                            {t(`cards.${items[idx].key}.title`)}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
 
-                        <h3 className="text-base font-medium">{t(`cards.${key}.title`)}</h3>
-                        <p className="mt-1 text-sm text-foreground/70">{t(`cards.${key}.desc`)}</p>
-                      </motion.div>
-                    ))}
-                  </motion.div>
+                    {/* konten poin aktif (kanan, 2 kolom) */}
+                    <div className="md:col-span-2">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={items[point].key}
+                          initial={{ opacity: 0, y: prefersReduced ? 0 : 12, filter: "blur(2px)" }}
+                          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.35, ease: EASE } }}
+                          exit={{ opacity: 0, y: prefersReduced ? 0 : -10, filter: "blur(2px)", transition: { duration: 0.25, ease: EASE } }}
+                          className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm"
+                        >
+                          <div
+                            className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
+                            aria-hidden
+                            style={{ background: `${BRAND}14`, color: BRAND }}
+                          >
+                            {items[point].icon}
+                          </div>
+                          <h3 className="text-lg font-medium">{t(`cards.${items[point].key}.title`)}</h3>
+                          <p className="mt-2 text-foreground/70">{t(`cards.${items[point].key}.desc`)}</p>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </div>
                 </motion.section>
               )}
 
+              {/* ===== Stage 2: CTA ===== */}
               {stage === 2 && (
                 <motion.section key="stage-cta" {...stageFade} className="text-center">
                   <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
