@@ -39,12 +39,24 @@ export default function FeaturesPage() {
   const BRAND = "#26658C";
   const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+  // hero rise
   const rise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 18 },
     visible: (delay: number = 0) => ({
       opacity: 1,
       y: 0,
       transition: { duration: 0.5, ease: EASE, delay },
+    }),
+  };
+
+  // fitur cards: muncul satu-per-satu saat grid terlihat
+  const cardRise: Variants = {
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
+    visible: (i: number = 0) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: 0.45, ease: EASE, delay: 0.05 + i * 0.07 },
     }),
   };
 
@@ -141,11 +153,19 @@ export default function FeaturesPage() {
 
               {stage === 1 && (
                 <motion.section key="stage-grid" {...stageFade}>
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {items.map(({ key, icon }) => (
-                      <div
+                  {/* Grid: reveal satu-per-satu ketika masuk viewport */}
+                  <motion.div
+                    className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: prefersReduced ? 0 : 0.3 }}
+                  >
+                    {items.map(({ key, icon }, idx) => (
+                      <motion.div
                         key={String(key)}
                         className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                        variants={cardRise}
+                        custom={idx}
                       >
                         <div
                           className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
@@ -157,9 +177,9 @@ export default function FeaturesPage() {
 
                         <h3 className="text-base font-medium">{t(`cards.${key}.title`)}</h3>
                         <p className="mt-1 text-sm text-foreground/70">{t(`cards.${key}.desc`)}</p>
-                      </div>
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
                 </motion.section>
               )}
 
