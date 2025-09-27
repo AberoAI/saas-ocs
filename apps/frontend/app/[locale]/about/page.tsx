@@ -18,13 +18,17 @@ export const metadata: Metadata = {
 export default async function AboutLocalePage() {
   const locale = (await getLocale()).toLowerCase();
   const isTR = locale.startsWith("tr");
-
-  // ambil copy dari messages JSON per-locale (sejalan dengan Features)
-  const copy = (await import(`@/messages/${isTR ? "tr" : "en"}/about.json`))
-    .default as AboutCopy;
-
-  // prefix untuk tautan internal (mis. /en/contact atau /tr/contact)
   const localePrefix = isTR ? "/tr" : "/en";
+
+  // Muat JSON per-locale; fallback aman ke EN kalau file tidak ditemukan
+  let copy: AboutCopy;
+  try {
+    copy = (
+      await import(`@/messages/${isTR ? "tr" : "en"}/about.json`)
+    ).default as AboutCopy;
+  } catch {
+    copy = (await import("@/messages/en/about.json")).default as AboutCopy;
+  }
 
   return <AboutView copy={copy} localePrefix={localePrefix} />;
 }
