@@ -8,12 +8,10 @@ import {
   useReducedMotion,
   type Variants,
   AnimatePresence,
-  useScroll,
-  useTransform,
 } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Easing cubic-bezier (stabil, di luar komponen supaya tidak berubah tiap render)
+// Easing stabil (top-level agar tidak berubah per render)
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function FeaturesPage() {
@@ -29,71 +27,71 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
+  // 6 poin fitur
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
-    { key: "instant", icon: "⚡️" },
-    { key: "multitenant", icon: "🏢" },
-    { key: "analytics", icon: "📊" },
-    { key: "handoff", icon: "🤝" },
+    { key: "instant",      icon: "⚡️" },
+    { key: "multitenant",  icon: "🏢" },
+    { key: "analytics",    icon: "📊" },
+    { key: "handoff",      icon: "🤝" },
     { key: "multilingual", icon: "🌐" },
-    { key: "booking", icon: "📅" },
+    { key: "booking",      icon: "📅" },
   ];
 
   const BRAND = "#26658C";
 
-  // ===== HERO =====
+  // ===== Variants sederhana, ringan (tanpa blur) =====
   const rise: Variants = {
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 18 },
+    hidden:  { opacity: 0, y: prefersReduced ? 0 : 16 },
     visible: (delay: number = 0) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: EASE, delay },
+      transition: { duration: 0.45, ease: EASE, delay },
     }),
   };
 
-  const heroRef = useRef<HTMLElement | null>(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
+  const stageFade = useMemo(
+    () => ({
+      initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
+      animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
+      exit:    { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } },
+    }),
+    [prefersReduced]
+  );
 
-  // Panggil hook SELALU, lalu pilih hasilnya (hindari conditional hooks)
-  const heroYOffset = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const heroY = prefersReduced ? 0 : heroYOffset;
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
+  // ===== Satu viewport sticky, beberapa langkah konten =====
+  // step 0 = Hero, step 1..6 = poin fitur, step 7 = CTA
+  const TOTAL_STEPS = items.length + 2; // 6 + hero + cta = 8
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // ===== FEATURES STEPPER (STABIL) =====
-  const stepperRef = useRef<HTMLDivElement | null>(null);
-  const [point, setPoint] = useState(0);
-  const pointRef = useRef(0);
-  useEffect(() => {
-    pointRef.current = point;
-  }, [point]);
+  const [step, setStep] = useState(0);
+  const stepRef = useRef(0);
+  useEffect(() => { stepRef.current = step; }, [step]);
 
-  // dipakai untuk mengunci perubahan saat kita sedang smooth-scroll
+  // Lock agar tidak rebutan saat smooth-scroll menuju target step
   const lockRef = useRef(false);
 
-  const stepperHeightVh = items.length * 100;
+  const containerHeightVh = TOTAL_STEPS * 100;
 
-  // Sinkronkan highlight saat drag scrollbar / PageUpDown / touch (tanpa intersep)
+  // Sinkronkan step saat user drag scrollbar / PgUp/Down / scroll biasa
   useEffect(() => {
     const onScroll = () => {
-      if (lockRef.current) return; // biar nggak rebutan saat smooth-scroll
-      const root = stepperRef.current;
+      if (lockRef.current) return;
+      const root = containerRef.current;
       if (!root) return;
 
       const rect = root.getBoundingClientRect();
       const vh = window.innerHeight;
 
-      // hanya saat area terlihat cukup di viewport
+      // Interaksi hanya saat kontainer terlihat cukup
       const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
       if (!visible) return;
 
-      const startY = window.scrollY + rect.top;
-      const pos = window.scrollY - startY;
+      const containerTop = window.scrollY + rect.top;
+      const pos = window.scrollY - containerTop;
       const idx = Math.round(
-        Math.max(0, Math.min(items.length - 1, pos / vh))
+        Math.max(0, Math.min(TOTAL_STEPS - 1, pos / vh))
       );
-      if (idx !== pointRef.current) setPoint(idx);
+      if (idx !== stepRef.current) setStep(idx);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -103,31 +101,15 @@ export default function FeaturesPage() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [items.length, stepperHeightVh]);
+  }, [TOTAL_STEPS, containerHeightVh]);
 
-  // Intersepsi wheel/touch di area stepper: 1 gerakan ⇒ ±1 poin (stabil)
+  // Intersep gesture di area kontainer: 1 gesture = ±1 step (stabil, tanpa loncat)
   useEffect(() => {
     if (prefersReduced) return;
-    const root = stepperRef.current;
+    const root = containerRef.current;
     if (!root) return;
 
     let unlockTimer: number | null = null;
-
-    const scrollToIndex = (next: number) => {
-      const rect = root.getBoundingClientRect();
-      const startTop = window.scrollY + rect.top;
-      const target = startTop + next * window.innerHeight;
-
-      lockRef.current = true;
-      setPoint(next);
-      window.scrollTo({ top: target, behavior: "smooth" });
-
-      if (unlockTimer) window.clearTimeout(unlockTimer);
-      // buffer sedikit di atas durasi native smooth-scroll
-      unlockTimer = window.setTimeout(() => {
-        lockRef.current = false;
-      }, 420);
-    };
 
     const inViewport = () => {
       const rect = root.getBoundingClientRect();
@@ -135,39 +117,50 @@ export default function FeaturesPage() {
       return rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
     };
 
-    const onWheel = (e: WheelEvent) => {
-      // jangan intersep saat pinch-zoom / gesture lain
-      if (e.ctrlKey) return;
-      if (!inViewport()) return;
+    const scrollToStep = (next: number) => {
+      const rect = root.getBoundingClientRect();
+      const containerTop = window.scrollY + rect.top;
+      const target = containerTop + next * window.innerHeight;
 
-      // cegah inertial scroll menembus stepper
+      lockRef.current = true;
+      setStep(next);
+      window.scrollTo({ top: target, behavior: "smooth" });
+
+      if (unlockTimer) window.clearTimeout(unlockTimer);
+      unlockTimer = window.setTimeout(() => {
+        lockRef.current = false;
+      }, 420); // sedikit di atas durasi smooth-scroll native
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (!inViewport()) return;
+      if (e.ctrlKey) return; // pinch-zoom dll
       e.preventDefault();
       if (lockRef.current) return;
 
       const dir = e.deltaY > 0 ? 1 : -1;
-      const next = Math.max(0, Math.min(items.length - 1, pointRef.current + dir));
-      if (next !== pointRef.current) scrollToIndex(next);
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      if (next !== stepRef.current) scrollToStep(next);
     };
 
     // Sentuh (mobile)
-    let touchStartY = 0;
+    let startY = 0;
     const onTouchStart = (e: TouchEvent) => {
       if (!inViewport()) return;
-      touchStartY = e.touches[0].clientY;
+      startY = e.touches[0].clientY;
     };
     const onTouchMove = (e: TouchEvent) => {
       if (!inViewport()) return;
       if (lockRef.current) return;
 
-      const delta = touchStartY - e.touches[0].clientY;
-      // filter geser kecil agar tidak sensitif
-      if (Math.abs(delta) < 28) return;
-
+      const delta = startY - e.touches[0].clientY; // geser ke atas = positif
+      if (Math.abs(delta) < 28) return; // threshold biar nggak sensitif
       e.preventDefault();
+
       const dir = delta > 0 ? 1 : -1;
-      const next = Math.max(0, Math.min(items.length - 1, pointRef.current + dir));
-      if (next !== pointRef.current) scrollToIndex(next);
-      touchStartY = e.touches[0].clientY;
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      if (next !== stepRef.current) scrollToStep(next);
+      startY = e.touches[0].clientY;
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
@@ -180,161 +173,135 @@ export default function FeaturesPage() {
       root.removeEventListener("touchmove", onTouchMove as EventListener);
       if (unlockTimer) window.clearTimeout(unlockTimer);
     };
-  }, [items.length, prefersReduced]);
+  }, [TOTAL_STEPS, prefersReduced]);
 
-  const stageFade = useMemo(
-    () => ({
-      initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
-      animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
-      exit: { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } },
-    }),
-    [prefersReduced]
-  );
-
+  // ===== Render =====
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* ===== HERO ===== */}
-      <section
-        ref={heroRef}
-        className="min-h-screen flex flex-col items-center justify-center text-center"
-      >
-        <motion.div style={{ y: heroY, opacity: heroOpacity }}>
-          <motion.span
-            className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-            style={{ background: `${BRAND}14` }}
-            variants={rise}
-            initial="hidden"
-            animate="visible"
-            custom={0.05}
-          >
-            {t("badge")}
-          </motion.span>
-
-          <motion.h1
-            className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-            variants={rise}
-            initial="hidden"
-            animate="visible"
-            custom={0.12}
-          >
-            {t("title")}
-          </motion.h1>
-
-          <motion.p
-            className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto"
-            variants={rise}
-            initial="hidden"
-            animate="visible"
-            custom={0.2}
-          >
-            {t("subtitle")}
-          </motion.p>
-        </motion.div>
-
-        <a
-          href="#features-stepper"
-          className="mt-10 inline-flex items-center gap-2 text-foreground/60 hover:text-foreground transition"
-          aria-label="Scroll to features"
-        >
-          <span className="text-sm">Scroll</span>
-          <span className="animate-bounce" aria-hidden>↓</span>
-        </a>
-      </section>
-
-      {/* ===== FEATURES STEPPER ===== */}
+      {/* Satu kontainer tinggi n layar; viewport sticky menampilkan satu konten */}
       <div
-        id="features-stepper"
-        ref={stepperRef}
+        ref={containerRef}
         className="relative"
-        style={{ height: `${stepperHeightVh}vh` }}
+        style={{ height: `${containerHeightVh}vh` }}
       >
-        <div className="sticky top-0 h-screen grid gap-8 md:grid-cols-3 items-start">
-          {/* daftar poin (kiri) */}
-          <ol className="hidden md:flex md:flex-col md:gap-4 pt-16">
-            {items.map(({ key }, idx) => (
-              <li key={String(key)} className="flex items-start gap-3">
-                <span
-                  className={[
-                    "mt-1 h-7 w-7 shrink-0 rounded-full border flex items-center justify-center text-xs font-medium",
-                    idx === point
-                      ? "bg-black text-white border-black"
-                      : "text-foreground/50 border-black/15",
-                  ].join(" ")}
-                >
-                  {idx + 1}
-                </span>
-                <span
-                  className={[
-                    "leading-6",
-                    idx === point ? "text-foreground font-medium" : "text-foreground/60",
-                  ].join(" ")}
-                >
-                  {t(`cards.${items[idx].key}.title`)}
-                </span>
-              </li>
-            ))}
-          </ol>
-
-          {/* konten aktif (kanan, 2 kolom) */}
-          <div className="md:col-span-2 flex items-center">
+        <div className="sticky top-0 h-screen flex items-center justify-center">
+          <div className="w-full">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={items[point].key}
-                {...stageFade}
-                className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm w-full"
-              >
-                <div
-                  className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl text-2xl"
-                  aria-hidden
-                  style={{ background: `${BRAND}14`, color: BRAND }}
+              {/* Step 0: HERO */}
+              {step === 0 && (
+                <motion.section
+                  key="step-hero"
+                  {...stageFade}
+                  className="text-center"
                 >
-                  {items[point].icon}
-                </div>
-                <h3 className="text-lg font-medium">{t(`cards.${items[point].key}.title`)}</h3>
-                <p className="mt-2 text-foreground/70">{t(`cards.${items[point].key}.desc`)}</p>
+                  <motion.span
+                    className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
+                    style={{ background: `${BRAND}14` }}
+                    variants={rise}
+                    initial="hidden"
+                    animate="visible"
+                    custom={0.05}
+                  >
+                    {t("badge")}
+                  </motion.span>
 
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <a
-                    href="#demo"
-                    className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
-                    style={{ backgroundColor: BRAND }}
+                  <motion.h1
+                    className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                    variants={rise}
+                    initial="hidden"
+                    animate="visible"
+                    custom={0.12}
                   >
-                    {t("cta.primary")}
-                  </a>
-                  <a
-                    href={withLocale("/contact")}
-                    className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
+                    {t("title")}
+                  </motion.h1>
+
+                  <motion.p
+                    className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto"
+                    variants={rise}
+                    initial="hidden"
+                    animate="visible"
+                    custom={0.2}
                   >
-                    {t("cta.secondary")}
-                  </a>
-                </div>
-              </motion.div>
+                    {t("subtitle")}
+                  </motion.p>
+
+                  <div className="mt-10 inline-flex items-center gap-2 text-foreground/60">
+                    <span className="text-sm">Scroll</span>
+                    <span className="animate-bounce" aria-hidden>↓</span>
+                  </div>
+                </motion.section>
+              )}
+
+              {/* Step 1..6: setiap scroll ganti ke poin berikutnya */}
+              {step >= 1 && step <= items.length && (
+                <motion.section
+                  key={`step-point-${step}`}
+                  {...stageFade}
+                  className="text-center"
+                >
+                  <div
+                    className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+                    aria-hidden
+                    style={{ background: `${BRAND}14`, color: BRAND }}
+                  >
+                    {items[step - 1].icon}
+                  </div>
+                  <h3 className="text-xl font-semibold">
+                    {t(`cards.${items[step - 1].key}.title`)}
+                  </h3>
+                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70">
+                    {t(`cards.${items[step - 1].key}.desc`)}
+                  </p>
+
+                  {/* indikator kecil */}
+                  <div className="mt-6 flex justify-center gap-2">
+                    {items.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 w-6 rounded-full ${
+                          i === step - 1 ? "bg-black" : "bg-black/15"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </motion.section>
+              )}
+
+              {/* Step terakhir: CTA */}
+              {step === items.length + 1 && (
+                <motion.section
+                  key="step-cta"
+                  {...stageFade}
+                  className="text-center"
+                >
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    {t("title")}
+                  </h2>
+                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">
+                    {t("subtitle")}
+                  </p>
+
+                  <div className="mt-8 flex justify-center gap-3">
+                    <a
+                      href="#demo"
+                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
+                      style={{ backgroundColor: BRAND }}
+                    >
+                      {t("cta.primary")}
+                    </a>
+                    <a
+                      href={withLocale("/contact")}
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
+                    >
+                      {t("cta.secondary")}
+                    </a>
+                  </div>
+                </motion.section>
+              )}
             </AnimatePresence>
           </div>
         </div>
       </div>
-
-      {/* ===== CTA ===== */}
-      <section className="py-20 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
-        <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
-
-        <div className="mt-8 flex justify-center gap-3">
-          <a
-            href="#demo"
-            className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
-            style={{ backgroundColor: BRAND }}
-          >
-            {t("cta.primary")}
-          </a>
-          <a
-            href={withLocale("/contact")}
-            className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
-          >
-            {t("cta.secondary")}
-          </a>
-        </div>
-      </section>
     </main>
   );
 }
