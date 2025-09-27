@@ -11,7 +11,7 @@ import {
   useTransform,
   AnimatePresence,
   useMotionValueEvent,
-  useSpring, // ⟵ tambah
+  useSpring, // << tambah
 } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 
@@ -50,7 +50,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // (tetap untuk reuse bila perlu)
+  // (tetap disimpan untuk reuse jika perlu)
   const cardRise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
     visible: (i: number = 0) => ({
@@ -61,7 +61,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // aktifkan scroll-snap di <html> selama halaman ini aktif
+  // aktifkan scroll-snap di <html> hanya saat halaman ini hidup
   useEffect(() => {
     const html = document.documentElement;
     const prev = html.style.scrollSnapType;
@@ -95,7 +95,7 @@ export default function FeaturesPage() {
     { clamp: true }
   );
 
-  // smoothing + anti-loncat
+  // Smoothing + anti-loncat:
   const smoothP = useSpring(stage1Progress, {
     stiffness: 140,
     damping: 24,
@@ -108,39 +108,39 @@ export default function FeaturesPage() {
     pointRef.current = point;
   }, [point]);
 
+  // throttle agar tidak spam pindah
   const lastSwitchRef = useRef(0);
 
   useMotionValueEvent(smoothP, "change", (p) => {
-    const steps = items.length - 1;
+    const steps = items.length - 1; // 0..5 untuk 6 item
     const current = pointRef.current;
-    const pos = p * steps; // posisi kontinyu 0..steps
+    const pos = p * steps;          // posisi kontinyu
+    const rawTarget = Math.round(pos);
 
-    // throttle agar tidak spam pindah
-    const now = performance.now();
-    const MIN_INTERVAL = 140; // ms
-    if (now - lastSwitchRef.current < MIN_INTERVAL) return;
-
-    // hysteresis (butuh lewat ~55% untuk pindah)
-    const HYST = 0.55;
+    // hysteresis: perlu melewati ~60% jarak langkah berikutnya
+    const HYST = 0.60;
     let target = current;
     if (pos > current + HYST) target = current + 1;
     else if (pos < current - HYST) target = current - 1;
 
-    // kalau input terlalu cepat, batasi max 1 langkah
-    const rawTarget = Math.round(pos);
+    // batasi max 1 langkah walau scroll cepat
     if (Math.abs(rawTarget - current) > 1) {
       target = current + Math.sign(rawTarget - current);
     }
 
     target = Math.max(0, Math.min(steps, target));
-    if (target !== current) {
+
+    // throttle
+    const now = performance.now();
+    const MIN_INTERVAL = 140; // ms
+    if (target !== current && now - lastSwitchRef.current >= MIN_INTERVAL) {
       setPoint(target);
       pointRef.current = target;
       lastSwitchRef.current = now;
     }
   });
 
-  // ringankan animasi (hapus blur yang berat)
+  // Ringankan animasi (hilangkan filter blur)
   const stageFade = useMemo(
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
@@ -156,6 +156,7 @@ export default function FeaturesPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6">
+      {/* container tinggi 3 layar agar ada ruang scroll */}
       <div
         ref={containerRef}
         className="relative snap-start"
