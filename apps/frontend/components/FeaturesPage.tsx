@@ -12,7 +12,7 @@ import {
   AnimatePresence,
   useMotionValueEvent,
 } from "framer-motion";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 export default function FeaturesPage() {
   const t = useTranslations("features");
@@ -52,6 +52,16 @@ export default function FeaturesPage() {
     }),
   };
 
+  // ===== aktifkan scroll-snap HANYA di <html> (bukan di body) ====
+  useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.scrollSnapType;
+    html.style.scrollSnapType = "y proximity";
+    return () => {
+      html.style.scrollSnapType = prev;
+    };
+  }, []);
+
   // ---------- Sticky viewport + staged content ----------
   // 3 stage: 0=Hero, 1=Grid Fitur, 2=CTA
   const STAGES = 3;
@@ -63,7 +73,8 @@ export default function FeaturesPage() {
 
   const [stage, setStage] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(STAGES - 1, Math.floor(v * STAGES + 1e-6));
+    // sesuaikan dengan titik snap: 0, 1/(STAGES-1), 2/(STAGES-1), ...
+    const idx = Math.max(0, Math.min(STAGES - 1, Math.round(v * (STAGES - 1))));
     if (idx !== stage) setStage(idx);
   });
 
@@ -150,8 +161,8 @@ export default function FeaturesPage() {
                           {icon}
                         </div>
 
-                        <h3 className="text-base font-medium">{t(`cards.${key}.title`)}</h3>
-                        <p className="mt-1 text-sm text-foreground/70">{t(`cards.${key}.desc`)}</p>
+                          <h3 className="text-base font-medium">{t(`cards.${key}.title`)}</h3>
+                          <p className="mt-1 text-sm text-foreground/70">{t(`cards.${key}.desc`)}</p>
                       </div>
                     ))}
                   </div>
@@ -184,6 +195,11 @@ export default function FeaturesPage() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Sentinel snap points (1 layar per stage) */}
+        {Array.from({ length: STAGES }).map((_, i) => (
+          <div key={i} className="h-screen snap-start [scroll-snap-stop:always]" aria-hidden />
+        ))}
       </div>
     </main>
   );
