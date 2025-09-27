@@ -11,7 +11,7 @@ import {
   useTransform,
   AnimatePresence,
   useMotionValueEvent,
-  useSpring, // << tambah
+  useSpring,
 } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 
@@ -61,7 +61,7 @@ export default function FeaturesPage() {
     }),
   };
 
-  // aktifkan scroll-snap di <html> hanya saat halaman ini hidup
+  // aktifkan scroll-snap di <html> hanya di halaman ini
   useEffect(() => {
     const html = document.documentElement;
     const prev = html.style.scrollSnapType;
@@ -88,6 +88,7 @@ export default function FeaturesPage() {
   // ---- sub-stage untuk "points" di stage grid ----
   const STAGE1_START = 1 / STAGES;
   const STAGE1_END = 2 / STAGES;
+
   const stage1Progress = useTransform(
     scrollYProgress,
     [STAGE1_START, STAGE1_END],
@@ -95,11 +96,11 @@ export default function FeaturesPage() {
     { clamp: true }
   );
 
-  // Smoothing + anti-loncat:
+  // Pegas lebih berat → gerak kalem (anti overshoot)
   const smoothP = useSpring(stage1Progress, {
-    stiffness: 140,
-    damping: 24,
-    mass: 0.7,
+    stiffness: 70,
+    damping: 36,
+    mass: 0.8,
   });
 
   const [point, setPoint] = useState(0);
@@ -108,44 +109,43 @@ export default function FeaturesPage() {
     pointRef.current = point;
   }, [point]);
 
-  // throttle agar tidak spam pindah
+  // cooldown agar satu scroll panjang tidak memicu banyak loncatan
   const lastSwitchRef = useRef(0);
 
   useMotionValueEvent(smoothP, "change", (p) => {
-    const steps = items.length - 1; // 0..5 untuk 6 item
-    const current = pointRef.current;
-    const pos = p * steps;          // posisi kontinyu
-    const rawTarget = Math.round(pos);
+    const steps = items.length - 1;  // 0..5
+    let current = pointRef.current;
+    const pos = p * steps;           // posisi kontinyu 0..steps
 
-    // hysteresis: perlu melewati ~60% jarak langkah berikutnya
-    const HYST = 0.60;
+    const now = performance.now();
+    const MIN_INTERVAL = 300;        // ms — lebih besar = makin kalem
+    if (now - lastSwitchRef.current < MIN_INTERVAL) return;
+
+    // ambang titik tengah: harus lewat 0.5 langkah untuk pindah
+    const EPS = 0.001;
     let target = current;
-    if (pos > current + HYST) target = current + 1;
-    else if (pos < current - HYST) target = current - 1;
 
-    // batasi max 1 langkah walau scroll cepat
-    if (Math.abs(rawTarget - current) > 1) {
-      target = current + Math.sign(rawTarget - current);
+    if (pos >= current + 0.5 + EPS && current < steps) {
+      target = current + 1;
+    } else if (pos <= current - 0.5 - EPS && current > 0) {
+      target = current - 1;
     }
 
-    target = Math.max(0, Math.min(steps, target));
-
-    // throttle
-    const now = performance.now();
-    const MIN_INTERVAL = 140; // ms
-    if (target !== current && now - lastSwitchRef.current >= MIN_INTERVAL) {
+    // clamp & set
+    if (target !== current) {
+      target = Math.max(0, Math.min(steps, target));
       setPoint(target);
       pointRef.current = target;
       lastSwitchRef.current = now;
     }
   });
 
-  // Ringankan animasi (hilangkan filter blur)
+  // Ringan & responsif
   const stageFade = useMemo(
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
       animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-      exit: { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.3, ease: EASE } },
+      exit:    { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.3, ease: EASE } },
     }),
     [prefersReduced]
   );
