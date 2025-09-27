@@ -10,8 +10,6 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
-  useMotionValueEvent,
-  useSpring,
 } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 
@@ -40,6 +38,7 @@ export default function FeaturesPage() {
   const BRAND = "#26658C";
   const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+  // hero rise
   const rise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 18 },
     visible: (delay: number = 0) => ({
@@ -49,114 +48,106 @@ export default function FeaturesPage() {
     }),
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const cardRise: Variants = {
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 20, scale: prefersReduced ? 1 : 0.98 },
-    visible: (i: number = 0) => ({
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.45, ease: EASE, delay: 0.05 + i * 0.07 },
-    }),
-  };
-
-  // HAPUS scroll-snap global (biar gak auto balik). Jangan set apa-apa di <html>.
   // ---------- Sticky viewport + staged content ----------
-  const STAGES = 3;
+  const STAGES = 3; // 0: hero, 1: points, 2: cta
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
+  // Map progress -> stage (tanpa snap, pakai floor biar tidak dobel-triger di batas)
   const [stage, setStage] = useState(0);
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.max(0, Math.min(STAGES - 1, Math.round(v * (STAGES - 1))));
-    if (idx !== stage) setStage(idx);
-  });
+  useEffect(() => {
+    return scrollYProgress.on("change", (v) => {
+      const idx = Math.max(0, Math.min(STAGES - 1, Math.floor(v * STAGES + 1e-6)));
+      setStage(idx);
+    });
+  }, [scrollYProgress]);
 
   // ---- sub-stage untuk "points" di stage grid ----
-  const STAGE1_START = 1 / STAGES;
-  const STAGE1_END = 2 / STAGES;
-  const stage1Progress = useTransform(
-    scrollYProgress,
-    [STAGE1_START, STAGE1_END],
-    [0, 1],
-    { clamp: true }
-  );
-
-  // Pegas lebih berat → lembut, anti overshoot
-  const smoothP = useSpring(stage1Progress, {
-    stiffness: 60,
-    damping: 40,
-    mass: 0.9,
-  });
-
+  // Gating berbasis wheel/touch agar 1 gulir = 1 langkah, tidak bisa loncat jauh
   const [point, setPoint] = useState(0);
   const pointRef = useRef(0);
   useEffect(() => {
     pointRef.current = point;
   }, [point]);
 
-  // cooldown + deadzone arming
-  const lastSwitchRef = useRef(0);
-  const [armed, setArmed] = useState(true);
+  // aktif hanya ketika berada di stage 1
+  useEffect(() => {
+    if (stage !== 1) return;
 
-  useMotionValueEvent(smoothP, "change", (p) => {
-    const steps = items.length - 1;    // 0..5
-    const current = pointRef.current;
-    const pos = p * steps;             // posisi kontinyu (0..steps)
+    let accum = 0;
+    const maxIndex = items.length - 1;
 
-    // re-arm ketika sudah stabil di pusat current (deadzone ±0.25 langkah)
-    const CENTER_REARM = 0.25;
-    if (!armed) {
-      if (Math.abs(pos - current) <= CENTER_REARM) setArmed(true);
-      return;
-    }
+    const step = (dir: 1 | -1) => {
+      const next = Math.max(0, Math.min(maxIndex, pointRef.current + dir));
+      if (next !== pointRef.current) setPoint(next);
+    };
 
-    const now = performance.now();
-    const MIN_INTERVAL = 500;          // ms — lebih tinggi = makin kalem
-    if (now - lastSwitchRef.current < MIN_INTERVAL) return;
+    const onWheel = (e: WheelEvent) => {
+      // trackpad bisa sangat sensitif — akumulasi dulu
+      accum += e.deltaY;
+      const TH = 120; // ambang (±120 ~ 1 "notch" mouse; trackpad juga oke)
+      if (accum > TH) {
+        step(1);
+        accum = 0;
+      } else if (accum < -TH) {
+        step(-1);
+        accum = 0;
+      }
+    };
 
-    // threshold arah: harus lewat tengah (0.5) dengan margin kecil
-    const EPS = 0.02;
-    let target = current;
+    // dukung sentuh (mobile)
+    let lastY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      lastY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0].clientY;
+      accum += lastY - y; // geser ke atas → positif
+      lastY = y;
+      const TH = 60; // ambang untuk sentuh
+      if (accum > TH) {
+        step(1);
+        accum = 0;
+      } else if (accum < -TH) {
+        step(-1);
+        accum = 0;
+      }
+    };
 
-    if (pos >= current + 0.5 + EPS && current < steps) {
-      target = current + 1;
-    } else if (pos <= current - 0.5 - EPS && current > 0) {
-      target = current - 1;
-    }
+    window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
 
-    if (target !== current) {
-      setPoint(target);
-      pointRef.current = target;
-      lastSwitchRef.current = now;
-      setArmed(false); // kunci dulu sampai stabil di pusat poin baru
-    }
-  });
+    return () => {
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [stage, items.length]);
 
-  const stageFade = useMemo(
-    () => ({
-      initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
-      animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-      exit:    { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.3, ease: EASE } },
-    }),
-    [prefersReduced, EASE]
-  );
-
+  // transisi halus saat beranjak dari hero ke stage berikutnya
   const yOnScroll = useTransform(scrollYProgress, [0, 1], [0, 80]);
   const heroY = prefersReduced ? 0 : yOnScroll;
   const heroOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
 
+  // Ringankan animasi (tanpa blur supaya tidak berat)
+  const stageFade = useMemo(
+    () => ({
+      initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
+      animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+      exit: { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.3, ease: EASE } },
+    }),
+    [prefersReduced, EASE]
+  );
+
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* container tinggi 3 layar agar ada ruang scroll */}
-      <div
-        ref={containerRef}
-        className="relative"
-        style={{ height: `${STAGES * 100}vh` }}
-      >
+      {/* Tinggi kontainer = 3 layar (tanpa snap) */}
+      <div ref={containerRef} className="relative" style={{ height: `${STAGES * 100}vh` }}>
+        {/* Viewport sticky yang selalu 1 layar */}
         <div className="sticky top-0 h-screen flex items-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
@@ -285,11 +276,6 @@ export default function FeaturesPage() {
             </AnimatePresence>
           </div>
         </div>
-
-        {/* Sentinel tinggi layar untuk memberi ruang scroll per stage */}
-        {Array.from({ length: STAGES }).map((_, i) => (
-          <div key={i} className="h-screen" aria-hidden />
-        ))}
       </div>
     </main>
   );
