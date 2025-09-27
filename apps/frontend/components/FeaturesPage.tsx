@@ -13,6 +13,9 @@ import {
 } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+// Easing cubic-bezier (stabil, di luar komponen supaya tidak berubah tiap render)
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
@@ -36,7 +39,6 @@ export default function FeaturesPage() {
   ];
 
   const BRAND = "#26658C";
-  const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
   // ===== HERO =====
   const rise: Variants = {
@@ -53,7 +55,10 @@ export default function FeaturesPage() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const heroY = prefersReduced ? 0 : useTransform(scrollYProgress, [0, 1], [0, 80]);
+
+  // Panggil hook SELALU, lalu pilih hasilnya (hindari conditional hooks)
+  const heroYOffset = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroY = prefersReduced ? 0 : heroYOffset;
   const heroOpacity = useTransform(scrollYProgress, [0, 0.6, 1], [1, 0.25, 0]);
 
   // ===== FEATURES STEPPER (STABIL) =====
@@ -64,10 +69,9 @@ export default function FeaturesPage() {
     pointRef.current = point;
   }, [point]);
 
-  // Tinggi area stepper = N layar
   const stepperHeightVh = items.length * 100;
 
-  // Sinkronkan highlight saat user drag scrollbar / PageUpDown / touch
+  // Sinkronkan highlight saat drag scrollbar / PageUpDown / touch
   useEffect(() => {
     const onScroll = () => {
       const root = stepperRef.current;
@@ -76,12 +80,11 @@ export default function FeaturesPage() {
       const rect = root.getBoundingClientRect();
       const vh = window.innerHeight;
 
-      // hanya saat viewport bersinggungan signifikan dengan area stepper
       const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
       if (!visible) return;
 
       const startY = window.scrollY + rect.top;
-      const pos = window.scrollY - startY; // jarak dari awal area
+      const pos = window.scrollY - startY;
       const idx = Math.round(Math.max(0, Math.min(items.length - 1, pos / vh)));
       if (idx !== pointRef.current) setPoint(idx);
     };
@@ -95,10 +98,9 @@ export default function FeaturesPage() {
     };
   }, [items.length, stepperHeightVh]);
 
-  // Intersepsi wheel HANYA di area stepper: 1 gerakan ⇒ ±1 poin (tanpa loncat)
+  // Intersepsi wheel/touch di area stepper: 1 gerakan ⇒ ±1 poin
   useEffect(() => {
-    if (prefersReduced) return; // biarkan natural untuk accessibility
-
+    if (prefersReduced) return;
     const root = stepperRef.current;
     if (!root) return;
 
@@ -124,9 +126,8 @@ export default function FeaturesPage() {
       const rect = root.getBoundingClientRect();
       const vh = window.innerHeight;
       const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
-      if (!visible) return; // di luar area → jangan intersep
+      if (!visible) return;
 
-      // Intersep agar tidak “nyeret” ke section lain
       e.preventDefault();
       if (animating) return;
 
@@ -151,7 +152,7 @@ export default function FeaturesPage() {
       if (!visible) return;
 
       const delta = touchStartY - e.touches[0].clientY;
-      if (Math.abs(delta) < 24 || animating) return; // ambang kecil
+      if (Math.abs(delta) < 24 || animating) return;
       e.preventDefault();
 
       const dir = delta > 0 ? 1 : -1;
@@ -178,12 +179,12 @@ export default function FeaturesPage() {
       animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
       exit: { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } },
     }),
-    [prefersReduced, EASE]
+    [prefersReduced]
   );
 
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* ===== HERO (section biasa) ===== */}
+      {/* ===== HERO ===== */}
       <section
         ref={heroRef}
         className="min-h-screen flex flex-col items-center justify-center text-center"
@@ -231,7 +232,7 @@ export default function FeaturesPage() {
         </a>
       </section>
 
-      {/* ===== FEATURES STEPPER (kontainer tinggi N layar, konten sticky) ===== */}
+      {/* ===== FEATURES STEPPER ===== */}
       <div
         id="features-stepper"
         ref={stepperRef}
@@ -304,7 +305,7 @@ export default function FeaturesPage() {
         </div>
       </div>
 
-      {/* ===== CTA (section biasa) ===== */}
+      {/* ===== CTA ===== */}
       <section className="py-20 text-center">
         <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
         <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
