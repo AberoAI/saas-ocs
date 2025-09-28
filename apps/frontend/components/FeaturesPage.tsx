@@ -666,9 +666,9 @@ function InstantChatStage({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: EASE } }}
               exit={{ opacity: 0, y: -6, transition: { duration: 0.18, ease: EASE } }}
-              className="inline-flex items-center gap-2 rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm"
+              className="inline-flex items-center"
+              aria-label="typing"
             >
-              <span className="text-[0.9rem] text-foreground/60">AI</span>
               <TypingDots />
             </motion.div>
           )}
@@ -696,7 +696,7 @@ function InstantChatStage({
   );
 }
 
-// typing indicator
+// typing indicator (3 dots only)
 function TypingDots() {
   return (
     <div className="flex items-center gap-1" aria-label="typing">
