@@ -418,81 +418,86 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: KONTEN TANPA KOTAK & TANPA CTA (dengan animasi mikro) */}
+              {/* Step 1..6: KIRI = TEKS (posisi oranye), KANAN = STAGE ANIMASI */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  <div className="min-h-[60vh] flex items-center justify-center">
-                    <AnimatePresence mode="wait">
+                  <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-10 md:gap-14 items-center md:items-start">
+                    {/* LEFT: text block (tanpa kotak & tanpa CTA) */}
+                    <motion.div
+                      variants={contentStagger.container}
+                      initial="hidden"
+                      animate="visible"
+                      exit={{
+                        opacity: 0,
+                        y: prefersReduced ? 0 : -8,
+                        transition: { duration: 0.25, ease: EASE },
+                      }}
+                      className="w-full max-w-3xl md:max-w-none text-center md:text-left"
+                    >
+                      {/* Ikon + halo pulse */}
                       <motion.div
-                        key={items[step - 1].key}
-                        variants={contentStagger.container}
-                        initial="hidden"
-                        animate="visible"
-                        exit={{
-                          opacity: 0,
-                          y: prefersReduced ? 0 : -8,
-                          transition: { duration: 0.25, ease: EASE },
-                        }}
-                        className="w-full max-w-3xl text-center md:text-left"
+                        variants={contentStagger.item}
+                        className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+                        aria-hidden
                       >
-                        {/* Ikon + HALO PULSE */}
-                        <motion.div
-                          variants={contentStagger.item}
-                          className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                          aria-hidden
-                        >
-                          {!prefersReduced && (
-                            <motion.span
-                              className="absolute inset-0 rounded-xl"
-                              style={{ background: BRAND_BG_12 }}
-                              initial={{ opacity: 0.55, scale: 1 }}
-                              animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
-                              transition={{
-                                duration: 1.6,
-                                ease: "easeOut",
-                                repeat: Infinity,
-                                repeatDelay: 0.5,
-                              }}
-                            />
-                          )}
-                          <span style={{ color: BRAND }}>{items[step - 1].icon}</span>
-                        </motion.div>
-
-                        {/* Judul + UNDERLINE SWEEP */}
-                        <motion.h3
-                          variants={contentStagger.item}
-                          className="text-xl md:text-2xl font-semibold inline-block"
-                        >
-                          {t(`cards.${items[step - 1].key}.title`)}
-                          {!prefersReduced && (
-                            <motion.span
-                              aria-hidden
-                              className="block h-[3px] rounded-full mt-1"
-                              style={{ backgroundColor: BRAND, transformOrigin: "0% 50%" }}
-                              initial={{ scaleX: 0 }}
-                              animate={{ scaleX: 1 }}
-                              transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
-                            />
-                          )}
-                        </motion.h3>
-
-                        {/* Deskripsi */}
-                        <motion.p
-                          variants={contentStagger.item}
-                          className="mt-2 text-foreground/70"
-                          data-native-scroll="true"
-                          style={{ maxHeight: 320, overflowY: "auto" }}
-                        >
-                          {t(`cards.${items[step - 1].key}.desc`)}
-                        </motion.p>
-                        {/* CTA per-point tetap dihapus */}
+                        {!prefersReduced && (
+                          <motion.span
+                            className="absolute inset-0 rounded-xl"
+                            style={{ background: BRAND_BG_12 }}
+                            initial={{ opacity: 0.55, scale: 1 }}
+                            animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
+                            transition={{
+                              duration: 1.6,
+                              ease: "easeOut",
+                              repeat: Infinity,
+                              repeatDelay: 0.5,
+                            }}
+                          />
+                        )}
+                        <span style={{ color: BRAND }}>{items[step - 1].icon}</span>
                       </motion.div>
-                    </AnimatePresence>
+
+                      {/* Judul + underline sweep */}
+                      <motion.h3
+                        variants={contentStagger.item}
+                        className="text-xl md:text-2xl font-semibold inline-block"
+                      >
+                        {t(`cards.${items[step - 1].key}.title`)}
+                        {!prefersReduced && (
+                          <motion.span
+                            aria-hidden
+                            className="block h-[3px] rounded-full mt-1"
+                            style={{ backgroundColor: BRAND, transformOrigin: "0% 50%" }}
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
+                          />
+                        )}
+                      </motion.h3>
+
+                      {/* Deskripsi */}
+                      <motion.p
+                        variants={contentStagger.item}
+                        className="mt-2 text-foreground/70"
+                        data-native-scroll="true"
+                        style={{ maxHeight: 320, overflowY: "auto" }}
+                      >
+                        {t(`cards.${items[step - 1].key}.desc`)}
+                      </motion.p>
+                    </motion.div>
+
+                    {/* RIGHT: stage animasi per-point (placeholder, siap ganti Lottie/canvas) */}
+                    <div className="hidden md:flex justify-center md:justify-start">
+                      <FeatureStage
+                        stepKey={items[step - 1].key}
+                        prefersReduced={!!prefersReduced}
+                      />
+                    </div>
                   </div>
                 </motion.section>
               )}
 
-              {/* Step terakhir: CTA */}
+              {/* Step terakhir: CTA (global) */}
               {step === items.length + 1 && (
                 <motion.section key="step-cta" {...stageFade} className="text-center">
                   <h2 className="text-2xl font-semibold tracking-tight">
@@ -524,5 +529,59 @@ export default function FeaturesPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+/* =======================
+ * Stage placeholder untuk animasi per-point
+ * - Bersih & siap diganti Lottie/canvas nantinya
+ * ======================= */
+function FeatureStage({
+  stepKey,
+  prefersReduced,
+}: {
+  stepKey: keyof IntlMessages["features"]["cards"];
+  prefersReduced: boolean;
+}) {
+  const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
+    instant: "#FF9AA2",
+    multitenant: "#B5EAD7",
+    analytics: "#C7CEEA",
+    handoff: "#FFDAC1",
+    multilingual: "#E2F0CB",
+    booking: "#F1F0FF",
+  };
+
+  const base = palette[stepKey] ?? "#EAEAEA";
+
+  return (
+    <motion.div
+      key={stepKey}
+      initial={{ opacity: 0, scale: 0.98, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.35, ease: EASE }}
+      className="aspect-square w-[68vw] max-w-[420px] rounded-2xl"
+      style={{ background: `${base}80` }} // 50% alpha
+      aria-label="Feature animation stage"
+    >
+      {!prefersReduced && (
+        <motion.div
+          className="h-full w-full rounded-2xl"
+          initial={{ clipPath: "inset(50% 50% 50% 50% round 24px)" }}
+          animate={{ clipPath: "inset(12% 12% 12% 12% round 24px)" }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        >
+          <motion.div
+            className="h-full w-full rounded-2xl"
+            style={{
+              background: `radial-gradient(60% 60% at 65% 35%, ${base} 0%, transparent 60%)`,
+            }}
+            animate={{ rotate: [0, 6, -4, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
