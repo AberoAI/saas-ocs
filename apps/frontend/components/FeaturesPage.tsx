@@ -40,6 +40,8 @@ type IntlMessages = {
  * ======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const BRAND = "#26658C";
+// read receipts (double check) akan jadi warna biru saat typing
+const READ_BLUE = "#2563EB";
 
 /* =======================
  * Utils (stable)
@@ -634,6 +636,9 @@ function InstantChatStage({
     };
   }, [prefersReduced, locale]);
 
+  // dianggap "sudah dibaca" sejak indikator typing muncul
+  const isRead = phase !== "idle";
+
   return (
     <motion.div
       variants={containerVariants}
@@ -653,7 +658,23 @@ function InstantChatStage({
           className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
           aria-hidden
         >
-          21:13 ✓✓
+          21:13{" "}
+          {/* double check berubah biru ketika typing/bot */}
+          <motion.span
+            initial={false}
+            animate={{ color: isRead ? READ_BLUE : "inherit" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="ml-0.5"
+          >
+            ✓
+          </motion.span>
+          <motion.span
+            initial={false}
+            animate={{ color: isRead ? READ_BLUE : "inherit" }}
+            transition={{ duration: 0.25, ease: "easeOut", delay: 0.03 }}
+          >
+            ✓
+          </motion.span>
         </time>
       </motion.div>
 
