@@ -386,7 +386,7 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: HANYA KONTEN (list kiri dihapus) */}
+              {/* Step 1..6: KONTEN TANPA KOTAK & TANPA CTA */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
                   <div className="min-h-[60vh] flex items-center justify-center">
@@ -404,7 +404,7 @@ export default function FeaturesPage() {
                           y: prefersReduced ? 0 : -8,
                           transition: { duration: 0.25, ease: EASE },
                         }}
-                        className="rounded-2xl border border-black/10 bg-white p-6 md:p-8 shadow-sm w-full max-w-3xl text-center md:text-left"
+                        className="w-full max-w-3xl text-center md:text-left"
                       >
                         <div
                           className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
@@ -423,22 +423,7 @@ export default function FeaturesPage() {
                         >
                           {t(`cards.${items[step - 1].key}.desc`)}
                         </p>
-
-                        <div className="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
-                          <a
-                            href="#demo"
-                            className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
-                            style={{ backgroundColor: BRAND }}
-                          >
-                            {t("cta.primary")}
-                          </a>
-                          <a
-                            href={withLocale("/contact")}
-                            className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
-                          >
-                            {t("cta.secondary")}
-                          </a>
-                        </div>
+                        {/* CTA per-point dihapus sesuai permintaan */}
                       </motion.div>
                     </AnimatePresence>
                   </div>
