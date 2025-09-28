@@ -439,11 +439,12 @@ export default function FeaturesPage() {
                       }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
-                      {/* === Rapi icon + title untuk SEMUA fitur === */}
-                      <div className="flex items-center justify-center md:justify-start gap-3 md:gap-4">
+                      {/* ====== GRID: ikon | judul/quote/desc (semua konten rata dengan judul) ====== */}
+                      <div className="grid grid-cols-[44px_minmax(0,1fr)] md:grid-cols-[48px_minmax(0,1fr)] gap-x-3 md:gap-x-4 items-start">
+                        {/* Icon (col 1) */}
                         <motion.div
                           variants={contentStagger.item}
-                          className="relative inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl text-xl md:text-2xl shrink-0"
+                          className="relative h-10 w-10 md:h-12 md:w-12 rounded-xl text-xl md:text-2xl flex items-center justify-center select-none"
                           aria-hidden
                         >
                           {!prefersReduced && (
@@ -465,9 +466,10 @@ export default function FeaturesPage() {
                           </span>
                         </motion.div>
 
+                        {/* Title (col 2) */}
                         <motion.h3
                           variants={contentStagger.item}
-                          className="text-xl md:text-2xl font-semibold leading-tight"
+                          className="col-start-2 text-xl md:text-2xl font-semibold leading-tight"
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
                           {!prefersReduced && (
@@ -481,29 +483,29 @@ export default function FeaturesPage() {
                             />
                           )}
                         </motion.h3>
-                      </div>
-                      {/* === /Rapi icon + title === */}
 
-                      {/* Deskripsi: jika ada kutipan pembuka, pisahkan */}
-                      {(() => {
-                        const descRaw = t(
-                          `cards.${items[step - 1].key}.desc`
-                        ) as unknown as string;
-                        const { quote, rest } = splitQuoted(descRaw);
-                        return (
-                          <motion.div
-                            variants={contentStagger.item}
-                            className="mt-3 text-foreground/70 space-y-3"
-                            data-native-scroll="true"
-                            style={{ maxHeight: 320, overflowY: "auto" }}
-                          >
-                            {quote && (
-                              <p className="italic text-foreground/80">“{quote}”</p>
-                            )}
-                            <p>{quote ? rest : descRaw}</p>
-                          </motion.div>
-                        );
-                      })()}
+                        {/* Quote + body (col 2), selalu di bawah & sejajar dengan judul */}
+                        {(() => {
+                          const descRaw = t(
+                            `cards.${items[step - 1].key}.desc`
+                          ) as unknown as string;
+                          const { quote, rest } = splitQuoted(descRaw);
+                          return (
+                            <motion.div
+                              variants={contentStagger.item}
+                              className="col-start-2 mt-3 text-foreground/70 space-y-3"
+                              data-native-scroll="true"
+                              style={{ maxHeight: 320, overflowY: "auto" }}
+                            >
+                              {quote && (
+                                <p className="italic text-foreground/80">“{quote}”</p>
+                              )}
+                              <p>{quote ? rest : descRaw}</p>
+                            </motion.div>
+                          );
+                        })()}
+                      </div>
+                      {/* ====== /GRID ====== */}
                     </motion.div>
 
                     {/* RIGHT: stage (selaras dengan judul, bukan emoji) */}
