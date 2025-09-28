@@ -486,7 +486,7 @@ export default function FeaturesPage() {
                       </motion.p>
                     </motion.div>
 
-                    {/* RIGHT: stage animasi per-point (placeholder, siap ganti Lottie/canvas) */}
+                    {/* RIGHT: stage animasi per-point (placeholder/instant) */}
                     <div className="hidden md:flex justify-center md:justify-start">
                       <FeatureStage
                         stepKey={items[step - 1].key}
@@ -533,8 +533,9 @@ export default function FeaturesPage() {
 }
 
 /* =======================
- * Stage placeholder untuk animasi per-point
- * - Bersih & siap diganti Lottie/canvas nantinya
+ * Stage per-point
+ * - "instant": animasi chat cepat
+ * - lainnya: placeholder gradient (tetap)
  * ======================= */
 function FeatureStage({
   stepKey,
@@ -543,6 +544,10 @@ function FeatureStage({
   stepKey: keyof IntlMessages["features"]["cards"];
   prefersReduced: boolean;
 }) {
+  if (stepKey === "instant") {
+    return <InstantChatStage prefersReduced={prefersReduced} />;
+  }
+
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
     instant: "#FF9AA2",
     multitenant: "#B5EAD7",
@@ -583,5 +588,129 @@ function FeatureStage({
         </motion.div>
       )}
     </motion.div>
+  );
+}
+
+/* =======================
+ * InstantChatStage — animasi chat “respon cepat”
+ * ======================= */
+function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.98, y: 8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { duration: 0.35, ease: EASE },
+    },
+  };
+
+  const baseDelay = prefersReduced ? 0 : 0.1;
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.32, ease: EASE, delay: baseDelay + i * 0.45 },
+    }),
+  };
+
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="w-[68vw] max-w-[460px] aspect-[4/3] rounded-2xl p-4 md:p-5 bg-white shadow-sm border border-black/10"
+      aria-label="Lightning-fast auto-reply demo"
+    >
+      {/* Header kecil */}
+      <div className="flex items-center gap-2 text-sm text-foreground/60 mb-3">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: `${BRAND}14`, color: BRAND }}>⚡️</span>
+        <span>Auto-reply is online</span>
+      </div>
+
+      {/* Thread */}
+      <div className="h-full w-full rounded-xl bg-black/5 p-3 overflow-hidden">
+        {/* Pesan user */}
+        <motion.div
+          custom={0}
+          variants={itemVariants}
+          className="max-w-[84%] rounded-2xl px-3 py-2 bg-white border border-black/10 text-[0.95rem] leading-snug mb-2"
+        >
+          Hi! Do you have a table available tonight?
+        </motion.div>
+
+        {/* Typing indicator (AI) */}
+        {!prefersReduced && (
+          <motion.div
+            custom={1}
+            variants={itemVariants}
+            className="max-w-[70%] rounded-2xl px-3 py-2 bg-[#F2F8FC] border border-black/10 text-[0.95rem] leading-snug mb-2 flex items-center gap-2"
+          >
+            <span className="text-[0.9rem] text-foreground/60">AI</span>
+            <TypingDots />
+          </motion.div>
+        )}
+
+        {/* Balasan AI super cepat */}
+        <motion.div
+          custom={prefersReduced ? 1 : 2}
+          variants={itemVariants}
+          className="max-w-[82%] rounded-2xl px-3 py-2 bg-[#F2F8FC] border border-black/10 text-[0.95rem] leading-snug mb-2"
+        >
+          Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for you? <span className="ml-1">⚡️</span>
+        </motion.div>
+
+        {/* Konfirmasi user */}
+        <motion.div
+          custom={prefersReduced ? 2 : 3}
+          variants={itemVariants}
+          className="ml-auto max-w-[72%] rounded-2xl px-3 py-2 bg-white border border-black/10 text-[0.95rem] leading-snug mb-2"
+        >
+          7pm, please.
+        </motion.div>
+
+        {/* Final AI */}
+        <motion.div
+          custom={prefersReduced ? 3 : 4}
+          variants={itemVariants}
+          className="max-w-[86%] rounded-2xl px-3 py-2 bg-[#F2F8FC] border border-black/10 text-[0.95rem] leading-snug"
+        >
+          Booked. I’ve sent the confirmation to your email. Have a great evening! ✨
+        </motion.div>
+      </div>
+
+      {/* Badge waktu respons (opsional) */}
+      {!prefersReduced && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: baseDelay + 0.45 } }}
+          className="mt-3 text-xs text-foreground/60"
+        >
+          Typical AI reply time: <span className="font-medium text-foreground">~0.6s</span>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+/* =======================
+ * Typing dots (•••) untuk AI
+ * ======================= */
+function TypingDots() {
+  return (
+    <div className="flex items-center gap-1">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="inline-block h-1.5 w-1.5 rounded-full"
+          style={{ background: BRAND }}
+          initial={{ opacity: 0.3, y: 0 }}
+          animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+          transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
+        />
+      ))}
+    </div>
   );
 }
