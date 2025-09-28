@@ -65,9 +65,7 @@ const getVVH = (): number =>
 const canScrollWithin = (target: EventTarget | null): boolean => {
   let cur = target as HTMLElement | null;
   while (cur) {
-    // ✅ ketikan benar, tanpa 'any'
     if (cur.dataset?.nativeScroll === "true") return true;
-
     const style = window.getComputedStyle(cur);
     const oy = style.overflowY;
     const canScrollY =
@@ -573,8 +571,8 @@ function FeatureStage({
 
 /* =======================
  * InstantChatStage — 2 bubble, pure bubble + timestamp
- *  - Customer = biru (#F2F8FC)
- *  - Bot = putih
+ *  - POV customer: customer dulu & DI KANAN
+ *  - Customer = biru (#F2F8FC), Bot = putih
  * ======================= */
 function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
   const containerVariants: Variants = {
@@ -605,34 +603,45 @@ function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
       className="w-[68vw] max-w-[460px] aspect-[4/3] flex flex-col justify-center gap-3 select-none"
       aria-label="Lightning-fast auto-reply demo"
     >
-      {/* CUSTOMER bubble — biru */}
+      {/* CUSTOMER bubble — kanan, biru */}
       <motion.div
         custom={0}
         variants={itemVariants}
-        className="self-start max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
+        className="self-end max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
-        Hi! Do you have a table available tonight?
-        <span className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap">
+        <div className="pr-12">
+          Hi! Do you have a table available tonight?
+        </div>
+        <time
+          className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
+          aria-hidden
+        >
           21:13 ✓✓
-        </span>
+        </time>
       </motion.div>
 
-      {/* BOT bubble — putih */}
+      {/* BOT bubble — kiri, putih */}
       <motion.div
         custom={1}
         variants={itemVariants}
         className="self-start max-w-[92%] rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
-        Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for you? ⚡️
-        <span className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap">
+        <div className="pr-10">
+          Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for
+          you? <span className="align-[-2px]">⚡️</span>
+        </div>
+        <time
+          className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
+          aria-hidden
+        >
           21:13
-        </span>
+        </time>
       </motion.div>
     </motion.div>
   );
 }
 
-// Helper kept for future reuse
+// (Optional) kept for reuse
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
