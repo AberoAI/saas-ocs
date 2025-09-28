@@ -574,8 +574,8 @@ function FeatureStage({
 }
 
 /* =======================
- * InstantChatStage — 2 bubble, pure bubble + timestamp
- *  - POV customer: customer dulu & DI KANAN
+ * InstantChatStage — chat sequence + typing
+ *  - POV customer: customer dulu (kanan, biru)
  *  - /en dan /tr copy otomatis
  * ======================= */
 function InstantChatStage({
@@ -619,6 +619,21 @@ function InstantChatStage({
             "Of course! We’re online 24/7. Would you prefer morning or afternoon for your appointment?",
         };
 
+  // phase: customer only -> typing -> bot reply
+  const [phase, setPhase] = useState<"idle" | "typing" | "bot">(
+    prefersReduced ? "bot" : "idle"
+  );
+
+  useEffect(() => {
+    if (prefersReduced) return;
+    const t1 = window.setTimeout(() => setPhase("typing"), 400);
+    const t2 = window.setTimeout(() => setPhase("bot"), 1600);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [prefersReduced, locale]);
+
   return (
     <motion.div
       variants={containerVariants}
@@ -642,31 +657,49 @@ function InstantChatStage({
         </time>
       </motion.div>
 
-      {/* BOT bubble — kiri, putih */}
-      <motion.div
-        custom={1}
-        variants={itemVariants}
-        className="self-start max-w-[92%] rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
-      >
-        <div className="pr-10">
-          {copy.bot} <span className="align-[-2px]">⚡️</span>
-        </div>
-        <time
-          className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
-          aria-hidden
-        >
-          21:13
-        </time>
-      </motion.div>
+      {/* BOT area: typing indicator -> bot reply */}
+      <div className="self-start max-w-[92%]">
+        <AnimatePresence initial={false} mode="wait">
+          {phase === "typing" && (
+            <motion.div
+              key="typing"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: EASE } }}
+              exit={{ opacity: 0, y: -6, transition: { duration: 0.18, ease: EASE } }}
+              className="inline-flex items-center gap-2 rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm"
+            >
+              <span className="text-[0.9rem] text-foreground/60">AI</span>
+              <TypingDots />
+            </motion.div>
+          )}
+
+          {phase === "bot" && (
+            <motion.div
+              key="bot"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } }}
+              exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: EASE } }}
+              className="relative rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
+            >
+              <div className="pr-10">{copy.bot}</div>
+              <time
+                className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
+                aria-hidden
+              >
+                21:13
+              </time>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// (Optional) kept for reuse without lint warnings
+// typing indicator
 function TypingDots() {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" aria-label="typing">
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
@@ -680,4 +713,3 @@ function TypingDots() {
     </div>
   );
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
