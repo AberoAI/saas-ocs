@@ -132,6 +132,38 @@ export default function FeaturesPage() {
   );
 
   /* =======================
+   * Micro animations (ringan & respect reduced-motion)
+   * ======================= */
+  const contentStagger = useMemo(() => {
+    return {
+      container: {
+        hidden: { opacity: 0, y: prefersReduced ? 0 : 8 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.35,
+            ease: EASE,
+            staggerChildren: prefersReduced ? 0 : 0.06,
+            delayChildren: 0.02,
+          },
+        },
+      } as Variants,
+      item: {
+        hidden: { opacity: 0, y: prefersReduced ? 0 : 8 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.35, ease: EASE },
+        },
+      } as Variants,
+    };
+  }, [prefersReduced]);
+
+  // ~12% alpha untuk halo (#RRGGBB + '1F')
+  const BRAND_BG_12 = `${BRAND}1F`;
+
+  /* =======================
    * Sticky viewport multi-step
    * ======================= */
   const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta = 8
@@ -386,19 +418,16 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: KONTEN TANPA KOTAK & TANPA CTA */}
+              {/* Step 1..6: KONTEN TANPA KOTAK & TANPA CTA (dengan animasi mikro) */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
                   <div className="min-h-[60vh] flex items-center justify-center">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={items[step - 1].key}
-                        initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: 0.35, ease: EASE },
-                        }}
+                        variants={contentStagger.container}
+                        initial="hidden"
+                        animate="visible"
                         exit={{
                           opacity: 0,
                           y: prefersReduced ? 0 : -8,
@@ -406,24 +435,57 @@ export default function FeaturesPage() {
                         }}
                         className="w-full max-w-3xl text-center md:text-left"
                       >
-                        <div
-                          className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+                        {/* Ikon + HALO PULSE */}
+                        <motion.div
+                          variants={contentStagger.item}
+                          className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
                           aria-hidden
-                          style={{ background: `${BRAND}14`, color: BRAND }}
                         >
-                          {items[step - 1].icon}
-                        </div>
-                        <h3 className="text-xl md:text-2xl font-semibold">
+                          {!prefersReduced && (
+                            <motion.span
+                              className="absolute inset-0 rounded-xl"
+                              style={{ background: BRAND_BG_12 }}
+                              initial={{ opacity: 0.55, scale: 1 }}
+                              animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
+                              transition={{
+                                duration: 1.6,
+                                ease: "easeOut",
+                                repeat: Infinity,
+                                repeatDelay: 0.5,
+                              }}
+                            />
+                          )}
+                          <span style={{ color: BRAND }}>{items[step - 1].icon}</span>
+                        </motion.div>
+
+                        {/* Judul + UNDERLINE SWEEP */}
+                        <motion.h3
+                          variants={contentStagger.item}
+                          className="text-xl md:text-2xl font-semibold inline-block"
+                        >
                           {t(`cards.${items[step - 1].key}.title`)}
-                        </h3>
-                        <p
+                          {!prefersReduced && (
+                            <motion.span
+                              aria-hidden
+                              className="block h-[3px] rounded-full mt-1"
+                              style={{ backgroundColor: BRAND, transformOrigin: "0% 50%" }}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
+                            />
+                          )}
+                        </motion.h3>
+
+                        {/* Deskripsi */}
+                        <motion.p
+                          variants={contentStagger.item}
                           className="mt-2 text-foreground/70"
                           data-native-scroll="true"
                           style={{ maxHeight: 320, overflowY: "auto" }}
                         >
                           {t(`cards.${items[step - 1].key}.desc`)}
-                        </p>
-                        {/* CTA per-point dihapus sesuai permintaan */}
+                        </motion.p>
+                        {/* CTA per-point tetap dihapus */}
                       </motion.div>
                     </AnimatePresence>
                   </div>
