@@ -232,37 +232,94 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: setiap scroll ganti ke poin berikutnya */}
+              {/* Step 1..6: daftar di kiri, konten aktif di kanan */}
               {step >= 1 && step <= items.length && (
                 <motion.section
-                  key={`step-point-${step}`}
+                  key={`step-points`}
                   {...stageFade}
-                  className="text-center"
+                  className="w-full"
                 >
-                  <div
-                    className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                    aria-hidden
-                    style={{ background: `${BRAND}14`, color: BRAND }}
-                  >
-                    {items[step - 1].icon}
-                  </div>
-                  <h3 className="text-xl font-semibold">
-                    {t(`cards.${items[step - 1].key}.title`)}
-                  </h3>
-                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70">
-                    {t(`cards.${items[step - 1].key}.desc`)}
-                  </p>
+                  <div className="grid gap-8 md:grid-cols-[20rem_minmax(0,1fr)]">
+                    {/* LEFT: sticky list (desktop) */}
+                    <nav
+                      className="hidden md:block sticky top-20 self-start"
+                      aria-label="Features"
+                    >
+                      <ol className="flex flex-col gap-3">
+                        {items.map(({ key }, idx) => {
+                          const active = idx === step - 1;
+                          return (
+                            <li key={String(key)}>
+                              <button
+                                type="button"
+                                onClick={() => setStep(idx + 1)}
+                                aria-current={active ? "step" : undefined}
+                                className={`w-full text-left rounded-lg px-3 py-2 transition
+                                  ${active ? "bg-black text-white" : "text-foreground/70 hover:bg-black/5"}`}
+                              >
+                                <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs">
+                                  {idx + 1}
+                                </span>
+                                {t(`cards.${key}.title`)}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </nav>
 
-                  {/* indikator kecil */}
-                  <div className="mt-6 flex justify-center gap-2">
-                    {items.map((_, i) => (
-                      <span
-                        key={i}
-                        className={`h-1.5 w-6 rounded-full ${
-                          i === step - 1 ? "bg-black" : "bg-black/15"
-                        }`}
-                      />
-                    ))}
+                    {/* RIGHT: content panel */}
+                    <div className="md:col-span-1 min-h-[60vh] flex items-center">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={items[step - 1].key}
+                          initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
+                          animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } }}
+                          exit={{ opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } }}
+                          className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm w-full text-center md:text-left"
+                        >
+                          <div
+                            className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
+                            aria-hidden
+                            style={{ background: `${BRAND}14`, color: BRAND }}
+                          >
+                            {items[step - 1].icon}
+                          </div>
+                          <h3 className="text-xl font-semibold">
+                            {t(`cards.${items[step - 1].key}.title`)}
+                          </h3>
+                          <p className="mt-2 text-foreground/70">
+                            {t(`cards.${items[step - 1].key}.desc`)}
+                          </p>
+
+                          {/* Indikator kecil (muncul di mobile) */}
+                          <div className="mt-6 flex justify-center md:hidden gap-2">
+                            {items.map((_, i) => (
+                              <span
+                                key={i}
+                                className={`h-1.5 w-6 rounded-full ${i === step - 1 ? "bg-black" : "bg-black/15"}`}
+                              />
+                            ))}
+                          </div>
+
+                          <div className="mt-8 flex flex-wrap gap-3 justify-center md:justify-start">
+                            <a
+                              href="#demo"
+                              className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
+                              style={{ backgroundColor: BRAND }}
+                            >
+                              {t("cta.primary")}
+                            </a>
+                            <a
+                              href={withLocale("/contact")}
+                              className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
+                            >
+                              {t("cta.secondary")}
+                            </a>
+                          </div>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </motion.section>
               )}
