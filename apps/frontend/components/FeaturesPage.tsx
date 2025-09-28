@@ -13,13 +13,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /** =========================================================
  *  STABILITY FIRST EDITION — safest defaults
- *  - no intercept when prefers-reduced-motion
- *  - preventDefault only when really needed
- *  - viewport height uses VisualViewport
  *  ========================================================= */
 
 /* =======================
- * Types (diletakkan di atas agar urutan rapi)
+ * Types
  * ======================= */
 type IntlMessages = {
   features: {
@@ -52,7 +49,6 @@ const isEditable = (el: EventTarget | null): boolean => {
   if (!node) return false;
   const tag = node.tagName?.toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select") return true;
-  // contenteditable chain
   let cur: HTMLElement | null = node;
   while (cur) {
     if (cur.getAttribute?.("contenteditable") === "true") return true;
@@ -61,16 +57,13 @@ const isEditable = (el: EventTarget | null): boolean => {
   return false;
 };
 
-// Visual viewport height (mobile-safe)
-const getVVH = (): number => {
-  return (window.visualViewport?.height ?? window.innerHeight) | 0;
-};
+const getVVH = (): number =>
+  (window.visualViewport?.height ?? window.innerHeight) | 0;
 
-// Apakah target/ancestor-nya bisa scroll native di sumbu Y?
 const canScrollWithin = (target: EventTarget | null): boolean => {
   let cur = target as HTMLElement | null;
   while (cur) {
-    if (cur.dataset?.nativeScroll === "true") return true;
+    if ((cur as any).dataset?.nativeScroll === "true") return true;
     const style = window.getComputedStyle(cur);
     const oy = style.overflowY;
     const canScrollY =
@@ -94,15 +87,16 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
-  // 6 poin fitur (urut sesuai prioritasmu)
-  const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
-    { key: "instant", icon: "⚡️" },
-    { key: "multitenant", icon: "🏢" },
-    { key: "analytics", icon: "📊" },
-    { key: "handoff", icon: "🤝" },
-    { key: "multilingual", icon: "🌐" },
-    { key: "booking", icon: "📅" },
-  ];
+  // 6 poin fitur
+  const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] =
+    [
+      { key: "instant", icon: "⚡️" },
+      { key: "multitenant", icon: "🏢" },
+      { key: "analytics", icon: "📊" },
+      { key: "handoff", icon: "🤝" },
+      { key: "multilingual", icon: "🌐" },
+      { key: "booking", icon: "📅" },
+    ];
 
   const rise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 16 },
@@ -131,7 +125,7 @@ export default function FeaturesPage() {
   );
 
   /* =======================
-   * Micro animations (ringan & respect reduced-motion)
+   * Micro animations
    * ======================= */
   const contentStagger = useMemo(() => {
     return {
@@ -159,13 +153,12 @@ export default function FeaturesPage() {
     };
   }, [prefersReduced]);
 
-  // ~12% alpha untuk halo (#RRGGBB + '1F')
   const BRAND_BG_12 = `${BRAND}1F`;
 
   /* =======================
    * Sticky viewport multi-step
    * ======================= */
-  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta = 8
+  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [step, _setStep] = useState(0);
@@ -175,13 +168,11 @@ export default function FeaturesPage() {
     _setStep(v);
   }, []);
 
-  // locks & timing
   const lockRef = useRef(false);
   const lastDirRef = useRef<1 | -1 | 0>(0);
   const lastChangeAtRef = useRef(0);
-  const COOLDOWN = 280; // ms
+  const COOLDOWN = 280;
 
-  // cached geometry
   const containerTopRef = useRef(0);
   const viewportHRef = useRef(0);
 
@@ -193,7 +184,6 @@ export default function FeaturesPage() {
     viewportHRef.current = getVVH();
   }, []);
 
-  // initial + resize/viewport changes
   useEffect(() => {
     if (typeof window === "undefined") return;
     recalc();
@@ -226,7 +216,6 @@ export default function FeaturesPage() {
 
   const vh = useCallback(() => viewportHRef.current || getVVH(), []);
 
-  // Snap to step (±1 only)
   const scrollToStep = useCallback(
     (next: number, dir: 1 | -1) => {
       const top = containerTopRef.current + next * vh();
@@ -247,9 +236,6 @@ export default function FeaturesPage() {
     [setStep, vh]
   );
 
-  /* =======================
-   * Interaction interceptors
-   * ======================= */
   const interceptionEnabled = !prefersReduced;
 
   useEffect(() => {
@@ -326,9 +312,9 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep]);
 
-  // Sync while dragging scrollbar
   useEffect(() => {
     if (!interceptionEnabled) return;
+
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
@@ -410,7 +396,7 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: KIRI = TEKS (posisi oranye), KANAN = STAGE ANIMASI */}
+              {/* Step 1..6 */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
                   <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-10 md:gap-14 items-center md:items-start">
@@ -426,6 +412,7 @@ export default function FeaturesPage() {
                       }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
+                      {/* Icon */}
                       <motion.div
                         variants={contentStagger.item}
                         className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
@@ -434,7 +421,7 @@ export default function FeaturesPage() {
                         {!prefersReduced && (
                           <motion.span
                             className="absolute inset-0 rounded-xl"
-                            style={{ background: `${BRAND}1F` }}
+                            style={{ background: BRAND_BG_12 }}
                             initial={{ opacity: 0.55, scale: 1 }}
                             animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
                             transition={{
@@ -445,9 +432,12 @@ export default function FeaturesPage() {
                             }}
                           />
                         )}
-                        <span style={{ color: BRAND }}>{items[step - 1].icon}</span>
+                        <span style={{ color: BRAND }}>
+                          {items[step - 1].icon}
+                        </span>
                       </motion.div>
 
+                      {/* Title */}
                       <motion.h3
                         variants={contentStagger.item}
                         className="text-xl md:text-2xl font-semibold inline-block"
@@ -465,6 +455,7 @@ export default function FeaturesPage() {
                         )}
                       </motion.h3>
 
+                      {/* Desc */}
                       <motion.p
                         variants={contentStagger.item}
                         className="mt-2 text-foreground/70"
@@ -486,7 +477,7 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step terakhir: CTA */}
+              {/* CTA */}
               {step === items.length + 1 && (
                 <motion.section key="step-cta" {...stageFade} className="text-center">
                   <h2 className="text-2xl font-semibold tracking-tight">
@@ -523,8 +514,6 @@ export default function FeaturesPage() {
 
 /* =======================
  * Stage per-point
- * - "instant": animasi chat cepat
- * - lainnya: placeholder gradient (tetap)
  * ======================= */
 function FeatureStage({
   stepKey,
@@ -582,6 +571,8 @@ function FeatureStage({
 
 /* =======================
  * InstantChatStage — 2 bubble, pure bubble + timestamp
+ *  - Customer = biru (#F2F8FC)
+ *  - Bot = putih
  * ======================= */
 function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
   const containerVariants: Variants = {
@@ -612,36 +603,34 @@ function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
       className="w-[68vw] max-w-[460px] aspect-[4/3] flex flex-col justify-center gap-3 select-none"
       aria-label="Lightning-fast auto-reply demo"
     >
-      {/* CUSTOMER bubble (chat dulu) */}
+      {/* CUSTOMER bubble — biru */}
       <motion.div
         custom={0}
         variants={itemVariants}
-        className="self-start max-w-[86%] rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
+        className="self-start max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
-        <div className="flex items-end gap-2">
-          <span className="flex-1">Hi! Do you have a table available tonight?</span>
-          <span className="text-[11px] text-foreground/60 whitespace-nowrap">21:13 ✓✓</span>
-        </div>
+        Hi! Do you have a table available tonight?
+        <span className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap">
+          21:13 ✓✓
+        </span>
       </motion.div>
 
-      {/* BOT bubble (balasan cepat) */}
+      {/* BOT bubble — putih */}
       <motion.div
         custom={1}
         variants={itemVariants}
-        className="self-start max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug"
+        className="self-start max-w-[92%] rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
-        <div className="flex items-end gap-2 text-foreground">
-          <span className="flex-1">
-            Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for you? ⚡️
-          </span>
-          <span className="text-[11px] text-foreground/60 whitespace-nowrap">21:13</span>
-        </div>
+        Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for you? ⚡️
+        <span className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap">
+          21:13
+        </span>
       </motion.div>
     </motion.div>
   );
 }
 
-/* (TypingDots disimpan jika suatu saat mau dipakai lagi) */
+// (TypingDots helper disimpan untuk reuse kalau dibutuhkan)
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
