@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /** =========================================================
  *  STABILITY FIRST EDITION — safest defaults
- *  ========================================================= */
+ * ========================================================= */
 
 /* =======================
  * Types
@@ -57,13 +57,17 @@ const isEditable = (el: EventTarget | null): boolean => {
   return false;
 };
 
+// Visual viewport height (mobile-safe)
 const getVVH = (): number =>
   (window.visualViewport?.height ?? window.innerHeight) | 0;
 
+// Apakah target/ancestor-nya bisa scroll native di sumbu Y?
 const canScrollWithin = (target: EventTarget | null): boolean => {
   let cur = target as HTMLElement | null;
   while (cur) {
-    if ((cur as any).dataset?.nativeScroll === "true") return true;
+    // ✅ ketikan benar, tanpa 'any'
+    if (cur.dataset?.nativeScroll === "true") return true;
+
     const style = window.getComputedStyle(cur);
     const oy = style.overflowY;
     const canScrollY =
@@ -288,7 +292,8 @@ export default function FeaturesPage() {
       if (isEditable(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ")
+        dir = 1;
       else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
@@ -312,9 +317,9 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep]);
 
+  // Sync while dragging scrollbar
   useEffect(() => {
     if (!interceptionEnabled) return;
-
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
@@ -396,11 +401,11 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6 */}
+              {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
                   <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-10 md:gap-14 items-center md:items-start">
-                    {/* LEFT */}
+                    {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
                       initial="hidden"
@@ -412,7 +417,6 @@ export default function FeaturesPage() {
                       }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
-                      {/* Icon */}
                       <motion.div
                         variants={contentStagger.item}
                         className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
@@ -437,7 +441,6 @@ export default function FeaturesPage() {
                         </span>
                       </motion.div>
 
-                      {/* Title */}
                       <motion.h3
                         variants={contentStagger.item}
                         className="text-xl md:text-2xl font-semibold inline-block"
@@ -455,7 +458,6 @@ export default function FeaturesPage() {
                         )}
                       </motion.h3>
 
-                      {/* Desc */}
                       <motion.p
                         variants={contentStagger.item}
                         className="mt-2 text-foreground/70"
@@ -630,7 +632,7 @@ function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
   );
 }
 
-// (TypingDots helper disimpan untuk reuse kalau dibutuhkan)
+// Helper kept for future reuse
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
