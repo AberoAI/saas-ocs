@@ -419,50 +419,54 @@ export default function FeaturesPage() {
                       }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
-                      <motion.div
-                        variants={contentStagger.item}
-                        className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                        aria-hidden
-                      >
-                        {!prefersReduced && (
-                          <motion.span
-                            className="absolute inset-0 rounded-xl"
-                            style={{ background: BRAND_BG_12 }}
-                            initial={{ opacity: 0.55, scale: 1 }}
-                            animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
-                            transition={{
-                              duration: 1.6,
-                              ease: "easeOut",
-                              repeat: Infinity,
-                              repeatDelay: 0.5,
-                            }}
-                          />
-                        )}
-                        <span style={{ color: BRAND }}>
-                          {items[step - 1].icon}
-                        </span>
-                      </motion.div>
+                      {/* === Rapi icon + title untuk SEMUA fitur === */}
+                      <div className="flex items-center justify-center md:justify-start gap-3 md:gap-4">
+                        <motion.div
+                          variants={contentStagger.item}
+                          className="relative inline-flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl text-xl md:text-2xl shrink-0"
+                          aria-hidden
+                        >
+                          {!prefersReduced && (
+                            <motion.span
+                              className="absolute inset-0 rounded-xl"
+                              style={{ background: BRAND_BG_12 }}
+                              initial={{ opacity: 0.55, scale: 1 }}
+                              animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
+                              transition={{
+                                duration: 1.6,
+                                ease: "easeOut",
+                                repeat: Infinity,
+                                repeatDelay: 0.5,
+                              }}
+                            />
+                          )}
+                          <span className="-translate-y-[1px]" style={{ color: BRAND }}>
+                            {items[step - 1].icon}
+                          </span>
+                        </motion.div>
 
-                      <motion.h3
-                        variants={contentStagger.item}
-                        className="text-xl md:text-2xl font-semibold inline-block"
-                      >
-                        {t(`cards.${items[step - 1].key}.title`)}
-                        {!prefersReduced && (
-                          <motion.span
-                            aria-hidden
-                            className="block h-[3px] rounded-full mt-1"
-                            style={{ backgroundColor: BRAND, transformOrigin: "0% 50%" }}
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
-                          />
-                        )}
-                      </motion.h3>
+                        <motion.h3
+                          variants={contentStagger.item}
+                          className="text-xl md:text-2xl font-semibold leading-tight"
+                        >
+                          {t(`cards.${items[step - 1].key}.title`)}
+                          {!prefersReduced && (
+                            <motion.span
+                              aria-hidden
+                              className="block h-[3px] rounded-full mt-1"
+                              style={{ backgroundColor: BRAND, transformOrigin: "0% 50%" }}
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
+                            />
+                          )}
+                        </motion.h3>
+                      </div>
+                      {/* === /Rapi icon + title === */}
 
                       <motion.p
                         variants={contentStagger.item}
-                        className="mt-2 text-foreground/70"
+                        className="mt-3 text-foreground/70"
                         data-native-scroll="true"
                         style={{ maxHeight: 320, overflowY: "auto" }}
                       >
