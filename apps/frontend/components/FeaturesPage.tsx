@@ -9,10 +9,54 @@ import {
   type Variants,
   AnimatePresence,
 } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-// Easing stabil
+/** =========================================================
+ *  STABILITY FIRST EDITION — safest defaults
+ *  - no intercept when prefers-reduced-motion
+ *  - preventDefault only when really needed
+ *  - viewport height uses VisualViewport
+ *  ========================================================= */
+
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const BRAND = "#26658C";
+
+// Utils (stable)
+const isEditable = (el: EventTarget | null): boolean => {
+  const node = el as HTMLElement | null;
+  if (!node) return false;
+  const tag = node.tagName?.toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select") return true;
+  // contenteditable chain
+  let cur: HTMLElement | null = node;
+  while (cur) {
+    if (cur.getAttribute?.("contenteditable") === "true") return true;
+    cur = cur.parentElement;
+  }
+  return false;
+};
+
+// Can this target (or its ancestors) scroll natively on Y?
+const canScrollWithin = (target: EventTarget | null): boolean => {
+  const el = target as HTMLElement | null;
+  let cur: HTMLElement | null = el;
+  while (cur) {
+    if (cur.dataset?.nativeScroll === "true") return true;
+    const style = window.getComputedStyle(cur);
+    const oy = style.overflowY;
+    const canScrollY =
+      (oy === "auto" || oy === "scroll") && cur.scrollHeight > cur.clientHeight;
+    if (canScrollY) return true;
+    cur = cur.parentElement;
+  }
+  return false;
+};
+
+// Visual viewport height (mobile-safe)
+const getVVH = () => {
+  // visualViewport is more accurate on mobile URL bar show/hide
+  return (window.visualViewport?.height ?? window.innerHeight) | 0;
+};
 
 export default function FeaturesPage() {
   const t = useTranslations("features");
@@ -27,7 +71,7 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
-  // 6 poin fitur
+  // 6 poin fitur (urutkan sesuai prioritasmu)
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
     { key: "instant",      icon: "⚡️" },
     { key: "multitenant",  icon: "🏢" },
@@ -37,12 +81,9 @@ export default function FeaturesPage() {
     { key: "booking",      icon: "📅" },
   ];
 
-  const BRAND = "#26658C";
-
-  // Animasi ringan
   const rise: Variants = {
     hidden:  { opacity: 0, y: prefersReduced ? 0 : 16 },
-    visible: (delay: number = 0) => ({
+    visible: (delay = 0) => ({
       opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE, delay },
     }),
   };
@@ -56,169 +97,200 @@ export default function FeaturesPage() {
     [prefersReduced]
   );
 
-  // ===== Satu viewport sticky, beberapa langkah konten =====
-  // step 0 = Hero, step 1..6 = poin fitur, step 7 = CTA
-  const TOTAL_STEPS = items.length + 2; // 8
+  // ===== Sticky viewport multi-step =====
+  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta = 8
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [step, _setStep] = useState(0);
   const stepRef = useRef(0);
-  const setStep = (v: number) => { stepRef.current = v; _setStep(v); };
+  const setStep = useCallback((v: number) => { stepRef.current = v; _setStep(v); }, []);
 
-  // guard saat smooth-scroll
+  // locks & timing
   const lockRef = useRef(false);
+  const lastDirRef = useRef<1 | -1 | 0>(0);
+  const lastChangeAtRef = useRef(0);
+  const COOLDOWN = 280; // ms (sedikit lebih konservatif)
 
-  // simpang posisi absolut kontainer
+  // cached geometry
   const containerTopRef = useRef(0);
-  const calcContainerTop = () => {
+  const viewportHRef = useRef(0);
+
+  const recalc = useCallback(() => {
     const root = containerRef.current;
     if (!root) return;
     const rect = root.getBoundingClientRect();
     containerTopRef.current = window.scrollY + rect.top;
-  };
-  useEffect(() => {
-    calcContainerTop();
-    window.addEventListener("resize", calcContainerTop, { passive: true });
-    return () => window.removeEventListener("resize", calcContainerTop);
+    viewportHRef.current = getVVH();
   }, []);
 
-  const vh = () => window.innerHeight;
-  const containerHeightVh = TOTAL_STEPS * 100;
+  // initial + resize/viewport changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    recalc();
 
-  const inViewport = () => {
+    const ctrl = new AbortController();
+    const { signal } = ctrl;
+
+    // window resize
+    window.addEventListener("resize", recalc, { passive: true, signal });
+
+    // visualViewport resize/scroll (mobile chrome/safari)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", recalc, { signal });
+      window.visualViewport.addEventListener("scroll", recalc, { signal });
+    }
+
+    // orientation change (iOS)
+    window.addEventListener("orientationchange", recalc, { passive: true, signal });
+
+    return () => ctrl.abort();
+  }, [recalc]);
+
+  const inViewport = useCallback(() => {
     const root = containerRef.current;
     if (!root) return false;
     const rect = root.getBoundingClientRect();
-    const h = window.innerHeight;
+    const h = getVVH();
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
-  };
+  }, []);
 
-  // Snap ke step tertentu (selalu ±1 dari current)
-  const scrollToStep = (next: number) => {
+  const vh = useCallback(() => (viewportHRef.current || getVVH()), []);
+
+  // Snap to step (±1 only)
+  const scrollToStep = useCallback((next: number, dir: 1 | -1) => {
     const top = containerTopRef.current + next * vh();
     setStep(next);
     lockRef.current = true;
+    lastDirRef.current = dir;
+    lastChangeAtRef.current = performance.now();
+
+    // Smooth, then force-align
     window.scrollTo({ top, behavior: "smooth" });
+    const alignTimer = window.setTimeout(() => {
+      window.scrollTo({ top, behavior: "auto" });
+      lockRef.current = false;
+      lastChangeAtRef.current = performance.now();
+    }, 420);
 
-    // Lepas lock setelah benar2 mendarat ±1px dari target
-    const start = performance.now();
-    const check = () => {
-      const y = window.scrollY;
-      if (Math.abs(y - top) <= 1 || performance.now() - start > 800) {
-        lockRef.current = false;
-      } else {
-        requestAnimationFrame(check);
-      }
-    };
-    requestAnimationFrame(check);
-  };
+    // safety: cancel align if unmounted
+    return () => clearTimeout(alignTimer);
+  }, [setStep, vh]);
 
-  // ---------- Intercept gesture: ±1 langkah sesuai arah ----------
+  /** ===========================
+   *  INTERACTION INTERCEPTORS
+   *  =========================== */
+
+  // Early exit: honor reduced motion → no interception at all (paling stabil)
+  const interceptionEnabled = !prefersReduced;
+
+  // Wheel / Touch / Keyboard
   useEffect(() => {
-    if (prefersReduced) return;
+    if (!interceptionEnabled) return;
     const root = containerRef.current;
     if (!root) return;
 
+    const ctrl = new AbortController();
+    const { signal } = ctrl;
+
+    const go = (dir: 1 | -1) => {
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      if (next !== stepRef.current) scrollToStep(next, dir);
+    };
+
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
-      if (e.ctrlKey) return;
-      e.preventDefault();
       if (lockRef.current) return;
+      // allow pinch zoom & editable fields
+      if (e.ctrlKey || isEditable(e.target)) return;
+      // if user is scrolling a nested scrollable area, don't hijack
+      if (canScrollWithin(e.target)) return;
 
+      e.preventDefault();
       const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next);
+      go(dir);
     };
 
     // Touch
     let startY = 0;
-    const onTouchStart = (e: TouchEvent) => { if (inViewport()) startY = e.touches[0].clientY; };
-    const onTouchMove  = (e: TouchEvent) => {
+    const onTouchStart = (e: TouchEvent) => {
+      if (!inViewport()) return;
+      if (isEditable(e.target)) return;
+      startY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
       if (!inViewport() || lockRef.current) return;
+      if (isEditable(e.target)) return;
+      if (canScrollWithin(e.target)) return;
+
       const delta = startY - e.touches[0].clientY;
       if (Math.abs(delta) < 28) return;
       e.preventDefault();
       const dir: 1 | -1 = delta > 0 ? 1 : -1;
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next);
+      go(dir);
       startY = e.touches[0].clientY;
     };
 
-    // Keyboard
+    // Keyboard (only when body focus, not inside inputs)
     const onKey = (e: KeyboardEvent) => {
       if (!inViewport() || lockRef.current) return;
+      if (isEditable(e.target)) return;
+
       let dir: 1 | -1 | 0 | null = null;
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
       else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
       else return;
+
       e.preventDefault();
-
-      let next = stepRef.current;
-      if (e.key === "Home") next = 0;
-      else if (e.key === "End") next = TOTAL_STEPS - 1;
-      else next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + (dir as 1 | -1)));
-
-      if (next !== stepRef.current) scrollToStep(next);
+      if (dir === 0) {
+        const next = e.key === "Home" ? 0 : TOTAL_STEPS - 1;
+        if (next !== stepRef.current) scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
+        return;
+      }
+      go(dir as 1 | -1);
     };
 
-    root.addEventListener("wheel", onWheel, { passive: false });
-    root.addEventListener("touchstart", onTouchStart, { passive: true });
-    root.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("keydown", onKey);
+    root.addEventListener("wheel", onWheel, { passive: false, signal });
+    root.addEventListener("touchstart", onTouchStart, { passive: true, signal });
+    root.addEventListener("touchmove", onTouchMove, { passive: false, signal });
+    window.addEventListener("keydown", onKey, { signal });
 
-    return () => {
-      root.removeEventListener("wheel", onWheel as EventListener);
-      root.removeEventListener("touchstart", onTouchStart as EventListener);
-      root.removeEventListener("touchmove", onTouchMove as EventListener);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [TOTAL_STEPS, prefersReduced]);
+    return () => ctrl.abort();
+  }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep]);
 
-  // ---------- Sync saat user DRAG scrollbar: threshold 60% + arah nyata ----------
+  // Sync while dragging scrollbar (no preventDefault here)
   useEffect(() => {
-    const HYST = 0.6; // 60% layar
-    const lastYRef = useRef<number | null>(null);
+    if (!interceptionEnabled) return;
+
+    const ctrl = new AbortController();
+    const { signal } = ctrl;
 
     const onScroll = () => {
       if (!inViewport() || lockRef.current) return;
 
-      const y = window.scrollY;
-      if (lastYRef.current === null) {
-        lastYRef.current = y;
-        return;
-      }
-      const dy = y - lastYRef.current;
-      lastYRef.current = y;
-      if (dy === 0) return;
+      const now = performance.now();
+      if (now - lastChangeAtRef.current < COOLDOWN) return;
 
-      const dir: 1 | -1 = dy > 0 ? 1 : -1; // arah NYATA user
+      const pos = window.scrollY - containerTopRef.current;
+      const targetIdx = Math.round(pos / vh());
+      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
+      if (clamped === stepRef.current) return;
 
-      const stepTop = containerTopRef.current + stepRef.current * vh();
-      const thresholdDown = stepTop + HYST * vh();
-      const thresholdUp   = stepTop - HYST * vh();
-
-      if (dir === 1) {
-        // turun hanya jika melewati 60% ke bawah
-        if (y >= thresholdDown) {
-          const next = Math.min(TOTAL_STEPS - 1, stepRef.current + 1);
-          if (next !== stepRef.current) setStep(next);
-        }
-      } else {
-        // naik hanya jika melewati 60% ke atas
-        if (y <= thresholdUp) {
-          const next = Math.max(0, stepRef.current - 1);
-          if (next !== stepRef.current) setStep(next);
-        }
-      }
+      const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      lastDirRef.current = dir;
+      lastChangeAtRef.current = now;
+      setStep(next);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [TOTAL_STEPS]);
+    window.addEventListener("scroll", onScroll, { passive: true, signal });
+    return () => ctrl.abort();
+  }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
 
   // ===== Render =====
+  const containerHeightVh = TOTAL_STEPS * 100;
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -270,7 +342,7 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: daftar kiri, konten kanan */}
+              {/* Step 1..6: list kiri, konten kanan */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-points" {...stageFade} className="w-full">
                   <div className="grid gap-8 md:grid-cols-[20rem_minmax(0,1fr)]">
@@ -282,7 +354,7 @@ export default function FeaturesPage() {
                             <li key={String(key)}>
                               <button
                                 type="button"
-                                onClick={() => scrollToStep(idx + 1)}
+                                onClick={() => scrollToStep(idx + 1, idx + 1 > stepRef.current ? 1 : -1)}
                                 aria-current={active ? "step" : undefined}
                                 className={`w-full text-left rounded-lg px-3 py-2 transition ${
                                   active ? "bg-black text-white" : "text-foreground/70 hover:bg-black/5"
@@ -318,7 +390,7 @@ export default function FeaturesPage() {
                           <h3 className="text-xl font-semibold">
                             {t(`cards.${items[step - 1].key}.title`)}
                           </h3>
-                          <p className="mt-2 text-foreground/70">
+                          <p className="mt-2 text-foreground/70" data-native-scroll="true" style={{ maxHeight: 320, overflowY: "auto" }}>
                             {t(`cards.${items[step - 1].key}.desc`)}
                           </p>
 
