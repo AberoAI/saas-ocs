@@ -472,16 +472,6 @@ export default function FeaturesPage() {
                           className="col-start-2 text-xl md:text-2xl font-semibold leading-tight"
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
-                          {!prefersReduced && (
-                            <motion.span
-                              aria-hidden
-                              className="block h-[3px] rounded-full mt-1"
-                              style={{ backgroundColor: BRAND, transformOrigin: "0% 50%" }}
-                              initial={{ scaleX: 0 }}
-                              animate={{ scaleX: 1 }}
-                              transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
-                            />
-                          )}
                         </motion.h3>
 
                         {/* Quote + body (col 2), selalu di bawah & sejajar dengan judul */}
