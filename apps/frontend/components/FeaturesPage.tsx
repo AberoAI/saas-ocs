@@ -11,7 +11,7 @@ import {
 } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Easing stabil (top-level agar tidak berubah per render)
+// Easing stabil
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function FeaturesPage() {
@@ -39,13 +39,11 @@ export default function FeaturesPage() {
 
   const BRAND = "#26658C";
 
-  // ===== Variants sederhana, ringan (tanpa blur) =====
+  // Animasi ringan
   const rise: Variants = {
     hidden:  { opacity: 0, y: prefersReduced ? 0 : 16 },
     visible: (delay: number = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.45, ease: EASE, delay },
+      opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE, delay },
     }),
   };
 
@@ -60,113 +58,112 @@ export default function FeaturesPage() {
 
   // ===== Satu viewport sticky, beberapa langkah konten =====
   // step 0 = Hero, step 1..6 = poin fitur, step 7 = CTA
-  const TOTAL_STEPS = items.length + 2; // 6 + hero + cta = 8
+  const TOTAL_STEPS = items.length + 2; // 8
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const [step, setStep] = useState(0);
+  const [step, _setStep] = useState(0);
   const stepRef = useRef(0);
-  useEffect(() => { stepRef.current = step; }, [step]);
+  const setStep = (v: number) => { stepRef.current = v; _setStep(v); };
 
-  // Lock saat smooth-scroll agar event lain tidak mengubah step
-  const lockRef = useRef(false);
-  const unlockAfter = (ms: number) => {
-    lockRef.current = true;
-    window.setTimeout(() => (lockRef.current = false), ms);
-  };
+  // guard saat smooth-scroll + cooldown anti-bounce
+  const lockRef = useRef(false);               // ignore event saat animasi scroll
+  const lastDirRef = useRef<1 | -1 | 0>(0);    // arah terakhir (+1 / -1)
+  const lastChangeAtRef = useRef(0);           // timestamp ms
+  const COOLDOWN = 260;                        // ms—tahan reversals cepat
 
-  // Hitung absolute top container sekali (dan update saat resize)
-  const containerTopRef = useRef<number>(0);
-  const recomputeContainerTop = () => {
+  // Posisi absolut awal kontainer
+  const containerTopRef = useRef(0);
+  const calcContainerTop = () => {
     const root = containerRef.current;
     if (!root) return;
     const rect = root.getBoundingClientRect();
     containerTopRef.current = window.scrollY + rect.top;
   };
   useEffect(() => {
-    recomputeContainerTop();
-    window.addEventListener("resize", recomputeContainerTop, { passive: true });
-    return () => window.removeEventListener("resize", recomputeContainerTop);
+    calcContainerTop();
+    window.addEventListener("resize", calcContainerTop, { passive: true });
+    return () => window.removeEventListener("resize", calcContainerTop);
   }, []);
 
   const vh = () => window.innerHeight;
   const containerHeightVh = TOTAL_STEPS * 100;
 
-  // Helper: apakah area kontainer cukup terlihat?
   const inViewport = () => {
     const root = containerRef.current;
     if (!root) return false;
     const rect = root.getBoundingClientRect();
-    const _vh = window.innerHeight;
-    return rect.top < _vh * 0.85 && rect.bottom > _vh * 0.15;
+    const h = window.innerHeight;
+    return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   };
 
-  // Pergi ke step tertentu (snap 1 langkah)
-  const scrollToStep = (next: number) => {
+  // Snap ke step tertentu (satu langkah dari current)
+  const scrollToStep = (next: number, dir: 1 | -1) => {
     const top = containerTopRef.current + next * vh();
+    // step adalah sumber kebenaran — set segera
     setStep(next);
     lockRef.current = true;
+    lastDirRef.current = dir;
+    lastChangeAtRef.current = performance.now();
+
     window.scrollTo({ top, behavior: "smooth" });
-    unlockAfter(460); // sedikit di atas durasi smooth native
+
+    // pastikan mendarat tepat di target + beri cooldown kecil
+    window.setTimeout(() => {
+      window.scrollTo({ top, behavior: "auto" });
+      lockRef.current = false;
+      // tahan reversal mendadak sedikit lagi
+      lastChangeAtRef.current = performance.now();
+    }, 460);
   };
 
-  // --------- INTERCEPT: wheel / touch / keyboard (selalu ±1 langkah) ----------
+  // ---------- Intercept gesture: selalu ±1 langkah ----------
   useEffect(() => {
     if (prefersReduced) return;
     const root = containerRef.current;
     if (!root) return;
 
-    // Wheel
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
-      if (e.ctrlKey) return; // pinch-zoom dll
+      if (e.ctrlKey) return;
       e.preventDefault();
       if (lockRef.current) return;
 
-      const dir = e.deltaY > 0 ? 1 : -1;
+      const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next);
+      if (next !== stepRef.current) scrollToStep(next, dir);
     };
 
     // Touch
     let startY = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      if (!inViewport()) return;
+    const onTouchStart = (e: TouchEvent) => { if (inViewport()) startY = e.touches[0].clientY; };
+    const onTouchMove  = (e: TouchEvent) => {
+      if (!inViewport() || lockRef.current) return;
+      const delta = startY - e.touches[0].clientY;
+      if (Math.abs(delta) < 28) return;
+      e.preventDefault();
+      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      if (next !== stepRef.current) scrollToStep(next, dir);
       startY = e.touches[0].clientY;
     };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!inViewport()) return;
-      if (lockRef.current) return;
 
-      const delta = startY - e.touches[0].clientY; // geser ke atas = positif
-      if (Math.abs(delta) < 28) return; // threshold biar tidak sensitif
-      e.preventDefault();
-
-      const dir = delta > 0 ? 1 : -1;
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next);
-      startY = e.touches[0].clientY; // reset supaya tetap 1 langkah
-    };
-
-    // Keyboard (arrows/space/PageUp/PageDown)
+    // Keyboard
     const onKey = (e: KeyboardEvent) => {
-      if (!inViewport()) return;
-      if (lockRef.current) return;
-
+      if (!inViewport() || lockRef.current) return;
       let dir: 1 | -1 | 0 | null = null;
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
       else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
-
-      if (dir === null) return;
+      else return;
       e.preventDefault();
 
       let next = stepRef.current;
       if (e.key === "Home") next = 0;
       else if (e.key === "End") next = TOTAL_STEPS - 1;
-      else next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      else next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + (dir as 1 | -1)));
 
-      if (next !== stepRef.current) scrollToStep(next);
+      if (next !== stepRef.current) scrollToStep(next, dir === 0 ? lastDirRef.current || 1 : (dir as 1 | -1));
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
@@ -182,53 +179,47 @@ export default function FeaturesPage() {
     };
   }, [TOTAL_STEPS, prefersReduced]);
 
-  // --------- SYNC: kalau user drag scrollbar, koreksi max ±1 langkah ----------
+  // ---------- Sync saat user drag scrollbar: ±1 langkah & hormati arah ----------
   useEffect(() => {
     const onScroll = () => {
-      if (!inViewport()) return;
-      if (lockRef.current) return;
+      if (!inViewport() || lockRef.current) return;
+
+      const now = performance.now();
+      // cegah reversal terlalu cepat (anti 2→3→1)
+      if (now - lastChangeAtRef.current < COOLDOWN) return;
 
       const pos = window.scrollY - containerTopRef.current;
-      const rawIdx = Math.round(pos / vh()); // index terdekat dari posisi scroll
-      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, rawIdx));
+      const targetIdx = Math.round(pos / vh());
+      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
+      if (clamped === stepRef.current) return;
 
-      // Jaga urutan: koreksi paling banyak 1 langkah dari step saat ini
-      const prev = stepRef.current;
-      if (clamped === prev) return;
-
-      const dir = clamped > prev ? 1 : -1;
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, prev + dir));
+      const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
+      // hanya satu langkah sesuai arah
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+      lastDirRef.current = dir;
+      lastChangeAtRef.current = now;
       setStep(next);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", recomputeContainerTop, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", recomputeContainerTop);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, [TOTAL_STEPS]);
 
   // ===== Render =====
   return (
     <main className="mx-auto max-w-6xl px-6">
-      {/* Satu kontainer tinggi n layar; viewport sticky menampilkan satu konten */}
       <div
         ref={containerRef}
         className="relative"
         style={{ height: `${containerHeightVh}vh` }}
-        onLoad={recomputeContainerTop}
+        onLoad={calcContainerTop}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
               {/* Step 0: HERO */}
               {step === 0 && (
-                <motion.section
-                  key="step-hero"
-                  {...stageFade}
-                  className="text-center"
-                >
+                <motion.section key="step-hero" {...stageFade} className="text-center">
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -267,19 +258,11 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: daftar di kiri, konten aktif di kanan */}
+              {/* Step 1..6: daftar kiri, konten kanan */}
               {step >= 1 && step <= items.length && (
-                <motion.section
-                  key={`step-points`}
-                  {...stageFade}
-                  className="w-full"
-                >
+                <motion.section key="step-points" {...stageFade} className="w-full">
                   <div className="grid gap-8 md:grid-cols-[20rem_minmax(0,1fr)]">
-                    {/* LEFT: sticky list (desktop) */}
-                    <nav
-                      className="hidden md:block sticky top-20 self-start"
-                      aria-label="Features"
-                    >
+                    <nav className="hidden md:block sticky top-20 self-start" aria-label="Features">
                       <ol className="flex flex-col gap-3">
                         {items.map(({ key }, idx) => {
                           const active = idx === step - 1;
@@ -287,10 +270,11 @@ export default function FeaturesPage() {
                             <li key={String(key)}>
                               <button
                                 type="button"
-                                onClick={() => scrollToStep(idx + 1)}
+                                onClick={() => scrollToStep(idx + 1, idx + 1 > stepRef.current ? 1 : -1)}
                                 aria-current={active ? "step" : undefined}
-                                className={`w-full text-left rounded-lg px-3 py-2 transition
-                                  ${active ? "bg-black text-white" : "text-foreground/70 hover:bg-black/5"}`}
+                                className={`w-full text-left rounded-lg px-3 py-2 transition ${
+                                  active ? "bg-black text-white" : "text-foreground/70 hover:bg-black/5"
+                                }`}
                               >
                                 <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full border text-xs">
                                   {idx + 1}
@@ -303,7 +287,6 @@ export default function FeaturesPage() {
                       </ol>
                     </nav>
 
-                    {/* RIGHT: content panel */}
                     <div className="md:col-span-1 min-h-[60vh] flex items-center">
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -327,7 +310,6 @@ export default function FeaturesPage() {
                             {t(`cards.${items[step - 1].key}.desc`)}
                           </p>
 
-                          {/* Indikator kecil (muncul di mobile) */}
                           <div className="mt-6 flex justify-center md:hidden gap-2">
                             {items.map((_, i) => (
                               <span
@@ -361,17 +343,9 @@ export default function FeaturesPage() {
 
               {/* Step terakhir: CTA */}
               {step === items.length + 1 && (
-                <motion.section
-                  key="step-cta"
-                  {...stageFade}
-                  className="text-center"
-                >
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    {t("title")}
-                  </h2>
-                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">
-                    {t("subtitle")}
-                  </p>
+                <motion.section key="step-cta" {...stageFade} className="text-center">
+                  <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
+                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
 
                   <div className="mt-8 flex justify-center gap-3">
                     <a
