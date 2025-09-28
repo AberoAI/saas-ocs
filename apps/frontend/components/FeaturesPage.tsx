@@ -65,13 +65,10 @@ export default function FeaturesPage() {
   const stepRef = useRef(0);
   const setStep = (v: number) => { stepRef.current = v; _setStep(v); };
 
-  // guard saat smooth-scroll + cooldown anti-bounce
-  const lockRef = useRef(false);               // ignore event saat animasi scroll
-  const lastDirRef = useRef<1 | -1 | 0>(0);    // arah terakhir (+1 / -1)
-  const lastChangeAtRef = useRef(0);           // timestamp ms
-  const COOLDOWN = 260;                        // ms—tahan reversals cepat
+  // guard saat smooth-scroll
+  const lockRef = useRef(false);
 
-  // Posisi absolut awal kontainer
+  // simpang posisi absolut kontainer
   const containerTopRef = useRef(0);
   const calcContainerTop = () => {
     const root = containerRef.current;
@@ -96,27 +93,27 @@ export default function FeaturesPage() {
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   };
 
-  // Snap ke step tertentu (satu langkah dari current)
-  const scrollToStep = (next: number, dir: 1 | -1) => {
+  // Snap ke step tertentu (selalu ±1 dari current)
+  const scrollToStep = (next: number) => {
     const top = containerTopRef.current + next * vh();
-    // step adalah sumber kebenaran — set segera
     setStep(next);
     lockRef.current = true;
-    lastDirRef.current = dir;
-    lastChangeAtRef.current = performance.now();
-
     window.scrollTo({ top, behavior: "smooth" });
 
-    // pastikan mendarat tepat di target + beri cooldown kecil
-    window.setTimeout(() => {
-      window.scrollTo({ top, behavior: "auto" });
-      lockRef.current = false;
-      // tahan reversal mendadak sedikit lagi
-      lastChangeAtRef.current = performance.now();
-    }, 460);
+    // Lepas lock setelah benar2 mendarat ±1px dari target
+    const start = performance.now();
+    const check = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - top) <= 1 || performance.now() - start > 800) {
+        lockRef.current = false;
+      } else {
+        requestAnimationFrame(check);
+      }
+    };
+    requestAnimationFrame(check);
   };
 
-  // ---------- Intercept gesture: selalu ±1 langkah ----------
+  // ---------- Intercept gesture: ±1 langkah sesuai arah ----------
   useEffect(() => {
     if (prefersReduced) return;
     const root = containerRef.current;
@@ -130,7 +127,7 @@ export default function FeaturesPage() {
 
       const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next, dir);
+      if (next !== stepRef.current) scrollToStep(next);
     };
 
     // Touch
@@ -143,7 +140,7 @@ export default function FeaturesPage() {
       e.preventDefault();
       const dir: 1 | -1 = delta > 0 ? 1 : -1;
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next, dir);
+      if (next !== stepRef.current) scrollToStep(next);
       startY = e.touches[0].clientY;
     };
 
@@ -163,7 +160,7 @@ export default function FeaturesPage() {
       else if (e.key === "End") next = TOTAL_STEPS - 1;
       else next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + (dir as 1 | -1)));
 
-      if (next !== stepRef.current) scrollToStep(next, dir === 0 ? lastDirRef.current || 1 : (dir as 1 | -1));
+      if (next !== stepRef.current) scrollToStep(next);
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
@@ -179,26 +176,42 @@ export default function FeaturesPage() {
     };
   }, [TOTAL_STEPS, prefersReduced]);
 
-  // ---------- Sync saat user drag scrollbar: ±1 langkah & hormati arah ----------
+  // ---------- Sync saat user DRAG scrollbar: threshold 60% + arah nyata ----------
   useEffect(() => {
+    const HYST = 0.6; // 60% layar
+    const lastYRef = useRef<number | null>(null);
+
     const onScroll = () => {
       if (!inViewport() || lockRef.current) return;
 
-      const now = performance.now();
-      // cegah reversal terlalu cepat (anti 2→3→1)
-      if (now - lastChangeAtRef.current < COOLDOWN) return;
+      const y = window.scrollY;
+      if (lastYRef.current === null) {
+        lastYRef.current = y;
+        return;
+      }
+      const dy = y - lastYRef.current;
+      lastYRef.current = y;
+      if (dy === 0) return;
 
-      const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round(pos / vh());
-      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
-      if (clamped === stepRef.current) return;
+      const dir: 1 | -1 = dy > 0 ? 1 : -1; // arah NYATA user
 
-      const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
-      // hanya satu langkah sesuai arah
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      lastDirRef.current = dir;
-      lastChangeAtRef.current = now;
-      setStep(next);
+      const stepTop = containerTopRef.current + stepRef.current * vh();
+      const thresholdDown = stepTop + HYST * vh();
+      const thresholdUp   = stepTop - HYST * vh();
+
+      if (dir === 1) {
+        // turun hanya jika melewati 60% ke bawah
+        if (y >= thresholdDown) {
+          const next = Math.min(TOTAL_STEPS - 1, stepRef.current + 1);
+          if (next !== stepRef.current) setStep(next);
+        }
+      } else {
+        // naik hanya jika melewati 60% ke atas
+        if (y <= thresholdUp) {
+          const next = Math.max(0, stepRef.current - 1);
+          if (next !== stepRef.current) setStep(next);
+        }
+      }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -212,7 +225,6 @@ export default function FeaturesPage() {
         ref={containerRef}
         className="relative"
         style={{ height: `${containerHeightVh}vh` }}
-        onLoad={calcContainerTop}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
@@ -270,7 +282,7 @@ export default function FeaturesPage() {
                             <li key={String(key)}>
                               <button
                                 type="button"
-                                onClick={() => scrollToStep(idx + 1, idx + 1 > stepRef.current ? 1 : -1)}
+                                onClick={() => scrollToStep(idx + 1)}
                                 aria-current={active ? "step" : undefined}
                                 className={`w-full text-left rounded-lg px-3 py-2 transition ${
                                   active ? "bg-black text-white" : "text-foreground/70 hover:bg-black/5"
