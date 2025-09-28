@@ -63,7 +63,6 @@ const isEditable = (el: EventTarget | null): boolean => {
 
 // Visual viewport height (mobile-safe)
 const getVVH = (): number => {
-  // visualViewport lebih akurat saat URL bar mobile muncul/hilang
   return (window.visualViewport?.height ?? window.innerHeight) | 0;
 };
 
@@ -236,7 +235,6 @@ export default function FeaturesPage() {
       lastDirRef.current = dir;
       lastChangeAtRef.current = performance.now();
 
-      // Smooth, then force-align
       window.scrollTo({ top, behavior: "smooth" });
       const alignTimer = window.setTimeout(() => {
         window.scrollTo({ top, behavior: "auto" });
@@ -244,7 +242,6 @@ export default function FeaturesPage() {
         lastChangeAtRef.current = performance.now();
       }, 420);
 
-      // safety: cancel align if unmounted
       return () => clearTimeout(alignTimer);
     },
     [setStep, vh]
@@ -255,7 +252,6 @@ export default function FeaturesPage() {
    * ======================= */
   const interceptionEnabled = !prefersReduced;
 
-  // Wheel / Touch / Keyboard
   useEffect(() => {
     if (!interceptionEnabled) return;
     const root = containerRef.current;
@@ -272,8 +268,8 @@ export default function FeaturesPage() {
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
       if (lockRef.current) return;
-      if (e.ctrlKey || isEditable(e.target)) return; // pinch zoom / input
-      if (canScrollWithin(e.target)) return; // nested scrollable
+      if (e.ctrlKey || isEditable(e.target)) return;
+      if (canScrollWithin(e.target)) return;
 
       e.preventDefault();
       const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
@@ -300,14 +296,13 @@ export default function FeaturesPage() {
       startY = e.touches[0].clientY;
     };
 
-    // Keyboard (only when body focus, not inside inputs)
+    // Keyboard
     const onKey = (e: KeyboardEvent) => {
       if (!inViewport() || lockRef.current) return;
       if (isEditable(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ")
-        dir = 1;
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
       else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
@@ -331,10 +326,9 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep]);
 
-  // Sync while dragging scrollbar (no preventDefault here)
+  // Sync while dragging scrollbar
   useEffect(() => {
     if (!interceptionEnabled) return;
-
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
@@ -411,9 +405,7 @@ export default function FeaturesPage() {
 
                   <div className="mt-10 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>
-                      ↓
-                    </span>
+                    <span className="animate-bounce" aria-hidden>↓</span>
                   </div>
                 </motion.section>
               )}
@@ -422,7 +414,7 @@ export default function FeaturesPage() {
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
                   <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-10 md:gap-14 items-center md:items-start">
-                    {/* LEFT: text block (tanpa kotak & tanpa CTA) */}
+                    {/* LEFT */}
                     <motion.div
                       variants={contentStagger.container}
                       initial="hidden"
@@ -434,7 +426,6 @@ export default function FeaturesPage() {
                       }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
-                      {/* Ikon + halo pulse */}
                       <motion.div
                         variants={contentStagger.item}
                         className="relative mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
@@ -443,7 +434,7 @@ export default function FeaturesPage() {
                         {!prefersReduced && (
                           <motion.span
                             className="absolute inset-0 rounded-xl"
-                            style={{ background: BRAND_BG_12 }}
+                            style={{ background: `${BRAND}1F` }}
                             initial={{ opacity: 0.55, scale: 1 }}
                             animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
                             transition={{
@@ -457,7 +448,6 @@ export default function FeaturesPage() {
                         <span style={{ color: BRAND }}>{items[step - 1].icon}</span>
                       </motion.div>
 
-                      {/* Judul + underline sweep */}
                       <motion.h3
                         variants={contentStagger.item}
                         className="text-xl md:text-2xl font-semibold inline-block"
@@ -475,7 +465,6 @@ export default function FeaturesPage() {
                         )}
                       </motion.h3>
 
-                      {/* Deskripsi */}
                       <motion.p
                         variants={contentStagger.item}
                         className="mt-2 text-foreground/70"
@@ -486,7 +475,7 @@ export default function FeaturesPage() {
                       </motion.p>
                     </motion.div>
 
-                    {/* RIGHT: stage animasi per-point (placeholder/instant) */}
+                    {/* RIGHT: stage */}
                     <div className="hidden md:flex justify-center md:justify-start">
                       <FeatureStage
                         stepKey={items[step - 1].key}
@@ -497,7 +486,7 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step terakhir: CTA (global) */}
+              {/* Step terakhir: CTA */}
               {step === items.length + 1 && (
                 <motion.section key="step-cta" {...stageFade} className="text-center">
                   <h2 className="text-2xl font-semibold tracking-tight">
@@ -567,7 +556,7 @@ function FeatureStage({
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.35, ease: EASE }}
       className="aspect-square w-[68vw] max-w-[420px] rounded-2xl"
-      style={{ background: `${base}80` }} // 50% alpha
+      style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
     >
       {!prefersReduced && (
@@ -592,7 +581,7 @@ function FeatureStage({
 }
 
 /* =======================
- * InstantChatStage — 2 bubble, tanpa frame/card (pure bubble)
+ * InstantChatStage — 2 bubble, pure bubble + timestamp
  * ======================= */
 function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
   const containerVariants: Variants = {
@@ -623,41 +612,36 @@ function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
       className="w-[68vw] max-w-[460px] aspect-[4/3] flex flex-col justify-center gap-3 select-none"
       aria-label="Lightning-fast auto-reply demo"
     >
-      {/* USER bubble */}
+      {/* CUSTOMER bubble (chat dulu) */}
       <motion.div
         custom={0}
         variants={itemVariants}
         className="self-start max-w-[86%] rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
       >
-        Hi! Do you have a table available tonight?
+        <div className="flex items-end gap-2">
+          <span className="flex-1">Hi! Do you have a table available tonight?</span>
+          <span className="text-[11px] text-foreground/60 whitespace-nowrap">21:13 ✓✓</span>
+        </div>
       </motion.div>
 
-      {/* AI bubble */}
+      {/* BOT bubble (balasan cepat) */}
       <motion.div
         custom={1}
         variants={itemVariants}
         className="self-start max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug"
       >
-        Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for you?{" "}
-        {!prefersReduced && (
-          <motion.span
-            aria-hidden
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.35, ease: EASE, delay: 0.05 }}
-            className="inline-block align-[-2px]"
-          >
-            ⚡️
-          </motion.span>
-        )}
+        <div className="flex items-end gap-2 text-foreground">
+          <span className="flex-1">
+            Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for you? ⚡️
+          </span>
+          <span className="text-[11px] text-foreground/60 whitespace-nowrap">21:13</span>
+        </div>
       </motion.div>
     </motion.div>
   );
 }
 
-/* =======================
- * Typing dots (disimpan untuk reuse jika diperlukan)
- * ======================= */
+/* (TypingDots disimpan jika suatu saat mau dipakai lagi) */
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
