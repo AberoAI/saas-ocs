@@ -79,6 +79,26 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
   return false;
 };
 
+/* =======================
+ * Quote splitter: pisahkan kalimat ber-kutipan di awal deskripsi */
+function splitQuoted(desc: string): { quote?: string; rest: string } {
+  const m = desc.match(/“([^”]+)”/); // smart quotes
+  if (m && m.index !== undefined) {
+    const before = desc.slice(0, m.index).trim();
+    const after = desc.slice(m.index + m[0].length).trim().replace(/^[\s,.;:—-]+/, "");
+    const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
+    return { quote: m[1], rest: rest || "" };
+  }
+  const m2 = desc.match(/"([^"]+)"/); // straight quotes
+  if (m2 && m2.index !== undefined) {
+    const before = desc.slice(0, m2.index).trim();
+    const after = desc.slice(m2.index + m2[0].length).trim().replace(/^[\s,.;:—-]+/, "");
+    const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
+    return { quote: m2[1], rest: rest || "" };
+  }
+  return { rest: desc };
+}
+
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
@@ -464,18 +484,30 @@ export default function FeaturesPage() {
                       </div>
                       {/* === /Rapi icon + title === */}
 
-                      <motion.p
-                        variants={contentStagger.item}
-                        className="mt-3 text-foreground/70"
-                        data-native-scroll="true"
-                        style={{ maxHeight: 320, overflowY: "auto" }}
-                      >
-                        {t(`cards.${items[step - 1].key}.desc`)}
-                      </motion.p>
+                      {/* Deskripsi: jika ada kutipan pembuka, pisahkan */}
+                      {(() => {
+                        const descRaw = t(
+                          `cards.${items[step - 1].key}.desc`
+                        ) as unknown as string;
+                        const { quote, rest } = splitQuoted(descRaw);
+                        return (
+                          <motion.div
+                            variants={contentStagger.item}
+                            className="mt-3 text-foreground/70 space-y-3"
+                            data-native-scroll="true"
+                            style={{ maxHeight: 320, overflowY: "auto" }}
+                          >
+                            {quote && (
+                              <p className="italic text-foreground/80">“{quote}”</p>
+                            )}
+                            <p>{quote ? rest : descRaw}</p>
+                          </motion.div>
+                        );
+                      })()}
                     </motion.div>
 
-                    {/* RIGHT: stage */}
-                    <div className="hidden md:flex justify-center md:justify-start">
+                    {/* RIGHT: stage (selaras dengan judul, bukan emoji) */}
+                    <div className="hidden md:flex justify-center md:justify-start md:mt-[6px]">
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
@@ -582,8 +614,6 @@ function FeatureStage({
 
 /* =======================
  * InstantChatStage — chat sequence + typing
- *  - POV customer: customer dulu (kanan, biru)
- *  - /en dan /tr copy otomatis
  * ======================= */
 function InstantChatStage({
   prefersReduced,
