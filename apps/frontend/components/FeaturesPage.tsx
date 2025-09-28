@@ -67,71 +67,55 @@ export default function FeaturesPage() {
   const stepRef = useRef(0);
   useEffect(() => { stepRef.current = step; }, [step]);
 
-  // Lock agar tidak rebutan saat smooth-scroll menuju target step
+  // Lock saat smooth-scroll agar event lain tidak mengubah step
   const lockRef = useRef(false);
+  const unlockAfter = (ms: number) => {
+    lockRef.current = true;
+    window.setTimeout(() => (lockRef.current = false), ms);
+  };
 
+  // Hitung absolute top container sekali (dan update saat resize)
+  const containerTopRef = useRef<number>(0);
+  const recomputeContainerTop = () => {
+    const root = containerRef.current;
+    if (!root) return;
+    const rect = root.getBoundingClientRect();
+    containerTopRef.current = window.scrollY + rect.top;
+  };
+  useEffect(() => {
+    recomputeContainerTop();
+    window.addEventListener("resize", recomputeContainerTop, { passive: true });
+    return () => window.removeEventListener("resize", recomputeContainerTop);
+  }, []);
+
+  const vh = () => window.innerHeight;
   const containerHeightVh = TOTAL_STEPS * 100;
 
-  // Sinkronkan step saat user drag scrollbar / PgUp/Down / scroll biasa
-  useEffect(() => {
-    const onScroll = () => {
-      if (lockRef.current) return;
-      const root = containerRef.current;
-      if (!root) return;
+  // Helper: apakah area kontainer cukup terlihat?
+  const inViewport = () => {
+    const root = containerRef.current;
+    if (!root) return false;
+    const rect = root.getBoundingClientRect();
+    const _vh = window.innerHeight;
+    return rect.top < _vh * 0.85 && rect.bottom > _vh * 0.15;
+  };
 
-      const rect = root.getBoundingClientRect();
-      const vh = window.innerHeight;
+  // Pergi ke step tertentu (snap 1 langkah)
+  const scrollToStep = (next: number) => {
+    const top = containerTopRef.current + next * vh();
+    setStep(next);
+    lockRef.current = true;
+    window.scrollTo({ top, behavior: "smooth" });
+    unlockAfter(460); // sedikit di atas durasi smooth native
+  };
 
-      // Interaksi hanya saat kontainer terlihat cukup
-      const visible = rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
-      if (!visible) return;
-
-      const containerTop = window.scrollY + rect.top;
-      const pos = window.scrollY - containerTop;
-      const idx = Math.round(
-        Math.max(0, Math.min(TOTAL_STEPS - 1, pos / vh))
-      );
-      if (idx !== stepRef.current) setStep(idx);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    onScroll();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [TOTAL_STEPS, containerHeightVh]);
-
-  // Intersep gesture di area kontainer: 1 gesture = ±1 step (stabil, tanpa loncat)
+  // --------- INTERCEPT: wheel / touch / keyboard (selalu ±1 langkah) ----------
   useEffect(() => {
     if (prefersReduced) return;
     const root = containerRef.current;
     if (!root) return;
 
-    let unlockTimer: number | null = null;
-
-    const inViewport = () => {
-      const rect = root.getBoundingClientRect();
-      const vh = window.innerHeight;
-      return rect.top < vh * 0.85 && rect.bottom > vh * 0.15;
-    };
-
-    const scrollToStep = (next: number) => {
-      const rect = root.getBoundingClientRect();
-      const containerTop = window.scrollY + rect.top;
-      const target = containerTop + next * window.innerHeight;
-
-      lockRef.current = true;
-      setStep(next);
-      window.scrollTo({ top: target, behavior: "smooth" });
-
-      if (unlockTimer) window.clearTimeout(unlockTimer);
-      unlockTimer = window.setTimeout(() => {
-        lockRef.current = false;
-      }, 420); // sedikit di atas durasi smooth-scroll native
-    };
-
+    // Wheel
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
       if (e.ctrlKey) return; // pinch-zoom dll
@@ -143,7 +127,7 @@ export default function FeaturesPage() {
       if (next !== stepRef.current) scrollToStep(next);
     };
 
-    // Sentuh (mobile)
+    // Touch
     let startY = 0;
     const onTouchStart = (e: TouchEvent) => {
       if (!inViewport()) return;
@@ -154,26 +138,76 @@ export default function FeaturesPage() {
       if (lockRef.current) return;
 
       const delta = startY - e.touches[0].clientY; // geser ke atas = positif
-      if (Math.abs(delta) < 28) return; // threshold biar nggak sensitif
+      if (Math.abs(delta) < 28) return; // threshold biar tidak sensitif
       e.preventDefault();
 
       const dir = delta > 0 ? 1 : -1;
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
       if (next !== stepRef.current) scrollToStep(next);
-      startY = e.touches[0].clientY;
+      startY = e.touches[0].clientY; // reset supaya tetap 1 langkah
+    };
+
+    // Keyboard (arrows/space/PageUp/PageDown)
+    const onKey = (e: KeyboardEvent) => {
+      if (!inViewport()) return;
+      if (lockRef.current) return;
+
+      let dir: 1 | -1 | 0 | null = null;
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
+      else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
+      else if (e.key === "Home") dir = 0;
+      else if (e.key === "End") dir = 0;
+
+      if (dir === null) return;
+      e.preventDefault();
+
+      let next = stepRef.current;
+      if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = TOTAL_STEPS - 1;
+      else next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
+
+      if (next !== stepRef.current) scrollToStep(next);
     };
 
     root.addEventListener("wheel", onWheel, { passive: false });
     root.addEventListener("touchstart", onTouchStart, { passive: true });
     root.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("keydown", onKey);
 
     return () => {
       root.removeEventListener("wheel", onWheel as EventListener);
       root.removeEventListener("touchstart", onTouchStart as EventListener);
       root.removeEventListener("touchmove", onTouchMove as EventListener);
-      if (unlockTimer) window.clearTimeout(unlockTimer);
+      window.removeEventListener("keydown", onKey);
     };
   }, [TOTAL_STEPS, prefersReduced]);
+
+  // --------- SYNC: kalau user drag scrollbar, koreksi max ±1 langkah ----------
+  useEffect(() => {
+    const onScroll = () => {
+      if (!inViewport()) return;
+      if (lockRef.current) return;
+
+      const pos = window.scrollY - containerTopRef.current;
+      const rawIdx = Math.round(pos / vh()); // index terdekat dari posisi scroll
+      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, rawIdx));
+
+      // Jaga urutan: koreksi paling banyak 1 langkah dari step saat ini
+      const prev = stepRef.current;
+      if (clamped === prev) return;
+
+      const dir = clamped > prev ? 1 : -1;
+      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, prev + dir));
+      setStep(next);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", recomputeContainerTop, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", recomputeContainerTop);
+    };
+  }, [TOTAL_STEPS]);
 
   // ===== Render =====
   return (
@@ -183,6 +217,7 @@ export default function FeaturesPage() {
         ref={containerRef}
         className="relative"
         style={{ height: `${containerHeightVh}vh` }}
+        onLoad={recomputeContainerTop}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
@@ -252,7 +287,7 @@ export default function FeaturesPage() {
                             <li key={String(key)}>
                               <button
                                 type="button"
-                                onClick={() => setStep(idx + 1)}
+                                onClick={() => scrollToStep(idx + 1)}
                                 aria-current={active ? "step" : undefined}
                                 className={`w-full text-left rounded-lg px-3 py-2 transition
                                   ${active ? "bg-black text-white" : "text-foreground/70 hover:bg-black/5"}`}
