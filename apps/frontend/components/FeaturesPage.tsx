@@ -81,7 +81,6 @@ export default function FeaturesPage() {
   const pathnameRaw = usePathname() || "/";
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
-  const locale = (m?.[1]?.toLowerCase() || "") as "en" | "tr" | "";
   const prefersReduced = useReducedMotion();
 
   const withLocale = (href: string) => {
@@ -472,7 +471,6 @@ export default function FeaturesPage() {
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
-                        locale={locale}
                       />
                     </div>
                   </div>
@@ -520,14 +518,12 @@ export default function FeaturesPage() {
 function FeatureStage({
   stepKey,
   prefersReduced,
-  locale,
 }: {
   stepKey: keyof IntlMessages["features"]["cards"];
   prefersReduced: boolean;
-  locale: "en" | "tr" | "";
 }) {
   if (stepKey === "instant") {
-    return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
+    return <InstantChatStage prefersReduced={prefersReduced} />;
   }
 
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
@@ -576,15 +572,9 @@ function FeatureStage({
 /* =======================
  * InstantChatStage — 2 bubble, pure bubble + timestamp
  *  - POV customer: customer dulu & DI KANAN
- *  - /en dan /tr copy otomatis
+ *  - Customer = biru (#F2F8FC), Bot = putih
  * ======================= */
-function InstantChatStage({
-  prefersReduced,
-  locale,
-}: {
-  prefersReduced: boolean;
-  locale: "en" | "tr" | "";
-}) {
+function InstantChatStage({ prefersReduced }: { prefersReduced: boolean }) {
   const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.98, y: 8 },
     visible: {
@@ -605,20 +595,6 @@ function InstantChatStage({
     }),
   };
 
-  // localized copy
-  const copy =
-    locale === "tr"
-      ? {
-          user: "Merhaba! Yarın için bir randevu alabilir miyim?",
-          bot:
-            "Tabii ki! 7/24 çevrimiçiyiz. Randevunuzu sabah mı yoksa öğleden sonra mı tercih edersiniz?",
-        }
-      : {
-          user: "Hi! Can I book a consultation for tomorrow?",
-          bot:
-            "Of course! We’re online 24/7. Would you prefer morning or afternoon for your appointment?",
-        };
-
   return (
     <motion.div
       variants={containerVariants}
@@ -633,7 +609,9 @@ function InstantChatStage({
         variants={itemVariants}
         className="self-end max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
-        <div className="pr-12">{copy.user}</div>
+        <div className="pr-12">
+          Hi! Do you have a table available tonight?
+        </div>
         <time
           className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
           aria-hidden
@@ -649,7 +627,8 @@ function InstantChatStage({
         className="self-start max-w-[92%] rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
         <div className="pr-10">
-          {copy.bot} <span className="align-[-2px]">⚡️</span>
+          Yes — we have 2 slots at 7pm and 8pm. Would you like me to book one for
+          you? <span className="align-[-2px]">⚡️</span>
         </div>
         <time
           className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
@@ -662,8 +641,7 @@ function InstantChatStage({
   );
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// (Optional) kept for reuse without lint warnings
+// (Optional) kept for reuse
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
@@ -680,4 +658,3 @@ function TypingDots() {
     </div>
   );
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
