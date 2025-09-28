@@ -18,10 +18,35 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  *  - viewport height uses VisualViewport
  *  ========================================================= */
 
+/* =======================
+ * Types (diletakkan di atas agar urutan rapi)
+ * ======================= */
+type IntlMessages = {
+  features: {
+    badge: string;
+    title: string;
+    subtitle: string;
+    cards: {
+      instant: { title: string; desc: string };
+      multitenant: { title: string; desc: string };
+      analytics: { title: string; desc: string };
+      handoff: { title: string; desc: string };
+      multilingual: { title: string; desc: string };
+      booking: { title: string; desc: string };
+    };
+    cta: { primary: string; secondary: string };
+  };
+};
+
+/* =======================
+ * Constants
+ * ======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const BRAND = "#26658C";
 
-// Utils (stable)
+/* =======================
+ * Utils (stable)
+ * ======================= */
 const isEditable = (el: EventTarget | null): boolean => {
   const node = el as HTMLElement | null;
   if (!node) return false;
@@ -36,12 +61,17 @@ const isEditable = (el: EventTarget | null): boolean => {
   return false;
 };
 
-// Can this target (or its ancestors) scroll natively on Y?
+// Visual viewport height (mobile-safe)
+const getVVH = (): number => {
+  // visualViewport lebih akurat saat URL bar mobile muncul/hilang
+  return (window.visualViewport?.height ?? window.innerHeight) | 0;
+};
+
+// Apakah target/ancestor-nya bisa scroll native di sumbu Y?
 const canScrollWithin = (target: EventTarget | null): boolean => {
-  const el = target as HTMLElement | null;
-  let cur: HTMLElement | null = el;
+  let cur = target as HTMLElement | null;
   while (cur) {
-    if (cur?.dataset?.nativeScroll === "true") return true;
+    if (cur.dataset?.nativeScroll === "true") return true;
     const style = window.getComputedStyle(cur);
     const oy = style.overflowY;
     const canScrollY =
@@ -50,12 +80,6 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
     cur = cur.parentElement;
   }
   return false;
-};
-
-// Visual viewport height (mobile-safe)
-const getVVH = () => {
-  // visualViewport is more accurate on mobile URL bar show/hide
-  return (window.visualViewport?.height ?? window.innerHeight) | 0;
 };
 
 export default function FeaturesPage() {
@@ -71,45 +95,60 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
-  // 6 poin fitur (urutkan sesuai prioritasmu)
+  // 6 poin fitur (urut sesuai prioritasmu)
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
-    { key: "instant",      icon: "⚡️" },
-    { key: "multitenant",  icon: "🏢" },
-    { key: "analytics",    icon: "📊" },
-    { key: "handoff",      icon: "🤝" },
+    { key: "instant", icon: "⚡️" },
+    { key: "multitenant", icon: "🏢" },
+    { key: "analytics", icon: "📊" },
+    { key: "handoff", icon: "🤝" },
     { key: "multilingual", icon: "🌐" },
-    { key: "booking",      icon: "📅" },
+    { key: "booking", icon: "📅" },
   ];
 
   const rise: Variants = {
-    hidden:  { opacity: 0, y: prefersReduced ? 0 : 16 },
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 16 },
     visible: (delay = 0) => ({
-      opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE, delay },
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.45, ease: EASE, delay },
     }),
   };
 
   const stageFade = useMemo(
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
-      animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
-      exit:    { opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } },
+      animate: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.35, ease: EASE },
+      },
+      exit: {
+        opacity: 0,
+        y: prefersReduced ? 0 : -8,
+        transition: { duration: 0.25, ease: EASE },
+      },
     }),
     [prefersReduced]
   );
 
-  // ===== Sticky viewport multi-step =====
+  /* =======================
+   * Sticky viewport multi-step
+   * ======================= */
   const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta = 8
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [step, _setStep] = useState(0);
   const stepRef = useRef(0);
-  const setStep = useCallback((v: number) => { stepRef.current = v; _setStep(v); }, []);
+  const setStep = useCallback((v: number) => {
+    stepRef.current = v;
+    _setStep(v);
+  }, []);
 
   // locks & timing
   const lockRef = useRef(false);
   const lastDirRef = useRef<1 | -1 | 0>(0);
   const lastChangeAtRef = useRef(0);
-  const COOLDOWN = 280; // ms (sedikit lebih konservatif)
+  const COOLDOWN = 280; // ms
 
   // cached geometry
   const containerTopRef = useRef(0);
@@ -131,17 +170,17 @@ export default function FeaturesPage() {
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
-    // window resize
     window.addEventListener("resize", recalc, { passive: true, signal });
 
-    // visualViewport resize/scroll (mobile chrome/safari)
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", recalc, { signal });
       window.visualViewport.addEventListener("scroll", recalc, { signal });
     }
 
-    // orientation change (iOS)
-    window.addEventListener("orientationchange", recalc, { passive: true, signal });
+    window.addEventListener("orientationchange", recalc, {
+      passive: true,
+      signal,
+    });
 
     return () => ctrl.abort();
   }, [recalc]);
@@ -154,33 +193,34 @@ export default function FeaturesPage() {
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   }, []);
 
-  const vh = useCallback(() => (viewportHRef.current || getVVH()), []);
+  const vh = useCallback(() => viewportHRef.current || getVVH(), []);
 
   // Snap to step (±1 only)
-  const scrollToStep = useCallback((next: number, dir: 1 | -1) => {
-    const top = containerTopRef.current + next * vh();
-    setStep(next);
-    lockRef.current = true;
-    lastDirRef.current = dir;
-    lastChangeAtRef.current = performance.now();
-
-    // Smooth, then force-align
-    window.scrollTo({ top, behavior: "smooth" });
-    const alignTimer = window.setTimeout(() => {
-      window.scrollTo({ top, behavior: "auto" });
-      lockRef.current = false;
+  const scrollToStep = useCallback(
+    (next: number, dir: 1 | -1) => {
+      const top = containerTopRef.current + next * vh();
+      setStep(next);
+      lockRef.current = true;
+      lastDirRef.current = dir;
       lastChangeAtRef.current = performance.now();
-    }, 420);
 
-    // safety: cancel align if unmounted
-    return () => clearTimeout(alignTimer);
-  }, [setStep, vh]);
+      // Smooth, then force-align
+      window.scrollTo({ top, behavior: "smooth" });
+      const alignTimer = window.setTimeout(() => {
+        window.scrollTo({ top, behavior: "auto" });
+        lockRef.current = false;
+        lastChangeAtRef.current = performance.now();
+      }, 420);
 
-  /** ===========================
-   *  INTERACTION INTERCEPTORS
-   *  =========================== */
+      // safety: cancel align if unmounted
+      return () => clearTimeout(alignTimer);
+    },
+    [setStep, vh]
+  );
 
-  // Early exit: honor reduced motion → no interception at all (paling stabil)
+  /* =======================
+   * Interaction interceptors
+   * ======================= */
   const interceptionEnabled = !prefersReduced;
 
   // Wheel / Touch / Keyboard
@@ -200,10 +240,8 @@ export default function FeaturesPage() {
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
       if (lockRef.current) return;
-      // allow pinch zoom & editable fields
-      if (e.ctrlKey || isEditable(e.target)) return;
-      // if user is scrolling a nested scrollable area, don't hijack
-      if (canScrollWithin(e.target)) return;
+      if (e.ctrlKey || isEditable(e.target)) return; // pinch zoom / input
+      if (canScrollWithin(e.target)) return; // nested scrollable
 
       e.preventDefault();
       const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
@@ -236,7 +274,8 @@ export default function FeaturesPage() {
       if (isEditable(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ")
+        dir = 1;
       else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
@@ -245,7 +284,8 @@ export default function FeaturesPage() {
       e.preventDefault();
       if (dir === 0) {
         const next = e.key === "Home" ? 0 : TOTAL_STEPS - 1;
-        if (next !== stepRef.current) scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
+        if (next !== stepRef.current)
+          scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
         return;
       }
       go(dir as 1 | -1);
@@ -288,7 +328,9 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
 
-  // ===== Render =====
+  /* =======================
+   * Render
+   * ======================= */
   const containerHeightVh = TOTAL_STEPS * 100;
 
   return (
@@ -337,7 +379,9 @@ export default function FeaturesPage() {
 
                   <div className="mt-10 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
+                    <span className="animate-bounce" aria-hidden>
+                      ↓
+                    </span>
                   </div>
                 </motion.section>
               )}
@@ -350,8 +394,16 @@ export default function FeaturesPage() {
                       <motion.div
                         key={items[step - 1].key}
                         initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
-                        animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE } }}
-                        exit={{ opacity: 0, y: prefersReduced ? 0 : -8, transition: { duration: 0.25, ease: EASE } }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          transition: { duration: 0.35, ease: EASE },
+                        }}
+                        exit={{
+                          opacity: 0,
+                          y: prefersReduced ? 0 : -8,
+                          transition: { duration: 0.25, ease: EASE },
+                        }}
                         className="rounded-2xl border border-black/10 bg-white p-6 md:p-8 shadow-sm w-full max-w-3xl text-center md:text-left"
                       >
                         <div
@@ -396,8 +448,12 @@ export default function FeaturesPage() {
               {/* Step terakhir: CTA */}
               {step === items.length + 1 && (
                 <motion.section key="step-cta" {...stageFade} className="text-center">
-                  <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
-                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">{t("subtitle")}</p>
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    {t("title")}
+                  </h2>
+                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">
+                    {t("subtitle")}
+                  </p>
 
                   <div className="mt-8 flex justify-center gap-3">
                     <a
@@ -423,20 +479,3 @@ export default function FeaturesPage() {
     </main>
   );
 }
-
-type IntlMessages = {
-  features: {
-    badge: string;
-    title: string;
-    subtitle: string;
-    cards: {
-      instant: { title: string; desc: string };
-      multitenant: { title: string; desc: string };
-      analytics: { title: string; desc: string };
-      handoff: { title: string; desc: string };
-      multilingual: { title: string; desc: string };
-      booking: { title: string; desc: string };
-    };
-    cta: { primary: string; secondary: string };
-  };
-};
