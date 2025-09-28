@@ -367,6 +367,38 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
 
+  /* ===== Alignment measurement: samakan top stage dengan top judul (h3) ===== */
+  const leftColRef = useRef<HTMLDivElement | null>(null);
+  const titleH3Ref = useRef<HTMLHeadingElement | null>(null);
+  const [titleOffset, setTitleOffset] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const measure = () => {
+      const left = leftColRef.current;
+      const title = titleH3Ref.current;
+      if (!left || !title) {
+        setTitleOffset(0);
+        return;
+      }
+      const delta =
+        title.getBoundingClientRect().top - left.getBoundingClientRect().top;
+      setTitleOffset(Math.max(0, Math.round(delta)));
+    };
+
+    measure();
+
+    const ctrl = new AbortController();
+    const { signal } = ctrl;
+    window.addEventListener("resize", measure, { passive: true, signal });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", measure, { signal });
+      window.visualViewport.addEventListener("scroll", measure, { signal });
+    }
+    return () => ctrl.abort();
+  }, [step, prefersReduced]);
+
   /* =======================
    * Render
    * ======================= */
@@ -429,6 +461,7 @@ export default function FeaturesPage() {
                   <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-10 md:gap-14 items-center md:items-start">
                     {/* LEFT: text */}
                     <motion.div
+                      ref={leftColRef}
                       variants={contentStagger.container}
                       initial="hidden"
                       animate="visible"
@@ -466,6 +499,7 @@ export default function FeaturesPage() {
                         </motion.div>
 
                         <motion.h3
+                          ref={titleH3Ref}
                           variants={contentStagger.item}
                           className="text-xl md:text-2xl font-semibold leading-tight"
                         >
@@ -506,8 +540,11 @@ export default function FeaturesPage() {
                       })()}
                     </motion.div>
 
-                    {/* RIGHT: stage (selaras dengan judul, bukan emoji) */}
-                    <div className="hidden md:flex justify-center md:justify-start md:mt-[6px]">
+                    {/* RIGHT: stage (selaras dgn awal judul/h3, bukan emoji) */}
+                    <div
+                      className="hidden md:flex justify-center md:justify-start"
+                      style={{ marginTop: titleOffset }}
+                    >
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
