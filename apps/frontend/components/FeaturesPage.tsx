@@ -741,38 +741,38 @@ function TypingDots() {
 }
 
 /* =======================
- * Advanced Stage: Multi-tenant map + pins + metrics
+ * Advanced Stage: Hub -> Branch cards (replaces older map+pins)
  * ======================= */
 function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean }) {
-  // Tiga tenant dengan posisi pin pada kanvas (persen)
+  // Data tenant + angka contoh (sinkron dengan panel)
   const tenants = [
-    { key: "HQ", icon: "🏢", color: "#DBF4EE", x: 22, y: 32 },
-    { key: "Branch A", icon: "🏬", color: "#E5F0FF", x: 68, y: 28 },
-    { key: "Branch B", icon: "🏪", color: "#FFF2CC", x: 58, y: 64 },
+    { key: "HQ", icon: "🏢", color: "#F0F7FF", agents: 24, queues: 8, sla: "99%" },
+    { key: "Branch A", icon: "🏬", color: "#F2FBF7", agents: 12, queues: 3, sla: "98%" },
+    { key: "Branch B", icon: "🏪", color: "#FFF7ED", agents: 7, queues: 2, sla: "97%" },
   ] as const;
 
   const [idx, setIdx] = useState<number>(0);
 
-  // Auto-rotate tenant aktif (respect reduced motion)
+  // Auto-cycle fokus antar branch (mati saat reduced motion)
   useEffect(() => {
     if (prefersReduced) return;
-    const id = window.setInterval(() => {
-      setIdx((i) => (i + 1) % tenants.length);
-    }, 2200);
+    const id = window.setInterval(() => setIdx((i) => (i + 1) % tenants.length), 2400);
     return () => window.clearInterval(id);
   }, [prefersReduced]);
 
+  const dashedAnim = !prefersReduced ? { strokeDashoffset: [40, 0] } : undefined;
+
   return (
     <motion.div
-      key="mt-advanced"
+      key="hub-branches"
       initial={{ opacity: 0, scale: 0.985, y: 6 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
-      className="aspect-square w-[64vw] max-w-[460px] rounded-2xl border border-black/10 bg-white/70 overflow-hidden"
-      aria-label="Multi-tenant advanced map demo"
+      className="aspect-square w-[64vw] max-w-[520px] rounded-2xl border border-black/10 bg-white/70 overflow-hidden"
+      aria-label="Multi-tenant hub and branches animation"
     >
-      {/* HEADER: chips tenant */}
+      {/* HEADER chips */}
       <div className="p-3 md:p-4 flex gap-2">
         {tenants.map((t, i) => {
           const active = i === idx;
@@ -783,7 +783,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
               className="px-2.5 py-1.5 rounded-xl text-sm flex items-center gap-1.5 border transition"
               style={{
                 borderColor: active ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.08)",
-                background: active ? `${t.color}CC` : "white",
+                background: active ? `${t.color}` : "white",
               }}
               whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
               transition={{ duration: 0.12 }}
@@ -796,104 +796,191 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
         })}
       </div>
 
-      {/* MAP / STAGE */}
+      {/* STAGE */}
       <div className="relative h-[72%] mx-3 mb-3 rounded-2xl overflow-hidden border border-black/10 bg-white">
-        {/* Soft map background */}
+        {/* background halus */}
         <motion.div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 80% at 30% 20%, #e8f8f2 0%, transparent 55%), radial-gradient(100% 90% at 80% 30%, #e9f1ff 0%, transparent 55%)",
+              "radial-gradient(120% 80% at 50% 0%, #eef6ff 0%, transparent 60%), radial-gradient(120% 80% at 100% 30%, #ecfdf5 0%, transparent 50%)",
           }}
-          animate={!prefersReduced ? { rotate: [0, 2, -1.5, 0] } : undefined}
-          transition={!prefersReduced ? { duration: 16, repeat: Infinity, ease: "easeInOut" } : undefined}
+          animate={!prefersReduced ? { rotate: [0, 1.5, -1.2, 0] } : undefined}
+          transition={!prefersReduced ? { duration: 18, repeat: Infinity, ease: "easeInOut" } : undefined}
+          aria-hidden
         />
 
-        {/* Path / garis koneksi antar pin */}
+        {/* HUB di atas (donut + bars) */}
+        <div className="absolute left-1/2 top-[8%] -translate-x-1/2">
+          <motion.div
+            className="relative w-[160px] h-[104px] rounded-2xl border border-black/10 bg-white shadow-sm"
+            initial={{ y: 6, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.32, ease: EASE }}
+          >
+            {/* mini chart (bars) */}
+            <div className="absolute right-3 top-3 flex gap-2 items-end">
+              {[22, 32, 46].map((h, i) => (
+                <motion.span
+                  key={i}
+                  className="w-3 rounded-sm"
+                  style={{ background: i === 2 ? BRAND : "#CBD5E1", height: h }}
+                  initial={{ scaleY: 0.6, opacity: 0.7 }}
+                  animate={!prefersReduced ? { scaleY: [0.9, 1, 0.9] } : undefined}
+                  transition={!prefersReduced ? { duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut" } : undefined}
+                />
+              ))}
+            </div>
+
+            {/* donut */}
+            <div className="absolute left-4 top-4 w-[84px] h-[84px] rounded-full bg-[conic-gradient(#93C5FD_0deg,#93C5FD_120deg,#E5E7EB_120deg,#E5E7EB_360deg)]" />
+            <div className="absolute left-[34px] top-[34px] w-[36px] h-[36px] rounded-full bg-white" />
+            {!prefersReduced && (
+              <motion.div
+                className="absolute left-4 top-4 w-[84px] h-[84px] rounded-full"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, transparent 0deg, transparent 300deg, #2563EB 300deg, #2563EB 330deg, transparent 330deg)",
+                  mixBlendMode: "multiply",
+                }}
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+              />
+            )}
+            <div className="absolute left-2 bottom-2 text-xs font-medium text-foreground/70">HQ Dashboard</div>
+          </motion.div>
+
+          {!prefersReduced && (
+            <motion.div
+              className="absolute left-1/2 top-[104px] -translate-x-1/2 -translate-y-1/2 w-[180px] h-[60px] rounded-full blur-2xl"
+              style={{ background: "#93C5FD55" }}
+              animate={{ opacity: [0.2, 0.35, 0.2], scale: [0.96, 1.04, 0.96] }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+              aria-hidden
+            />
+          )}
+        </div>
+
+        {/* KONEKTOR: hub -> 3 cabang */}
         <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
           <motion.path
-            d={`M ${tenants[0].x} ${tenants[0].y} 
-                C 35 20, 55 20, ${tenants[1].x} ${tenants[1].y} 
-                S 65 60, ${tenants[2].x} ${tenants[2].y}`}
+            d="M 50 26 C 40 36, 28 48, 20 60"
             fill="none"
-            stroke="rgba(0,0,0,0.08)"
-            strokeWidth="1.2"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.2, ease: EASE }}
+            stroke="rgba(0,0,0,0.18)"
+            strokeWidth="0.8"
+            strokeDasharray="4 4"
+            initial={{ strokeDashoffset: 40 }}
+            animate={dashedAnim}
+            transition={{ duration: 1.2, ease: EASE, delay: 0.1 }}
+          />
+          <motion.path
+            d="M 50 26 C 50 36, 50 52, 50 68"
+            fill="none"
+            stroke="rgba(0,0,0,0.18)"
+            strokeWidth="0.8"
+            strokeDasharray="4 4"
+            initial={{ strokeDashoffset: 40 }}
+            animate={dashedAnim}
+            transition={{ duration: 1.2, ease: EASE, delay: 0.25 }}
+          />
+          <motion.path
+            d="M 50 26 C 60 36, 72 48, 80 60"
+            fill="none"
+            stroke="rgba(0,0,0,0.18)"
+            strokeWidth="0.8"
+            strokeDasharray="4 4"
+            initial={{ strokeDashoffset: 40 }}
+            animate={dashedAnim}
+            transition={{ duration: 1.2, ease: EASE, delay: 0.4 }}
           />
         </svg>
 
-        {/* Pins */}
-        {tenants.map((t, i) => {
-          const active = i === idx;
-          return (
-            <div
-              key={t.key}
-              className="absolute"
-              style={{ left: `${t.x}%`, top: `${t.y}%`, transform: "translate(-50%, -100%)" }}
-            >
-              {/* Glow pulsating */}
-              {!prefersReduced && (
-                <motion.div
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                  style={{ width: active ? 90 : 60, height: active ? 90 : 60, background: `${t.color}` }}
-                  initial={{ opacity: 0.25, scale: 0.8 }}
-                  animate={{
-                    opacity: active ? [0.22, 0.35, 0.22] : 0.18,
-                    scale: active ? [0.95, 1.08, 0.95] : 0.9,
-                  }}
-                  transition={active ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : { duration: 0.4 }}
-                  aria-hidden
-                />
-              )}
-
-              {/* Pin marker */}
-              <motion.div
-                className="relative z-[1] rounded-xl border border-black/10 bg-white shadow-sm px-2.5 py-1.5 text-xs flex items-center gap-1.5"
-                initial={{ y: 6, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+        {/* GRID 3 CABANG */}
+        <div className="absolute left-0 right-0 bottom-3 px-3 grid grid-cols-3 gap-3">
+          {tenants.map((t, i) => {
+            const active = i === idx;
+            const tilt = prefersReduced ? {} : { rotateX: 6, rotateY: i === 0 ? -6 : i === 2 ? 6 : 0 };
+            return (
+              <motion.button
+                key={t.key}
+                onClick={() => setIdx(i)}
+                className="relative w-full aspect-[4/3] rounded-2xl border border-black/10 bg-white text-left overflow-hidden"
+                style={{ boxShadow: active ? "0 8px 20px rgba(0,0,0,0.08)" : "0 4px 12px rgba(0,0,0,0.04)" }}
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1, ...tilt }}
+                whileHover={prefersReduced ? undefined : { y: -2 }}
                 transition={{ duration: 0.28, ease: EASE }}
+                aria-pressed={active}
               >
-                <span className="text-base leading-none" aria-hidden>{t.icon}</span>
-                <span className="font-medium">{t.key}</span>
-                {active && (
-                  <motion.span
-                    className="ml-1 rounded-md px-1 py-[2px] text-[10px] border border-black/10"
-                    style={{ background: `${t.color}CC` }}
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.18, ease: EASE }}
+                {/* header slot */}
+                <div className="absolute left-2 top-2 right-2 flex items-center justify-between">
+                  <div
+                    className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border border-black/10"
+                    style={{ background: t.color }}
                   >
-                    Active
-                  </motion.span>
-                )}
-              </motion.div>
+                    <span aria-hidden>{t.icon}</span>
+                    {t.key}
+                  </div>
+                  <div className="inline-flex items-center gap-1 text-[10px] text-foreground/70">
+                    <span className="px-1.5 py-[2px] rounded border border-black/10 bg-white/70">Admin</span>
+                    <span className="px-1.5 py-[2px] rounded border border-black/10 bg-white/70">Manager</span>
+                    <span className="px-1.5 py-[2px] rounded border border-black/10 bg-white/70">Staff</span>
+                  </div>
+                </div>
 
-              {/* Stem */}
-              <div className="mx-auto h-3 w-[2px] bg-black/10 translate-x-[calc(50%-1px)]" />
-              <div className="mx-auto h-1.5 w-1.5 rounded-full bg-black/20 translate-x-[calc(50%-3px)]" />
-            </div>
-          );
-        })}
+                {/* isi card – mini chart + tiles */}
+                <div className="absolute inset-x-2 bottom-2 top-9 grid grid-cols-3 gap-1.5">
+                  <div className="rounded-md border border-black/10 bg-white relative">
+                    <div className="absolute inset-0 m-auto w-10 h-10 rounded-full bg-[conic-gradient(#60A5FA_0deg,#60A5FA_220deg,#E5E7EB_220deg)]" />
+                    <div className="absolute inset-0 m-auto w-4 h-4 rounded-full bg-white" />
+                  </div>
+                  <div className="rounded-md border border-black/10 bg-gradient-to-b from-[#E0F2FE] to-white relative overflow-hidden">
+                    {!prefersReduced && (
+                      <motion.div
+                        className="absolute left-0 right-0 bottom-0 h-1/2"
+                        style={{ background: "linear-gradient(180deg, rgba(37,99,235,0.25) 0%, rgba(37,99,235,0) 100%)" }}
+                        animate={{ y: [8, -4, 8] }}
+                        transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                    )}
+                  </div>
+                  <div className="grid grid-rows-2 gap-1.5">
+                    <div className="rounded-md border border-black/10 bg-white" />
+                    <div className="rounded-md border border-black/10 bg-white" />
+                  </div>
+                </div>
 
-        {/* Panel metrik yang ikut berubah */}
-        <AnimatePresence mode="wait">
+                {/* badge Active/Standby */}
+                <motion.span
+                  className="absolute left-2 bottom-2 text-[11px] px-2 py-1 rounded-md border border-black/10 bg-white/80"
+                  initial={{ scale: 0.96, opacity: 0.8 }}
+                  animate={{ scale: active ? 1 : 0.98, opacity: 1 }}
+                  transition={{ duration: 0.18, ease: EASE }}
+                >
+                  {active ? "Active" : "Standby"}
+                </motion.span>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* PANEL METRIK sinkron dengan fokus */}
+        <AnimatePresence mode="popLayout">
           <motion.div
             key={`panel-${tenants[idx].key}`}
-            className="absolute right-3 bottom-3 left-3 md:left-auto md:w-[48%] rounded-xl border border-black/10 bg-white/90 backdrop-blur p-3"
+            className="absolute right-3 bottom-[36%] md:bottom-3 left-3 md:left-auto md:w-[48%] rounded-xl border border-black/10 bg-white/90 backdrop-blur p-3"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.26, ease: EASE }}
             aria-live="polite"
           >
-            <div className="text-[11px] text-foreground/60 mb-2">Access & workload</div>
+            <div className="text-[11px] text-foreground/60 mb-2">Access &amp; workload</div>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { k: "Agents", v: idx === 0 ? 24 : idx === 1 ? 12 : 7 },
-                { k: "Queues", v: idx === 0 ? 8 : idx === 1 ? 3 : 2 },
-                { k: "SLA", v: idx === 0 ? "99%" : idx === 1 ? "98%" : "97%" },
+                { k: "Agents", v: tenants[idx].agents },
+                { k: "Queues", v: tenants[idx].queues },
+                { k: "SLA", v: tenants[idx].sla },
               ].map((m, i) => (
                 <motion.div
                   key={m.k}
@@ -905,40 +992,6 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
                   <div className="text-[11px] text-foreground/60">{m.k}</div>
                   <div className="text-base font-semibold">{m.v}</div>
                 </motion.div>
-              ))}
-            </div>
-
-            {/* Roles quick toggle visual */}
-            <div className="mt-2 flex items-center gap-1.5">
-              {["Admin", "Manager", "Staff"].map((r, i) => (
-                <motion.span
-                  key={r}
-                  className="text-[11px] px-2 py-1 rounded-md border border-black/10"
-                  style={{
-                    background:
-                      i === 0
-                        ? "#EEF2FF"
-                        : i === 1
-                        ? "#ECFDF5"
-                        : "#FFF7ED",
-                  }}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.18, delay: 0.15 + i * 0.04 }}
-                >
-                  {r}
-                  {!prefersReduced && i === 0 && (
-                    <motion.span
-                      className="ml-1.5 inline-block align-middle"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                      aria-hidden
-                    >
-                      🔒
-                    </motion.span>
-                  )}
-                </motion.span>
               ))}
             </div>
           </motion.div>
