@@ -759,7 +759,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
     const id = window.setInterval(() => {
       setIdx((i) => (i + 1) % tenants.length);
     }, 2200);
-    return () => clearInterval(id);
+    return () => window.clearInterval(id);
   }, [prefersReduced]);
 
   return (
@@ -787,8 +787,9 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
               }}
               whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
               transition={{ duration: 0.12 }}
+              aria-pressed={active}
             >
-              <span>{t.icon}</span>
+              <span aria-hidden>{t.icon}</span>
               <span className="font-medium">{t.key}</span>
             </motion.button>
           );
@@ -809,7 +810,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
         />
 
         {/* Path / garis koneksi antar pin */}
-        <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
           <motion.path
             d={`M ${tenants[0].x} ${tenants[0].y} 
                 C 35 20, 55 20, ${tenants[1].x} ${tenants[1].y} 
@@ -843,6 +844,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
                     scale: active ? [0.95, 1.08, 0.95] : 0.9,
                   }}
                   transition={active ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : { duration: 0.4 }}
+                  aria-hidden
                 />
               )}
 
@@ -853,7 +855,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.28, ease: EASE }}
               >
-                <span className="text-base leading-none">{t.icon}</span>
+                <span className="text-base leading-none" aria-hidden>{t.icon}</span>
                 <span className="font-medium">{t.key}</span>
                 {active && (
                   <motion.span
@@ -884,6 +886,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.26, ease: EASE }}
+            aria-live="polite"
           >
             <div className="text-[11px] text-foreground/60 mb-2">Access & workload</div>
             <div className="grid grid-cols-3 gap-2">
@@ -930,6 +933,7 @@ function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: [0, 1, 0] }}
                       transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                      aria-hidden
                     >
                       🔒
                     </motion.span>
