@@ -395,9 +395,9 @@ export default function FeaturesPage() {
                     {t("title")}
                   </motion.h1>
 
-                  {/* tighter: leading-snug */}
+                  {/* SUBTITLE — lebih dekat & miring */}
                   <motion.p
-                    className="mt-2 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto leading-snug"
+                    className="mt-1 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
                     variants={rise}
                     initial="hidden"
                     animate="visible"
