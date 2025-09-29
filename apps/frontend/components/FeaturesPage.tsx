@@ -79,9 +79,7 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
 };
 
 /* =======================
- * Quote splitter: pisahkan kalimat ber-kutipan di awal deskripsi
- * (menghapus tanda kutip, menyisakan italic)
- * ======================= */
+ * Quote splitter */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
   const m = desc.match(/“([^”]+)”/); // smart quotes
   if (m && m.index !== undefined) {
@@ -143,16 +141,8 @@ export default function FeaturesPage() {
   const stageFade = useMemo(
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
-      animate: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.32, ease: EASE },
-      },
-      exit: {
-        opacity: 0,
-        y: prefersReduced ? 0 : -6,
-        transition: { duration: 0.22, ease: EASE },
-      },
+      animate: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } },
+      exit: { opacity: 0, y: prefersReduced ? 0 : -6, transition: { duration: 0.22, ease: EASE } },
     }),
     [prefersReduced]
   );
@@ -177,11 +167,7 @@ export default function FeaturesPage() {
       } as Variants,
       item: {
         hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.28, ease: EASE },
-        },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE } },
       } as Variants,
     };
   }, [prefersReduced]);
@@ -231,10 +217,7 @@ export default function FeaturesPage() {
       window.visualViewport.addEventListener("scroll", recalc, { signal });
     }
 
-    window.addEventListener("orientationchange", recalc, {
-      passive: true,
-      signal,
-    });
+    window.addEventListener("orientationchange", recalc, { passive: true, signal });
 
     return () => ctrl.abort();
   }, [recalc]);
@@ -321,8 +304,7 @@ export default function FeaturesPage() {
       if (isEditable(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ")
-        dir = 1;
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
       else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
@@ -391,11 +373,7 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* Step 0: HERO */}
               {step === 0 && (
-                <motion.section
-                  key="step-hero"
-                  {...stageFade}
-                  className="text-center"
-                >
+                <motion.section key="step-hero" {...stageFade} className="text-center">
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -417,8 +395,9 @@ export default function FeaturesPage() {
                     {t("title")}
                   </motion.h1>
 
+                  {/* tighter: leading-snug */}
                   <motion.p
-                    className="mt-2 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto leading-relaxed"
+                    className="mt-2 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto leading-snug"
                     variants={rise}
                     initial="hidden"
                     animate="visible"
@@ -429,9 +408,7 @@ export default function FeaturesPage() {
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>
-                      ↓
-                    </span>
+                    <span className="animate-bounce" aria-hidden>↓</span>
                   </div>
                 </motion.section>
               )}
@@ -439,7 +416,8 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-8 md:gap-10 items-center md:items-start">
+                  {/* tighter gap: gap-6 md:gap-8 */}
+                  <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-6 md:gap-8 items-center md:items-start">
                     {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
@@ -463,15 +441,10 @@ export default function FeaturesPage() {
                           {!prefersReduced && (
                             <motion.span
                               className="absolute inset-0 rounded-xl"
-                              style={{ background: `${BRAND}12` }}
+                              style={{ background: `${BRAND_BG_12}` }}
                               initial={{ opacity: 0.5, scale: 1 }}
                               animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
-                              transition={{
-                                duration: 1.5,
-                                ease: "easeOut",
-                                repeat: Infinity,
-                                repeatDelay: 0.5,
-                              }}
+                              transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
                             />
                           )}
                           <span className="-translate-y-[1px]" style={{ color: BRAND }}>
@@ -487,22 +460,18 @@ export default function FeaturesPage() {
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
 
-                        {/* Quote + body (col 2) */}
+                        {/* Quote + body (col 2) — tighter */}
                         {(() => {
-                          const descRaw = t(
-                            `cards.${items[step - 1].key}.desc`
-                          ) as unknown as string;
+                          const descRaw = t(`cards.${items[step - 1].key}.desc`) as unknown as string;
                           const { quote, rest } = splitQuoted(descRaw);
                           return (
                             <motion.div
                               variants={contentStagger.item}
-                              className="col-start-2 mt-2.5 text-foreground/70 space-y-2.5 leading-relaxed"
+                              className="col-start-2 mt-1.5 text-foreground/70 space-y-1.5 leading-snug"
                               data-native-scroll="true"
-                              style={{ maxHeight: 300, overflowY: "auto" }}
+                              style={{ maxHeight: 260, overflowY: "auto" }}
                             >
-                              {quote && (
-                                <p className="italic text-foreground/80">{quote}</p>
-                              )}
+                              {quote && <p className="italic text-foreground/80 leading-snug">{quote}</p>}
                               <p>{quote ? rest : descRaw}</p>
                             </motion.div>
                           );
@@ -512,7 +481,7 @@ export default function FeaturesPage() {
                     </motion.div>
 
                     {/* RIGHT: stage (selaras dengan judul) */}
-                    <div className="hidden md:flex justify-center md:justify-start md:mt-[4px]">
+                    <div className="hidden md:flex justify-center md:justify-start md:mt-[2px]">
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
@@ -529,7 +498,7 @@ export default function FeaturesPage() {
                   <h2 className="text-2xl font-semibold tracking-tight">
                     {t("title")}
                   </h2>
-                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-relaxed">
+                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
                     {t("subtitle")}
                   </p>
 
@@ -629,12 +598,7 @@ function InstantChatStage({
 }) {
   const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.985, y: 6 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.3, ease: EASE },
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE } },
   };
 
   const baseDelay = prefersReduced ? 0 : 0.06;
@@ -647,7 +611,6 @@ function InstantChatStage({
     }),
   };
 
-  // localized copy
   const copy =
     locale === "tr"
       ? {
@@ -661,7 +624,6 @@ function InstantChatStage({
             "Of course! We’re online 24/7. Would you prefer morning or afternoon for your appointment?",
         };
 
-  // phase: customer only -> typing -> bot reply
   const [phase, setPhase] = useState<"idle" | "typing" | "bot">(
     prefersReduced ? "bot" : "idle"
   );
@@ -676,7 +638,6 @@ function InstantChatStage({
     };
   }, [prefersReduced, locale]);
 
-  // dianggap "read" sejak indikator typing muncul
   const isRead = phase !== "idle";
 
   return (
@@ -699,7 +660,6 @@ function InstantChatStage({
           aria-hidden
         >
           21:13{" "}
-          {/* double check: abu-abu -> biru */}
           <motion.span
             initial={{ color: TICK_GREY }}
             animate={{ color: isRead ? READ_BLUE : TICK_GREY }}
