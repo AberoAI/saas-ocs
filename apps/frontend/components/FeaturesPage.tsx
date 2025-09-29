@@ -113,7 +113,7 @@ export default function FeaturesPage() {
   const prefersReduced = useReducedMotion();
 
   const withLocale = (href: string) => {
-    if (/^https?:\/\//.test(href)) return href;
+    if (/^https?:\/\/.*/.test(href)) return href;
     if (href.startsWith("#")) return href;
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
@@ -397,7 +397,7 @@ export default function FeaturesPage() {
 
                   {/* SUBTITLE — lebih dekat & miring */}
                   <motion.p
-                    className="mt-1 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                    className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
                     variants={rise}
                     initial="hidden"
                     animate="visible"
