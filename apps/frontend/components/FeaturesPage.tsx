@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /** =========================================================
- *  STABILITY FIRST EDITION — safest defaults
+ *  STABILITY FIRST EDITION — safest defaults (tightened spacing)
  * ========================================================= */
 
 /* =======================
@@ -40,7 +40,6 @@ type IntlMessages = {
  * ======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const BRAND = "#26658C";
-// warna centang: abu-abu (awal) -> biru (read)
 const TICK_GREY = "rgba(0,0,0,0.55)";
 const READ_BLUE = "#2563EB";
 
@@ -80,19 +79,27 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
 };
 
 /* =======================
- * Quote splitter: pisahkan kalimat ber-kutipan di awal deskripsi */
+ * Quote splitter: pisahkan kalimat ber-kutipan di awal deskripsi
+ * (menghapus tanda kutip, menyisakan italic)
+ * ======================= */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
   const m = desc.match(/“([^”]+)”/); // smart quotes
   if (m && m.index !== undefined) {
     const before = desc.slice(0, m.index).trim();
-    const after = desc.slice(m.index + m[0].length).trim().replace(/^[\s,.;:—-]+/, "");
+    const after = desc
+      .slice(m.index + m[0].length)
+      .trim()
+      .replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m[1], rest: rest || "" };
   }
   const m2 = desc.match(/"([^"]+)"/); // straight quotes
   if (m2 && m2.index !== undefined) {
     const before = desc.slice(0, m2.index).trim();
-    const after = desc.slice(m2.index + m2[0].length).trim().replace(/^[\s,.;:—-]+/, "");
+    const after = desc
+      .slice(m2.index + m2[0].length)
+      .trim()
+      .replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m2[1], rest: rest || "" };
   }
@@ -125,26 +132,26 @@ export default function FeaturesPage() {
     ];
 
   const rise: Variants = {
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 16 },
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 14 },
     visible: (delay = 0) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.45, ease: EASE, delay },
+      transition: { duration: 0.38, ease: EASE, delay },
     }),
   };
 
   const stageFade = useMemo(
     () => ({
-      initial: { opacity: 0, y: prefersReduced ? 0 : 10 },
+      initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
       animate: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.35, ease: EASE },
+        transition: { duration: 0.32, ease: EASE },
       },
       exit: {
         opacity: 0,
-        y: prefersReduced ? 0 : -8,
-        transition: { duration: 0.25, ease: EASE },
+        y: prefersReduced ? 0 : -6,
+        transition: { duration: 0.22, ease: EASE },
       },
     }),
     [prefersReduced]
@@ -156,24 +163,24 @@ export default function FeaturesPage() {
   const contentStagger = useMemo(() => {
     return {
       container: {
-        hidden: { opacity: 0, y: prefersReduced ? 0 : 8 },
+        hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
         visible: {
           opacity: 1,
           y: 0,
           transition: {
-            duration: 0.35,
+            duration: 0.3,
             ease: EASE,
-            staggerChildren: prefersReduced ? 0 : 0.06,
+            staggerChildren: prefersReduced ? 0 : 0.055,
             delayChildren: 0.02,
           },
         },
       } as Variants,
       item: {
-        hidden: { opacity: 0, y: prefersReduced ? 0 : 8 },
+        hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.35, ease: EASE },
+          transition: { duration: 0.28, ease: EASE },
         },
       } as Variants,
     };
@@ -197,7 +204,7 @@ export default function FeaturesPage() {
   const lockRef = useRef(false);
   const lastDirRef = useRef<1 | -1 | 0>(0);
   const lastChangeAtRef = useRef(0);
-  const COOLDOWN = 280;
+  const COOLDOWN = 260;
 
   const containerTopRef = useRef(0);
   const viewportHRef = useRef(0);
@@ -255,7 +262,7 @@ export default function FeaturesPage() {
         window.scrollTo({ top, behavior: "auto" });
         lockRef.current = false;
         lastChangeAtRef.current = performance.now();
-      }, 420);
+      }, 400);
 
       return () => clearTimeout(alignTimer);
     },
@@ -301,7 +308,7 @@ export default function FeaturesPage() {
       if (canScrollWithin(e.target)) return;
 
       const delta = startY - e.touches[0].clientY;
-      if (Math.abs(delta) < 28) return;
+      if (Math.abs(delta) < 26) return;
       e.preventDefault();
       const dir: 1 | -1 = delta > 0 ? 1 : -1;
       go(dir);
@@ -384,7 +391,11 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* Step 0: HERO */}
               {step === 0 && (
-                <motion.section key="step-hero" {...stageFade} className="text-center">
+                <motion.section
+                  key="step-hero"
+                  {...stageFade}
+                  className="text-center"
+                >
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -397,7 +408,7 @@ export default function FeaturesPage() {
                   </motion.span>
 
                   <motion.h1
-                    className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                    className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                     variants={rise}
                     initial="hidden"
                     animate="visible"
@@ -407,18 +418,20 @@ export default function FeaturesPage() {
                   </motion.h1>
 
                   <motion.p
-                    className="mt-3 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto"
+                    className="mt-2 max-w-2xl text-base sm:text-lg text-foreground/70 mx-auto leading-relaxed"
                     variants={rise}
                     initial="hidden"
                     animate="visible"
-                    custom={0.2}
+                    custom={0.18}
                   >
                     {t("subtitle")}
                   </motion.p>
 
-                  <div className="mt-10 inline-flex items-center gap-2 text-foreground/60">
+                  <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
+                    <span className="animate-bounce" aria-hidden>
+                      ↓
+                    </span>
                   </div>
                 </motion.section>
               )}
@@ -426,7 +439,7 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-10 md:gap-14 items-center md:items-start">
+                  <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-8 md:gap-10 items-center md:items-start">
                     {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
@@ -434,27 +447,27 @@ export default function FeaturesPage() {
                       animate="visible"
                       exit={{
                         opacity: 0,
-                        y: prefersReduced ? 0 : -8,
-                        transition: { duration: 0.25, ease: EASE },
+                        y: prefersReduced ? 0 : -6,
+                        transition: { duration: 0.2, ease: EASE },
                       }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
-                      {/* ====== GRID: ikon | judul/quote/desc (semua konten rata dengan judul) ====== */}
-                      <div className="grid grid-cols-[44px_minmax(0,1fr)] md:grid-cols-[48px_minmax(0,1fr)] gap-x-3 md:gap-x-4 items-start">
+                      {/* ====== GRID: ikon | judul/quote/desc ====== */}
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
                         {/* Icon (col 1) */}
                         <motion.div
                           variants={contentStagger.item}
-                          className="relative h-10 w-10 md:h-12 md:w-12 rounded-xl text-xl md:text-2xl flex items-center justify-center select-none"
+                          className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
                           aria-hidden
                         >
                           {!prefersReduced && (
                             <motion.span
                               className="absolute inset-0 rounded-xl"
-                              style={{ background: BRAND_BG_12 }}
-                              initial={{ opacity: 0.55, scale: 1 }}
-                              animate={{ opacity: [0.55, 0], scale: [1, 1.22] }}
+                              style={{ background: `${BRAND}12` }}
+                              initial={{ opacity: 0.5, scale: 1 }}
+                              animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
                               transition={{
-                                duration: 1.6,
+                                duration: 1.5,
                                 ease: "easeOut",
                                 repeat: Infinity,
                                 repeatDelay: 0.5,
@@ -469,12 +482,12 @@ export default function FeaturesPage() {
                         {/* Title (col 2) */}
                         <motion.h3
                           variants={contentStagger.item}
-                          className="col-start-2 text-xl md:text-2xl font-semibold leading-tight"
+                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight"
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
 
-                        {/* Quote + body (col 2), selalu di bawah & sejajar dengan judul */}
+                        {/* Quote + body (col 2) */}
                         {(() => {
                           const descRaw = t(
                             `cards.${items[step - 1].key}.desc`
@@ -483,12 +496,11 @@ export default function FeaturesPage() {
                           return (
                             <motion.div
                               variants={contentStagger.item}
-                              className="col-start-2 mt-3 text-foreground/70 space-y-3"
+                              className="col-start-2 mt-2.5 text-foreground/70 space-y-2.5 leading-relaxed"
                               data-native-scroll="true"
-                              style={{ maxHeight: 320, overflowY: "auto" }}
+                              style={{ maxHeight: 300, overflowY: "auto" }}
                             >
                               {quote && (
-                                // <<< HAPUS tanda kutip, tetap italic >>>
                                 <p className="italic text-foreground/80">{quote}</p>
                               )}
                               <p>{quote ? rest : descRaw}</p>
@@ -499,8 +511,8 @@ export default function FeaturesPage() {
                       {/* ====== /GRID ====== */}
                     </motion.div>
 
-                    {/* RIGHT: stage (selaras dengan judul, bukan emoji) */}
-                    <div className="hidden md:flex justify-center md:justify-start md:mt-[6px]">
+                    {/* RIGHT: stage (selaras dengan judul) */}
+                    <div className="hidden md:flex justify-center md:justify-start md:mt-[4px]">
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
@@ -517,11 +529,11 @@ export default function FeaturesPage() {
                   <h2 className="text-2xl font-semibold tracking-tight">
                     {t("title")}
                   </h2>
-                  <p className="mt-3 max-w-2xl mx-auto text-foreground/70">
+                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-relaxed">
                     {t("subtitle")}
                   </p>
 
-                  <div className="mt-8 flex justify-center gap-3">
+                  <div className="mt-7 flex justify-center gap-3">
                     <a
                       href="#demo"
                       className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
@@ -576,11 +588,11 @@ function FeatureStage({
   return (
     <motion.div
       key={stepKey}
-      initial={{ opacity: 0, scale: 0.98, y: 8 }}
+      initial={{ opacity: 0, scale: 0.985, y: 6 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.35, ease: EASE }}
-      className="aspect-square w-[68vw] max-w-[420px] rounded-2xl"
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.3, ease: EASE }}
+      className="aspect-square w-[64vw] max-w-[420px] rounded-2xl"
       style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
     >
@@ -616,22 +628,22 @@ function InstantChatStage({
   locale: "en" | "tr" | "";
 }) {
   const containerVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.98, y: 8 },
+    hidden: { opacity: 0, scale: 0.985, y: 6 },
     visible: {
       opacity: 1,
       scale: 1,
       y: 0,
-      transition: { duration: 0.35, ease: EASE },
+      transition: { duration: 0.3, ease: EASE },
     },
   };
 
-  const baseDelay = prefersReduced ? 0 : 0.08;
+  const baseDelay = prefersReduced ? 0 : 0.06;
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 8 },
+    hidden: { opacity: 0, y: 6 },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.32, ease: EASE, delay: baseDelay + i * 0.35 },
+      transition: { duration: 0.28, ease: EASE, delay: baseDelay + i * 0.32 },
     }),
   };
 
@@ -656,8 +668,8 @@ function InstantChatStage({
 
   useEffect(() => {
     if (prefersReduced) return;
-    const t1 = window.setTimeout(() => setPhase("typing"), 400);
-    const t2 = window.setTimeout(() => setPhase("bot"), 1600);
+    const t1 = window.setTimeout(() => setPhase("typing"), 380);
+    const t2 = window.setTimeout(() => setPhase("bot"), 1500);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -672,18 +684,18 @@ function InstantChatStage({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="w-[68vw] max-w-[460px] aspect-[4/3] flex flex-col justify-center gap-3 select-none"
+      className="w-[64vw] max-w-[460px] aspect-[4/3] flex flex-col justify-center gap-2.5 select-none"
       aria-label="Lightning-fast auto-reply demo"
     >
-      {/* CUSTOMER bubble — kanan, biru */}
+      {/* CUSTOMER bubble — kanan */}
       <motion.div
         custom={0}
         variants={itemVariants}
-        className="self-end max-w-[90%] rounded-2xl px-4 py-3 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
+        className="self-end max-w-[90%] rounded-2xl px-4 py-2.5 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
         <div className="pr-12">{copy.user}</div>
         <time
-          className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
+          className="absolute bottom-1 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
           aria-hidden
         >
           21:13{" "}
@@ -691,7 +703,7 @@ function InstantChatStage({
           <motion.span
             initial={{ color: TICK_GREY }}
             animate={{ color: isRead ? READ_BLUE : TICK_GREY }}
-            transition={{ duration: 0.28, ease: EASE }}
+            transition={{ duration: 0.24, ease: EASE }}
             className="ml-0.5"
           >
             ✓
@@ -699,7 +711,7 @@ function InstantChatStage({
           <motion.span
             initial={{ color: TICK_GREY }}
             animate={{ color: isRead ? READ_BLUE : TICK_GREY }}
-            transition={{ duration: 0.28, ease: EASE, delay: 0.03 }}
+            transition={{ duration: 0.24, ease: EASE, delay: 0.03 }}
           >
             ✓
           </motion.span>
@@ -712,9 +724,9 @@ function InstantChatStage({
           {phase === "typing" && (
             <motion.div
               key="typing"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: EASE } }}
-              exit={{ opacity: 0, y: -6, transition: { duration: 0.18, ease: EASE } }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } }}
+              exit={{ opacity: 0, y: -5, transition: { duration: 0.16, ease: EASE } }}
               className="inline-flex items-center"
               aria-label="typing"
             >
@@ -725,14 +737,14 @@ function InstantChatStage({
           {phase === "bot" && (
             <motion.div
               key="bot"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } }}
-              exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: EASE } }}
-              className="relative rounded-2xl px-4 py-3 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: EASE } }}
+              exit={{ opacity: 0, y: -5, transition: { duration: 0.18, ease: EASE } }}
+              className="relative rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
             >
               <div className="pr-10">{copy.bot}</div>
               <time
-                className="absolute bottom-1.5 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
+                className="absolute bottom-1 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
                 aria-hidden
               >
                 21:13
@@ -748,14 +760,14 @@ function InstantChatStage({
 // typing indicator (3 dots only)
 function TypingDots() {
   return (
-    <div className="flex items-center gap-1" aria-label="typing">
+    <div className="flex items-center gap-1.5" aria-label="typing">
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
           className="inline-block h-1.5 w-1.5 rounded-full"
           style={{ background: BRAND }}
-          initial={{ opacity: 0.3, y: 0 }}
-          animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+          initial={{ opacity: 0.35, y: 0 }}
+          animate={{ opacity: [0.35, 1, 0.35], y: [0, -2, 0] }}
           transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15 }}
         />
       ))}
