@@ -543,6 +543,11 @@ function FeatureStage({
     return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
   }
 
+  // ✅ gunakan stage advance untuk multitenant
+  if (stepKey === "multitenant") {
+    return <MultiTenantStageAdvanced prefersReduced={prefersReduced} />;
+  }
+
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
     instant: "#FF9AA2",
     multitenant: "#B5EAD7",
@@ -732,5 +737,209 @@ function TypingDots() {
         />
       ))}
     </div>
+  );
+}
+
+/* =======================
+ * Advanced Stage: Multi-tenant map + pins + metrics
+ * ======================= */
+function MultiTenantStageAdvanced({ prefersReduced }: { prefersReduced: boolean }) {
+  // Tiga tenant dengan posisi pin pada kanvas (persen)
+  const tenants = [
+    { key: "HQ", icon: "🏢", color: "#DBF4EE", x: 22, y: 32 },
+    { key: "Branch A", icon: "🏬", color: "#E5F0FF", x: 68, y: 28 },
+    { key: "Branch B", icon: "🏪", color: "#FFF2CC", x: 58, y: 64 },
+  ] as const;
+
+  const [idx, setIdx] = useState<number>(0);
+
+  // Auto-rotate tenant aktif (respect reduced motion)
+  useEffect(() => {
+    if (prefersReduced) return;
+    const id = window.setInterval(() => {
+      setIdx((i) => (i + 1) % tenants.length);
+    }, 2200);
+    return () => clearInterval(id);
+  }, [prefersReduced]);
+
+  return (
+    <motion.div
+      key="mt-advanced"
+      initial={{ opacity: 0, scale: 0.985, y: 6 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.3, ease: EASE }}
+      className="aspect-square w-[64vw] max-w-[460px] rounded-2xl border border-black/10 bg-white/70 overflow-hidden"
+      aria-label="Multi-tenant advanced map demo"
+    >
+      {/* HEADER: chips tenant */}
+      <div className="p-3 md:p-4 flex gap-2">
+        {tenants.map((t, i) => {
+          const active = i === idx;
+          return (
+            <motion.button
+              key={t.key}
+              onClick={() => setIdx(i)}
+              className="px-2.5 py-1.5 rounded-xl text-sm flex items-center gap-1.5 border transition"
+              style={{
+                borderColor: active ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.08)",
+                background: active ? `${t.color}CC` : "white",
+              }}
+              whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
+              transition={{ duration: 0.12 }}
+            >
+              <span>{t.icon}</span>
+              <span className="font-medium">{t.key}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* MAP / STAGE */}
+      <div className="relative h-[72%] mx-3 mb-3 rounded-2xl overflow-hidden border border-black/10 bg-white">
+        {/* Soft map background */}
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 80% at 30% 20%, #e8f8f2 0%, transparent 55%), radial-gradient(100% 90% at 80% 30%, #e9f1ff 0%, transparent 55%)",
+          }}
+          animate={!prefersReduced ? { rotate: [0, 2, -1.5, 0] } : undefined}
+          transition={!prefersReduced ? { duration: 16, repeat: Infinity, ease: "easeInOut" } : undefined}
+        />
+
+        {/* Path / garis koneksi antar pin */}
+        <svg className="absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <motion.path
+            d={`M ${tenants[0].x} ${tenants[0].y} 
+                C 35 20, 55 20, ${tenants[1].x} ${tenants[1].y} 
+                S 65 60, ${tenants[2].x} ${tenants[2].y}`}
+            fill="none"
+            stroke="rgba(0,0,0,0.08)"
+            strokeWidth="1.2"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.2, ease: EASE }}
+          />
+        </svg>
+
+        {/* Pins */}
+        {tenants.map((t, i) => {
+          const active = i === idx;
+          return (
+            <div
+              key={t.key}
+              className="absolute"
+              style={{ left: `${t.x}%`, top: `${t.y}%`, transform: "translate(-50%, -100%)" }}
+            >
+              {/* Glow pulsating */}
+              {!prefersReduced && (
+                <motion.div
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                  style={{ width: active ? 90 : 60, height: active ? 90 : 60, background: `${t.color}` }}
+                  initial={{ opacity: 0.25, scale: 0.8 }}
+                  animate={{
+                    opacity: active ? [0.22, 0.35, 0.22] : 0.18,
+                    scale: active ? [0.95, 1.08, 0.95] : 0.9,
+                  }}
+                  transition={active ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : { duration: 0.4 }}
+                />
+              )}
+
+              {/* Pin marker */}
+              <motion.div
+                className="relative z-[1] rounded-xl border border-black/10 bg-white shadow-sm px-2.5 py-1.5 text-xs flex items-center gap-1.5"
+                initial={{ y: 6, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.28, ease: EASE }}
+              >
+                <span className="text-base leading-none">{t.icon}</span>
+                <span className="font-medium">{t.key}</span>
+                {active && (
+                  <motion.span
+                    className="ml-1 rounded-md px-1 py-[2px] text-[10px] border border-black/10"
+                    style={{ background: `${t.color}CC` }}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.18, ease: EASE }}
+                  >
+                    Active
+                  </motion.span>
+                )}
+              </motion.div>
+
+              {/* Stem */}
+              <div className="mx-auto h-3 w-[2px] bg-black/10 translate-x-[calc(50%-1px)]" />
+              <div className="mx-auto h-1.5 w-1.5 rounded-full bg-black/20 translate-x-[calc(50%-3px)]" />
+            </div>
+          );
+        })}
+
+        {/* Panel metrik yang ikut berubah */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`panel-${tenants[idx].key}`}
+            className="absolute right-3 bottom-3 left-3 md:left-auto md:w-[48%] rounded-xl border border-black/10 bg-white/90 backdrop-blur p-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.26, ease: EASE }}
+          >
+            <div className="text-[11px] text-foreground/60 mb-2">Access & workload</div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { k: "Agents", v: idx === 0 ? 24 : idx === 1 ? 12 : 7 },
+                { k: "Queues", v: idx === 0 ? 8 : idx === 1 ? 3 : 2 },
+                { k: "SLA", v: idx === 0 ? "99%" : idx === 1 ? "98%" : "97%" },
+              ].map((m, i) => (
+                <motion.div
+                  key={m.k}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: 0.04 + i * 0.05 }}
+                  className="rounded-lg border border-black/10 bg-white px-2.5 py-2"
+                >
+                  <div className="text-[11px] text-foreground/60">{m.k}</div>
+                  <div className="text-base font-semibold">{m.v}</div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Roles quick toggle visual */}
+            <div className="mt-2 flex items-center gap-1.5">
+              {["Admin", "Manager", "Staff"].map((r, i) => (
+                <motion.span
+                  key={r}
+                  className="text-[11px] px-2 py-1 rounded-md border border-black/10"
+                  style={{
+                    background:
+                      i === 0
+                        ? "#EEF2FF"
+                        : i === 1
+                        ? "#ECFDF5"
+                        : "#FFF7ED",
+                  }}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.18, delay: 0.15 + i * 0.04 }}
+                >
+                  {r}
+                  {!prefersReduced && i === 0 && (
+                    <motion.span
+                      className="ml-1.5 inline-block align-middle"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      🔒
+                    </motion.span>
+                  )}
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 }
