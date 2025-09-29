@@ -455,7 +455,7 @@ export default function FeaturesPage() {
                         {/* Title (col 2) */}
                         <motion.h3
                           variants={contentStagger.item}
-                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight"
+                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
@@ -467,7 +467,7 @@ export default function FeaturesPage() {
                           return (
                             <motion.div
                               variants={contentStagger.item}
-                              className="col-start-2 mt-1.5 text-foreground/70 space-y-1.5 leading-snug"
+                              className="col-start-2 mt-0.5 text-foreground/70 space-y-1 leading-snug"
                               data-native-scroll="true"
                               style={{ maxHeight: 260, overflowY: "auto" }}
                             >
