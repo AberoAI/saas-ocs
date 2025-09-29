@@ -488,7 +488,8 @@ export default function FeaturesPage() {
                               style={{ maxHeight: 320, overflowY: "auto" }}
                             >
                               {quote && (
-                                <p className="italic text-foreground/80">“{quote}”</p>
+                                // <<< HAPUS tanda kutip, tetap italic >>>
+                                <p className="italic text-foreground/80">{quote}</p>
                               )}
                               <p>{quote ? rest : descRaw}</p>
                             </motion.div>
