@@ -851,6 +851,63 @@ function BranchIcon({ type }: { type: "hq" | "branch" }) {
 }
 
 /* =======================
+ * SchultzBackdrop — generative soft blobs (Schultz-style)
+ * ======================= */
+function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
+  const baseAnim = prefersReduced
+    ? {}
+    : {
+        animate: { x: [0, 30, -15, 0], y: [0, -10, 20, 0], rotate: [0, 8, -6, 0] },
+        transition: { duration: 22, repeat: Infinity, ease: "easeInOut" as const },
+      };
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {/* blob 1 — brand */}
+      <motion.div
+        initial={{ x: -20, y: -10, scale: 1, opacity: 0.35 }}
+        {...baseAnim}
+        className="absolute -top-8 -left-10 h-40 w-40 md:h-56 md:w-56 rounded-full blur-2xl mix-blend-soft-light"
+        style={{
+          background:
+            "radial-gradient(50% 50% at 50% 50%, rgba(38,101,140,0.5) 0%, rgba(38,101,140,0) 70%)",
+        }}
+      />
+      {/* blob 2 — warm */}
+      <motion.div
+        initial={{ x: 10, y: -6, scale: 1, opacity: 0.28 }}
+        {...(prefersReduced
+          ? {}
+          : {
+              animate: { x: [10, -25, 15, 10], y: [-6, 12, -8, -6], rotate: [0, -6, 4, 0] },
+              transition: { duration: 26, repeat: Infinity, ease: "easeInOut" as const },
+            })}
+        className="absolute -top-6 right-0 h-36 w-36 md:h-48 md:w-48 rounded-full blur-2xl mix-blend-soft-light"
+        style={{
+          background:
+            "radial-gradient(50% 50% at 50% 50%, rgba(250,219,128,0.55) 0%, rgba(250,219,128,0) 70%)",
+        }}
+      />
+      {/* blob 3 — violet */}
+      <motion.div
+        initial={{ x: 30, y: 40, scale: 1, opacity: 0.22 }}
+        {...(prefersReduced
+          ? {}
+          : {
+              animate: { x: [30, 0, 20, 30], y: [40, 20, 50, 40], rotate: [0, 5, -4, 0] },
+              transition: { duration: 24, repeat: Infinity, ease: "easeInOut" as const },
+            })}
+        className="absolute bottom-0 right-6 h-44 w-44 md:h-56 md:w-56 rounded-full blur-2xl mix-blend-multiply"
+        style={{
+          background:
+            "radial-gradient(50% 50% at 50% 50%, rgba(185,198,255,0.45) 0%, rgba(185,198,255,0) 70%)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* =======================
  * NEW: AnalyticsTableStage — pengganti stage multitenant (count-up + highlight + ikon)
  * ======================= */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
@@ -869,7 +926,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   };
   const item: Variants = {
     hidden: { opacity: 0, y: 8 },
-    visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } }, // 🔧 snappier (0.22 → 0.2)
+    visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } }, // 🔧 snappier
   };
 
   return (
@@ -893,12 +950,14 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          opacity: prefersReduced ? 0.45 : 0.85, // 🔧 lebih rendah 10–15%
+          opacity: prefersReduced ? 0.45 : 0.85,
           background:
             "radial-gradient(60% 60% at 20% 0%, rgba(219,234,254,0.65) 0%, transparent 60%)," +
             "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
         }}
       />
+      {/* Schultz-style backdrop */}
+      <SchultzBackdrop prefersReduced={prefersReduced} />
 
       {/* header */}
       <div className="px-4 md:px-5 py-3.5 md:py-4 border-b border-white/60 bg-white/40 backdrop-blur">
@@ -928,7 +987,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Agents</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Queues</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">SLA</th>
-              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium whitespace-nowrap">Status</th> {/* 🔧 anti-wrap */}
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium whitespace-nowrap">Status</th>
             </tr>
           </thead>
 
@@ -941,7 +1000,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
                 className="
                   group border-t border-black/5 outline-none
                   hover:bg-white/70 focus-visible:bg-white/80
-                  focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.25)]  /* 🔧 fokus jelas */
+                  focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.25)]
                   hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
                   transition-colors
                 "
