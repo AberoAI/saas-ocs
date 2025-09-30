@@ -8,6 +8,8 @@ import {
   useReducedMotion,
   type Variants,
   AnimatePresence,
+  useMotionValue,
+  animate,
 } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -512,7 +514,8 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg黑/5 transition"
+                      style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
                     </a>
@@ -740,14 +743,104 @@ function TypingDots() {
 }
 
 /* =======================
- * NEW: AnalyticsTableStage — pengganti stage multitenant (SchultzSchultz style)
+ * NEW: small utilities for multitenant stage
+ * ======================= */
+function CountUp({
+  to,
+  duration = 0.8,
+  delay = 0,
+  disabled = false,
+  suffix = "",
+}: {
+  to: number;
+  duration?: number;
+  delay?: number;
+  disabled?: boolean;
+  suffix?: string;
+}) {
+  const mv = useMotionValue(0);
+  const [val, setVal] = useState(0);
+
+  useEffect(() => {
+    if (disabled) {
+      setVal(to);
+      return;
+    }
+    const controls = animate(mv, to, {
+      duration,
+      delay,
+      ease: "easeOut",
+    });
+    const unsub = mv.on("change", (v) => setVal(Math.round(v)));
+    return () => {
+      controls.stop();
+      unsub();
+    };
+  }, [to, duration, delay, disabled, mv]);
+
+  return <span className="tabular-nums">{val}{suffix}</span>;
+}
+
+function StatusPill({
+  status,
+  activePulse = true,
+}: {
+  status: "Active" | "Standby";
+  activePulse?: boolean;
+}) {
+  const isActive = status === "Active";
+  return (
+    <span
+      className="
+        relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium
+        shadow-[inset_0_-1px_0_rgba(255,255,255,0.65)]
+        transition-colors
+      "
+      style={
+        isActive
+          ? { borderColor: "rgba(37,99,235,0.25)", background: "#F0F7FF", color: READ_BLUE }
+          : { borderColor: "rgba(0,0,0,0.12)", background: "white", color: "rgba(0,0,0,0.75)" }
+      }
+    >
+      {/* pulsing dot */}
+      <span
+        className="relative inline-block h-2 w-2 rounded-full"
+        style={{ background: isActive ? READ_BLUE : "#94a3b8" }}
+        aria-hidden
+      >
+        {isActive && activePulse && (
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{ boxShadow: "0 0 0 6px rgba(37,99,235,0.15)" }}
+          />
+        )}
+      </span>
+      {status}
+    </span>
+  );
+}
+
+function BranchIcon({ type }: { type: "hq" | "branch" }) {
+  const color = type === "hq" ? READ_BLUE : "#94a3b8";
+  const ring = type === "hq" ? "0 0 0 6px rgba(37,99,235,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
+  return (
+    <span
+      className="h-2.5 w-2.5 rounded-full"
+      style={{ background: color, boxShadow: ring }}
+      aria-hidden
+    />
+  );
+}
+
+/* =======================
+ * NEW: AnalyticsTableStage — pengganti stage multitenant (count-up + highlight + ikon)
  * ======================= */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
-    { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active"  },
-    { name: "Branch A", agents: 12, queues: 3, sla: 98, status: "Standby" },
-    { name: "Branch B", agents: 7,  queues: 2, sla: 97, status: "Standby" },
-  ] as const;
+    { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active" as const, type: "hq" as const },
+    { name: "Branch A", agents: 12, queues: 3, sla: 98, status: "Standby" as const, type: "branch" as const },
+    { name: "Branch B", agents: 7,  queues: 2, sla: 97, status: "Standby" as const, type: "branch" as const },
+  ];
 
   const container: Variants = {
     hidden:  { opacity: 0, scale: 0.985, y: 6 },
@@ -822,44 +915,23 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
               >
                 <td className="px-5 py-3">
                   <div className="inline-flex items-center gap-2.5">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{
-                        background: i === 0 ? READ_BLUE : "#94a3b8",
-                        boxShadow:
-                          i === 0
-                            ? "0 0 0 6px rgba(37,99,235,0.12)"
-                            : "0 0 0 6px rgba(148,163,184,0.12)",
-                      }}
-                      aria-hidden
-                    />
+                    <BranchIcon type={r.type} />
                     <span className="font-medium tracking-tight">{r.name}</span>
                   </div>
                 </td>
 
-                <td className="px-5 py-3 text-right tabular-nums">{r.agents}</td>
-                <td className="px-5 py-3 text-right tabular-nums">{r.queues}</td>
-                <td className="px-5 py-3 text-right tabular-nums">{r.sla}%</td>
+                <td className="px-5 py-3 text-right">
+                  <CountUp to={r.agents} disabled={prefersReduced} />
+                </td>
+                <td className="px-5 py-3 text-right">
+                  <CountUp to={r.queues} delay={0.05 + i * 0.03} disabled={prefersReduced} />
+                </td>
+                <td className="px-5 py-3 text-right">
+                  <CountUp to={r.sla} suffix="%" delay={0.08 + i * 0.04} disabled={prefersReduced} />
+                </td>
 
                 <td className="px-5 py-3">
-                  <span
-                    className="
-                      inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium
-                      shadow-[inset_0_-1px_0_rgba(255,255,255,0.65)]
-                      transition-colors
-                    "
-                    style={
-                      r.status === "Active"
-                        ? {
-                            borderColor: "rgba(37,99,235,0.25)",
-                            background: "#F0F7FF",
-                            color: READ_BLUE,
-                          }
-                        : { borderColor: "rgba(0,0,0,0.12)", background: "white" }
-                    }
-                  >
-                    {r.status}
-                  </span>
+                  <StatusPill status={r.status} activePulse={!prefersReduced && i === 0} />
                 </td>
               </motion.tr>
             ))}
