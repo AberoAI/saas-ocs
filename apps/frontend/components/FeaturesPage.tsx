@@ -37,7 +37,7 @@ type IntlMessages = {
   };
 };
 
-type Locale = string; // long-term friendly
+type Locale = string;
 
 /* =======================
  * Constants
@@ -48,7 +48,7 @@ const TICK_GREY = "rgba(0,0,0,0.55)";
 const READ_BLUE = "#2563EB";
 
 /* =======================
- * Utils (stable)
+ * Utils
  * ======================= */
 const isEditable = (el: EventTarget | null): boolean => {
   const node = el as HTMLElement | null;
@@ -72,10 +72,8 @@ const isInteractive = (el: EventTarget | null): boolean => {
   return isEditable(node);
 };
 
-// Visual viewport height (mobile-safe)
 const getVVH = (): number => (window.visualViewport?.height ?? window.innerHeight);
 
-// Apakah target/ancestor-nya bisa scroll native di sumbu Y?
 const canScrollWithin = (target: EventTarget | null): boolean => {
   let cur = target as HTMLElement | null;
   let depth = 0;
@@ -92,41 +90,35 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
   return false;
 };
 
-/* cubic-bezier helper (y only; cukup untuk easing terhadap waktu) */
+/* easing helper (y-only) */
 const cubicBezierY = (p0y: number, p1y: number) => (t: number) => {
   const u = 1 - t;
-  return (3 * u * u * t * p0y) + (3 * u * t * t * p1y) + (t * t * t);
+  return 3 * u * u * t * p0y + 3 * u * t * t * p1y + t * t * t;
 };
-/* ease fn sesuai EASE di atas */
 const easeFn = cubicBezierY(EASE[1], EASE[3]);
 
-/* Normalisasi delta wheel ke pixel */
+/* normalisasi wheel ke px */
 const normalizeWheelDelta = (e: WheelEvent, vhPx: number) => {
-  if (e.deltaMode === 1) return e.deltaY * 16;     // line → px approx
-  if (e.deltaMode === 2) return e.deltaY * vhPx;   // page → 1vh
-  return e.deltaY;                                  // already px
+  if (e.deltaMode === 1) return e.deltaY * 16;
+  if (e.deltaMode === 2) return e.deltaY * vhPx;
+  return e.deltaY;
 };
 
 /* =======================
- * Quote splitter */
+ * Quote splitter
+ * ======================= */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
-  const m = desc.match(/“([^”]+)”/); // smart quotes
+  const m = desc.match(/“([^”]+)”/);
   if (m && m.index !== undefined) {
     const before = desc.slice(0, m.index).trim();
-    const after = desc
-      .slice(m.index + m[0].length)
-      .trim()
-      .replace(/^[\s,.;:—-]+/, "");
+    const after = desc.slice(m.index + m[0].length).trim().replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m[1], rest: rest || "" };
   }
-  const m2 = desc.match(/"([^"]+)"/); // straight quotes
+  const m2 = desc.match(/"([^"]+)"/);
   if (m2 && m2.index !== undefined) {
     const before = desc.slice(0, m2.index).trim();
-    const after = desc
-      .slice(m2.index + m2[0].length)
-      .trim()
-      .replace(/^[\s,.;:—-]+/, "");
+    const after = desc.slice(m2.index + m2[0].length).trim().replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m2[1], rest: rest || "" };
   }
@@ -147,7 +139,6 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
-  // 6 poin fitur
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
     { key: "instant", icon: "⚡️" },
     { key: "multitenant", icon: "🏢" },
@@ -205,7 +196,7 @@ export default function FeaturesPage() {
   /* =======================
    * Sticky viewport multi-step
    * ======================= */
-  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta
+  const TOTAL_STEPS = items.length + 2;
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [step, _setStep] = useState(0);
@@ -223,10 +214,8 @@ export default function FeaturesPage() {
   const containerTopRef = useRef(0);
   const viewportHRef = useRef(0);
 
-  // wheel accumulation (untuk gesture halus)
   const wheelAccRef = useRef(0);
 
-  // animasi scroll kustom
   const animRef = useRef<number | null>(null);
   const cancelAnim = useCallback(() => {
     if (animRef.current != null) {
@@ -257,7 +246,7 @@ export default function FeaturesPage() {
           animRef.current = requestAnimationFrame(tick);
         } else {
           animRef.current = null;
-          window.scrollTo({ top: to, behavior: "auto" }); // align
+          window.scrollTo({ top: to, behavior: "auto" });
           lockRef.current = false;
           lastChangeAtRef.current = performance.now();
         }
@@ -275,7 +264,6 @@ export default function FeaturesPage() {
     containerTopRef.current = window.scrollY + rect.top;
     const h = getVVH();
     viewportHRef.current = h;
-    // Set CSS var for consistent height calc
     root.style.setProperty("--vvh", `${h}px`);
   }, []);
 
@@ -332,7 +320,7 @@ export default function FeaturesPage() {
     const go = (dir: 1 | -1) => {
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
       if (next !== stepRef.current) {
-        wheelAccRef.current = 0; // reset setelah berpindah
+        wheelAccRef.current = 0;
         scrollToStep(next, dir);
       }
     };
@@ -346,13 +334,10 @@ export default function FeaturesPage() {
       e.preventDefault();
 
       const delta = normalizeWheelDelta(e, vh());
-      // reset accumulator jika arah berganti
-      if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) {
-        wheelAccRef.current = 0;
-      }
+      if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) wheelAccRef.current = 0;
       wheelAccRef.current += delta;
 
-      const threshold = Math.max(40, Math.min(140, vh() * 0.08)); // adaptif
+      const threshold = Math.max(40, Math.min(140, vh() * 0.08));
       if (Math.abs(wheelAccRef.current) >= threshold) {
         const dir: 1 | -1 = wheelAccRef.current > 0 ? 1 : -1;
         go(dir);
@@ -365,7 +350,7 @@ export default function FeaturesPage() {
       if (!inViewport()) return;
       if (isEditable(e.target) || isInteractive(e.target)) return;
       startY = e.touches[0].clientY;
-      cancelAnim(); // hentikan animasi jika user mulai gesture baru
+      cancelAnim();
       lockRef.current = false;
     };
     const onTouchMove = (e: TouchEvent) => {
@@ -397,8 +382,7 @@ export default function FeaturesPage() {
       e.preventDefault();
       if (dir === 0) {
         const next = e.key === "Home" ? 0 : TOTAL_STEPS - 1;
-        if (next !== stepRef.current)
-          scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
+        if (next !== stepRef.current) scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
         return;
       }
       go(dir as 1 | -1);
@@ -412,7 +396,7 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep, cancelAnim, vh]);
 
-  // Sync while dragging scrollbar
+  // Sync saat drag scrollbar
   useEffect(() => {
     if (!interceptionEnabled) return;
     const ctrl = new AbortController();
@@ -425,14 +409,14 @@ export default function FeaturesPage() {
       if (now - lastChangeAtRef.current < COOLDOWN) return;
 
       const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round((pos + vh() * 0.08) / vh()); // tolerance 8%
+      const targetIdx = Math.round((pos + vh() * 0.08) / vh());
       const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
       if (clamped === stepRef.current) return;
 
       const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
       lastDirRef.current = dir;
       lastChangeAtRef.current = now;
-      setStep(clamped); // go directly to target
+      setStep(clamped);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true, signal });
@@ -444,11 +428,7 @@ export default function FeaturesPage() {
    * ======================= */
   return (
     <main className="mx-auto max-w-6xl px-6">
-      <div
-        ref={containerRef}
-        className="relative"
-        style={{ height: `calc(var(--vvh) * ${TOTAL_STEPS})` }}
-      >
+      <div ref={containerRef} className="relative" style={{ height: `calc(var(--vvh) * ${TOTAL_STEPS})` }}>
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
@@ -476,7 +456,6 @@ export default function FeaturesPage() {
                     {t("title")}
                   </motion.h1>
 
-                  {/* SUBTITLE — lebih dekat & miring */}
                   <motion.p
                     className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
                     variants={rise}
@@ -494,26 +473,20 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
 
-              {/* Step 1..6: content + stage */}
+              {/* Step 1..6 */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  {/* tighter gap: gap-6 md:gap-8 */}
                   <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-6 md:gap-8 items-center md:items-start">
-                    {/* LEFT: text */}
+                    {/* LEFT */}
                     <motion.div
                       variants={contentStagger.container}
                       initial="hidden"
                       animate="visible"
-                      exit={{
-                        opacity: 0,
-                        y: prefersReduced ? 0 : -6,
-                        transition: { duration: 0.2, ease: EASE },
-                      }}
+                      exit={{ opacity: 0, y: prefersReduced ? 0 : -6, transition: { duration: 0.2, ease: EASE } }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                     >
-                      {/* ====== GRID: ikon | judul/quote/desc ====== */}
                       <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
-                        {/* Icon (col 1) */}
+                        {/* Icon */}
                         <motion.div
                           variants={contentStagger.item}
                           className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
@@ -533,7 +506,7 @@ export default function FeaturesPage() {
                           </span>
                         </motion.div>
 
-                        {/* Title (col 2) */}
+                        {/* Title */}
                         <motion.h3
                           variants={contentStagger.item}
                           className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
@@ -541,7 +514,7 @@ export default function FeaturesPage() {
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
 
-                        {/* Quote + body (col 2) — tighter */}
+                        {/* Body */}
                         {(() => {
                           const descRaw = t(`cards.${items[step - 1].key}.desc`) as unknown as string;
                           const { quote, rest } = splitQuoted(descRaw);
@@ -558,10 +531,9 @@ export default function FeaturesPage() {
                           );
                         })()}
                       </div>
-                      {/* ====== /GRID ====== */}
                     </motion.div>
 
-                    {/* RIGHT: stage (selaras dengan judul) */}
+                    {/* RIGHT */}
                     <div className="hidden md:flex justify-center md:justify-start md:mt-[2px] w-full">
                       <FeatureStage
                         stepKey={items[step - 1].key}
@@ -576,12 +548,8 @@ export default function FeaturesPage() {
               {/* CTA */}
               {step === items.length + 1 && (
                 <motion.section key="step-cta" {...stageFade} className="text-center">
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    {t("title")}
-                  </h2>
-                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
-                    {t("subtitle")}
-                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
+                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">{t("subtitle")}</p>
 
                   <div className="mt-7 flex justify-center gap-3">
                     <a
@@ -593,7 +561,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg黑/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
@@ -624,12 +592,14 @@ function FeatureStage({
   if (stepKey === "instant") {
     return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
   }
-
-  // ⬇️ multitenant memakai tabel analitik glass
   if (stepKey === "multitenant") {
     return <AnalyticsTableStage prefersReduced={prefersReduced} />;
   }
+  if (stepKey === "analytics") {
+    return <AnalyticsPulseStage prefersReduced={prefersReduced} />;
+  }
 
+  // generic fallback (tetap ada)
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
     instant: "#FF9AA2",
     multitenant: "#B5EAD7",
@@ -638,7 +608,6 @@ function FeatureStage({
     multilingual: "#E2F0CB",
     booking: "#F1F0FF",
   };
-
   const base = palette[stepKey] ?? "#EAEAEA";
 
   return (
@@ -652,7 +621,6 @@ function FeatureStage({
       style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
     >
-      {/* background lembut default */}
       <motion.div
         className="h-full w-full rounded-2xl"
         initial={{ clipPath: "inset(50% 50% 50% 50% round 24px)" }}
@@ -661,9 +629,7 @@ function FeatureStage({
       >
         <motion.div
           className="h-full w-full rounded-2xl"
-          style={{
-            background: `radial-gradient(60% 60% at 65% 35%, ${base} 0%, transparent 60%)`,
-          }}
+          style={{ background: `radial-gradient(60% 60% at 65% 35%, ${base} 0%, transparent 60%)` }}
           animate={prefersReduced ? undefined : { rotate: [0, 6, -4, 0] }}
           transition={prefersReduced ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -673,15 +639,9 @@ function FeatureStage({
 }
 
 /* =======================
- * InstantChatStage — chat sequence + typing
+ * InstantChatStage
  * ======================= */
-function InstantChatStage({
-  prefersReduced,
-  locale,
-}: {
-  prefersReduced: boolean;
-  locale: Locale;
-}) {
+function InstantChatStage({ prefersReduced, locale }: { prefersReduced: boolean; locale: Locale }) {
   const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.985, y: 6 },
     visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE } },
@@ -701,18 +661,14 @@ function InstantChatStage({
     locale === "tr"
       ? {
           user: "Merhaba! Yarın için bir randevu alabilir miyim?",
-          bot:
-            "Tabii ki! 7/24 çevrimiçiyiz. Randevunuzu sabah mı yoksa öğleden sonra mı tercih edersiniz?",
+          bot: "Tabii ki! 7/24 çevrimiçiyiz. Randevunuzu sabah mı yoksa öğleden sonra mı tercih edersiniz?",
         }
       : {
           user: "Hi! Can I book a consultation for tomorrow?",
-          bot:
-            "Of course! We’re online 24/7. Would you prefer morning or afternoon for your appointment?",
+          bot: "Of course! We’re online 24/7. Would you prefer morning or afternoon for your appointment?",
         };
 
-  const [phase, setPhase] = useState<"idle" | "typing" | "bot">(
-    prefersReduced ? "bot" : "idle"
-  );
+  const [phase, setPhase] = useState<"idle" | "typing" | "bot">(prefersReduced ? "bot" : "idle");
 
   useEffect(() => {
     if (prefersReduced) return;
@@ -734,17 +690,13 @@ function InstantChatStage({
       className="w-[64vw] max-w-[460px] aspect-[4/3] flex flex-col justify-center gap-2.5 select-none"
       aria-label="Lightning-fast auto-reply demo"
     >
-      {/* CUSTOMER bubble — kanan */}
       <motion.div
         custom={0}
         variants={itemVariants}
         className="self-end max-w-[90%] rounded-2xl px-4 py-2.5 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
       >
         <div className="pr-12">{copy.user}</div>
-        <time
-          className="absolute bottom-1 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
-          aria-hidden
-        >
+        <time className="absolute bottom-1 right-3 text-[11px] text-foreground/60 whitespace-nowrap" aria-hidden>
           21:13{" "}
           <motion.span
             initial={{ color: TICK_GREY }}
@@ -754,17 +706,12 @@ function InstantChatStage({
           >
             ✓
           </motion.span>
-          <motion.span
-            initial={{ color: TICK_GREY }}
-            animate={{ color: isRead ? READ_BLUE : TICK_GREY }}
-            transition={{ duration: 0.24, ease: EASE, delay: 0.03 }}
-          >
+          <motion.span initial={{ color: TICK_GREY }} animate={{ color: isRead ? READ_BLUE : TICK_GREY }} transition={{ duration: 0.24, ease: EASE, delay: 0.03 }}>
             ✓
           </motion.span>
         </time>
       </motion.div>
 
-      {/* BOT area: typing indicator -> bot reply */}
       <div className="self-start max-w-[92%]" aria-live={phase === "bot" ? "polite" : "off"}>
         <AnimatePresence initial={false} mode="wait">
           {phase === "typing" && (
@@ -790,10 +737,7 @@ function InstantChatStage({
               className="relative rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
             >
               <div className="pr-10">{copy.bot}</div>
-              <time
-                className="absolute bottom-1 right-3 text-[11px] text-foreground/60 whitespace-nowrap"
-                aria-hidden
-              >
+              <time className="absolute bottom-1 right-3 text-[11px] text-foreground/60 whitespace-nowrap" aria-hidden>
                 21:13
               </time>
             </motion.div>
@@ -804,7 +748,6 @@ function InstantChatStage({
   );
 }
 
-// typing indicator (3 dots only)
 function TypingDots() {
   return (
     <div className="flex items-center gap-1.5" aria-label="typing">
@@ -823,11 +766,11 @@ function TypingDots() {
 }
 
 /* =======================
- * NEW: small utilities for multitenant stage
+ * Small utilities
  * ======================= */
 function CountUp({
   to,
-  duration = 0.75,        // 0.6–0.8s
+  duration = 0.75,
   delay = 0,
   disabled = false,
   suffix = "",
@@ -846,11 +789,7 @@ function CountUp({
       setVal(to);
       return;
     }
-    const controls = animate(mv, to, {
-      duration,
-      delay,
-      ease: "easeOut",
-    });
+    const controls = animate(mv, to, { duration, delay, ease: "easeOut" });
     const unsub = mv.on("change", (v) => setVal(Math.round(v)));
     return () => {
       controls.stop();
@@ -869,7 +808,7 @@ function StatusPill({
   activePulse?: boolean;
 }) {
   const isActive = status === "Active";
-  const brand = BRAND; // konsisten brand
+  const brand = BRAND;
   return (
     <span
       className="
@@ -883,12 +822,7 @@ function StatusPill({
           : { borderColor: "rgba(0,0,0,0.18)", background: "white", color: "rgba(0,0,0,0.78)" }
       }
     >
-      {/* pulsing dot — scale + opacity (lebih halus dari box-shadow) */}
-      <span
-        className="relative inline-block h-2 w-2 rounded-full overflow-visible"
-        style={{ background: isActive ? brand : "#64748b" }}
-        aria-hidden
-      >
+      <span className="relative inline-block h-2 w-2 rounded-full overflow-visible" style={{ background: isActive ? brand : "#64748b" }} aria-hidden>
         {isActive && activePulse && (
           <motion.span
             className="absolute inset-0 rounded-full"
@@ -906,76 +840,93 @@ function StatusPill({
 
 function BranchIcon({ type }: { type: "hq" | "branch" }) {
   const color = type === "hq" ? BRAND : "#94a3b8";
-  const ring =
-    type === "hq" ? "0 0 0 6px rgba(38,101,140,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
-  return (
-    <span
-      className="h-2.5 w-2.5 rounded-full"
-      style={{ background: color, boxShadow: ring }}
-      aria-hidden
-    />
-  );
+  const ring = type === "hq" ? "0 0 0 6px rgba(38,101,140,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
+  return <span className="h-2.5 w-2.5 rounded-full" style={{ background: color, boxShadow: ring }} aria-hidden />;
 }
 
 /* =======================
- * SchultzBackdrop — generative soft blobs (Schultz-style)
+ * SchultzBackdrop (untuk table stage)
  * ======================= */
 function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
   const baseAnim = prefersReduced
     ? {}
-    : {
-        animate: { x: [0, 30, -15, 0], y: [0, -10, 20, 0], rotate: [0, 8, -6, 0] },
-        transition: { duration: 22, repeat: Infinity, ease: "easeInOut" as const },
-      };
+    : { animate: { x: [0, 30, -15, 0], y: [0, -10, 20, 0], rotate: [0, 8, -6, 0] }, transition: { duration: 22, repeat: Infinity, ease: "easeInOut" as const } };
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* blob 1 — brand */}
       <motion.div
         initial={{ x: -20, y: -10, scale: 1, opacity: 0.35 }}
         {...baseAnim}
         className="absolute -top-8 -left-10 h-40 w-40 md:h-56 md:w-56 rounded-full blur-2xl mix-blend-soft-light"
-        style={{
-          background:
-            "radial-gradient(50% 50% at 50% 50%, rgba(38,101,140,0.5) 0%, rgba(38,101,140,0) 70%)",
-        }}
+        style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(38,101,140,0.5) 0%, rgba(38,101,140,0) 70%)" }}
       />
-      {/* blob 2 — warm */}
       <motion.div
         initial={{ x: 10, y: -6, scale: 1, opacity: 0.28 }}
-        {...(prefersReduced
-          ? {}
-          : {
-              animate: { x: [10, -25, 15, 10], y: [-6, 12, -8, -6], rotate: [0, -6, 4, 0] },
-              transition: { duration: 26, repeat: Infinity, ease: "easeInOut" as const },
-            })}
+        {...(prefersReduced ? {} : { animate: { x: [10, -25, 15, 10], y: [-6, 12, -8, -6], rotate: [0, -6, 4, 0] }, transition: { duration: 26, repeat: Infinity, ease: "easeInOut" as const } })}
         className="absolute -top-6 right-0 h-36 w-36 md:h-48 md:w-48 rounded-full blur-2xl mix-blend-soft-light"
-        style={{
-          background:
-            "radial-gradient(50% 50% at 50% 50%, rgba(250,219,128,0.55) 0%, rgba(250,219,128,0) 70%)",
-        }}
+        style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(250,219,128,0.55) 0%, rgba(250,219,128,0) 70%)" }}
       />
-      {/* blob 3 — violet */}
       <motion.div
         initial={{ x: 30, y: 40, scale: 1, opacity: 0.22 }}
-        {...(prefersReduced
-          ? {}
-          : {
-              animate: { x: [30, 0, 20, 30], y: [40, 20, 50, 40], rotate: [0, 5, -4, 0] },
-              transition: { duration: 24, repeat: Infinity, ease: "easeInOut" as const },
-            })}
+        {...(prefersReduced ? {} : { animate: { x: [30, 0, 20, 30], y: [40, 20, 50, 40], rotate: [0, 5, -4, 0] }, transition: { duration: 24, repeat: Infinity, ease: "easeInOut" as const } })}
         className="absolute bottom-0 right-6 h-44 w-44 md:h-56 md:w-56 rounded-full blur-2xl mix-blend-multiply"
-        style={{
-          background:
-            "radial-gradient(50% 50% at 50% 50%, rgba(185,198,255,0.45) 0%, rgba(185,198,255,0) 70%)",
-        }}
+        style={{ background: "radial-gradient(50% 50% at 50% 50%, rgba(185,198,255,0.45) 0%, rgba(185,198,255,0) 70%)" }}
       />
     </div>
   );
 }
 
 /* =======================
- * NEW: AnalyticsTableStage — pengganti stage multitenant (count-up + highlight + ikon)
+ * NEW: AnalyticsPulseStage — animasi jelas untuk 'analytics'
+ * ======================= */
+function AnalyticsPulseStage({ prefersReduced }: { prefersReduced: boolean }) {
+  const base = "#C7CEEA";
+
+  return (
+    <motion.div
+      key="analytics-pulse"
+      initial={{ opacity: 0, scale: 0.985, y: 6 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.3, ease: EASE }}
+      className="aspect-square w-[64vw] max-w-[420px] rounded-2xl"
+      style={{ background: `${base}80` }}
+      aria-label="Analytics animated stage"
+    >
+      <div className="relative h-full w-full rounded-2xl overflow-hidden">
+        {/* inner tile */}
+        <div className="absolute inset-[10%] rounded-[22px] bg-white/65 border border-white/60 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.15)]" />
+
+        {/* moving soft spots */}
+        {!prefersReduced && (
+          <>
+            <motion.span
+              className="absolute inset-[18%] rounded-[20px] blur-2xl"
+              style={{ background: "radial-gradient(60% 60% at 50% 50%, rgba(92,106,196,0.35) 0%, rgba(92,106,196,0) 70%)" }}
+              animate={{ scale: [1, 1.08, 0.98, 1], x: [-12, 10, -8, -12], y: [0, -8, 10, 0], opacity: [0.55, 0.9, 0.7, 0.55] }}
+              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.span
+              className="absolute inset-[24%] rounded-[18px] blur-2xl"
+              style={{ background: "radial-gradient(55% 55% at 60% 40%, rgba(38,101,140,0.28) 0%, rgba(38,101,140,0) 70%)" }}
+              animate={{ scale: [1.02, 0.96, 1.06, 1.02], x: [6, -10, 8, 6], y: [10, -6, 0, 10], opacity: [0.5, 0.7, 0.55, 0.5] }}
+              transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+            />
+            <motion.span
+              className="absolute inset-[28%] rounded-[16px] blur-xl"
+              style={{ background: "radial-gradient(50% 50% at 45% 60%, rgba(185,198,255,0.35) 0%, rgba(185,198,255,0) 70%)" }}
+              animate={{ scale: [0.98, 1.04, 0.97, 0.98], x: [0, 6, -4, 0], y: [-6, 4, -2, -6] }}
+              transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+            />
+          </>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* =======================
+ * AnalyticsTableStage — untuk 'multitenant'
  * ======================= */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
@@ -986,15 +937,9 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
 
   const container: Variants = {
     hidden:  { opacity: 0, scale: 0.985, y: 6 },
-    visible: {
-      opacity: 1, scale: 1, y: 0,
-      transition: { duration: 0.3, ease: EASE, staggerChildren: prefersReduced ? 0 : 0.06 }
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE, staggerChildren: prefersReduced ? 0 : 0.06 } },
   };
-  const item: Variants = {
-    hidden: { opacity: 0, y: 8 },
-    visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } }, // 🔧 snappier
-  };
+  const item: Variants = { hidden: { opacity: 0, y: 8 }, visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } } };
 
   return (
     <motion.div
@@ -1012,7 +957,6 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow — glare ditipiskan */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -1023,29 +967,23 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
             "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
         }}
       />
-      {/* Schultz-style backdrop */}
       <SchultzBackdrop prefersReduced={prefersReduced} />
 
-      {/* header */}
       <div className="px-4 md:px-5 py-3.5 md:py-4 border-b border-white/60 bg-white/40 backdrop-blur">
         <div className="flex items-center justify-between">
-          <div className="text-[14px] md:text-[15px] font-medium tracking-tight text-foreground/85">
-            Access &amp; workload
-          </div>
+          <div className="text-[14px] md:text-[15px] font-medium tracking-tight text-foreground/85">Access &amp; workload</div>
           <div className="text-[10px] md:text-[11px] text-foreground/70">Last 24h</div>
         </div>
       </div>
 
-      {/* table */}
       <div className="overflow-x-hidden">
         <table className="w-full text-[13px] md:text-sm table-fixed">
-          {/*  ✅ atur lebar kolom agar kelimanya muat di frame tanpa scroll */}
           <colgroup>
-            <col className="w-[32%]" />  {/* Branch */}
-            <col className="w-[14%]" />  {/* Agents */}
-            <col className="w-[14%]" />  {/* Queues */}
-            <col className="w-[14%]" />  {/* SLA */}
-            <col className="w-[26%]" />  {/* Status (lebih longgar) */}
+            <col className="w-[32%]" />
+            <col className="w-[14%]" />
+            <col className="w-[14%]" />
+            <col className="w-[14%]" />
+            <col className="w-[26%]" />
           </colgroup>
 
           <thead>
@@ -1098,7 +1036,6 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         </table>
       </div>
 
-      {/* footer note — kontras/ukuran ditingkatkan */}
       <div className="px-4 md:px-5 py-2.5 md:py-3 border-t border-white/60 bg-white/40 text-[11px] md:text-[12px] text-foreground/75">
         Tip: angka di atas hanya contoh; sambungkan ke API kamu untuk data real-time.
       </div>
