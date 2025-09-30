@@ -593,7 +593,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg黑/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
@@ -918,56 +918,54 @@ function BranchIcon({ type }: { type: "hq" | "branch" }) {
 }
 
 /* =======================
- * SchultzBackdrop — generative soft blobs (Schultz-style)
- * ======================= */
+ * SchultzBackdrop — generative soft blobs (Schultz-style) */
 function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
-  const baseAnim = prefersReduced
-    ? {}
-    : {
-        animate: { x: [0, 30, -15, 0], y: [0, -10, 20, 0], rotate: [0, 8, -6, 0] },
-        transition: { duration: 22, repeat: Infinity, ease: "easeInOut" as const },
-      };
-
+  // Layer di atas glare (-z-10) tapi tetap di bawah isi tabel
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* blob 1 — brand */}
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-[-5] overflow-hidden">
+      {/* blob 1 — brand (overlay, tegas) */}
       <motion.div
-        initial={{ x: -20, y: -10, scale: 1, opacity: 0.35 }}
-        {...baseAnim}
-        className="absolute -top-8 -left-10 h-40 w-40 md:h-56 md:w-56 rounded-full blur-2xl mix-blend-soft-light"
-        style={{
-          background:
-            "radial-gradient(50% 50% at 50% 50%, rgba(38,101,140,0.5) 0%, rgba(38,101,140,0) 70%)",
-        }}
-      />
-      {/* blob 2 — warm */}
-      <motion.div
-        initial={{ x: 10, y: -6, scale: 1, opacity: 0.28 }}
+        initial={{ x: -24, y: -16, scale: 1, opacity: 0.5 }}
         {...(prefersReduced
           ? {}
           : {
-              animate: { x: [10, -25, 15, 10], y: [-6, 12, -8, -6], rotate: [0, -6, 4, 0] },
+              animate: { x: [-24, 18, -12, -24], y: [-16, -4, 10, -16], rotate: [0, 8, -6, 0] },
+              transition: { duration: 22, repeat: Infinity, ease: "easeInOut" as const },
+            })}
+        className="absolute -top-10 -left-12 h-56 w-56 md:h-72 md:w-72 rounded-full blur-3xl mix-blend-overlay"
+        style={{
+          background:
+            "radial-gradient(50% 50% at 50% 50%, rgba(38,101,140,0.65) 0%, rgba(38,101,140,0) 72%)",
+        }}
+      />
+      {/* blob 2 — warm (soft-light) */}
+      <motion.div
+        initial={{ x: 8, y: -8, scale: 1, opacity: 0.42 }}
+        {...(prefersReduced
+          ? {}
+          : {
+              animate: { x: [8, -22, 14, 8], y: [-8, 14, -6, -8], rotate: [0, -6, 4, 0] },
               transition: { duration: 26, repeat: Infinity, ease: "easeInOut" as const },
             })}
-        className="absolute -top-6 right-0 h-36 w-36 md:h-48 md:w-48 rounded-full blur-2xl mix-blend-soft-light"
+        className="absolute -top-8 right-0 h-48 w-48 md:h-64 md:w-64 rounded-full blur-3xl mix-blend-soft-light"
         style={{
           background:
-            "radial-gradient(50% 50% at 50% 50%, rgba(250,219,128,0.55) 0%, rgba(250,219,128,0) 70%)",
+            "radial-gradient(50% 50% at 50% 50%, rgba(255,214,102,0.6) 0%, rgba(255,214,102,0) 72%)",
         }}
       />
-      {/* blob 3 — violet */}
+      {/* blob 3 — violet (multiply) */}
       <motion.div
-        initial={{ x: 30, y: 40, scale: 1, opacity: 0.22 }}
+        initial={{ x: 24, y: 36, scale: 1, opacity: 0.36 }}
         {...(prefersReduced
           ? {}
           : {
-              animate: { x: [30, 0, 20, 30], y: [40, 20, 50, 40], rotate: [0, 5, -4, 0] },
+              animate: { x: [24, -6, 18, 24], y: [36, 18, 46, 36], rotate: [0, 5, -4, 0] },
               transition: { duration: 24, repeat: Infinity, ease: "easeInOut" as const },
             })}
-        className="absolute bottom-0 right-6 h-44 w-44 md:h-56 md:w-56 rounded-full blur-2xl mix-blend-multiply"
+        className="absolute bottom-0 right-6 h-56 w-56 md:h-72 md:w-72 rounded-full blur-3xl mix-blend-multiply"
         style={{
           background:
-            "radial-gradient(50% 50% at 50% 50%, rgba(185,198,255,0.45) 0%, rgba(185,198,255,0) 70%)",
+            "radial-gradient(50% 50% at 50% 50%, rgba(119,135,255,0.5) 0%, rgba(119,135,255,0) 72%)",
         }}
       />
     </div>
@@ -1012,12 +1010,12 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow — glare ditipiskan */}
+      {/* soft ambient glow — glare ditipiskan agar backdrop terbaca */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          opacity: prefersReduced ? 0.45 : 0.85,
+          opacity: prefersReduced ? 0.40 : 0.58,
           background:
             "radial-gradient(60% 60% at 20% 0%, rgba(219,234,254,0.65) 0%, transparent 60%)," +
             "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
