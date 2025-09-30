@@ -37,6 +37,8 @@ type IntlMessages = {
   };
 };
 
+type Locale = string; // long-term friendly
+
 /* =======================
  * Constants
  * ======================= */
@@ -61,15 +63,25 @@ const isEditable = (el: EventTarget | null): boolean => {
   return false;
 };
 
+const isInteractive = (el: EventTarget | null): boolean => {
+  const node = el as HTMLElement | null;
+  if (!node) return false;
+  const tag = node.tagName?.toLowerCase();
+  if (["a", "button", "summary", "details"].includes(tag)) return true;
+  if (node.getAttribute?.("role") === "button") return true;
+  return isEditable(node);
+};
+
 // Visual viewport height (mobile-safe)
-const getVVH = (): number =>
-  (window.visualViewport?.height ?? window.innerHeight) | 0;
+const getVVH = (): number => (window.visualViewport?.height ?? window.innerHeight);
 
 // Apakah target/ancestor-nya bisa scroll native di sumbu Y?
 const canScrollWithin = (target: EventTarget | null): boolean => {
   let cur = target as HTMLElement | null;
-  while (cur) {
+  let depth = 0;
+  while (cur && depth++ < 12) {
     if (cur.dataset?.nativeScroll === "true") return true;
+    if (cur.getAttribute?.("role") === "dialog") return true;
     const style = window.getComputedStyle(cur);
     const oy = style.overflowY;
     const canScrollY =
@@ -111,7 +123,7 @@ export default function FeaturesPage() {
   const pathnameRaw = usePathname() || "/";
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
-  const locale = (m?.[1]?.toLowerCase() || "") as "en" | "tr" | "";
+  const locale = (m?.[1]?.toLowerCase() || "") as Locale;
   const prefersReduced = useReducedMotion();
 
   const withLocale = (href: string) => {
@@ -121,15 +133,14 @@ export default function FeaturesPage() {
   };
 
   // 6 poin fitur
-  const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] =
-    [
-      { key: "instant", icon: "⚡️" },
-      { key: "multitenant", icon: "🏢" },
-      { key: "analytics", icon: "📊" },
-      { key: "handoff", icon: "🤝" },
-      { key: "multilingual", icon: "🌐" },
-      { key: "booking", icon: "📅" },
-    ];
+  const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
+    { key: "instant", icon: "⚡️" },
+    { key: "multitenant", icon: "🏢" },
+    { key: "analytics", icon: "📊" },
+    { key: "handoff", icon: "🤝" },
+    { key: "multilingual", icon: "🌐" },
+    { key: "booking", icon: "📅" },
+  ];
 
   const rise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 14 },
@@ -152,7 +163,7 @@ export default function FeaturesPage() {
   /* =======================
    * Micro animations
    * ======================= */
-  const contentStagger = useMemo(() => {
+  const contentStagger = useMemo((): { container: Variants; item: Variants } => {
     return {
       container: {
         hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
@@ -166,11 +177,11 @@ export default function FeaturesPage() {
             delayChildren: 0.02,
           },
         },
-      } as Variants,
+      },
       item: {
         hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE } },
-      } as Variants,
+      },
     };
   }, [prefersReduced]);
 
@@ -202,7 +213,10 @@ export default function FeaturesPage() {
     if (!root) return;
     const rect = root.getBoundingClientRect();
     containerTopRef.current = window.scrollY + rect.top;
-    viewportHRef.current = getVVH();
+    const h = getVVH();
+    viewportHRef.current = h;
+    // Set CSS var for consistent height calc
+    root.style.setProperty("--vvh", `${h}px`);
   }, []);
 
   useEffect(() => {
@@ -227,7 +241,7 @@ export default function FeaturesPage() {
   const inViewport = useCallback(() => {
     const root = containerRef.current;
     if (!root) return false;
-    const rect = root.getBoundingClientRect(); // ✅ fixed
+    const rect = root.getBoundingClientRect();
     const h = getVVH();
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   }, []);
@@ -273,6 +287,7 @@ export default function FeaturesPage() {
       if (!inViewport()) return;
       if (lockRef.current) return;
       if (e.ctrlKey || isEditable(e.target)) return;
+      if (isInteractive(e.target)) return;
       if (canScrollWithin(e.target)) return;
 
       e.preventDefault();
@@ -284,12 +299,12 @@ export default function FeaturesPage() {
     let startY = 0;
     const onTouchStart = (e: TouchEvent) => {
       if (!inViewport()) return;
-      if (isEditable(e.target)) return;
+      if (isEditable(e.target) || isInteractive(e.target)) return;
       startY = e.touches[0].clientY;
     };
     const onTouchMove = (e: TouchEvent) => {
       if (!inViewport() || lockRef.current) return;
-      if (isEditable(e.target)) return;
+      if (isEditable(e.target) || isInteractive(e.target)) return;
       if (canScrollWithin(e.target)) return;
 
       const delta = startY - e.touches[0].clientY;
@@ -303,7 +318,7 @@ export default function FeaturesPage() {
     // Keyboard
     const onKey = (e: KeyboardEvent) => {
       if (!inViewport() || lockRef.current) return;
-      if (isEditable(e.target)) return;
+      if (isEditable(e.target) || isInteractive(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
@@ -343,15 +358,14 @@ export default function FeaturesPage() {
       if (now - lastChangeAtRef.current < COOLDOWN) return;
 
       const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round(pos / vh());
+      const targetIdx = Math.round((pos + vh() * 0.08) / vh()); // tolerance 8%
       const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
       if (clamped === stepRef.current) return;
 
       const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
       lastDirRef.current = dir;
       lastChangeAtRef.current = now;
-      setStep(next);
+      setStep(clamped); // go directly to target
     };
 
     window.addEventListener("scroll", onScroll, { passive: true, signal });
@@ -361,14 +375,12 @@ export default function FeaturesPage() {
   /* =======================
    * Render
    * ======================= */
-  const containerHeightVh = TOTAL_STEPS * 100;
-
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
         ref={containerRef}
         className="relative"
-        style={{ height: `${containerHeightVh}vh` }}
+        style={{ height: `calc(var(--vvh) * ${TOTAL_STEPS})` }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
@@ -507,14 +519,14 @@ export default function FeaturesPage() {
                   <div className="mt-7 flex justify-center gap-3">
                     <a
                       href="#demo"
-                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition"
+                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ backgroundColor: BRAND }}
                     >
                       {t("cta.primary")}
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
@@ -540,7 +552,7 @@ function FeatureStage({
 }: {
   stepKey: keyof IntlMessages["features"]["cards"];
   prefersReduced: boolean;
-  locale: "en" | "tr" | "";
+  locale: Locale;
 }) {
   if (stepKey === "instant") {
     return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
@@ -585,8 +597,8 @@ function FeatureStage({
           style={{
             background: `radial-gradient(60% 60% at 65% 35%, ${base} 0%, transparent 60%)`,
           }}
-          animate={{ rotate: [0, 6, -4, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          animate={prefersReduced ? undefined : { rotate: [0, 6, -4, 0] }}
+          transition={prefersReduced ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
         />
       </motion.div>
     </motion.div>
@@ -601,7 +613,7 @@ function InstantChatStage({
   locale,
 }: {
   prefersReduced: boolean;
-  locale: "en" | "tr" | "";
+  locale: Locale;
 }) {
   const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.985, y: 6 },
@@ -686,7 +698,7 @@ function InstantChatStage({
       </motion.div>
 
       {/* BOT area: typing indicator -> bot reply */}
-      <div className="self-start max-w-[92%]">
+      <div className="self-start max-w-[92%]" aria-live={phase === "bot" ? "polite" : "off"}>
         <AnimatePresence initial={false} mode="wait">
           {phase === "typing" && (
             <motion.div
@@ -707,7 +719,6 @@ function InstantChatStage({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.26, ease: EASE }}
-              /* ✅ fix: transition harus pakai titik dua, bukan kurung kurawal ganda */
               exit={{ opacity: 0, y: -5, transition: { duration: 0.18, ease: EASE } }}
               className="relative rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
             >
