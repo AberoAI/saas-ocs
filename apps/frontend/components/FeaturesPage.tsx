@@ -797,7 +797,7 @@ function StatusPill({
       className="
         relative inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium
         shadow-[inset_0_-1px_0_rgba(255,255,255,0.65)]
-        transition-colors
+        transition-colors whitespace-nowrap
       "
       style={
         isActive
@@ -870,7 +870,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       exit={{ opacity: 0, y: -6 }}
       aria-label="Analytics table"
       className="
-        relative w-full max-w-[640px] overflow-hidden
+        relative w-full max-w-full md:max-w-[640px] overflow-hidden
         rounded-[22px] border border-white/60 bg-white/55 md:backdrop-blur-xl backdrop-blur
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
@@ -888,34 +888,34 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       />
 
       {/* header */}
-      <div className="px-5 py-4 border-b border-white/60 bg-white/40 backdrop-blur">
+      <div className="px-4 md:px-5 py-3.5 md:py-4 border-b border-white/60 bg-white/40 backdrop-blur">
         <div className="flex items-center justify-between">
-          <div className="text-[15px] font-medium tracking-tight text-foreground/85">
+          <div className="text-[14px] md:text-[15px] font-medium tracking-tight text-foreground/85">
             Access &amp; workload
           </div>
-          <div className="text-[11px] text-foreground/70">Last 24h</div>
+          <div className="text-[10px] md:text-[11px] text-foreground/70">Last 24h</div>
         </div>
       </div>
 
       {/* table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm table-fixed">
-          {/*  ✅ atur lebar kolom biar jarak rapi & konsisten */}
+      <div className="overflow-x-hidden">
+        <table className="w-full text-[13px] md:text-sm table-fixed">
+          {/*  ✅ atur lebar kolom agar kelimanya muat di frame tanpa scroll */}
           <colgroup>
-            <col className="w-[34%]" />  {/* Branch — cukup untuk “Branch B”, tidak terpotong */}
-            <col className="w-[16%]" />  {/* Agents */}
-            <col className="w-[16%]" />  {/* Queues */}
-            <col className="w-[16%]" />  {/* SLA */}
-            <col className="w-[18%]" />  {/* Status */}
+            <col className="w-[32%]" />  {/* Branch */}
+            <col className="w-[14%]" />  {/* Agents */}
+            <col className="w-[14%]" />  {/* Queues */}
+            <col className="w-[14%]" />  {/* SLA */}
+            <col className="w-[26%]" />  {/* Status (lebih longgar) */}
           </colgroup>
 
           <thead>
             <tr className="text-left text-foreground/80">
-              <th className="px-5 py-3 font-medium">Branch</th>
-              <th className="px-5 py-3 font-medium text-right">Agents</th>
-              <th className="px-5 py-3 font-medium text-right">Queues</th>
-              <th className="px-5 py-3 font-medium text-right">SLA</th>
-              <th className="px-5 py-3 font-medium">Status</th>
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium">Branch</th>
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Agents</th>
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Queues</th>
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">SLA</th>
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium">Status</th>
             </tr>
           </thead>
 
@@ -932,24 +932,24 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
                   transition-colors
                 "
               >
-                <td className="px-5 py-3">
+                <td className="px-4 md:px-5 py-2.5 md:py-3">
                   <div className="inline-flex items-center gap-2.5 whitespace-nowrap">
                     <BranchIcon type={r.type} />
-                    <span className="font-medium tracking-tight">{r.name}</span>
+                    <span className="font-medium tracking-tight truncate">{r.name}</span>
                   </div>
                 </td>
 
-                <td className="px-5 py-3 text-right">
+                <td className="px-4 md:px-5 py-2.5 md:py-3 text-right whitespace-nowrap">
                   <CountUp to={r.agents} disabled={prefersReduced} />
                 </td>
-                <td className="px-5 py-3 text-right">
+                <td className="px-4 md:px-5 py-2.5 md:py-3 text-right whitespace-nowrap">
                   <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
                 </td>
-                <td className="px-5 py-3 text-right">
+                <td className="px-4 md:px-5 py-2.5 md:py-3 text-right whitespace-nowrap">
                   <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
                 </td>
 
-                <td className="px-5 py-3">
+                <td className="px-4 md:px-5 py-2.5 md:py-3">
                   <StatusPill status={r.status} activePulse={!prefersReduced && i === 0} />
                 </td>
               </motion.tr>
@@ -959,7 +959,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       </div>
 
       {/* footer note */}
-      <div className="px-5 py-3 border-t border-white/60 bg-white/40 text-[11px] text-foreground/70">
+      <div className="px-4 md:px-5 py-2.5 md:py-3 border-t border-white/60 bg-white/40 text-[10px] md:text-[11px] text-foreground/70">
         Tip: angka di atas hanya contoh; sambungkan ke API kamu untuk data real-time.
       </div>
     </motion.div>
