@@ -92,6 +92,21 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
   return false;
 };
 
+/* cubic-bezier helper (y only; cukup untuk easing terhadap waktu) */
+const cubicBezierY = (p0y: number, p1y: number) => (t: number) => {
+  const u = 1 - t;
+  return (3 * u * u * t * p0y) + (3 * u * t * t * p1y) + (t * t * t);
+};
+/* ease fn sesuai EASE di atas */
+const easeFn = cubicBezierY(EASE[1], EASE[3]);
+
+/* Normalisasi delta wheel ke pixel */
+const normalizeWheelDelta = (e: WheelEvent, vhPx: number) => {
+  if (e.deltaMode === 1) return e.deltaY * 16;     // line → px approx
+  if (e.deltaMode === 2) return e.deltaY * vhPx;   // page → 1vh
+  return e.deltaY;                                  // already px
+};
+
 /* =======================
  * Quote splitter */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
@@ -208,6 +223,51 @@ export default function FeaturesPage() {
   const containerTopRef = useRef(0);
   const viewportHRef = useRef(0);
 
+  // wheel accumulation (untuk gesture halus)
+  const wheelAccRef = useRef(0);
+
+  // animasi scroll kustom
+  const animRef = useRef<number | null>(null);
+  const cancelAnim = useCallback(() => {
+    if (animRef.current != null) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+    }
+  }, []);
+
+  const animateTo = useCallback(
+    (to: number, duration = 420) => {
+      cancelAnim();
+      const start = window.scrollY;
+      const dist = to - start;
+      if (Math.abs(dist) < 1) {
+        window.scrollTo({ top: to, behavior: "auto" });
+        return;
+      }
+      lockRef.current = true;
+      const t0 = performance.now();
+
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / duration);
+        const eased = prefersReduced ? p : easeFn(p);
+        const y = start + dist * eased;
+        window.scrollTo({ top: y, behavior: "auto" });
+
+        if (p < 1 && lockRef.current) {
+          animRef.current = requestAnimationFrame(tick);
+        } else {
+          animRef.current = null;
+          window.scrollTo({ top: to, behavior: "auto" }); // align
+          lockRef.current = false;
+          lastChangeAtRef.current = performance.now();
+        }
+      };
+
+      animRef.current = requestAnimationFrame(tick);
+    },
+    [cancelAnim, prefersReduced]
+  );
+
   const recalc = useCallback(() => {
     const root = containerRef.current;
     if (!root) return;
@@ -252,20 +312,11 @@ export default function FeaturesPage() {
     (next: number, dir: 1 | -1) => {
       const top = containerTopRef.current + next * vh();
       setStep(next);
-      lockRef.current = true;
       lastDirRef.current = dir;
       lastChangeAtRef.current = performance.now();
-
-      window.scrollTo({ top, behavior: "smooth" });
-      const alignTimer = window.setTimeout(() => {
-        window.scrollTo({ top, behavior: "auto" });
-        lockRef.current = false;
-        lastChangeAtRef.current = performance.now();
-      }, 400);
-
-      return () => clearTimeout(alignTimer);
+      animateTo(top, prefersReduced ? 0 : 420);
     },
-    [setStep, vh]
+    [setStep, vh, animateTo, prefersReduced]
   );
 
   const interceptionEnabled = !prefersReduced;
@@ -280,19 +331,32 @@ export default function FeaturesPage() {
 
     const go = (dir: 1 | -1) => {
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) scrollToStep(next, dir);
+      if (next !== stepRef.current) {
+        wheelAccRef.current = 0; // reset setelah berpindah
+        scrollToStep(next, dir);
+      }
     };
 
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
       if (lockRef.current) return;
-      if (e.ctrlKey || isEditable(e.target)) return;
-      if (isInteractive(e.target)) return;
+      if (e.ctrlKey || isEditable(e.target) || isInteractive(e.target)) return;
       if (canScrollWithin(e.target)) return;
 
       e.preventDefault();
-      const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
-      go(dir);
+
+      const delta = normalizeWheelDelta(e, vh());
+      // reset accumulator jika arah berganti
+      if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) {
+        wheelAccRef.current = 0;
+      }
+      wheelAccRef.current += delta;
+
+      const threshold = Math.max(40, Math.min(140, vh() * 0.08)); // adaptif
+      if (Math.abs(wheelAccRef.current) >= threshold) {
+        const dir: 1 | -1 = wheelAccRef.current > 0 ? 1 : -1;
+        go(dir);
+      }
     };
 
     // Touch
@@ -301,6 +365,8 @@ export default function FeaturesPage() {
       if (!inViewport()) return;
       if (isEditable(e.target) || isInteractive(e.target)) return;
       startY = e.touches[0].clientY;
+      cancelAnim(); // hentikan animasi jika user mulai gesture baru
+      lockRef.current = false;
     };
     const onTouchMove = (e: TouchEvent) => {
       if (!inViewport() || lockRef.current) return;
@@ -308,11 +374,12 @@ export default function FeaturesPage() {
       if (canScrollWithin(e.target)) return;
 
       const delta = startY - e.touches[0].clientY;
-      if (Math.abs(delta) < 26) return;
+      const thresh = Math.max(26, vh() * 0.03);
+      if (Math.abs(delta) < thresh) return;
       e.preventDefault();
       const dir: 1 | -1 = delta > 0 ? 1 : -1;
-      go(dir);
       startY = e.touches[0].clientY;
+      go(dir);
     };
 
     // Keyboard
@@ -343,7 +410,7 @@ export default function FeaturesPage() {
     window.addEventListener("keydown", onKey, { signal });
 
     return () => ctrl.abort();
-  }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep]);
+  }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep, cancelAnim, vh]);
 
   // Sync while dragging scrollbar
   useEffect(() => {
@@ -526,7 +593,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg黑/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
