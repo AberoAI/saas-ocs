@@ -747,7 +747,7 @@ function TypingDots() {
  * ======================= */
 function CountUp({
   to,
-  duration = 0.8,
+  duration = 0.75,        // 0.6–0.8s
   delay = 0,
   disabled = false,
   suffix = "",
@@ -778,7 +778,7 @@ function CountUp({
     };
   }, [to, duration, delay, disabled, mv]);
 
-  return <span className="tabular-nums">{val}{suffix}</span>;
+  return <span className="tabular-nums text-foreground/80">{val}{suffix}</span>;
 }
 
 function StatusPill({
@@ -789,6 +789,7 @@ function StatusPill({
   activePulse?: boolean;
 }) {
   const isActive = status === "Active";
+  const brand = BRAND; // konsisten brand
   return (
     <span
       className="
@@ -798,20 +799,20 @@ function StatusPill({
       "
       style={
         isActive
-          ? { borderColor: "rgba(37,99,235,0.25)", background: "#F0F7FF", color: READ_BLUE }
-          : { borderColor: "rgba(0,0,0,0.12)", background: "white", color: "rgba(0,0,0,0.75)" }
+          ? { borderColor: "rgba(38,101,140,0.28)", background: "#F3F8FC", color: brand }
+          : { borderColor: "rgba(0,0,0,0.18)", background: "white", color: "rgba(0,0,0,0.78)" }
       }
     >
       {/* pulsing dot */}
       <span
         className="relative inline-block h-2 w-2 rounded-full"
-        style={{ background: isActive ? READ_BLUE : "#94a3b8" }}
+        style={{ background: isActive ? brand : "#64748b" }}
         aria-hidden
       >
         {isActive && activePulse && (
           <span
             className="absolute inset-0 rounded-full"
-            style={{ boxShadow: "0 0 0 6px rgba(37,99,235,0.15)" }}
+            style={{ boxShadow: "0 0 0 6px rgba(38,101,140,0.16)" }}
           />
         )}
       </span>
@@ -821,8 +822,8 @@ function StatusPill({
 }
 
 function BranchIcon({ type }: { type: "hq" | "branch" }) {
-  const color = type === "hq" ? READ_BLUE : "#94a3b8";
-  const ring = type === "hq" ? "0 0 0 6px rgba(37,99,235,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
+  const color = type === "hq" ? BRAND : "#94a3b8";
+  const ring = type === "hq" ? "0 0 0 6px rgba(38,101,140,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
   return (
     <span
       className="h-2.5 w-2.5 rounded-full"
@@ -864,14 +865,14 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       aria-label="Analytics table"
       className="
         relative w-full max-w-[640px] overflow-hidden
-        rounded-[22px] border border-white/60 bg-white/55 backdrop-blur-xl
+        rounded-[22px] border border-white/60 bg-white/55 md:backdrop-blur-xl backdrop-blur
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
       {/* soft ambient glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
+        className="pointer-events-none absolute inset-0 -z-10 md:opacity-100 opacity-80"
         style={{
           background:
             "radial-gradient(60% 60% at 20% 0%, rgba(219,234,254,0.65) 0%, transparent 60%)," +
@@ -885,7 +886,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
           <div className="text-[15px] font-medium tracking-tight text-foreground/85">
             Access &amp; workload
           </div>
-          <div className="text-[11px] text-foreground/55">Last 24h</div>
+          <div className="text-[11px] text-foreground/70">Last 24h</div>
         </div>
       </div>
 
@@ -893,7 +894,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-foreground/60">
+            <tr className="text-left text-foreground/80">
               <th className="px-5 py-3 font-medium">Branch</th>
               <th className="px-5 py-3 font-medium text-right">Agents</th>
               <th className="px-5 py-3 font-medium text-right">Queues</th>
@@ -924,10 +925,10 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
                   <CountUp to={r.agents} disabled={prefersReduced} />
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <CountUp to={r.queues} delay={0.05 + i * 0.03} disabled={prefersReduced} />
+                  <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <CountUp to={r.sla} suffix="%" delay={0.08 + i * 0.04} disabled={prefersReduced} />
+                  <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
                 </td>
 
                 <td className="px-5 py-3">
@@ -940,7 +941,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       </div>
 
       {/* footer note */}
-      <div className="px-5 py-3 border-t border-white/60 bg-white/40 text-[11px] text-foreground/60">
+      <div className="px-5 py-3 border-t border-white/60 bg-white/40 text-[11px] text-foreground/70">
         Tip: angka di atas hanya contoh; sambungkan ke API kamu untuk data real-time.
       </div>
     </motion.div>
