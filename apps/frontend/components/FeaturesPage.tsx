@@ -707,6 +707,7 @@ function InstantChatStage({
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.26, ease: EASE }}
+              /* ✅ fix: transition harus pakai titik dua, bukan kurung kurawal ganda */
               exit={{ opacity: 0, y: -5, transition: { duration: 0.18, ease: EASE } }}
               className="relative rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
             >
@@ -827,7 +828,8 @@ function StatusPill({
 
 function BranchIcon({ type }: { type: "hq" | "branch" }) {
   const color = type === "hq" ? BRAND : "#94a3b8";
-  const ring = type === "hq" ? "0 0 0 6px rgba(38,101,140,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
+  const ring =
+    type === "hq" ? "0 0 0 6px rgba(38,101,140,0.12)" : "0 0 0 6px rgba(148,163,184,0.12)";
   return (
     <span
       className="h-2.5 w-2.5 rounded-full"
@@ -842,7 +844,7 @@ function BranchIcon({ type }: { type: "hq" | "branch" }) {
  * ======================= */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
-    { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active" as const, type: "hq" as const },
+    { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active" as const,  type: "hq" as const },
     { name: "Branch A", agents: 12, queues: 3, sla: 98, status: "Standby" as const, type: "branch" as const },
     { name: "Branch B", agents: 7,  queues: 2, sla: 97, status: "Standby" as const, type: "branch" as const },
   ];
