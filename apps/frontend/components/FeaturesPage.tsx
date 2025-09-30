@@ -11,7 +11,7 @@ import {
   useMotionValue,
   animate,
 } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 /** =========================================================
  *  STABILITY FIRST EDITION — safest defaults (tightened spacing)
@@ -635,6 +635,11 @@ function FeatureStage({
     return <AnalyticsRealtimeStage prefersReduced={prefersReduced} />;
   }
 
+  // ⬇️ handoff: chat flow + avatar swap
+  if (stepKey === "handoff") {
+    return <HandoffStage prefersReduced={prefersReduced} />;
+  }
+
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
     instant: "#FF9AA2",
     multitenant: "#B5EAD7",
@@ -925,10 +930,8 @@ function BranchIcon({ type }: { type: "hq" | "branch" }) {
 /* =======================
  * SchultzBackdrop — generative soft blobs (Schultz-style) */
 function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
-  // Layer di atas glare (-z-10) tapi tetap di bawah isi tabel
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-[-5] overflow-hidden">
-      {/* blob 1 — brand (overlay, tegas) */}
       <motion.div
         initial={{ x: -24, y: -16, scale: 1, opacity: 0.5 }}
         {...(prefersReduced
@@ -943,7 +946,6 @@ function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
             "radial-gradient(50% 50% at 50% 50%, rgba(38,101,140,0.65) 0%, rgba(38,101,140,0) 72%)",
         }}
       />
-      {/* blob 2 — warm (soft-light) */}
       <motion.div
         initial={{ x: 8, y: -8, scale: 1, opacity: 0.42 }}
         {...(prefersReduced
@@ -958,7 +960,6 @@ function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
             "radial-gradient(50% 50% at 50% 50%, rgba(255,214,102,0.6) 0%, rgba(255,214,102,0) 72%)",
         }}
       />
-      {/* blob 3 — violet (multiply) */}
       <motion.div
         initial={{ x: 24, y: 36, scale: 1, opacity: 0.36 }}
         {...(prefersReduced
@@ -978,8 +979,7 @@ function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
 }
 
 /* =======================
- * NEW: AnalyticsTableStage — pengganti stage multitenant (count-up + highlight + ikon)
- * ======================= */
+ * AnalyticsTableStage — pengganti stage multitenant */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
     { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active" as const,  type: "hq" as const },
@@ -996,7 +996,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   };
   const item: Variants = {
     hidden: { opacity: 0, y: 8 },
-    visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } }, // 🔧 snappier
+    visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } },
   };
 
   return (
@@ -1015,7 +1015,6 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow — glare ditipiskan agar backdrop terbaca */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -1026,10 +1025,8 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
             "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
         }}
       />
-      {/* Schultz-style backdrop */}
       <SchultzBackdrop prefersReduced={prefersReduced} />
 
-      {/* header */}
       <div className="px-4 md:px-5 py-3.5 md:py-4 border-b border-white/60 bg-white/40 backdrop-blur">
         <div className="flex items-center justify-between">
           <div className="text-[14px] md:text-[15px] font-medium tracking-tight text-foreground/85">
@@ -1039,7 +1036,6 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         </div>
       </div>
 
-      {/* table */}
       <div className="overflow-x-hidden">
         <table className="w-full text-[13px] md:text-sm table-fixed">
           <colgroup>
@@ -1108,10 +1104,9 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
 }
 
 /* =======================
- * NEW: AnalyticsRealtimeStage — chart + counters + gradient shift
+ * AnalyticsRealtimeStage — chart + counters + gradient shift
  * ======================= */
 function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean }) {
-  // Bar heights (0–100). Kita animasikan dengan sedikit variasi agar tampak "live".
   const barsA = [28, 42, 35, 55, 62, 48, 30, 40, 58, 66, 52, 38];
   const barsB = [34, 36, 48, 60, 54, 50, 36, 46, 62, 72, 56, 44];
 
@@ -1135,7 +1130,6 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
       "
       aria-label="Realtime Analytics"
     >
-      {/* ambient gradient shift */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -1148,7 +1142,6 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
       />
       <SchultzBackdrop prefersReduced={prefersReduced} />
 
-      {/* header */}
       <div className="px-4 md:px-5 py-3.5 md:py-4 border-b border-white/60 bg-white/40 backdrop-blur">
         <div className="flex items-center justify-between">
           <div className="text-[14px] md:text-[15px] font-medium tracking-tight text-foreground/85">
@@ -1158,7 +1151,6 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
         </div>
       </div>
 
-      {/* metrics */}
       <div className="px-4 md:px-5 py-3 md:py-4 grid grid-cols-3 gap-3 md:gap-4">
         <MetricCard
           label="Conversations"
@@ -1177,10 +1169,8 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
         />
       </div>
 
-      {/* chart area */}
       <div className="px-2 md:px-4 pb-4 md:pb-5">
         <div className="relative h-[180px] rounded-xl bg-white/65 border border-white/60 overflow-hidden">
-          {/* grid lines */}
           <svg className="absolute inset-0 w-full h-full" aria-hidden>
             {[0, 1, 2, 3].map((i) => (
               <line
@@ -1195,7 +1185,6 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
             ))}
           </svg>
 
-          {/* bars */}
           <div className="absolute inset-0 flex items-end px-3 md:px-4 gap-[6px] md:gap-[8px]">
             {(prefersReduced ? barsA : barsB).map((h, i) => (
               <motion.div
@@ -1216,7 +1205,6 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
             ))}
           </div>
 
-          {/* moving highlight (gradient sweep) */}
           {!prefersReduced && (
             <motion.div
               className="absolute inset-y-0 w-1/3"
@@ -1233,7 +1221,6 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
         </div>
       </div>
 
-      {/* footer */}
       <div className="px-4 md:px-5 py-2.5 md:py-3 border-t border-white/60 bg-white/40 text-[11px] md:text-[12px] text-foreground/75">
         Live sample. Sambungkan ke data kamu (WS/SSE/Polling) untuk update realtime.
       </div>
@@ -1241,12 +1228,177 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
   );
 }
 
-function MetricCard({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
+function MetricCard({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
   return (
     <div className="rounded-xl border border-white/60 bg-white/70 px-3 py-2.5 md:px-4 md:py-3">
       <div className="text-[11px] md:text-[12px] text-foreground/70">{label}</div>
       <div className="mt-0.5 text-lg md:text-xl font-semibold tracking-tight">{value}</div>
       {hint && <div className="text-[10px] md:text-[11px] text-foreground/60">{hint}</div>}
     </div>
+  );
+}
+
+/* =======================
+ * NEW: HandoffStage — chat flow transition + avatar swap
+ * ======================= */
+function HandoffStage({ prefersReduced }: { prefersReduced: boolean }) {
+  type Phase = "ai" | "handoff" | "human";
+  const [phase, setPhase] = useState<Phase>(prefersReduced ? "human" : "ai");
+
+  useEffect(() => {
+    if (prefersReduced) return;
+    const t1 = setTimeout(() => setPhase("handoff"), 900);
+    const t2 = setTimeout(() => setPhase("human"), 2000);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [prefersReduced]);
+
+  const container: Variants = {
+    hidden: { opacity: 0, scale: 0.985, y: 6 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE } },
+  };
+
+  const bubbleIn: Variants = {
+    hidden: { opacity: 0, y: 8, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.26, ease: EASE } },
+    exit: { opacity: 0, y: -6, transition: { duration: 0.18, ease: EASE } },
+  };
+
+  const peach = "#FFE8DA";
+
+  return (
+    <motion.div
+      key="handoff-stage"
+      variants={container}
+      initial="hidden"
+      animate="visible"
+      exit={{ opacity: 0, y: -6 }}
+      className="
+        relative w-full max-w-[520px] md:max-w-[560px] overflow-hidden
+        rounded-[22px] border border-white/60 bg-white/60
+        md:backdrop-blur-xl backdrop-blur
+        supports-[not(backdrop-filter:blur(0))]:bg-white/90
+        shadow-[0_10px_40px_-10px_rgba(0,0,0,0.12)]
+        aspect-[4/3] flex items-center justify-center
+      "
+      aria-label="Human handoff demo"
+    >
+      {/* warm gradient background */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 rounded-[22px]"
+        style={{
+          background:
+            `radial-gradient(45% 45% at 70% 40%, ${peach} 0%, transparent 60%),
+             radial-gradient(50% 50% at 15% 85%, rgba(255,214,164,0.6) 0%, transparent 65%)`,
+          opacity: 0.9,
+        }}
+      />
+
+      {/* avatars — swap */}
+      <div className="absolute top-3 left-3 flex items-center gap-2">
+        <motion.span
+          initial={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: phase === "ai" ? 1 : 0.25, scale: phase === "ai" ? 1 : 0.92 }}
+          transition={{ duration: 0.25, ease: EASE }}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F0F4F8] border border-black/10 text-[13px]"
+          aria-label="AI bot"
+          title="AI"
+        >
+          🤖
+        </motion.span>
+        <motion.span
+          initial={{ opacity: 0.25, scale: 0.92 }}
+          animate={{ opacity: phase === "human" ? 1 : 0.25, scale: phase === "human" ? 1 : 0.92 }}
+          transition={{ duration: 0.25, ease: EASE }}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white border border-black/10 text-[13px]"
+          aria-label="Human agent"
+          title="Agent"
+        >
+          👩‍💼
+        </motion.span>
+      </div>
+
+      <div className="w-full px-4 md:px-6">
+        <div className="flex flex-col gap-3 md:gap-3.5">
+          {/* AI bubble */}
+          <AnimatePresence initial={false}>
+            {(phase === "ai" || phase === "handoff") && (
+              <motion.div
+                key="ai-bubble"
+                variants={bubbleIn}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="self-start max-w-[88%] rounded-2xl px-4 py-2.5 bg-[#FFF4EE] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
+              >
+                <div className="pr-10">
+                  I’ll hand this to a human agent so you get the best help.
+                </div>
+                <span className="absolute left-2 top-2 text-xs" aria-hidden>🤖</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Handoff indicator */}
+          <AnimatePresence initial={false}>
+            {phase === "handoff" && !prefersReduced && (
+              <motion.div
+                key="handoff-indicator"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="relative mx-auto w-[84%] h-7"
+                aria-hidden
+              >
+                {/* connector line */}
+                <motion.div
+                  className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-[rgba(0,0,0,0.06)] via-[rgba(38,101,140,0.35)] to-[rgba(0,0,0,0.06)]"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.4, ease: EASE }}
+                  style={{ transformOrigin: "left center" }}
+                />
+                {/* moving arrow pulse */}
+                <motion.div
+                  className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full border border-black/10 bg-white shadow"
+                  initial={{ left: "0%" }}
+                  animate={{ left: ["0%", "100%"] }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                >
+                  <div className="flex h-full w-full items-center justify-center text-[12px]">→</div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Human bubble */}
+          <AnimatePresence initial={false}>
+            {phase === "human" && (
+              <motion.div
+                key="human-bubble"
+                variants={bubbleIn}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="self-end max-w-[88%] rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
+              >
+                <div className="pr-10">
+                  Hi, I’m Lina from Support. I’ll take it from here. How can I help?
+                </div>
+                <span className="absolute right-2 top-2 text-xs" aria-hidden>👩‍💼</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* subtle caption */}
+      <div className="absolute bottom-2.5 right-3 text-[10px] md:text-[11px] text-foreground/60">
+        Seamless AI → Human handoff
+      </div>
+    </motion.div>
   );
 }
