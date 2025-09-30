@@ -858,7 +858,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   };
   const item: Variants = {
     hidden: { opacity: 0, y: 8 },
-    visible:{ opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } },
+    visible:{ opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE } }, // 🔧 snappier (0.22 → 0.2)
   };
 
   return (
@@ -871,16 +871,18 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       aria-label="Analytics table"
       className="
         relative w-full max-w-full md:max-w-[640px] overflow-hidden
-        rounded-[22px] border border-white/60 bg-white/55 md:backdrop-blur-xl backdrop-blur
+        rounded-[22px] border border-white/60 bg-white/55
+        md:backdrop-blur-xl backdrop-blur
+        supports-[not(backdrop-filter:blur(0))]:bg-white/90
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow — dikurangi saat reduced motion */}
+      {/* soft ambient glow — glare ditipiskan */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          opacity: prefersReduced ? 0.55 : undefined,
+          opacity: prefersReduced ? 0.45 : 0.85, // 🔧 lebih rendah 10–15%
           background:
             "radial-gradient(60% 60% at 20% 0%, rgba(219,234,254,0.65) 0%, transparent 60%)," +
             "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
@@ -915,7 +917,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Agents</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Queues</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">SLA</th>
-              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium">Status</th>
+              <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium whitespace-nowrap">Status</th> {/* 🔧 anti-wrap */}
             </tr>
           </thead>
 
@@ -927,7 +929,8 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
                 tabIndex={0}
                 className="
                   group border-t border-black/5 outline-none
-                  hover:bg-white/70 focus-visible:bg-white/75
+                  hover:bg-white/70 focus-visible:bg-white/80
+                  focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.25)]  /* 🔧 fokus jelas */
                   hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
                   transition-colors
                 "
@@ -958,8 +961,8 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         </table>
       </div>
 
-      {/* footer note */}
-      <div className="px-4 md:px-5 py-2.5 md:py-3 border-t border-white/60 bg-white/40 text-[10px] md:text-[11px] text-foreground/70">
+      {/* footer note — kontras/ukuran ditingkatkan */}
+      <div className="px-4 md:px-5 py-2.5 md:py-3 border-t border-white/60 bg-white/40 text-[11px] md:text-[12px] text-foreground/75">
         Tip: angka di atas hanya contoh; sambungkan ke API kamu untuk data real-time.
       </div>
     </motion.div>
