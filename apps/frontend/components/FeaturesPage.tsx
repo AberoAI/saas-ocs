@@ -514,7 +514,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg黑/5 transition"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
@@ -803,16 +803,19 @@ function StatusPill({
           : { borderColor: "rgba(0,0,0,0.18)", background: "white", color: "rgba(0,0,0,0.78)" }
       }
     >
-      {/* pulsing dot */}
+      {/* pulsing dot — scale + opacity (lebih halus dari box-shadow) */}
       <span
-        className="relative inline-block h-2 w-2 rounded-full"
+        className="relative inline-block h-2 w-2 rounded-full overflow-visible"
         style={{ background: isActive ? brand : "#64748b" }}
         aria-hidden
       >
         {isActive && activePulse && (
-          <span
+          <motion.span
             className="absolute inset-0 rounded-full"
-            style={{ boxShadow: "0 0 0 6px rgba(38,101,140,0.16)" }}
+            initial={{ scale: 1, opacity: 0.35 }}
+            animate={{ scale: [1, 1.28, 1], opacity: [0.35, 0, 0.35] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+            style={{ background: brand }}
           />
         )}
       </span>
@@ -869,11 +872,12 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow */}
+      {/* soft ambient glow — dikurangi saat reduced motion */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 md:opacity-100 opacity-80"
+        className="pointer-events-none absolute inset-0 -z-10"
         style={{
+          opacity: prefersReduced ? 0.55 : undefined,
           background:
             "radial-gradient(60% 60% at 20% 0%, rgba(219,234,254,0.65) 0%, transparent 60%)," +
             "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
@@ -908,9 +912,11 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
               <motion.tr
                 key={r.name}
                 variants={item}
+                tabIndex={0}
                 className="
-                  group border-t border-black/5
-                  hover:bg-white/70 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
+                  group border-t border-black/5 outline-none
+                  hover:bg-white/70 focus-visible:bg-white/75
+                  hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
                   transition-colors
                 "
               >
