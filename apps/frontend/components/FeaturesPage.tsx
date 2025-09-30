@@ -748,7 +748,7 @@ function TypingDots() {
  * ======================= */
 function CountUp({
   to,
-  duration = 0.75,        // 0.6–0.8s
+  duration = 0.75,
   delay = 0,
   disabled = false,
   suffix = "",
@@ -804,7 +804,7 @@ function StatusPill({
           : { borderColor: "rgba(0,0,0,0.18)", background: "white", color: "rgba(0,0,0,0.78)" }
       }
     >
-      {/* pulsing dot — scale + opacity (lebih halus dari box-shadow) */}
+      {/* pulsing dot — scale + opacity */}
       <span
         className="relative inline-block h-2 w-2 rounded-full overflow-visible"
         style={{ background: isActive ? brand : "#64748b" }}
@@ -873,7 +873,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow — dikurangi saat reduced motion */}
+      {/* soft ambient glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -901,49 +901,50 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
           <thead>
             <tr className="text-left text-foreground/80">
               <th className="px-5 py-3 font-medium w-[12.5rem] min-w-[12.5rem] whitespace-nowrap">Branch</th>
-              <th className="px-5 py-3 font-medium text-right">Agents</th>
-              <th className="px-5 py-3 font-medium text-right">Queues</th>
-              <th className="px-5 py-3 font-medium text-right">SLA</th>
+              {/* ⬇️ Lebar tetap untuk angka agar Agents & Queues rapat */}
+              <th className="px-5 py-3 font-medium text-right w-[5.5rem]">Agents</th>
+              <th className="px-5 py-3 font-medium text-right w-[5.5rem]">Queues</th>
+              <th className="px-5 py-3 font-medium text-right w-[5.5rem]">SLA</th>
               <th className="px-5 py-3 font-medium">Status</th>
             </tr>
           </thead>
 
-      <tbody className="bg-white/50">
-        {rows.map((r, i) => (
-          <motion.tr
-            key={r.name}
-            variants={item}
-            tabIndex={0}
-            className="
-              group border-t border-black/5 outline-none
-              hover:bg-white/70 focus-visible:bg-white/75
-              hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
-              transition-colors
-            "
-          >
-            <td className="px-5 py-3 w-[12.5rem] min-w-[12.5rem]">
-              <div className="inline-flex items-center gap-2.5 whitespace-nowrap">
-                <BranchIcon type={r.type} />
-                <span className="font-medium tracking-tight">{r.name}</span>
-              </div>
-            </td>
+          <tbody className="bg-white/50">
+            {rows.map((r, i) => (
+              <motion.tr
+                key={r.name}
+                variants={item}
+                tabIndex={0}
+                className="
+                  group border-t border-black/5 outline-none
+                  hover:bg-white/70 focus-visible:bg-white/75
+                  hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
+                  transition-colors
+                "
+              >
+                <td className="px-5 py-3 w-[12.5rem] min-w-[12.5rem]">
+                  <div className="inline-flex items-center gap-2.5 whitespace-nowrap">
+                    <BranchIcon type={r.type} />
+                    <span className="font-medium tracking-tight">{r.name}</span>
+                  </div>
+                </td>
 
-            <td className="px-5 py-3 text-right">
-              <CountUp to={r.agents} disabled={prefersReduced} />
-            </td>
-            <td className="px-5 py-3 text-right">
-              <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
-            </td>
-            <td className="px-5 py-3 text-right">
-              <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
-            </td>
+                <td className="px-5 py-3 text-right w-[5.5rem]">
+                  <CountUp to={r.agents} disabled={prefersReduced} />
+                </td>
+                <td className="px-5 py-3 text-right w-[5.5rem]">
+                  <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
+                </td>
+                <td className="px-5 py-3 text-right w-[5.5rem]">
+                  <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
+                </td>
 
-            <td className="px-5 py-3">
-              <StatusPill status={r.status} activePulse={!prefersReduced && i === 0} />
-            </td>
-          </motion.tr>
-        ))}
-      </tbody>
+                <td className="px-5 py-3">
+                  <StatusPill status={r.status} activePulse={!prefersReduced && i === 0} />
+                </td>
+              </motion.tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
