@@ -705,7 +705,8 @@ function InstantChatStage({
             <motion.div
               key="bot"
               initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0, transition: { duration: 0.26, ease: EASE } }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.26, ease: EASE }}
               exit={{ opacity: 0, y: -5, transition: { duration: 0.18, ease: EASE } }}
               className="relative rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug"
             >
@@ -899,7 +900,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-foreground/80">
-              <th className="px-5 py-3 font-medium">Branch</th>
+              <th className="px-5 py-3 font-medium w-[12.5rem] min-w-[12.5rem] whitespace-nowrap">Branch</th>
               <th className="px-5 py-3 font-medium text-right">Agents</th>
               <th className="px-5 py-3 font-medium text-right">Queues</th>
               <th className="px-5 py-3 font-medium text-right">SLA</th>
@@ -907,42 +908,42 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
             </tr>
           </thead>
 
-          <tbody className="bg-white/50">
-            {rows.map((r, i) => (
-              <motion.tr
-                key={r.name}
-                variants={item}
-                tabIndex={0}
-                className="
-                  group border-t border-black/5 outline-none
-                  hover:bg-white/70 focus-visible:bg-white/75
-                  hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
-                  transition-colors
-                "
-              >
-                <td className="px-5 py-3">
-                  <div className="inline-flex items-center gap-2.5">
-                    <BranchIcon type={r.type} />
-                    <span className="font-medium tracking-tight">{r.name}</span>
-                  </div>
-                </td>
+      <tbody className="bg-white/50">
+        {rows.map((r, i) => (
+          <motion.tr
+            key={r.name}
+            variants={item}
+            tabIndex={0}
+            className="
+              group border-t border-black/5 outline-none
+              hover:bg-white/70 focus-visible:bg-white/75
+              hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
+              transition-colors
+            "
+          >
+            <td className="px-5 py-3 w-[12.5rem] min-w-[12.5rem]">
+              <div className="inline-flex items-center gap-2.5 whitespace-nowrap">
+                <BranchIcon type={r.type} />
+                <span className="font-medium tracking-tight">{r.name}</span>
+              </div>
+            </td>
 
-                <td className="px-5 py-3 text-right">
-                  <CountUp to={r.agents} disabled={prefersReduced} />
-                </td>
-                <td className="px-5 py-3 text-right">
-                  <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
-                </td>
-                <td className="px-5 py-3 text-right">
-                  <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
-                </td>
+            <td className="px-5 py-3 text-right">
+              <CountUp to={r.agents} disabled={prefersReduced} />
+            </td>
+            <td className="px-5 py-3 text-right">
+              <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
+            </td>
+            <td className="px-5 py-3 text-right">
+              <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
+            </td>
 
-                <td className="px-5 py-3">
-                  <StatusPill status={r.status} activePulse={!prefersReduced && i === 0} />
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
+            <td className="px-5 py-3">
+              <StatusPill status={r.status} activePulse={!prefersReduced && i === 0} />
+            </td>
+          </motion.tr>
+        ))}
+      </tbody>
         </table>
       </div>
 
