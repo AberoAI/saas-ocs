@@ -225,7 +225,7 @@ export default function FeaturesPage() {
   const inViewport = useCallback(() => {
     const root = containerRef.current;
     if (!root) return false;
-    const rect = root.getBoundingClientRect();
+    const rect = root.getBoundingClientRect(); // ✅ fixed
     const h = getVVH();
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   }, []);
@@ -543,7 +543,7 @@ function FeatureStage({
     return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
   }
 
-  // ⬇️ GANTI: multitenant memakai tabel analitik sederhana
+  // ⬇️ multitenant memakai tabel analitik glass
   if (stepKey === "multitenant") {
     return <AnalyticsTableStage prefersReduced={prefersReduced} />;
   }
@@ -740,79 +740,123 @@ function TypingDots() {
 }
 
 /* =======================
- * NEW: AnalyticsTableStage — pengganti stage multitenant
+ * NEW: AnalyticsTableStage — pengganti stage multitenant (SchultzSchultz style)
  * ======================= */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
-    { name: "HQ", agents: 24, queues: 8, sla: 99, status: "Active" },
+    { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active"  },
     { name: "Branch A", agents: 12, queues: 3, sla: 98, status: "Standby" },
-    { name: "Branch B", agents: 7, queues: 2, sla: 97, status: "Standby" },
+    { name: "Branch B", agents: 7,  queues: 2, sla: 97, status: "Standby" },
   ] as const;
 
   const container: Variants = {
-    hidden: { opacity: 0, scale: 0.985, y: 6 },
+    hidden:  { opacity: 0, scale: 0.985, y: 6 },
     visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.3, ease: EASE, staggerChildren: prefersReduced ? 0 : 0.06 },
+      opacity: 1, scale: 1, y: 0,
+      transition: { duration: 0.3, ease: EASE, staggerChildren: prefersReduced ? 0 : 0.06 }
     },
   };
   const item: Variants = {
     hidden: { opacity: 0, y: 8 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } },
+    visible:{ opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } },
   };
 
   return (
     <motion.div
-      key="analytics-table"
+      key="analytics-table-ss"
       variants={container}
       initial="hidden"
       animate="visible"
       exit={{ opacity: 0, y: -6 }}
-      className="w-full max-w-[560px] rounded-2xl border border-black/10 bg-white/80 overflow-hidden"
       aria-label="Analytics table"
+      className="
+        relative w-full max-w-[640px] overflow-hidden
+        rounded-[22px] border border-white/60 bg-white/55 backdrop-blur-xl
+        shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
+      "
     >
-      <div className="px-4 py-3 border-b border-black/10 flex items-center justify-between">
-        <div className="text-sm font-medium text-foreground/80">Access &amp; workload</div>
-        <div className="text-[11px] text-foreground/60">Last 24h</div>
+      {/* soft ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(60% 60% at 20% 0%, rgba(219,234,254,0.65) 0%, transparent 60%)," +
+            "radial-gradient(55% 45% at 100% 30%, rgba(253,230,138,0.45) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* header */}
+      <div className="px-5 py-4 border-b border-white/60 bg-white/40 backdrop-blur">
+        <div className="flex items-center justify-between">
+          <div className="text-[15px] font-medium tracking-tight text-foreground/85">
+            Access &amp; workload
+          </div>
+          <div className="text-[11px] text-foreground/55">Last 24h</div>
+        </div>
       </div>
 
+      {/* table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-foreground/60">
-              <th className="px-4 py-2 font-medium">Branch</th>
-              <th className="px-4 py-2 font-medium">Agents</th>
-              <th className="px-4 py-2 font-medium">Queues</th>
-              <th className="px-4 py-2 font-medium">SLA</th>
-              <th className="px-4 py-2 font-medium">Status</th>
+              <th className="px-5 py-3 font-medium">Branch</th>
+              <th className="px-5 py-3 font-medium text-right">Agents</th>
+              <th className="px-5 py-3 font-medium text-right">Queues</th>
+              <th className="px-5 py-3 font-medium text-right">SLA</th>
+              <th className="px-5 py-3 font-medium">Status</th>
             </tr>
           </thead>
-          <tbody>
+
+          <tbody className="bg-white/50">
             {rows.map((r, i) => (
               <motion.tr
                 key={r.name}
                 variants={item}
-                className="border-t border-black/5 hover:bg-black/[0.02]"
+                className="
+                  group border-t border-black/5
+                  hover:bg-white/70 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]
+                  transition-colors
+                "
               >
-                <td className="px-4 py-2">
-                  <div className="inline-flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: i === 0 ? READ_BLUE : "#94a3b8" }} />
-                    <span className="font-medium">{r.name}</span>
+                <td className="px-5 py-3">
+                  <div className="inline-flex items-center gap-2.5">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{
+                        background: i === 0 ? READ_BLUE : "#94a3b8",
+                        boxShadow:
+                          i === 0
+                            ? "0 0 0 6px rgba(37,99,235,0.12)"
+                            : "0 0 0 6px rgba(148,163,184,0.12)",
+                      }}
+                      aria-hidden
+                    />
+                    <span className="font-medium tracking-tight">{r.name}</span>
                   </div>
                 </td>
-                <td className="px-4 py-2">{r.agents}</td>
-                <td className="px-4 py-2">{r.queues}</td>
-                <td className="px-4 py-2">{r.sla}%</td>
-                <td className="px-4 py-2">
+
+                <td className="px-5 py-3 text-right tabular-nums">{r.agents}</td>
+                <td className="px-5 py-3 text-right tabular-nums">{r.queues}</td>
+                <td className="px-5 py-3 text-right tabular-nums">{r.sla}%</td>
+
+                <td className="px-5 py-3">
                   <span
-                    className="px-2 py-0.5 rounded-md border text-xs"
-                    style={{
-                      borderColor: r.status === "Active" ? "rgba(37,99,235,0.25)" : "rgba(0,0,0,0.12)",
-                      background: r.status === "Active" ? "#EFF6FF" : "white",
-                      color: r.status === "Active" ? READ_BLUE : "inherit",
-                    }}
+                    className="
+                      inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium
+                      shadow-[inset_0_-1px_0_rgba(255,255,255,0.65)]
+                      transition-colors
+                    "
+                    style={
+                      r.status === "Active"
+                        ? {
+                            borderColor: "rgba(37,99,235,0.25)",
+                            background: "#F0F7FF",
+                            color: READ_BLUE,
+                          }
+                        : { borderColor: "rgba(0,0,0,0.12)", background: "white" }
+                    }
                   >
                     {r.status}
                   </span>
@@ -823,7 +867,8 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         </table>
       </div>
 
-      <div className="px-4 py-3 border-t border-black/10 text-[11px] text-foreground/60">
+      {/* footer note */}
+      <div className="px-5 py-3 border-t border-white/60 bg-white/40 text-[11px] text-foreground/60">
         Tip: angka di atas hanya contoh; sambungkan ke API kamu untuk data real-time.
       </div>
     </motion.div>
