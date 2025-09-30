@@ -748,7 +748,7 @@ function TypingDots() {
  * ======================= */
 function CountUp({
   to,
-  duration = 0.75,
+  duration = 0.75,        // 0.6–0.8s
   delay = 0,
   disabled = false,
   suffix = "",
@@ -804,7 +804,7 @@ function StatusPill({
           : { borderColor: "rgba(0,0,0,0.18)", background: "white", color: "rgba(0,0,0,0.78)" }
       }
     >
-      {/* pulsing dot — scale + opacity */}
+      {/* pulsing dot — scale + opacity (lebih halus dari box-shadow) */}
       <span
         className="relative inline-block h-2 w-2 rounded-full overflow-visible"
         style={{ background: isActive ? brand : "#64748b" }}
@@ -873,7 +873,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]
       "
     >
-      {/* soft ambient glow */}
+      {/* soft ambient glow — dikurangi saat reduced motion */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -897,14 +897,22 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
 
       {/* table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm table-fixed">
+          {/*  ✅ atur lebar kolom biar jarak rapi & konsisten */}
+          <colgroup>
+            <col className="w-[34%]" />  {/* Branch — cukup untuk “Branch B”, tidak terpotong */}
+            <col className="w-[16%]" />  {/* Agents */}
+            <col className="w-[16%]" />  {/* Queues */}
+            <col className="w-[16%]" />  {/* SLA */}
+            <col className="w-[18%]" />  {/* Status */}
+          </colgroup>
+
           <thead>
             <tr className="text-left text-foreground/80">
-              <th className="px-5 py-3 font-medium w-[12.5rem] min-w-[12.5rem] whitespace-nowrap">Branch</th>
-              {/* ⬇️ Lebar tetap untuk angka agar Agents & Queues rapat */}
-              <th className="px-5 py-3 font-medium text-right w-[5.5rem]">Agents</th>
-              <th className="px-5 py-3 font-medium text-right w-[5.5rem]">Queues</th>
-              <th className="px-5 py-3 font-medium text-right w-[5.5rem]">SLA</th>
+              <th className="px-5 py-3 font-medium">Branch</th>
+              <th className="px-5 py-3 font-medium text-right">Agents</th>
+              <th className="px-5 py-3 font-medium text-right">Queues</th>
+              <th className="px-5 py-3 font-medium text-right">SLA</th>
               <th className="px-5 py-3 font-medium">Status</th>
             </tr>
           </thead>
@@ -922,20 +930,20 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
                   transition-colors
                 "
               >
-                <td className="px-5 py-3 w-[12.5rem] min-w-[12.5rem]">
+                <td className="px-5 py-3">
                   <div className="inline-flex items-center gap-2.5 whitespace-nowrap">
                     <BranchIcon type={r.type} />
                     <span className="font-medium tracking-tight">{r.name}</span>
                   </div>
                 </td>
 
-                <td className="px-5 py-3 text-right w-[5.5rem]">
+                <td className="px-5 py-3 text-right">
                   <CountUp to={r.agents} disabled={prefersReduced} />
                 </td>
-                <td className="px-5 py-3 text-right w-[5.5rem]">
+                <td className="px-5 py-3 text-right">
                   <CountUp to={r.queues} delay={0.07 + i * 0.06} disabled={prefersReduced} />
                 </td>
-                <td className="px-5 py-3 text-right w-[5.5rem]">
+                <td className="px-5 py-3 text-right">
                   <CountUp to={r.sla} suffix="%" delay={0.14 + i * 0.06} disabled={prefersReduced} />
                 </td>
 
