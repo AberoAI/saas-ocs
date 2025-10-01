@@ -497,7 +497,8 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-start">
+                  {/* CHANGE: md:items-start -> md:items-center */}
+                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
                     {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
@@ -508,7 +509,8 @@ export default function FeaturesPage() {
                         y: prefersReduced ? 0 : -6,
                         transition: { duration: 0.2, ease: EASE },
                       }}
-                      className="w-full max-w-3xl md:max-w-none text-center md:text-left"
+                      /* CHANGE: add md:self-center to ensure vertical centering */
+                      className="w-full max-w-3xl md:max-w-none text-center md:text-left md:self-center"
                     >
                       {/* ====== GRID: ikon | judul/quote/desc ====== */}
                       <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
