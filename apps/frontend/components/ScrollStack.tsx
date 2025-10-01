@@ -31,6 +31,8 @@ export const ScrollStackItem: React.FC<
 > = ({ children, itemClassName = "" }) => (
   <div
     className={[
+      // PENTING: class dasar untuk selector & transform
+      "scroll-stack-card",
       "relative w-full rounded-[22px] bg-white/90 border border-white/60",
       "backdrop-blur-md shadow-[0_20px_60px_-18px_rgba(0,0,0,0.18)]",
       itemClassName,
