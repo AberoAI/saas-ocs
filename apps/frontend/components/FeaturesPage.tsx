@@ -783,7 +783,6 @@ function InstantChatStage({
               key="typing"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } }}
-              // (fix) correct braces in `exit`
               exit={{ opacity: 0, y: -5, transition: { duration: 0.16, ease: EASE } }}
               className="inline-flex items-center"
               aria-label="typing"
@@ -1191,7 +1190,7 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
             {(prefersReduced ? barsA : barsB).map((h, i) => (
               <motion.div
                 key={i}
-                className="w-full max-w-[28px] rounded-md border border-black/5 bg-[rgba(38,101,140,0.12)]"
+                className="w-full max-w=[28px] rounded-md border border-black/5 bg-[rgba(38,101,140,0.12)]"
                 initial={{ height: `${Math.max(8, h - 12)}%` }}
                 animate={
                   prefersReduced
@@ -1290,9 +1289,8 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       aria-label="Chat simulation with AI → human handoff"
     >
       {/* container clean tanpa header avatar & tanpa scroll */}
-
       <div className="flex-1 flex flex-col p-3.5 md:p-5">
-        {/* messages — semua kiri (POV customer) */}
+        {/* messages — user kanan, agent/bot kiri */}
         <div className="flex-1">
           <div className="flex flex-col gap-2.5 md:gap-3">
             <AnimatePresence initial={false}>
@@ -1303,7 +1301,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.22, ease: EASE }}
-                  className="self-start"
+                  className={m.sender === "user" ? "self-end" : "self-start"}
                 >
                   <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
                 </motion.div>
