@@ -106,10 +106,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number }>>(new Map());
   const doneRef = useRef(false);
   const busyRef = useRef(false);
-
-  // PERF: cache posisi kartu; ukur ulang hanya saat layout berubah
-  const metricsRef = useRef<number[]>([]); // absolute top per card (wrapper/window relative, invariant to scroll)
-  const needMeasureRef = useRef(true);
   const tickingRef = useRef(false); // coalesce native scroll → 1× per frame
 
   // Compute prefers-reduced-motion safely on client
@@ -123,7 +119,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       mq.addEventListener("change", set);
       return () => mq.removeEventListener("change", set);
     } catch {
-      // Safari <14
       mq.addListener?.(set);
       return () => mq.removeListener?.(set);
     }
@@ -141,17 +136,16 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     return { top: el.scrollTop, h: el.clientHeight };
   }, [useWindowScroll]);
 
-  // Safer offset calculation for both window & wrapper paths
+  // Offset untuk window vs wrapper
   const getOffset = useCallback(
     (el: HTMLElement) => {
-      const rect = el.getBoundingClientRect();
       if (useWindowScroll) {
-        return rect.top + window.scrollY;
+        const r = el.getBoundingClientRect(); // includes transforms → cocok dengan logika animasi
+        return r.top + window.scrollY;
       }
+      // wrapper: gunakan offsetTop (stabil) + scrollTop
       const wrapper = scrollerRef.current!;
-      const wrapperRect = wrapper.getBoundingClientRect();
-      // distance from wrapper top + wrapper scroll
-      return rect.top - wrapperRect.top + wrapper.scrollTop;
+      return el.offsetTop - (wrapper.offsetTop || 0);
     },
     [useWindowScroll]
   );
@@ -162,18 +156,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     []
   );
 
-  /** Measure card absolute tops once (and when layout changes) */
-  const measure = useCallback(() => {
-    const cards = cardsRef.current;
-    if (!cards.length) return;
-    const tops: number[] = new Array(cards.length);
-    for (let i = 0; i < cards.length; i++) {
-      tops[i] = getOffset(cards[i]!);
-    }
-    metricsRef.current = tops;
-    needMeasureRef.current = false;
-  }, [getOffset]);
-
   const update = useCallback(() => {
     if (!cardsRef.current.length || busyRef.current) {
       tickingRef.current = false;
@@ -181,40 +163,34 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     }
     busyRef.current = true;
 
-    if (needMeasureRef.current) {
-      measure();
-    }
-
     const { top, h } = getScroll();
     const stackY = toPx(stackPosition, h);
     const scaleEndY = toPx(scaleEndPosition, h);
 
-    // Scope queries to this stack only
+    // Scope ke instance ini
     const rootEl = hostRef.current!;
     const endEl = rootEl.querySelector(".scroll-stack-end") as HTMLElement | null;
 
-    // If no explicit end element, fall back to last card tail
     const fallbackEndEl = cardsRef.current[cardsRef.current.length - 1];
     const endTop = endEl
-      ? getOffset(endEl)
+      ? (useWindowScroll ? endEl.getBoundingClientRect().top + window.scrollY : endEl.offsetTop)
       : fallbackEndEl
-      ? (metricsRef.current[cardsRef.current.length - 1] ?? getOffset(fallbackEndEl)) + fallbackEndEl.offsetHeight
+      ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
       : 0;
 
-    const tops = metricsRef.current;
-
-    // Compute topIdx once per frame
+    // Hitung topIdx sekali per frame (pakai offset aktual per kartu)
     let topIdx = 0;
     if (blurAmount) {
-      for (let j = 0; j < tops.length; j++) {
-        const js = tops[j]! - stackY - itemStackDistance * j;
+      for (let j = 0; j < cardsRef.current.length; j++) {
+        const jt = getOffset(cardsRef.current[j]!);
+        const js = jt - stackY - itemStackDistance * j;
         if (top >= js) topIdx = j;
         else break;
       }
     }
 
     cardsRef.current.forEach((card, i) => {
-      const cardTop = tops[i]!;
+      const cardTop = getOffset(card);
       const start = cardTop - stackY - itemStackDistance * i;
       const end = cardTop - scaleEndY;
       const pinStart = start;
@@ -251,15 +227,10 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       if (changed) {
         card.style.transform = `translate3d(0, ${tr.y}px, 0) scale(${tr.s}) rotate(${tr.r}deg)`;
         card.style.filter = tr.b > 0 ? `blur(${tr.b}px)` : "";
-        // Hint performa
-        card.style.willChange = "transform, filter";
-        card.style.transformOrigin = "top center";
-        card.style.backfaceVisibility = "hidden";
-        card.style.contain = "layout paint size style";
         lastTRef.current.set(i, tr);
       }
 
-      // callback saat kartu terakhir pinned
+      // callback kartu terakhir
       if (i === cardsRef.current.length - 1) {
         const inView = top >= pinStart && top <= pinEnd;
         if (inView && !doneRef.current) {
@@ -286,16 +257,14 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     stackPosition,
     toPx,
     prog,
-    measure,
   ]);
 
   const onScroll = useCallback(() => {
-    // Lenis path: update() dipanggil via raf Lenis → tidak perlu coalesce
     if (lenisRef.current) {
+      // Lenis memanggil per rAF sendiri
       update();
       return;
     }
-    // Native scroll path: coalesce ke 1× per frame
     if (!tickingRef.current) {
       tickingRef.current = true;
       requestAnimationFrame(() => update());
@@ -307,8 +276,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
    * ========================= */
   const initLenis = useCallback(() => {
     if (!enableLenis || prefersReduced) return;
-    if (!LenisCtorRef.current) return; // belum loaded
-    if (lenisRef.current) return;       // sudah ada
+    if (!LenisCtorRef.current) return;
+    if (lenisRef.current) return;
 
     const Ctor = LenisCtorRef.current;
 
@@ -334,7 +303,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     }
 
     const wrapper = scrollerRef.current;
-    if (!wrapper) return; // wait until mounted
+    if (!wrapper) return;
 
     const lenis = new Ctor({
       wrapper,
@@ -348,7 +317,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       syncTouchLerp: 0.075,
       wheelMultiplier: 1,
       touchMultiplier: 2,
-      // inertia yang enak untuk mobile (opsional; properti ini tersedia di sebagian versi Lenis)
       touchInertia: 0.6,
     });
     lenis.on("scroll", onScroll);
@@ -369,7 +337,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         const mod = await import("lenis");
         if (!mounted) return;
 
-        // Type-safe guard tanpa 'any'
         type LenisModule = { default: unknown } | Record<string, unknown>;
         const maybe = mod as LenisModule;
 
@@ -391,70 +358,48 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     };
   }, [enableLenis, prefersReduced, initLenis]);
 
-  // Collect cards within THIS instance only
+  // Kumpulkan kartu dalam scope instance ini
   useLayoutEffect(() => {
     const scope = hostRef.current!;
     const cards = Array.from(scope.querySelectorAll(":scope .scroll-stack-card")) as HTMLElement[];
     cardsRef.current = cards;
 
-    // Gaya dasar kartu + jarak antar
+    // Gaya dasar kartu
     cards.forEach((card, i) => {
       if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
       card.style.willChange = "transform, filter";
       card.style.transformOrigin = "top center";
       card.style.backfaceVisibility = "hidden";
       card.style.transform = "translateZ(0)";
-      card.style.contain = "layout paint size style";
     });
 
-    // ukur pertama kali
-    needMeasureRef.current = true;
-    measure();
-
-    // Tanpa Lenis → pakai listener native (coalesced ke rAF)
+    // Tanpa Lenis → listener native (coalesced)
     if (!lenisRef.current) {
       const el: Window | HTMLElement | null = useWindowScroll ? window : scrollerRef.current;
       const handler = () => onScroll();
       el?.addEventListener("scroll", handler as EventListener, { passive: true } as AddEventListenerOptions);
-
-      // Resize observer untuk invalidasi cache metrik
-      const ro = new ResizeObserver(() => {
-        needMeasureRef.current = true;
-        onScroll();
-      });
-      if (useWindowScroll) ro.observe(document.body);
-      else if (scrollerRef.current) ro.observe(scrollerRef.current);
-
       update();
 
-      const onResize = () => {
-        needMeasureRef.current = true;
-        onScroll();
-      };
+      const onResize = () => onScroll();
       window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
 
       return () => {
         el?.removeEventListener("scroll", handler as EventListener);
         window.removeEventListener("resize", onResize as EventListener);
-        ro.disconnect();
         cardsRef.current = [];
         lastTRef.current.clear();
         doneRef.current = false;
-        metricsRef.current = [];
-        needMeasureRef.current = true;
         tickingRef.current = false;
       };
     }
 
-    // Dengan Lenis → sudah terhubung lewat initLenis()
+    // Dengan Lenis
     update();
 
     return () => {
       cardsRef.current = [];
       lastTRef.current.clear();
       doneRef.current = false;
-      metricsRef.current = [];
-      needMeasureRef.current = true;
       tickingRef.current = false;
     };
   }, [
@@ -469,7 +414,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     useWindowScroll,
     update,
     onScroll,
-    measure,
   ]);
 
   // Cleanup Lenis/RAF on unmount
@@ -494,7 +438,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       <div ref={hostRef} className={["relative w-full", className].join(" ")}>
         <div className="relative w-full">
           {children}
-          {/* gunakan endSpacer juga saat reduced motion */}
           <div
             className="scroll-stack-end"
             style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}
