@@ -635,7 +635,7 @@ function FeatureStage({
     return <AnalyticsRealtimeStage prefersReduced={prefersReduced} />;
   }
 
-  // ⬇️ handoff: chat flow + avatar swap
+  // ⬇️ handoff: simulasi chat AI → human
   if (stepKey === "handoff") {
     return <HandoffStage prefersReduced={prefersReduced} />;
   }
@@ -1239,166 +1239,151 @@ function MetricCard({ label, value, hint }: { label: string; value: ReactNode; h
 }
 
 /* =======================
- * NEW: HandoffStage — chat flow transition + avatar swap
+ * NEW: HandoffStage — simulated chat timeline (AI → human)
  * ======================= */
 function HandoffStage({ prefersReduced }: { prefersReduced: boolean }) {
-  type Phase = "ai" | "handoff" | "human";
-  const [phase, setPhase] = useState<Phase>(prefersReduced ? "human" : "ai");
+  type Sender = "user" | "ai" | "human" | "system";
+
+  const script: Array<{ sender: Sender; text: string }> = [
+    { sender: "user",  text: "Hi, my order arrived damaged." },
+    { sender: "ai",    text: "I’m really sorry to hear that. Could you share your order ID so I can check?" },
+    { sender: "user",  text: "#A-10492" },
+    { sender: "ai",    text: "Thanks! I’ll hand this to a human agent so you get the best help." },
+    { sender: "system",text: "Lina joined the chat" },
+    { sender: "human", text: "Hi, I’m Lina from Support. I’ll take it from here. How can I help?" },
+  ];
+
+  const [idx, setIdx] = useState(prefersReduced ? script.length : 1);
+  const [typing, setTyping] = useState(!prefersReduced);
 
   useEffect(() => {
     if (prefersReduced) return;
-    const t1 = setTimeout(() => setPhase("handoff"), 900);
-    const t2 = setTimeout(() => setPhase("human"), 2000);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [prefersReduced]);
+    if (idx < script.length) {
+      const isNextAIOrHuman = script[idx].sender === "ai" || script[idx].sender === "human";
+      const showTyping = isNextAIOrHuman;
 
-  const container: Variants = {
-    hidden: { opacity: 0, scale: 0.985, y: 6 },
-    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE } },
-  };
+      const preDelay = showTyping ? 450 : 280;
+      const t1 = window.setTimeout(() => setTyping(showTyping), preDelay);
+      const t2 = window.setTimeout(() => {
+        setIdx((n) => n + 1);
+        setTyping(false);
+      }, preDelay + (showTyping ? 950 : 120));
 
-  const bubbleIn: Variants = {
-    hidden: { opacity: 0, y: 8, scale: 0.98 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.26, ease: EASE } },
-    exit: { opacity: 0, y: -6, transition: { duration: 0.18, ease: EASE } },
-  };
-
-  const peach = "#FFE8DA";
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+  }, [idx, prefersReduced, script]);
 
   return (
     <motion.div
-      key="handoff-stage"
-      variants={container}
-      initial="hidden"
-      animate="visible"
+      key="handoff-simulated-chat"
+      initial={{ opacity: 0, scale: 0.985, y: 6 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.3, ease: EASE }}
       className="
-        relative w-full max-w-[520px] md:max-w-[560px] overflow-hidden
+        relative w-full max-w-[560px] overflow-hidden
         rounded-[22px] border border-white/60 bg-white/60
         md:backdrop-blur-xl backdrop-blur
         supports-[not(backdrop-filter:blur(0))]:bg-white/90
         shadow-[0_10px_40px_-10px_rgba(0,0,0,0.12)]
-        aspect-[4/3] flex items-center justify-center
+        aspect-[4/3] flex
       "
-      aria-label="Human handoff demo"
+      aria-label="Chat simulation with AI → human handoff"
     >
-      {/* warm gradient background */}
+      {/* warm blobs background */}
       <div
         aria-hidden
         className="absolute inset-0 -z-10 rounded-[22px]"
         style={{
           background:
-            `radial-gradient(45% 45% at 70% 40%, ${peach} 0%, transparent 60%),
-             radial-gradient(50% 50% at 15% 85%, rgba(255,214,164,0.6) 0%, transparent 65%)`,
-          opacity: 0.9,
+            "radial-gradient(40% 40% at 25% 30%, rgba(255,183,107,0.18) 0%, transparent 60%)," +
+            "radial-gradient(45% 45% at 80% 70%, rgba(255,214,164,0.18) 0%, transparent 60%)",
         }}
       />
 
-      {/* avatars — swap */}
-      <div className="absolute top-3 left-3 flex items-center gap-2">
-        <motion.span
-          initial={{ opacity: 1, scale: 1 }}
-          animate={{ opacity: phase === "ai" ? 1 : 0.25, scale: phase === "ai" ? 1 : 0.92 }}
-          transition={{ duration: 0.25, ease: EASE }}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F0F4F8] border border-black/10 text-[13px]"
-          aria-label="AI bot"
-          title="AI"
-        >
-          🤖
-        </motion.span>
-        <motion.span
-          initial={{ opacity: 0.25, scale: 0.92 }}
-          animate={{ opacity: phase === "human" ? 1 : 0.25, scale: phase === "human" ? 1 : 0.92 }}
-          transition={{ duration: 0.25, ease: EASE }}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white border border-black/10 text-[13px]"
-          aria-label="Human agent"
-          title="Agent"
-        >
-          👩‍💼
-        </motion.span>
-      </div>
+      <div className="flex-1 flex flex-col p-3.5 md:p-5">
+        {/* header avatars */}
+        <div className="flex items-center gap-2 pl-0.5 mb-2.5">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F0F4F8] border border-black/10 text-[13px]" title="AI" aria-label="AI bot">🤖</span>
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white border border-black/10 text-[13px]" title="Agent" aria-label="Human agent">👩‍💼</span>
+        </div>
 
-      <div className="w-full px-4 md:px-6">
-        <div className="flex flex-col gap-3 md:gap-3.5">
-          {/* AI bubble */}
-          <AnimatePresence initial={false}>
-            {(phase === "ai" || phase === "handoff") && (
-              <motion.div
-                key="ai-bubble"
-                variants={bubbleIn}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="self-start max-w-[88%] rounded-2xl px-4 py-2.5 bg-[#FFF4EE] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
-              >
-                <div className="pr-10">
-                  I’ll hand this to a human agent so you get the best help.
-                </div>
-                <span className="absolute left-2 top-2 text-xs" aria-hidden>🤖</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* messages */}
+        <div className="relative flex-1 overflow-hidden">
+          <div className="absolute inset-0 overflow-y-auto pr-1" data-native-scroll="true">
+            <div className="flex flex-col gap-2.5 md:gap-3">
+              <AnimatePresence initial={false}>
+                {script.slice(0, idx).map((m, i) => (
+                  <motion.div
+                    key={`${i}-${m.sender}`}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.22, ease: EASE }}
+                    className={m.sender === "user" ? "self-end" : "self-start"}
+                  >
+                    <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
+                  </motion.div>
+                ))}
 
-          {/* Handoff indicator */}
-          <AnimatePresence initial={false}>
-            {phase === "handoff" && !prefersReduced && (
-              <motion.div
-                key="handoff-indicator"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="relative mx-auto w-[84%] h-7"
-                aria-hidden
-              >
-                {/* connector line */}
-                <motion.div
-                  className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-[rgba(0,0,0,0.06)] via-[rgba(38,101,140,0.35)] to-[rgba(0,0,0,0.06)]"
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.4, ease: EASE }}
-                  style={{ transformOrigin: "left center" }}
-                />
-                {/* moving arrow pulse */}
-                <motion.div
-                  className="absolute top-1/2 -translate-y-1/2 h-5 w-5 rounded-full border border-black/10 bg-white shadow"
-                  initial={{ left: "0%" }}
-                  animate={{ left: ["0%", "100%"] }}
-                  transition={{ duration: 1.2, ease: "easeInOut" }}
-                >
-                  <div className="flex h-full w-full items-center justify-center text-[12px]">→</div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {typing && !prefersReduced && (
+                  <motion.div
+                    key="typing"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.18, ease: EASE }}
+                    className="self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm"
+                  >
+                    <TypingDots />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
 
-          {/* Human bubble */}
-          <AnimatePresence initial={false}>
-            {phase === "human" && (
-              <motion.div
-                key="human-bubble"
-                variants={bubbleIn}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="self-end max-w-[88%] rounded-2xl px-4 py-2.5 bg-white border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
-              >
-                <div className="pr-10">
-                  Hi, I’m Lina from Support. I’ll take it from here. How can I help?
-                </div>
-                <span className="absolute right-2 top-2 text-xs" aria-hidden>👩‍💼</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <div className="pt-2 text-[10px] md:text-[11px] text-foreground/60 text-right">
+          Seamless AI → Human handoff (simulated)
         </div>
       </div>
-
-      {/* subtle caption */}
-      <div className="absolute bottom-2.5 right-3 text-[10px] md:text-[11px] text-foreground/60">
-        Seamless AI → Human handoff
-      </div>
     </motion.div>
+  );
+}
+
+/* small chat bubble */
+function ChatBubble({
+  sender,
+  children,
+}: {
+  sender: "user" | "ai" | "human" | "system";
+  children: React.ReactNode;
+}) {
+  if (sender === "system") {
+    return (
+      <div className="mx-auto text-[11px] md:text-[12px] text-foreground/60 px-2 py-1">
+        {children}
+      </div>
+    );
+  }
+
+  const isUser = sender === "user";
+  const bg =
+    sender === "ai" ? "#FFF4EE" :
+    sender === "human" ? "#FFFFFF" :
+    "#F2F8FC";
+
+  const align = isUser ? "self-end" : "self-start";
+  const extra = isUser ? "shadow-md" : "shadow-sm";
+
+  return (
+    <div
+      className={`${align} max-w-[88%] md:max-w-[82%] rounded-2xl px-4 py-2.5 border border-black/10 ${extra}`}
+      style={{ background: bg }}
+    >
+      <div className="text-[0.98rem] leading-snug">
+        {children}
+      </div>
+    </div>
   );
 }
