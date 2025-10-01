@@ -136,7 +136,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
-  // (fix) removed stray token `the`
+  // fix: removed stray token
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
@@ -333,7 +333,7 @@ export default function FeaturesPage() {
     const go = (dir: 1 | -1) => {
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
       if (next !== stepRef.current) {
-        wheelAccRef.current = 0; // reset setelah berpindah
+        wheelAccRef.current = 0;
         scrollToStep(next, dir);
       }
     };
@@ -347,13 +347,12 @@ export default function FeaturesPage() {
       e.preventDefault();
 
       const delta = normalizeWheelDelta(e, vh());
-      // reset accumulator jika arah berganti
       if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) {
         wheelAccRef.current = 0;
       }
       wheelAccRef.current += delta;
 
-      const threshold = Math.max(40, Math.min(140, vh() * 0.08)); // adaptif
+      const threshold = Math.max(40, Math.min(140, vh() * 0.08));
       if (Math.abs(wheelAccRef.current) >= threshold) {
         const dir: 1 | -1 = wheelAccRef.current > 0 ? 1 : -1;
         go(dir);
@@ -366,7 +365,7 @@ export default function FeaturesPage() {
       if (!inViewport()) return;
       if (isEditable(e.target) || isInteractive(e.target)) return;
       startY = e.touches[0].clientY;
-      cancelAnim(); // hentikan animasi jika user mulai gesture baru
+      cancelAnim();
       lockRef.current = false;
     };
     const onTouchMove = (e: TouchEvent) => {
@@ -426,14 +425,14 @@ export default function FeaturesPage() {
       if (now - lastChangeAtRef.current < COOLDOWN) return;
 
       const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round((pos + vh() * 0.08) / vh()); // tolerance 8%
+      const targetIdx = Math.round((pos + vh() * 0.08) / vh());
       const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
       if (clamped === stepRef.current) return;
 
       const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
       lastDirRef.current = dir;
       lastChangeAtRef.current = now;
-      setStep(clamped); // go directly to target
+      setStep(clamped);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true, signal });
@@ -477,7 +476,7 @@ export default function FeaturesPage() {
                     {t("title")}
                   </motion.h1>
 
-                  {/* SUBTITLE — lebih dekat & miring */}
+                  {/* SUBTITLE */}
                   <motion.p
                     className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
                     variants={rise}
@@ -498,7 +497,6 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  {/* tighter gap: gap-6 md:gap-8 */}
                   <div className="grid md:grid-cols-[minmax(22rem,40rem)_minmax(0,1fr)] gap-6 md:gap-8 items-center md:items-start">
                     {/* LEFT: text */}
                     <motion.div
@@ -542,7 +540,7 @@ export default function FeaturesPage() {
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
 
-                        {/* Quote + body (col 2) — tighter */}
+                        {/* Quote + body (col 2) */}
                         {(() => {
                           const descRaw = t(`cards.${items[step - 1].key}.desc`) as unknown as string;
                           const { quote, rest } = splitQuoted(descRaw);
@@ -562,7 +560,7 @@ export default function FeaturesPage() {
                       {/* ====== /GRID ====== */}
                     </motion.div>
 
-                    {/* RIGHT: stage (selaras dengan judul) */}
+                    {/* RIGHT: stage */}
                     <div className="hidden md:flex justify-center md:justify-start md:mt-[2px] w-full">
                       <FeatureStage
                         stepKey={items[step - 1].key}
@@ -626,17 +624,14 @@ function FeatureStage({
     return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
   }
 
-  // ⬇️ multitenant memakai tabel analitik glass
   if (stepKey === "multitenant") {
     return <AnalyticsTableStage prefersReduced={prefersReduced} />;
   }
 
-  // ⬇️ analytics memakai chart + counters + gradient shift
   if (stepKey === "analytics") {
     return <AnalyticsRealtimeStage prefersReduced={prefersReduced} />;
   }
 
-  // ⬇️ handoff: simulasi chat AI → human
   if (stepKey === "handoff") {
     return <HandoffStage prefersReduced={prefersReduced} locale={locale} />;
   }
@@ -663,7 +658,6 @@ function FeatureStage({
       style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
     >
-      {/* background lembut default */}
       <motion.div
         className="h-full w-full rounded-2xl"
         initial={{ clipPath: "inset(50% 50% 50% 50% round 24px)" }}
@@ -838,7 +832,7 @@ function TypingDots() {
  * ======================= */
 function CountUp({
   to,
-  duration = 0.75, // 0.6–0.8s
+  duration = 0.75,
   delay = 0,
   disabled = false,
   suffix = "",
@@ -880,7 +874,7 @@ function StatusPill({
   activePulse?: boolean;
 }) {
   const isActive = status === "Active";
-  const brand = BRAND; // konsisten brand
+  const brand = BRAND;
   return (
     <span
       className="
@@ -894,7 +888,6 @@ function StatusPill({
           : { borderColor: "rgba(0,0,0,0.18)", background: "white", color: "rgba(0,0,0,0.78)" }
       }
     >
-      {/* pulsing dot — scale + opacity (lebih halus dari box-shadow) */}
       <span
         className="relative inline-block h-2 w-2 rounded-full overflow-visible"
         style={{ background: isActive ? brand : "#64748b" }}
@@ -929,7 +922,7 @@ function BranchIcon({ type }: { type: "hq" | "branch" }) {
 }
 
 /* =======================
- * SchultzBackdrop — generative soft blobs (Schultz-style) */
+ * SchultzBackdrop — generative soft blobs */
 function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-[-5] overflow-hidden">
@@ -1009,7 +1002,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       exit={{ opacity: 0, y: -6 }}
       aria-label="Analytics table"
       className="
-        relative w-full max-w-full md:max-w-[640px] overflow-hidden
+        relative w-full max-w-full md:max-w=[640px] overflow-hidden
         rounded-[22px] border border-white/60 bg-white/55
         md:backdrop-blur-xl backdrop-blur
         supports-[not(backdrop-filter:blur(0))]:bg-white/90
@@ -1190,7 +1183,7 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
             {(prefersReduced ? barsA : barsB).map((h, i) => (
               <motion.div
                 key={i}
-                className="w-full max-w=[28px] rounded-md border border-black/5 bg-[rgba(38,101,140,0.12)]"
+                className="w-full max-w-[28px] rounded-md border border-black/5 bg-[rgba(38,101,140,0.12)]"
                 initial={{ height: `${Math.max(8, h - 12)}%` }}
                 animate={
                   prefersReduced
@@ -1258,7 +1251,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
           { sender: "human", text: "Hello, my name is Ella. I’m a nurse, and I’ll take over the conversation to assist you further." },
         ] as Array<{ sender: Sender; text: string }>);
 
-  const [idx, setIdx] = useState(prefersReduced ? script.length : 1); // mulai dari pesan user
+  const [idx, setIdx] = useState(prefersReduced ? script.length : 1);
   const [typing, setTyping] = useState(!prefersReduced);
 
   useEffect(() => {
@@ -1288,7 +1281,6 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       className="relative w-full max-w-[560px] aspect-[4/3] flex"
       aria-label="Chat simulation with AI → human handoff"
     >
-      {/* container clean tanpa header avatar & tanpa scroll */}
       <div className="flex-1 flex flex-col p-3.5 md:p-5">
         {/* messages — user kanan, agent/bot kiri */}
         <div className="flex-1">
@@ -1348,8 +1340,6 @@ function ChatBubble({
   }
 
   const isUser = sender === "user";
-
-  // Warna sesuai contoh: customer (user) biru muda, bot & staff putih.
   const bg = isUser ? "#F2F8FC" : "#FFFFFF";
   const elevation = isUser ? "shadow-md" : "shadow-sm";
 
