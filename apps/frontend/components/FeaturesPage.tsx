@@ -743,7 +743,7 @@ function InstantChatStage({
       <motion.div
         custom={0}
         variants={itemVariants}
-        className="self-end max-w-[90%] rounded-2xl px-4 py-2.5 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative"
+        className="self-end max-w-[90%] rounded-2xl px-4 py-2.5 bg-[#F2F8FC] border border-black/10 shadow-sm text-[0.98rem] leading-snug relative ml-12 md:ml-24"
       >
         <div className="pr-12">{copy.user}</div>
         <time
@@ -770,7 +770,7 @@ function InstantChatStage({
       </motion.div>
 
       {/* BOT area: typing indicator -> bot reply */}
-      <div className="self-start max-w-[92%]" aria-live={phase === "bot" ? "polite" : "off"}>
+      <div className="self-start max-w-[92%] mr-12 md:mr-24" aria-live={phase === "bot" ? "polite" : "off"}>
         <AnimatePresence initial={false} mode="wait">
           {phase === "typing" && (
             <motion.div
@@ -1234,6 +1234,7 @@ function MetricCard({ label, value, hint }: { label: string; value: ReactNode; h
 
 /* =======================
  * NEW: HandoffStage — simulated chat timeline (AI → human)
+ * NOTE: ditambah "lane offset" agar tidak lurus: user → kanan (ml), agent/human → kiri (mr)
  * ======================= */
 function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; locale: Locale }) {
   type Sender = "user" | "ai" | "human" | "system";
@@ -1271,6 +1272,10 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
     }
   }, [idx, prefersReduced, script]);
 
+  // helper: kelas offset supaya tidak "lurus"
+  const laneOffset = (sender: Sender) =>
+    sender === "user" ? "ml-12 md:ml-24" : "mr-12 md:mr-24";
+
   return (
     <motion.div
       key="handoff-simulated-chat"
@@ -1282,9 +1287,9 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       aria-label="Chat simulation with AI → human handoff"
     >
       <div className="flex-1 flex flex-col p-3.5 md:p-5">
-        {/* messages — user kanan, agent/bot kiri */}
+        {/* messages — user kanan, agent/bot kiri; dengan offset lanes */}
         <div className="flex-1">
-          <div className="flex flex-col gap-2.5 md:gap-3">
+          <div className="flex flex-col gap-3 md:gap-3.5">
             <AnimatePresence initial={false}>
               {script.slice(0, idx).map((m, i) => (
                 <motion.div
@@ -1293,7 +1298,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.22, ease: EASE }}
-                  className={m.sender === "user" ? "self-end" : "self-start"}
+                  className={`${m.sender === "user" ? "self-end" : "self-start"} ${laneOffset(m.sender)}`}
                 >
                   <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
                 </motion.div>
@@ -1306,7 +1311,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.18, ease: EASE }}
-                  className="self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm"
+                  className={`self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm ${laneOffset("ai")}`}
                 >
                   <TypingDots />
                 </motion.div>
@@ -1323,7 +1328,8 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
   );
 }
 
-/* small chat bubble */
+/* small chat bubble
+   NOTE: ditambah sedikit pengaturan max-width agar proporsi isu "lurus" makin hilang */
 function ChatBubble({
   sender,
   children,
@@ -1342,10 +1348,11 @@ function ChatBubble({
   const isUser = sender === "user";
   const bg = isUser ? "#F2F8FC" : "#FFFFFF";
   const elevation = isUser ? "shadow-md" : "shadow-sm";
+  const widthClass = isUser ? "max-w-[86%] md:max-w-[78%]" : "max-w-[90%] md:max-w-[82%]";
 
   return (
     <div
-      className={`max-w-[88%] md:max-w-[82%] rounded-2xl px-4 py-2.5 border border-black/10 ${elevation}`}
+      className={`${widthClass} rounded-2xl px-4 py-2.5 border border-black/10 ${elevation}`}
       style={{ background: bg }}
     >
       <div className="text-[0.98rem] leading-snug">
