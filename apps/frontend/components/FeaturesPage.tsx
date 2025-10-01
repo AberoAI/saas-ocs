@@ -8,13 +8,23 @@ import {
   useReducedMotion,
   type Variants,
   AnimatePresence,
+  useScroll,
+  useTransform,
   useMotionValue,
   animate,
 } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 /** =========================================================
  *  STABILITY FIRST EDITION — safest defaults (tightened spacing)
+ *  (Diadaptasi ke Scroll-Stack Animation)
  * ========================================================= */
 
 /* =======================
@@ -75,23 +85,6 @@ const isInteractive = (el: EventTarget | null): boolean => {
 // Visual viewport height (mobile-safe)
 const getVVH = (): number => (window.visualViewport?.height ?? window.innerHeight);
 
-// Apakah target/ancestor-nya bisa scroll native di sumbu Y?
-const canScrollWithin = (target: EventTarget | null): boolean => {
-  let cur = target as HTMLElement | null;
-  let depth = 0;
-  while (cur && depth++ < 12) {
-    if (cur.dataset?.nativeScroll === "true") return true;
-    if (cur.getAttribute?.("role") === "dialog") return true;
-    const style = window.getComputedStyle(cur);
-    const oy = style.overflowY;
-    const canScrollY =
-      (oy === "auto" || oy === "scroll") && cur.scrollHeight > cur.clientHeight;
-    if (canScrollY) return true;
-    cur = cur.parentElement;
-  }
-  return false;
-};
-
 /* cubic-bezier helper (y only; cukup untuk easing terhadap waktu) */
 const cubicBezierY = (p0y: number, p1y: number) => (t: number) => {
   const u = 1 - t;
@@ -110,7 +103,7 @@ const normalizeWheelDelta = (e: WheelEvent, vhPx: number) => {
 /* =======================
  * Quote splitter */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
-  const m = desc.match(/“([^”]+)”/); // smart quotes
+  const m = desc.match(/“([^”]+)”/);
   if (m && m.index !== undefined) {
     const before = desc.slice(0, m.index).trim();
     const after = desc
@@ -120,7 +113,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m[1], rest: rest || "" };
   }
-  const m2 = desc.match(/"([^"]+)"/); // straight quotes
+  const m2 = desc.match(/"([^"]+)"/);
   if (m2 && m2.index !== undefined) {
     const before = desc.slice(0, m2.index).trim();
     const after = desc
@@ -133,10 +126,36 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
   return { rest: desc };
 }
 
+/* =======================
+ * DATA (6 poin fitur)
+ * ======================= */
+const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
+  { key: "instant", icon: "⚡️" },
+  { key: "multitenant", icon: "🏢" },
+  { key: "analytics", icon: "📊" },
+  { key: "handoff", icon: "🤝" },
+  { key: "multilingual", icon: "🌐" },
+  { key: "booking", icon: "📅" },
+];
+
+/* warna base untuk stage fallback */
+const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
+  instant: "#FF9AA2",
+  multitenant: "#B5EAD7",
+  analytics: "#C7CEEA",
+  handoff: "#FFDAC1",
+  multilingual: "#E2F0CB",
+  booking: "#F1F0FF",
+};
+
+const BRAND_BG_12 = `${BRAND}1F`;
+
+/* =======================
+ * COMPONENT
+ * ======================= */
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
-  // fix: removed stray token
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
@@ -147,16 +166,6 @@ export default function FeaturesPage() {
     if (href.startsWith("#")) return href;
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
-
-  // 6 poin fitur
-  const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
-    { key: "instant", icon: "⚡️" },
-    { key: "multitenant", icon: "🏢" },
-    { key: "analytics", icon: "📊" },
-    { key: "handoff", icon: "🤝" },
-    { key: "multilingual", icon: "🌐" },
-    { key: "booking", icon: "📅" },
-  ];
 
   const rise: Variants = {
     hidden: { opacity: 0, y: prefersReduced ? 0 : 14 },
@@ -176,9 +185,6 @@ export default function FeaturesPage() {
     [prefersReduced]
   );
 
-  /* =======================
-   * Micro animations
-   * ======================= */
   const contentStagger = useMemo((): { container: Variants; item: Variants } => {
     return {
       container: {
@@ -201,417 +207,348 @@ export default function FeaturesPage() {
     };
   }, [prefersReduced]);
 
-  const BRAND_BG_12 = `${BRAND}1F`;
-
-  /* =======================
-   * Sticky viewport multi-step
-   * ======================= */
-  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta
+  // untuk menghitung tinggi viewport (dipakai pada hero height sync)
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const [step, _setStep] = useState(0);
-  const stepRef = useRef(0);
-  const setStep = useCallback((v: number) => {
-    stepRef.current = v;
-    _setStep(v);
-  }, []);
-
-  const lockRef = useRef(false);
-  const lastDirRef = useRef<1 | -1 | 0>(0);
-  const lastChangeAtRef = useRef(0);
-  const COOLDOWN = 260;
-
-  const containerTopRef = useRef(0);
-  const viewportHRef = useRef(0);
-
-  // wheel accumulation (untuk gesture halus)
-  const wheelAccRef = useRef(0);
-
-  // animasi scroll kustom
-  const animRef = useRef<number | null>(null);
-  const cancelAnim = useCallback(() => {
-    if (animRef.current != null) {
-      cancelAnimationFrame(animRef.current);
-      animRef.current = null;
-    }
-  }, []);
-
-  const animateTo = useCallback(
-    (to: number, duration = 420) => {
-      cancelAnim();
-      const start = window.scrollY;
-      const dist = to - start;
-      if (Math.abs(dist) < 1) {
-        window.scrollTo({ top: to, behavior: "auto" });
-        return;
-      }
-      lockRef.current = true;
-      const t0 = performance.now();
-
-      const tick = (now: number) => {
-        const p = Math.min(1, (now - t0) / duration);
-        const eased = prefersReduced ? p : easeFn(p);
-        const y = start + dist * eased;
-        window.scrollTo({ top: y, behavior: "auto" });
-
-        if (p < 1 && lockRef.current) {
-          animRef.current = requestAnimationFrame(tick);
-        } else {
-          animRef.current = null;
-          window.scrollTo({ top: to, behavior: "auto" }); // align
-          lockRef.current = false;
-          lastChangeAtRef.current = performance.now();
-        }
-      };
-
-      animRef.current = requestAnimationFrame(tick);
-    },
-    [cancelAnim, prefersReduced]
-  );
-
   const recalc = useCallback(() => {
     const root = containerRef.current;
     if (!root) return;
-    const rect = root.getBoundingClientRect();
-    containerTopRef.current = window.scrollY + rect.top;
     const h = getVVH();
-    viewportHRef.current = h;
-    // Set CSS var for consistent height calc
     root.style.setProperty("--vvh", `${h}px`);
   }, []);
-
   useEffect(() => {
-    if (typeof window === "undefined") return;
     recalc();
-
-    const ctrl = new AbortController();
-    const { signal } = ctrl;
-
-    window.addEventListener("resize", recalc, { passive: true, signal });
-
+    const on = () => recalc();
+    window.addEventListener("resize", on, { passive: true });
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", recalc, { signal });
-      window.visualViewport.addEventListener("scroll", recalc, { signal });
+      window.visualViewport.addEventListener("resize", on);
+      window.visualViewport.addEventListener("scroll", on);
     }
-
-    window.addEventListener("orientationchange", recalc, { passive: true, signal });
-
-    return () => ctrl.abort();
+    return () => {
+      window.removeEventListener("resize", on);
+      window.visualViewport?.removeEventListener("resize", on);
+      window.visualViewport?.removeEventListener("scroll", on);
+    };
   }, [recalc]);
 
-  const inViewport = useCallback(() => {
-    const root = containerRef.current;
-    if (!root) return false;
-    const rect = root.getBoundingClientRect();
-    const h = getVVH();
-    return rect.top < h * 0.85 && rect.bottom > h * 0.15;
-  }, []);
-
-  const vh = useCallback(() => viewportHRef.current || getVVH(), []);
-
-  const scrollToStep = useCallback(
-    (next: number, dir: 1 | -1) => {
-      const top = containerTopRef.current + next * vh();
-      setStep(next);
-      lastDirRef.current = dir;
-      lastChangeAtRef.current = performance.now();
-      animateTo(top, prefersReduced ? 0 : 420);
-    },
-    [setStep, vh, animateTo, prefersReduced]
-  );
-
-  const interceptionEnabled = !prefersReduced;
-
-  useEffect(() => {
-    if (!interceptionEnabled) return;
-    const root = containerRef.current;
-    if (!root) return;
-
-    const ctrl = new AbortController();
-    const { signal } = ctrl;
-
-    const go = (dir: 1 | -1) => {
-      const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
-      if (next !== stepRef.current) {
-        wheelAccRef.current = 0;
-        scrollToStep(next, dir);
-      }
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      if (!inViewport()) return;
-      if (lockRef.current) return;
-      if (e.ctrlKey || isEditable(e.target) || isInteractive(e.target)) return;
-      if (canScrollWithin(e.target)) return;
-
-      e.preventDefault();
-
-      const delta = normalizeWheelDelta(e, vh());
-      if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) {
-        wheelAccRef.current = 0;
-      }
-      wheelAccRef.current += delta;
-
-      const threshold = Math.max(40, Math.min(140, vh() * 0.08));
-      if (Math.abs(wheelAccRef.current) >= threshold) {
-        const dir: 1 | -1 = wheelAccRef.current > 0 ? 1 : -1;
-        go(dir);
-      }
-    };
-
-    // Touch
-    let startY = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      if (!inViewport()) return;
-      if (isEditable(e.target) || isInteractive(e.target)) return;
-      startY = e.touches[0].clientY;
-      cancelAnim();
-      lockRef.current = false;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!inViewport() || lockRef.current) return;
-      if (isEditable(e.target) || isInteractive(e.target)) return;
-      if (canScrollWithin(e.target)) return;
-
-      const delta = startY - e.touches[0].clientY;
-      const thresh = Math.max(26, vh() * 0.03);
-      if (Math.abs(delta) < thresh) return;
-      e.preventDefault();
-      const dir: 1 | -1 = delta > 0 ? 1 : -1;
-      startY = e.touches[0].clientY;
-      go(dir);
-    };
-
-    // Keyboard
-    const onKey = (e: KeyboardEvent) => {
-      if (!inViewport() || lockRef.current) return;
-      if (isEditable(e.target) || isInteractive(e.target)) return;
-
-      let dir: 1 | -1 | 0 | null = null;
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
-      else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
-      else if (e.key === "Home") dir = 0;
-      else if (e.key === "End") dir = 0;
-      else return;
-
-      e.preventDefault();
-      if (dir === 0) {
-        const next = e.key === "Home" ? 0 : TOTAL_STEPS - 1;
-        if (next !== stepRef.current)
-          scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
-        return;
-      }
-      go(dir as 1 | -1);
-    };
-
-    root.addEventListener("wheel", onWheel, { passive: false, signal });
-    root.addEventListener("touchstart", onTouchStart, { passive: true, signal });
-    root.addEventListener("touchmove", onTouchMove, { passive: false, signal });
-    window.addEventListener("keydown", onKey, { signal });
-
-    return () => ctrl.abort();
-  }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep, cancelAnim, vh]);
-
-  // Sync while dragging scrollbar
-  useEffect(() => {
-    if (!interceptionEnabled) return;
-    const ctrl = new AbortController();
-    const { signal } = ctrl;
-
-    const onScroll = () => {
-      if (!inViewport() || lockRef.current) return;
-
-      const now = performance.now();
-      if (now - lastChangeAtRef.current < COOLDOWN) return;
-
-      const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round((pos + vh() * 0.08) / vh());
-      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
-      if (clamped === stepRef.current) return;
-
-      const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
-      lastDirRef.current = dir;
-      lastChangeAtRef.current = now;
-      setStep(clamped);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true, signal });
-    return () => ctrl.abort();
-  }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
-
   /* =======================
-   * Render
+   * RENDER (Scroll-Stack)
    * ======================= */
   return (
     <main className="mx-auto max-w-6xl px-6">
-      <div
-        ref={containerRef}
-        className="relative"
-        style={{ height: `calc(var(--vvh) * ${TOTAL_STEPS})` }}
-      >
-        <div className="sticky top-0 h-screen flex items-center justify-center">
-          <div className="w-full">
-            <AnimatePresence mode="wait">
-              {/* Step 0: HERO */}
-              {step === 0 && (
-                <motion.section key="step-hero" {...stageFade} className="text-center">
-                  <motion.span
-                    className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-                    style={{ background: `${BRAND}14` }}
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.05}
-                  >
-                    {t("badge")}
-                  </motion.span>
+      <div ref={containerRef} className="relative">
+        {/* HERO — section biasa, sebelum stack */}
+        <section
+          className="min-h-[calc(var(--vvh,100vh)*0.86)] flex items-center justify-center text-center"
+        >
+          <div>
+            <motion.span
+              className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
+              style={{ background: `${BRAND}14` }}
+              variants={rise}
+              initial="hidden"
+              animate="visible"
+              custom={0.05}
+            >
+              {t("badge")}
+            </motion.span>
 
-                  <motion.h1
-                    className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.12}
-                  >
-                    {t("title")}
-                  </motion.h1>
+            <motion.h1
+              className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+              variants={rise}
+              initial="hidden"
+              animate="visible"
+              custom={0.12}
+            >
+              {t("title")}
+            </motion.h1>
 
-                  {/* SUBTITLE */}
-                  <motion.p
-                    className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.18}
-                  >
-                    {t("subtitle")}
-                  </motion.p>
+            <motion.p
+              className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+              variants={rise}
+              initial="hidden"
+              animate="visible"
+              custom={0.18}
+            >
+              {t("subtitle")}
+            </motion.p>
 
-                  <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
-                    <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
-                  </div>
-                </motion.section>
-              )}
-
-              {/* Step 1..6: content + stage */}
-              {step >= 1 && step <= items.length && (
-                <motion.section key="step-content" {...stageFade} className="w-full">
-                  {/* CHANGE: md:items-start -> md:items-center */}
-                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
-                    {/* LEFT: text */}
-                    <motion.div
-                      variants={contentStagger.container}
-                      initial="hidden"
-                      animate="visible"
-                      exit={{
-                        opacity: 0,
-                        y: prefersReduced ? 0 : -6,
-                        transition: { duration: 0.2, ease: EASE },
-                      }}
-                      /* CHANGE: add md:self-center to ensure vertical centering */
-                      className="w-full max-w-3xl md:max-w-none text-center md:text-left md:self-center"
-                    >
-                      {/* ====== GRID: ikon | judul/quote/desc ====== */}
-                      <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
-                        {/* Icon (col 1) */}
-                        <motion.div
-                          variants={contentStagger.item}
-                          className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
-                          aria-hidden
-                        >
-                          {!prefersReduced && (
-                            <motion.span
-                              className="absolute inset-0 rounded-xl"
-                              style={{ background: `${BRAND_BG_12}` }}
-                              initial={{ opacity: 0.5, scale: 1 }}
-                              animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
-                              transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
-                            />
-                          )}
-                          <span className="-translate-y-[1px]" style={{ color: BRAND }}>
-                            {items[step - 1].icon}
-                          </span>
-                        </motion.div>
-
-                        {/* Title (col 2) */}
-                        <motion.h3
-                          variants={contentStagger.item}
-                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
-                        >
-                          {t(`cards.${items[step - 1].key}.title`)}
-                        </motion.h3>
-
-                        {/* Quote + body (col 2) */}
-                        {(() => {
-                          const descRaw = t(`cards.${items[step - 1].key}.desc`) as unknown as string;
-                          const { quote, rest } = splitQuoted(descRaw);
-                          return (
-                            <motion.div
-                              variants={contentStagger.item}
-                              className="col-start-2 mt-0.5 text-foreground/70 space-y-1 leading-snug"
-                              data-native-scroll="true"
-                              style={{ maxHeight: 260, overflowY: "auto" }}
-                            >
-                              {quote && <p className="italic text-foreground/80 leading-snug">{quote}</p>}
-                              <p>{quote ? rest : descRaw}</p>
-                            </motion.div>
-                          );
-                        })()}
-                      </div>
-                      {/* ====== /GRID ====== */}
-                    </motion.div>
-
-                    {/* RIGHT: stage */}
-                    <div className="hidden md:flex self-center justify-center w-full">
-                      <FeatureStage
-                        stepKey={items[step - 1].key}
-                        prefersReduced={!!prefersReduced}
-                        locale={locale}
-                      />
-                    </div>
-                  </div>
-                </motion.section>
-              )}
-
-              {/* CTA */}
-              {step === items.length + 1 && (
-                <motion.section key="step-cta" {...stageFade} className="text-center">
-                  <h2 className="text-2xl font-semibold tracking-tight">
-                    {t("title")}
-                  </h2>
-                  <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
-                    {t("subtitle")}
-                  </p>
-
-                  <div className="mt-7 flex justify-center gap-3">
-                    <a
-                      href="#demo"
-                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
-                      style={{ backgroundColor: BRAND }}
-                    >
-                      {t("cta.primary")}
-                    </a>
-                    <a
-                      href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
-                      style={{ borderColor: "rgba(0,0,0,0.1)" }}
-                    >
-                      {t("cta.secondary")}
-                    </a>
-                  </div>
-                </motion.section>
-              )}
-            </AnimatePresence>
+            <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
+              <span className="text-sm">Scroll</span>
+              <span className="animate-bounce" aria-hidden>↓</span>
+            </div>
           </div>
+        </section>
+
+        {/* STACK CONTAINER */}
+        <div className="relative">
+          {/* Spacer untuk memberi ruang stack menumpuk */}
+          <div className="h-[calc(var(--vvh,100vh)*0.2)]" aria-hidden />
+
+          {items.map((it, idx) => (
+            <StackSection
+              key={it.key}
+              index={idx}
+              total={items.length}
+              icon={it.icon}
+              titleKey={`cards.${it.key}.title`}
+              descKey={`cards.${it.key}.desc`}
+              t={t}
+              prefersReduced={!!prefersReduced}
+              locale={locale}
+              contentStagger={contentStagger}
+              stageFade={stageFade}
+              stageBaseColor={palette[it.key]}
+            >
+              <FeatureStage
+                stepKey={it.key}
+                prefersReduced={!!prefersReduced}
+                locale={locale}
+              />
+            </StackSection>
+          ))}
+
+          {/* CTA — sticky terakhir agar menutup stack */}
+          <StickyCTA
+            t={t}
+            withLocale={withLocale}
+            prefersReduced={!!prefersReduced}
+          />
         </div>
+
+        {/* Spacer setelah stack */}
+        <div className="h-[calc(var(--vvh,100vh)*0.4)]" aria-hidden />
       </div>
     </main>
   );
 }
 
 /* =======================
- * Stage per-point
+ * StackSection
+ * — Satu panel sticky layar penuh.
+ * — Efek “stack”: scale & translateY sedikit saat panel berikutnya datang.
+ * ======================= */
+function StackSection({
+  index,
+  total,
+  icon,
+  titleKey,
+  descKey,
+  t,
+  prefersReduced,
+  locale,
+  contentStagger,
+  stageFade,
+  stageBaseColor,
+  children,
+}: {
+  index: number;
+  total: number;
+  icon: string;
+  titleKey: string;
+  descKey: string;
+  t: ReturnType<typeof useTranslations>;
+  prefersReduced: boolean;
+  locale: Locale;
+  contentStagger: { container: Variants; item: Variants };
+  stageFade: { initial: any; animate: any; exit: any };
+  stageBaseColor: string;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  // panel sticky ini akan aktif selama kira-kira 140% viewport scroll
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  // Efek stack: makin ke bawah → sedikit mengecil, dan turun
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    prefersReduced ? [1, 1, 1] : [1, 0.975, 0.95]
+  );
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    prefersReduced ? [0, 0] : [0, 32] // turun 32px di akhir
+  );
+  const shadow = useTransform(
+    scrollYProgress,
+    [0, 1],
+    prefersReduced
+      ? ["0 10px 30px -12px rgba(0,0,0,0.12)", "0 10px 30px -12px rgba(0,0,0,0.12)"]
+      : ["0 20px 60px -18px rgba(0,0,0,0.18)", "0 10px 24px -10px rgba(0,0,0,0.12)"]
+  );
+  // Opacity kecil agar transisi antarpanel terasa halus
+  const opacity = useTransform(scrollYProgress, [0, 0.08], [1, 0.92]);
+
+  // zIndex dibalik: panel yang lebih bawah punya zIndex lebih tinggi (stack menumpuk)
+  const z = 10 + index;
+
+  // akses copy
+  const descRaw = t(descKey) as unknown as string;
+  const { quote, rest } = splitQuoted(descRaw);
+
+  return (
+    <section
+      ref={ref}
+      className="relative h-[140vh]" // ruang scroll per-panel
+      aria-label={`Feature stack panel ${index + 1} / ${total}`}
+    >
+      <motion.div
+        style={{ y, scale, opacity, zIndex: z, boxShadow: shadow }}
+        className="
+          sticky top-0 h-[calc(var(--vvh,100vh))] flex items-center justify-center
+        "
+      >
+        <div
+          className="
+            w-full rounded-[22px] border border-white/60 bg-white/65
+            md:backdrop-blur-xl backdrop-blur
+            supports-[not(backdrop-filter:blur(0))]:bg-white/90
+          "
+        >
+          <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center p-4 md:p-6">
+            {/* LEFT: text (tetap center vertical) */}
+            <motion.div
+              variants={contentStagger.container}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: false, amount: 0.25 }}
+              className="w-full max-w-3xl md:max-w-none text-center md:text-left md:self-center"
+            >
+              <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
+                {/* Icon */}
+                <motion.div
+                  variants={contentStagger.item}
+                  className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
+                  aria-hidden
+                >
+                  {!prefersReduced && (
+                    <motion.span
+                      className="absolute inset-0 rounded-xl"
+                      style={{ background: `${BRAND_BG_12}` }}
+                      initial={{ opacity: 0.5, scale: 1 }}
+                      animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
+                      transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
+                    />
+                  )}
+                  <span className="-translate-y-[1px]" style={{ color: BRAND }}>
+                    {icon}
+                  </span>
+                </motion.div>
+
+                {/* Title */}
+                <motion.h3
+                  variants={contentStagger.item}
+                  className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
+                >
+                  {t(titleKey)}
+                </motion.h3>
+
+                {/* Quote + body */}
+                <motion.div
+                  variants={contentStagger.item}
+                  className="col-start-2 mt-0.5 text-foreground/70 space-y-1 leading-snug"
+                >
+                  {quote && <p className="italic text-foreground/80 leading-snug">{quote}</p>}
+                  <p>{quote ? rest : descRaw}</p>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* RIGHT: stage (dipertahankan) */}
+            <div className="hidden md:flex self-center justify-center w-full">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={titleKey}
+                  {...stageFade}
+                  className="w-full max-w-[440px]"
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* background halus agar tiap panel punya identitas warna ringan */}
+          <div
+            aria-hidden
+            className="pointer-events-none -z-10 absolute inset-0 rounded-[22px]"
+            style={{
+              background: `radial-gradient(60% 60% at 65% 35%, ${stageBaseColor}88 0%, transparent 60%)`,
+            }}
+          />
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+/* =======================
+ * StickyCTA — bagian penutup stack
+ * ======================= */
+function StickyCTA({
+  t,
+  withLocale,
+  prefersReduced,
+}: {
+  t: ReturnType<typeof useTranslations>;
+  withLocale: (href: string) => string;
+  prefersReduced: boolean;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], [0, prefersReduced ? 0 : -12]);
+  const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0.95]);
+
+  return (
+    <section ref={ref} className="relative h-[120vh]">
+      <motion.div
+        style={{ y, opacity, zIndex: 10 + 999 }}
+        className="sticky top-0 h-[calc(var(--vvh,100vh))] flex items-center justify-center"
+      >
+        <motion.section
+          key="step-cta"
+          initial={{ opacity: 0, y: prefersReduced ? 0 : 8 }}
+          whileInView={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } }}
+          viewport={{ once: false, amount: 0.3 }}
+          className="text-center rounded-[22px] border border-white/60 bg-white/65 md:backdrop-blur-xl backdrop-blur px-6 py-8"
+        >
+          <h2 className="text-2xl font-semibold tracking-tight">
+            {t("title")}
+          </h2>
+          <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
+            {t("subtitle")}
+          </p>
+
+          <div className="mt-7 flex justify-center gap-3">
+            <a
+              href="#demo"
+              className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+              style={{ backgroundColor: BRAND }}
+            >
+              {t("cta.primary")}
+            </a>
+            <a
+              href={withLocale("/contact")}
+              className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+              style={{ borderColor: "rgba(0,0,0,0.1)" }}
+            >
+              {t("cta.secondary")}
+            </a>
+          </div>
+        </motion.section>
+      </motion.div>
+    </section>
+  );
+}
+
+/* =======================
+ * Stage per-point (dipertahankan)
  * ======================= */
 function FeatureStage({
   stepKey,
@@ -637,15 +574,6 @@ function FeatureStage({
   if (stepKey === "handoff") {
     return <HandoffStage prefersReduced={prefersReduced} locale={locale} />;
   }
-
-  const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
-    instant: "#FF9AA2",
-    multitenant: "#B5EAD7",
-    analytics: "#C7CEEA",
-    handoff: "#FFDAC1",
-    multilingual: "#E2F0CB",
-    booking: "#F1F0FF",
-  };
 
   const base = palette[stepKey] ?? "#EAEAEA";
 
@@ -680,7 +608,7 @@ function FeatureStage({
 }
 
 /* =======================
- * InstantChatStage — chat sequence + typing
+ * InstantChatStage — chat sequence + typing (dipertahankan)
  * ======================= */
 function InstantChatStage({
   prefersReduced,
@@ -830,7 +758,7 @@ function TypingDots() {
 }
 
 /* =======================
- * NEW: small utilities for multitenant stage
+ * NEW: small utilities for multitenant stage (dipertahankan)
  * ======================= */
 function CountUp({
   to,
@@ -924,7 +852,8 @@ function BranchIcon({ type }: { type: "hq" | "branch" }) {
 }
 
 /* =======================
- * SchultzBackdrop — generative soft blobs */
+ * SchultzBackdrop — (dipakai di stage tabel/analytics)
+ * ======================= */
 function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-[-5] overflow-hidden">
@@ -975,7 +904,8 @@ function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
 }
 
 /* =======================
- * AnalyticsTableStage — pengganti stage multitenant */
+ * AnalyticsTableStage — (dipertahankan)
+ * ======================= */
 function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
     { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active" as const,  type: "hq" as const },
@@ -1100,7 +1030,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
 }
 
 /* =======================
- * AnalyticsRealtimeStage — chart + counters + gradient shift
+ * AnalyticsRealtimeStage — (dipertahankan)
  * ======================= */
 function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean }) {
   const barsA = [28, 42, 35, 55, 62, 48, 30, 40, 58, 66, 52, 38];
@@ -1235,7 +1165,7 @@ function MetricCard({ label, value, hint }: { label: string; value: ReactNode; h
 }
 
 /* =======================
- * NEW: HandoffStage — simulated chat timeline (AI → human)
+ * NEW: HandoffStage — (dipertahankan)
  * ======================= */
 function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; locale: Locale }) {
   type Sender = "user" | "ai" | "human" | "system";
@@ -1273,7 +1203,6 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
     }
   }, [idx, prefersReduced, script]);
 
-  // helper: kelas offset supaya tidak "lurus"
   const laneOffset = (sender: Sender) =>
     sender === "user" ? "ml-12 md:ml-24" : "mr-12 md:mr-24";
 
@@ -1288,40 +1217,36 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       aria-label="Chat simulation with AI → human handoff"
     >
       <div className="flex-1 flex flex-col justify-center p-3.5 md:p-5">
-        {/* messages — user kanan, agent/bot kiri; dengan offset lanes */}
-        <div className="flex-1">
-          <div className="flex flex-col gap-3 md:gap-3.5">
-            <AnimatePresence initial={false}>
-              {script.slice(0, idx).map((m, i) => (
-                <motion.div
-                  key={`${i}-${m.sender}`}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.22, ease: EASE }}
-                  className={`${m.sender === "user" ? "self-end" : "self-start"} ${laneOffset(m.sender)}`}
-                >
-                  <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
-                </motion.div>
-              ))}
+        <div className="flex flex-col gap-3 md:gap-3.5">
+          <AnimatePresence initial={false}>
+            {script.slice(0, idx).map((m, i) => (
+              <motion.div
+                key={`${i}-${m.sender}`}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: EASE }}
+                className={`${m.sender === "user" ? "self-end" : "self-start"} ${laneOffset(m.sender)}`}
+              >
+                <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
+              </motion.div>
+            ))}
 
-              {typing && !prefersReduced && (
-                <motion.div
-                  key="typing"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18, ease: EASE }}
-                  className={`self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm ${laneOffset("ai")}`}
-                >
-                  <TypingDots />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+            {typing && !prefersReduced && (
+              <motion.div
+                key="typing"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18, ease: EASE }}
+                className={`self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm ${laneOffset("ai")}`}
+              >
+                <TypingDots />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* fixed label in bottom-right of the stage */}
         <div className="pointer-events-none absolute bottom-2 right-3 text-[10px] md:text-[11px] text-foreground/60">
           Seamless AI → Human handoff (simulated)
         </div>
@@ -1330,8 +1255,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
   );
 }
 
-/* small chat bubble
-   NOTE: ditambah sedikit pengaturan max-width agar proporsi isu "lurus" makin hilang */
+/* small chat bubble */
 function ChatBubble({
   sender,
   children,
