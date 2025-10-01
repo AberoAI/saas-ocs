@@ -158,8 +158,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     busyRef.current = true;
 
     const { top, h } = getScroll();
-    let stackY = toPx(stackPosition, h);
-    let scaleEndY = toPx(scaleEndPosition, h);
+    const stackY = toPx(stackPosition, h);      // ✅ prefer-const
+    const scaleEndY = toPx(scaleEndPosition, h); // ✅ prefer-const
 
     // Scope queries to this stack only
     const rootEl = hostRef.current!;
@@ -251,7 +251,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     scaleEndPosition,
     stackPosition,
     toPx,
-    prog, // ✅ tambahkan agar deps lengkap
+    prog, // sudah lengkap
   ]);
 
   const onScroll = useCallback(() => update(), [update]);
@@ -317,7 +317,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         const mod = await import("lenis");
         if (!mounted) return;
 
-        // ✅ Hilangkan 'any' dengan type guard aman
+        // Type-safe guard tanpa 'any'
         type LenisModule = { default: unknown } | Record<string, unknown>;
         const maybe = mod as LenisModule;
 
