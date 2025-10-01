@@ -77,6 +77,9 @@ export type ScrollStackProps = {
   /** Penyelarasan pin saat in-view */
   align?: "top" | "center";
 
+  /** Memudarkan kartu di belakang kartu aktif per tingkat (0..1). 0 = nonaktif */
+  fadeAmount?: number;
+
   /** Dipanggil saat kartu terakhir sedang “pinned/in-view” */
   onStackComplete?: VoidFn;
 };
@@ -95,7 +98,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   useWindowScroll = true,
   enableLenis = true,
   endSpacer = "20vh",
-  align = "top", // <- default aman: perilaku lama
+  align = "top",
+  fadeAmount = 0,
   onStackComplete,
 }) => {
   const hostRef = useRef<HTMLDivElement | null>(null);      // host of this instance
@@ -107,7 +111,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   const lenisRef = useRef<Lenis | null>(null);
 
   const cardsRef = useRef<HTMLElement[]>([]);
-  const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number }>>(new Map());
+  const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number; o: number }>>(new Map());
   const doneRef = useRef(false);
   const busyRef = useRef(false);
   const tickingRef = useRef(false); // coalesce native scroll → 1× per frame
@@ -140,15 +144,17 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     return { top: el.scrollTop, h: el.clientHeight };
   }, [useWindowScroll]);
 
-  // Offset untuk window vs wrapper
+  // Offset akurat untuk window & wrapper (relatif ke dokumen/wrapper + mempertimbangkan scroll)
   const getOffset = useCallback(
     (el: HTMLElement) => {
       if (useWindowScroll) {
-        const r = el.getBoundingClientRect(); // includes transforms → cocok dengan logika animasi
-        return r.top + window.scrollY;
+        const rect = el.getBoundingClientRect();
+        return rect.top + window.scrollY;
       }
       const wrapper = scrollerRef.current!;
-      return el.offsetTop - (wrapper.offsetTop || 0);
+      const rect = el.getBoundingClientRect();
+      const wrect = wrapper.getBoundingClientRect();
+      return rect.top - wrect.top + wrapper.scrollTop;
     },
     [useWindowScroll]
   );
@@ -197,14 +203,14 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
     const fallbackEndEl = cardsRef.current[cardsRef.current.length - 1];
     const endTop = endEl
-      ? (useWindowScroll ? endEl.getBoundingClientRect().top + window.scrollY : endEl.offsetTop)
+      ? (useWindowScroll ? endEl.getBoundingClientRect().top + window.scrollY : getOffset(endEl))
       : fallbackEndEl
       ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
       : 0;
 
     // Hitung topIdx sekali per frame (pakai anchor sesuai mode)
     let topIdx = 0;
-    if (blurAmount) {
+    if (blurAmount || fadeAmount > 0) {
       for (let j = 0; j < cardsRef.current.length; j++) {
         const cardJ = cardsRef.current[j]!;
         const aj = anchorYFor(h, cardJ);
@@ -224,8 +230,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       const end = cardTop - scaleAnchorY;
       const pinStart = start;
 
-      // Saat align="center", kita rilis saat spacer melewati tengah viewport.
-      // Kita pakai heuristik yang nyaman (h/2) — sudah terasa natural untuk semua ukuran kartu.
+      // Saat align="center", rilis saat spacer melewati tengah viewport
       const pinEnd = Math.max(endTop - h / 2, pinStart + 1);
 
       const p = prog(top, start, end);
@@ -235,6 +240,13 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
       let b = 0;
       if (blurAmount && i < topIdx) b = Math.max(0, (topIdx - i) * blurAmount);
+
+      // Fade kartu di belakang kartu aktif untuk kurangi "ghost layers"
+      let o = 1;
+      if (fadeAmount > 0 && i < topIdx) {
+        const depth = topIdx - i;
+        o = Math.max(0, 1 - depth * fadeAmount);
+      }
 
       let y = 0;
       const pinned = top >= pinStart && top <= pinEnd;
@@ -246,6 +258,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         s: Math.round(s * 1000) / 1000,
         r: Math.round(r * 100) / 100,
         b: Math.round(b * 100) / 100,
+        o: Math.round(o * 1000) / 1000,
       };
 
       const last = lastTRef.current.get(i);
@@ -254,16 +267,22 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         Math.abs(last.y - tr.y) > 0.1 ||
         Math.abs(last.s - tr.s) > 0.001 ||
         Math.abs(last.r - tr.r) > 0.1 ||
-        Math.abs(last.b - tr.b) > 0.1;
+        Math.abs(last.b - tr.b) > 0.1 ||
+        Math.abs(last.o - tr.o) > 0.001;
 
       if (changed) {
         card.style.transform = `translate3d(0, ${tr.y}px, 0) scale(${tr.s}) rotate(${tr.r}deg)`;
         card.style.filter = tr.b > 0 ? `blur(${tr.b}px)` : "";
-        card.style.willChange = "transform, filter";
+        card.style.opacity = `${tr.o}`;
+        card.style.willChange = "transform, filter, opacity";
         card.style.transformOrigin = "top center";
         card.style.backfaceVisibility = "hidden";
         lastTRef.current.set(i, tr);
       }
+
+      // z-index: kartu lebih depan berada di atas
+      // (nilai besar untuk depan, tidak mengganggu layout lain)
+      card.style.zIndex = String(1000 + (cardsRef.current.length - i));
 
       // callback kartu terakhir
       if (i === cardsRef.current.length - 1) {
@@ -282,17 +301,21 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   }, [
     baseScale,
     blurAmount,
+    fadeAmount,
     getOffset,
     getScroll,
     itemScale,
     itemStackDistance,
     onStackComplete,
     rotationAmount,
+    scaleEndPosition,
+    stackPosition,
     toPx,
     prog,
     align,
     anchorYFor,
     scaleAnchorYFor,
+    useWindowScroll,
   ]);
 
   const onScroll = useCallback(() => {
@@ -402,10 +425,12 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     // Gaya dasar kartu
     cards.forEach((card, i) => {
       if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
-      card.style.willChange = "transform, filter";
+      card.style.willChange = "transform, filter, opacity";
       card.style.transformOrigin = "top center";
       card.style.backfaceVisibility = "hidden";
       card.style.transform = "translateZ(0)";
+      // z-index awal (akan diupdate di update())
+      card.style.zIndex = String(1000 + (cards.length - i));
     });
 
     // Tanpa Lenis → listener native (coalesced)
