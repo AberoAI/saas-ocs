@@ -497,7 +497,7 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-start">
+                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
                     {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
@@ -561,7 +561,7 @@ export default function FeaturesPage() {
                     </motion.div>
 
                     {/* RIGHT: stage */}
-                    <div className="hidden md:flex justify-center md:justify-start md:mt-[2px] w-full">
+                    <div className="hidden md:flex justify-center md:justify-center md:mt-[2px] w-full">
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
@@ -654,7 +654,7 @@ function FeatureStage({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
-      className="aspect-square w-[64vw] max-w-[420px] rounded-2xl"
+      className="aspect-square w-[64vw] max-w-[420px] rounded-2xl mx-auto"
       style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
     >
@@ -1283,7 +1283,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
-      className="relative w-full max-w-[560px] aspect-[4/3] flex"
+      className="relative w-full max-w-[560px] aspect-[4/3] flex mx-auto"
       aria-label="Chat simulation with AI → human handoff"
     >
       <div className="flex-1 flex flex-col p-3.5 md:p-5">
