@@ -158,8 +158,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     busyRef.current = true;
 
     const { top, h } = getScroll();
-    const stackY = toPx(stackPosition, h);
-    const scaleEndY = toPx(scaleEndPosition, h);
+    let stackY = toPx(stackPosition, h);
+    let scaleEndY = toPx(scaleEndPosition, h);
 
     // Scope queries to this stack only
     const rootEl = hostRef.current!;
@@ -167,7 +167,11 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
     // If no explicit end element, fall back to last card tail
     const fallbackEndEl = cardsRef.current[cardsRef.current.length - 1];
-    const endTop = endEl ? getOffset(endEl) : (fallbackEndEl ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight : 0);
+    const endTop = endEl
+      ? getOffset(endEl)
+      : fallbackEndEl
+      ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
+      : 0;
 
     cardsRef.current.forEach((card, i) => {
       const cardTop = getOffset(card);
@@ -247,6 +251,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     scaleEndPosition,
     stackPosition,
     toPx,
+    prog, // ✅ tambahkan agar deps lengkap
   ]);
 
   const onScroll = useCallback(() => update(), [update]);
@@ -311,9 +316,18 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       try {
         const mod = await import("lenis");
         if (!mounted) return;
-        const Ctor = (mod as any).default as LenisConstructor;
-        if (Ctor) {
-          LenisCtorRef.current = Ctor;
+
+        // ✅ Hilangkan 'any' dengan type guard aman
+        type LenisModule = { default: unknown } | Record<string, unknown>;
+        const maybe = mod as LenisModule;
+
+        const ctor =
+          maybe && "default" in maybe && typeof maybe.default === "function"
+            ? (maybe.default as LenisConstructor)
+            : undefined;
+
+        if (ctor) {
+          LenisCtorRef.current = ctor;
           initLenis();
         }
       } catch {
