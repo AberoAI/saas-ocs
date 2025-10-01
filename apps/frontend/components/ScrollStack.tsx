@@ -9,14 +9,20 @@ import React, {
   type PropsWithChildren,
 } from "react";
 
-// Opsional: aktifkan Lenis kalau di-install
-let LenisCtor: any = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  LenisCtor = require("lenis").default ?? require("lenis");
-} catch {
-  // tidak apa-apa; fallback ke native scroll
+/** =========================
+ * Minimal typings untuk Lenis
+ * ========================= */
+type LenisEvent = "scroll";
+type LenisHandler = (e?: unknown) => void;
+
+interface Lenis {
+  on(event: LenisEvent, handler: LenisHandler): void;
+  off?(event: LenisEvent, handler: LenisHandler): void;
+  raf(time: number): void;
+  destroy(): void;
 }
+
+type LenisConstructor = new (options?: Record<string, unknown>) => Lenis;
 
 type VoidFn = () => void;
 
@@ -84,10 +90,15 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 }) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
-  const lenisRef = useRef<any | null>(null);
+
+  // Lenis ctor & instance
+  const LenisCtorRef = useRef<LenisConstructor | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
   const cardsRef = useRef<HTMLElement[]>([]);
-  const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number }>>(new Map());
+  const lastTRef = useRef<
+    Map<number, { y: number; s: number; r: number; b: number }>
+  >(new Map());
   const doneRef = useRef(false);
   const busyRef = useRef(false);
 
@@ -120,7 +131,10 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   );
 
   const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
-  const prog = (x: number, a: number, b: number) => (a === b ? 1 : clamp01((x - a) / (b - a)));
+  const prog = useCallback(
+    (x: number, a: number, b: number) => (a === b ? 1 : clamp01((x - a) / (b - a))),
+    []
+  );
 
   const update = useCallback(() => {
     if (!cardsRef.current.length || busyRef.current) return;
@@ -209,16 +223,23 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     stackPosition,
     toPx,
     useWindowScroll,
+    prog,
   ]);
 
   const onScroll = useCallback(() => update(), [update]);
 
-  const setupLenis = useCallback(() => {
-    if (!enableLenis || !LenisCtor || prefersReduced) return null;
-    if (lenisRef.current) return lenisRef.current;
+  /** =========================
+   * Init Lenis via dynamic import
+   * ========================= */
+  const initLenis = useCallback(() => {
+    if (!enableLenis || prefersReduced) return;
+    if (!LenisCtorRef.current) return; // belum loaded
+    if (lenisRef.current) return; // sudah ada
+
+    const Ctor = LenisCtorRef.current;
 
     if (useWindowScroll) {
-      const lenis = new LenisCtor({
+      const lenis = new Ctor({
         duration: 1.05,
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         smoothWheel: true,
@@ -233,15 +254,15 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       };
       rafRef.current = requestAnimationFrame(raf);
       lenisRef.current = lenis;
-      return lenis;
+      return;
     }
 
     const wrapper = scrollerRef.current;
-    if (!wrapper) return null;
+    if (!wrapper) return;
 
-    const lenis = new LenisCtor({
+    const lenis = new Ctor({
       wrapper,
-      content: wrapper.querySelector(".scroll-stack-inner") as HTMLElement | undefined,
+      content: wrapper.querySelector(".scroll-stack-inner") ?? undefined,
       duration: 1.05,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
@@ -257,8 +278,28 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     };
     rafRef.current = requestAnimationFrame(raf);
     lenisRef.current = lenis;
-    return lenis;
-  }, [enableLenis, onScroll, prefersReduced, useWindowScroll]);
+  }, [enableLenis, prefersReduced, onScroll, useWindowScroll]);
+
+  // dynamic import lenis sekali (client only)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!enableLenis || prefersReduced) return;
+      try {
+        const mod = await import("lenis");
+        if (!mounted) return;
+        // default export atau module sendiri
+        const Ctor = (mod.default ?? (mod as unknown)) as LenisConstructor;
+        LenisCtorRef.current = Ctor;
+        initLenis();
+      } catch {
+        // abaikan: fallback ke native scroll
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [enableLenis, prefersReduced, initLenis]);
 
   useLayoutEffect(() => {
     // Kartu
@@ -275,35 +316,39 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       card.style.transform = "translateZ(0)";
     });
 
-    // Listener native jika tanpa Lenis
-    if (!LenisCtor || !enableLenis || prefersReduced) {
+    // Tanpa Lenis → pakai listener native
+    if (!lenisRef.current) {
+      const el: Window | HTMLElement | null = useWindowScroll ? window : scrollerRef.current;
       const handler = () => update();
-      const el = useWindowScroll ? window : scrollerRef.current;
-      el?.addEventListener("scroll", handler, { passive: true });
+      el?.addEventListener("scroll", handler as EventListener, { passive: true } as AddEventListenerOptions);
       update();
 
       // resize → update
       const onResize = () => update();
-      window.addEventListener("resize", onResize, { passive: true });
+      window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
 
       return () => {
-        el?.removeEventListener("scroll", handler as any);
-        window.removeEventListener("resize", onResize as any);
+        el?.removeEventListener("scroll", handler as EventListener);
+        window.removeEventListener("resize", onResize as EventListener);
         cardsRef.current = [];
         lastTRef.current.clear();
         doneRef.current = false;
       };
     }
 
-    // Smooth via Lenis
-    setupLenis();
+    // Dengan Lenis → sudah dihubungkan lewat initLenis()
     update();
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (lenisRef.current) {
-        lenisRef.current.off?.("scroll", onScroll);
-        lenisRef.current.destroy?.();
+        // aman kalau implementasi tidak punya off()
+        try {
+          lenisRef.current.off?.("scroll", onScroll);
+        } catch {}
+        try {
+          lenisRef.current.destroy();
+        } catch {}
       }
       lenisRef.current = null;
       cardsRef.current = [];
@@ -320,9 +365,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     rotationAmount,
     blurAmount,
     useWindowScroll,
-    enableLenis,
-    prefersReduced,
-    setupLenis,
     update,
     onScroll,
   ]);
