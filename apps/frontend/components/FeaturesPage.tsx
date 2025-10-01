@@ -637,7 +637,7 @@ function FeatureStage({
 
   // ⬇️ handoff: simulasi chat AI → human
   if (stepKey === "handoff") {
-    return <HandoffStage prefersReduced={prefersReduced} />;
+    return <HandoffStage prefersReduced={prefersReduced} locale={locale} />;
   }
 
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
@@ -1241,33 +1241,37 @@ function MetricCard({ label, value, hint }: { label: string; value: ReactNode; h
 /* =======================
  * NEW: HandoffStage — simulated chat timeline (AI → human)
  * ======================= */
-function HandoffStage({ prefersReduced }: { prefersReduced: boolean }) {
+function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; locale: Locale }) {
   type Sender = "user" | "ai" | "human" | "system";
 
-  const script: Array<{ sender: Sender; text: string }> = [
-    { sender: "user",  text: "Hi, my order arrived damaged." },
-    { sender: "ai",    text: "I’m really sorry to hear that. Could you share your order ID so I can check?" },
-    { sender: "user",  text: "#A-10492" },
-    { sender: "ai",    text: "Thanks! I’ll hand this to a human agent so you get the best help." },
-    { sender: "system",text: "Lina joined the chat" },
-    { sender: "human", text: "Hi, I’m Lina from Support. I’ll take it from here. How can I help?" },
-  ];
+  const script =
+    locale === "tr"
+      ? ([
+          { sender: "user",  text: "Tedaviden sonra dikişlerim kanamaya başladı, ne yapmalıyım?" },
+          { sender: "ai",    text: "Bu durum özel dikkat gerektiriyor. Sizi sağlık ekibimize bağlıyorum." },
+          { sender: "human", text: "Merhaba, benim adım Ayşe. Hemşireyim, görüşmeyi devralıyorum ve size yardımcı olacağım." },
+        ] as Array<{ sender: Sender; text: string }>)
+      : ([
+          { sender: "user",  text: "My stitches started bleeding after the treatment, what should I do?" },
+          { sender: "ai",    text: "This needs special attention. I’ll connect you with our medical staff." },
+          { sender: "human", text: "Hello, my name is Ella. I’m a nurse, and I’ll take over the conversation to assist you further." },
+        ] as Array<{ sender: Sender; text: string }>);
 
-  const [idx, setIdx] = useState(prefersReduced ? script.length : 1);
+  const [idx, setIdx] = useState(prefersReduced ? script.length : 1); // mulai dari pesan user
   const [typing, setTyping] = useState(!prefersReduced);
 
   useEffect(() => {
     if (prefersReduced) return;
     if (idx < script.length) {
-      const isNextAIOrHuman = script[idx].sender === "ai" || script[idx].sender === "human";
-      const showTyping = isNextAIOrHuman;
+      const next = script[idx];
+      const isAgent = next.sender === "ai" || next.sender === "human";
+      const preDelay = isAgent ? 450 : 280;
 
-      const preDelay = showTyping ? 450 : 280;
-      const t1 = window.setTimeout(() => setTyping(showTyping), preDelay);
+      const t1 = window.setTimeout(() => setTyping(isAgent), preDelay);
       const t2 = window.setTimeout(() => {
         setIdx((n) => n + 1);
         setTyping(false);
-      }, preDelay + (showTyping ? 950 : 120));
+      }, preDelay + (isAgent ? 950 : 160));
 
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
@@ -1357,7 +1361,7 @@ function ChatBubble({
   children,
 }: {
   sender: "user" | "ai" | "human" | "system";
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   if (sender === "system") {
     return (
