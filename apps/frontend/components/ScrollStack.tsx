@@ -71,6 +71,9 @@ export type ScrollStackProps = {
   /** Aktifkan smooth scrolling via Lenis jika tersedia */
   enableLenis?: boolean;
 
+  /** Tinggi spacer pelepas pin di akhir (px atau %, default "20vh") */
+  endSpacer?: number | string;
+
   /** Dipanggil saat kartu terakhir sedang “pinned/in-view” */
   onStackComplete?: VoidFn;
 };
@@ -88,6 +91,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   blurAmount = 0,
   useWindowScroll = true,
   enableLenis = true,
+  endSpacer = "20vh",                 // ⬅️ baru (default kecil)
   onStackComplete,
 }) => {
   const hostRef = useRef<HTMLDivElement | null>(null);      // host of this instance
@@ -158,8 +162,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     busyRef.current = true;
 
     const { top, h } = getScroll();
-    const stackY = toPx(stackPosition, h);      // ✅ prefer-const
-    const scaleEndY = toPx(scaleEndPosition, h); // ✅ prefer-const
+    const stackY = toPx(stackPosition, h);
+    const scaleEndY = toPx(scaleEndPosition, h);
 
     // Scope queries to this stack only
     const rootEl = hostRef.current!;
@@ -251,7 +255,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     scaleEndPosition,
     stackPosition,
     toPx,
-    prog, // sudah lengkap
+    prog,
   ]);
 
   const onScroll = useCallback(() => update(), [update]);
@@ -417,7 +421,11 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       <div ref={hostRef} className={["relative w-full", className].join(" ")}>
         <div className="relative w-full">
           {children}
-          <div className="scroll-stack-end h-[40vh]" />
+          {/* gunakan endSpacer juga saat reduced motion */}
+          <div
+            className="scroll-stack-end"
+            style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}
+          />
         </div>
       </div>
     );
@@ -435,8 +443,11 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       >
         <div className="scroll-stack-inner relative w-full">
           {children}
-          {/* spacer agar pin terakhir release mulus */}
-          <div className="scroll-stack-end h-[50vh]" />
+          {/* spacer agar pin terakhir release mulus — sekarang configurable */}
+          <div
+            className="scroll-stack-end"
+            style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}
+          />
         </div>
       </div>
     </div>
