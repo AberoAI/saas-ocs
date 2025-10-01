@@ -91,7 +91,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   blurAmount = 0,
   useWindowScroll = true,
   enableLenis = true,
-  endSpacer = "20vh",                 // ⬅️ baru (default kecil)
+  endSpacer = "20vh",
   onStackComplete,
 }) => {
   const hostRef = useRef<HTMLDivElement | null>(null);      // host of this instance
@@ -106,6 +106,11 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number }>>(new Map());
   const doneRef = useRef(false);
   const busyRef = useRef(false);
+
+  // PERF: cache posisi kartu; ukur ulang hanya saat layout berubah
+  const metricsRef = useRef<number[]>([]); // absolute top per card (wrapper/window relative, invariant to scroll)
+  const needMeasureRef = useRef(true);
+  const tickingRef = useRef(false); // coalesce native scroll → 1× per frame
 
   // Compute prefers-reduced-motion safely on client
   const [prefersReduced, setPrefersReduced] = useState(false);
@@ -157,9 +162,28 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     []
   );
 
+  /** Measure card absolute tops once (and when layout changes) */
+  const measure = useCallback(() => {
+    const cards = cardsRef.current;
+    if (!cards.length) return;
+    const tops: number[] = new Array(cards.length);
+    for (let i = 0; i < cards.length; i++) {
+      tops[i] = getOffset(cards[i]!);
+    }
+    metricsRef.current = tops;
+    needMeasureRef.current = false;
+  }, [getOffset]);
+
   const update = useCallback(() => {
-    if (!cardsRef.current.length || busyRef.current) return;
+    if (!cardsRef.current.length || busyRef.current) {
+      tickingRef.current = false;
+      return;
+    }
     busyRef.current = true;
+
+    if (needMeasureRef.current) {
+      measure();
+    }
 
     const { top, h } = getScroll();
     const stackY = toPx(stackPosition, h);
@@ -174,34 +198,36 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     const endTop = endEl
       ? getOffset(endEl)
       : fallbackEndEl
-      ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
+      ? (metricsRef.current[cardsRef.current.length - 1] ?? getOffset(fallbackEndEl)) + fallbackEndEl.offsetHeight
       : 0;
 
+    const tops = metricsRef.current;
+
+    // Compute topIdx once per frame
+    let topIdx = 0;
+    if (blurAmount) {
+      for (let j = 0; j < tops.length; j++) {
+        const js = tops[j]! - stackY - itemStackDistance * j;
+        if (top >= js) topIdx = j;
+        else break;
+      }
+    }
+
     cardsRef.current.forEach((card, i) => {
-      const cardTop = getOffset(card);
+      const cardTop = tops[i]!;
       const start = cardTop - stackY - itemStackDistance * i;
       const end = cardTop - scaleEndY;
       const pinStart = start;
-      const pinEnd = Math.max(endTop - h / 2, pinStart + 1); // ensure valid range
+      const pinEnd = Math.max(endTop - h / 2, pinStart + 1);
 
       const p = prog(top, start, end);
       const sTarget = baseScale + i * itemScale;
       const s = 1 - p * (1 - sTarget);
       const r = rotationAmount ? i * rotationAmount * p : 0;
 
-      // blur: blur only cards strictly behind current top index
       let b = 0;
-      if (blurAmount) {
-        let topIdx = 0;
-        for (let j = 0; j < cardsRef.current.length; j++) {
-          const jt = getOffset(cardsRef.current[j]!);
-          const js = jt - stackY - itemStackDistance * j;
-          if (top >= js) topIdx = j;
-        }
-        if (i < topIdx) b = Math.max(0, (topIdx - i) * blurAmount);
-      }
+      if (blurAmount && i < topIdx) b = Math.max(0, (topIdx - i) * blurAmount);
 
-      // pin/translate
       let y = 0;
       const pinned = top >= pinStart && top <= pinEnd;
       if (pinned) y = top - cardTop + stackY + itemStackDistance * i;
@@ -225,14 +251,17 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       if (changed) {
         card.style.transform = `translate3d(0, ${tr.y}px, 0) scale(${tr.s}) rotate(${tr.r}deg)`;
         card.style.filter = tr.b > 0 ? `blur(${tr.b}px)` : "";
+        // Hint performa
+        card.style.willChange = "transform, filter";
+        card.style.transformOrigin = "top center";
+        card.style.backfaceVisibility = "hidden";
+        card.style.contain = "layout paint size style";
         lastTRef.current.set(i, tr);
       }
 
       // callback saat kartu terakhir pinned
       if (i === cardsRef.current.length - 1) {
-        const lastPinStart = pinStart;
-        const lastPinEnd = pinEnd;
-        const inView = top >= lastPinStart && top <= lastPinEnd;
+        const inView = top >= pinStart && top <= pinEnd;
         if (inView && !doneRef.current) {
           doneRef.current = true;
           onStackComplete?.();
@@ -243,6 +272,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     });
 
     busyRef.current = false;
+    tickingRef.current = false;
   }, [
     baseScale,
     blurAmount,
@@ -256,9 +286,21 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     stackPosition,
     toPx,
     prog,
+    measure,
   ]);
 
-  const onScroll = useCallback(() => update(), [update]);
+  const onScroll = useCallback(() => {
+    // Lenis path: update() dipanggil via raf Lenis → tidak perlu coalesce
+    if (lenisRef.current) {
+      update();
+      return;
+    }
+    // Native scroll path: coalesce ke 1× per frame
+    if (!tickingRef.current) {
+      tickingRef.current = true;
+      requestAnimationFrame(() => update());
+    }
+  }, [update]);
 
   /** =========================
    * Init Lenis via dynamic import
@@ -278,6 +320,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         lerp: 0.1,
         syncTouch: true,
         syncTouchLerp: 0.075,
+        wheelMultiplier: 1,
+        touchMultiplier: 2,
       });
       lenis.on("scroll", onScroll);
       const raf = (time: number) => {
@@ -302,6 +346,10 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       lerp: 0.1,
       syncTouch: true,
       syncTouchLerp: 0.075,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      // inertia yang enak untuk mobile (opsional; properti ini tersedia di sebagian versi Lenis)
+      touchInertia: 0.6,
     });
     lenis.on("scroll", onScroll);
     const raf = (time: number) => {
@@ -349,42 +397,65 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     const cards = Array.from(scope.querySelectorAll(":scope .scroll-stack-card")) as HTMLElement[];
     cardsRef.current = cards;
 
-    // Gaya dasar kartu
+    // Gaya dasar kartu + jarak antar
     cards.forEach((card, i) => {
       if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
       card.style.willChange = "transform, filter";
       card.style.transformOrigin = "top center";
       card.style.backfaceVisibility = "hidden";
       card.style.transform = "translateZ(0)";
+      card.style.contain = "layout paint size style";
     });
 
-    // Tanpa Lenis → pakai listener native
+    // ukur pertama kali
+    needMeasureRef.current = true;
+    measure();
+
+    // Tanpa Lenis → pakai listener native (coalesced ke rAF)
     if (!lenisRef.current) {
       const el: Window | HTMLElement | null = useWindowScroll ? window : scrollerRef.current;
-      const handler = () => update();
+      const handler = () => onScroll();
       el?.addEventListener("scroll", handler as EventListener, { passive: true } as AddEventListenerOptions);
+
+      // Resize observer untuk invalidasi cache metrik
+      const ro = new ResizeObserver(() => {
+        needMeasureRef.current = true;
+        onScroll();
+      });
+      if (useWindowScroll) ro.observe(document.body);
+      else if (scrollerRef.current) ro.observe(scrollerRef.current);
+
       update();
 
-      // resize → update
-      const onResize = () => update();
+      const onResize = () => {
+        needMeasureRef.current = true;
+        onScroll();
+      };
       window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
 
       return () => {
         el?.removeEventListener("scroll", handler as EventListener);
         window.removeEventListener("resize", onResize as EventListener);
+        ro.disconnect();
         cardsRef.current = [];
         lastTRef.current.clear();
         doneRef.current = false;
+        metricsRef.current = [];
+        needMeasureRef.current = true;
+        tickingRef.current = false;
       };
     }
 
-    // Dengan Lenis → sudah dihubungkan lewat initLenis()
+    // Dengan Lenis → sudah terhubung lewat initLenis()
     update();
 
     return () => {
       cardsRef.current = [];
       lastTRef.current.clear();
       doneRef.current = false;
+      metricsRef.current = [];
+      needMeasureRef.current = true;
+      tickingRef.current = false;
     };
   }, [
     itemDistance,
@@ -397,6 +468,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     blurAmount,
     useWindowScroll,
     update,
+    onScroll,
+    measure,
   ]);
 
   // Cleanup Lenis/RAF on unmount
@@ -443,7 +516,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       >
         <div className="scroll-stack-inner relative w-full">
           {children}
-          {/* spacer agar pin terakhir release mulus — sekarang configurable */}
+          {/* spacer agar pin terakhir release mulus — configurable */}
           <div
             className="scroll-stack-end"
             style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}
