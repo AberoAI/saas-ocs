@@ -497,7 +497,7 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
+                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-start">
                     {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
@@ -561,7 +561,7 @@ export default function FeaturesPage() {
                     </motion.div>
 
                     {/* RIGHT: stage */}
-                    <div className="hidden md:flex justify-center md:justify-center md:mt-[2px] w-full">
+                    <div className="hidden md:flex self-center justify-center w-full">
                       <FeatureStage
                         stepKey={items[step - 1].key}
                         prefersReduced={!!prefersReduced}
@@ -654,7 +654,7 @@ function FeatureStage({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
-      className="aspect-square w-[64vw] max-w-[420px] rounded-2xl mx-auto"
+      className="aspect-square w-[64vw] max-w-[420px] rounded-2xl"
       style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
     >
@@ -1040,7 +1040,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
             <col className="w-[26%]" />
           </colgroup>
 
-          <thead>
+        <thead>
             <tr className="text-left text-foreground/80">
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium">Branch</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Agents</th>
@@ -1234,7 +1234,6 @@ function MetricCard({ label, value, hint }: { label: string; value: ReactNode; h
 
 /* =======================
  * NEW: HandoffStage — simulated chat timeline (AI → human)
- * NOTE: ditambah "lane offset" agar tidak lurus: user → kanan (ml), agent/human → kiri (mr)
  * ======================= */
 function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; locale: Locale }) {
   type Sender = "user" | "ai" | "human" | "system";
@@ -1283,10 +1282,10 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
-      className="relative w-full max-w-[560px] aspect-[4/3] flex mx-auto"
+      className="relative w-full max-w-[560px] aspect-[4/3] flex items-center justify-center mx-auto"
       aria-label="Chat simulation with AI → human handoff"
     >
-      <div className="flex-1 flex flex-col p-3.5 md:p-5">
+      <div className="flex-1 flex flex-col justify-center p-3.5 md:p-5">
         {/* messages — user kanan, agent/bot kiri; dengan offset lanes */}
         <div className="flex-1">
           <div className="flex flex-col gap-3 md:gap-3.5">
@@ -1320,7 +1319,8 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
           </div>
         </div>
 
-        <div className="pt-2 text-[10px] md:text-[11px] text-foreground/60 text-right">
+        {/* fixed label in bottom-right of the stage */}
+        <div className="pointer-events-none absolute bottom-2 right-3 text-[10px] md:text-[11px] text-foreground/60">
           Seamless AI → Human handoff (simulated)
         </div>
       </div>
