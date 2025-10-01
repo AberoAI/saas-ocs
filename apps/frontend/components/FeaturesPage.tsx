@@ -1002,7 +1002,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
       exit={{ opacity: 0, y: -6 }}
       aria-label="Analytics table"
       className="
-        relative w-full max-w-full md:max-w=[640px] overflow-hidden
+        relative w-full max-w-full md:max-w-[640px] overflow-hidden
         rounded-[22px] border border-white/60 bg-white/55
         md:backdrop-blur-xl backdrop-blur
         supports-[not(backdrop-filter:blur(0))]:bg-white/90
