@@ -6,6 +6,7 @@ import React, {
   useRef,
   useCallback,
   useEffect,
+  useState,
   type PropsWithChildren,
 } from "react";
 
@@ -31,7 +32,6 @@ export const ScrollStackItem: React.FC<
 > = ({ children, itemClassName = "" }) => (
   <div
     className={[
-      // PENTING: class dasar untuk selector & transform
       "scroll-stack-card",
       "relative w-full rounded-[22px] bg-white/90 border border-white/60",
       "backdrop-blur-md shadow-[0_20px_60px_-18px_rgba(0,0,0,0.18)]",
@@ -90,7 +90,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   enableLenis = true,
   onStackComplete,
 }) => {
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const hostRef = useRef<HTMLDivElement | null>(null);      // host of this instance
+  const scrollerRef = useRef<HTMLDivElement | null>(null);  // internal scroller when useWindowScroll=false
   const rafRef = useRef<number | null>(null);
 
   // Lenis ctor & instance
@@ -98,16 +99,26 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   const lenisRef = useRef<Lenis | null>(null);
 
   const cardsRef = useRef<HTMLElement[]>([]);
-  const lastTRef = useRef<
-    Map<number, { y: number; s: number; r: number; b: number }>
-  >(new Map());
+  const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number }>>(new Map());
   const doneRef = useRef(false);
   const busyRef = useRef(false);
 
-  const prefersReduced =
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Compute prefers-reduced-motion safely on client
+  const [prefersReduced, setPrefersReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const set = () => setPrefersReduced(!!mq.matches);
+    set();
+    try {
+      mq.addEventListener("change", set);
+      return () => mq.removeEventListener("change", set);
+    } catch {
+      // Safari <14
+      mq.addListener?.(set);
+      return () => mq.removeListener?.(set);
+    }
+  }, []);
 
   const toPx = useCallback((v: number | string, h: number) => {
     return typeof v === "string" && v.includes("%") ? (parseFloat(v) / 100) * h : Number(v);
@@ -121,13 +132,17 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     return { top: el.scrollTop, h: el.clientHeight };
   }, [useWindowScroll]);
 
+  // Safer offset calculation for both window & wrapper paths
   const getOffset = useCallback(
     (el: HTMLElement) => {
+      const rect = el.getBoundingClientRect();
       if (useWindowScroll) {
-        const r = el.getBoundingClientRect();
-        return r.top + window.scrollY;
+        return rect.top + window.scrollY;
       }
-      return el.offsetTop;
+      const wrapper = scrollerRef.current!;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      // distance from wrapper top + wrapper scroll
+      return rect.top - wrapperRect.top + wrapper.scrollTop;
     },
     [useWindowScroll]
   );
@@ -146,22 +161,27 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     const stackY = toPx(stackPosition, h);
     const scaleEndY = toPx(scaleEndPosition, h);
 
-    const root = useWindowScroll ? document : scrollerRef.current;
-    const endEl = root?.querySelector(".scroll-stack-end") as HTMLElement | null;
-    const endTop = endEl ? getOffset(endEl) : 0;
+    // Scope queries to this stack only
+    const rootEl = hostRef.current!;
+    const endEl = rootEl.querySelector(".scroll-stack-end") as HTMLElement | null;
+
+    // If no explicit end element, fall back to last card tail
+    const fallbackEndEl = cardsRef.current[cardsRef.current.length - 1];
+    const endTop = endEl ? getOffset(endEl) : (fallbackEndEl ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight : 0);
 
     cardsRef.current.forEach((card, i) => {
       const cardTop = getOffset(card);
       const start = cardTop - stackY - itemStackDistance * i;
       const end = cardTop - scaleEndY;
       const pinStart = start;
-      const pinEnd = endTop - h / 2;
+      const pinEnd = Math.max(endTop - h / 2, pinStart + 1); // ensure valid range
 
       const p = prog(top, start, end);
       const sTarget = baseScale + i * itemScale;
       const s = 1 - p * (1 - sTarget);
       const r = rotationAmount ? i * rotationAmount * p : 0;
 
+      // blur: blur only cards strictly behind current top index
       let b = 0;
       if (blurAmount) {
         let topIdx = 0;
@@ -173,6 +193,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         if (i < topIdx) b = Math.max(0, (topIdx - i) * blurAmount);
       }
 
+      // pin/translate
       let y = 0;
       const pinned = top >= pinStart && top <= pinEnd;
       if (pinned) y = top - cardTop + stackY + itemStackDistance * i;
@@ -201,7 +222,9 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
       // callback saat kartu terakhir pinned
       if (i === cardsRef.current.length - 1) {
-        const inView = top >= pinStart && top <= pinEnd;
+        const lastPinStart = pinStart;
+        const lastPinEnd = pinEnd;
+        const inView = top >= lastPinStart && top <= lastPinEnd;
         if (inView && !doneRef.current) {
           doneRef.current = true;
           onStackComplete?.();
@@ -224,8 +247,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     scaleEndPosition,
     stackPosition,
     toPx,
-    useWindowScroll,
-    prog,
   ]);
 
   const onScroll = useCallback(() => update(), [update]);
@@ -236,7 +257,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   const initLenis = useCallback(() => {
     if (!enableLenis || prefersReduced) return;
     if (!LenisCtorRef.current) return; // belum loaded
-    if (lenisRef.current) return; // sudah ada
+    if (lenisRef.current) return;       // sudah ada
 
     const Ctor = LenisCtorRef.current;
 
@@ -260,7 +281,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     }
 
     const wrapper = scrollerRef.current;
-    if (!wrapper) return;
+    if (!wrapper) return; // wait until mounted
 
     const lenis = new Ctor({
       wrapper,
@@ -290,12 +311,13 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       try {
         const mod = await import("lenis");
         if (!mounted) return;
-        // default export atau module sendiri
-        const Ctor = (mod.default ?? (mod as unknown)) as LenisConstructor;
-        LenisCtorRef.current = Ctor;
-        initLenis();
+        const Ctor = (mod as any).default as LenisConstructor;
+        if (Ctor) {
+          LenisCtorRef.current = Ctor;
+          initLenis();
+        }
       } catch {
-        // abaikan: fallback ke native scroll
+        // fallback ke native scroll
       }
     })();
     return () => {
@@ -303,10 +325,10 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     };
   }, [enableLenis, prefersReduced, initLenis]);
 
+  // Collect cards within THIS instance only
   useLayoutEffect(() => {
-    // Kartu
-    const root = useWindowScroll ? document : scrollerRef.current;
-    const cards = Array.from(root?.querySelectorAll(".scroll-stack-card") ?? []) as HTMLElement[];
+    const scope = hostRef.current!;
+    const cards = Array.from(scope.querySelectorAll(":scope .scroll-stack-card")) as HTMLElement[];
     cardsRef.current = cards;
 
     // Gaya dasar kartu
@@ -342,17 +364,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     update();
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (lenisRef.current) {
-        // aman kalau implementasi tidak punya off()
-        try {
-          lenisRef.current.off?.("scroll", onScroll);
-        } catch {}
-        try {
-          lenisRef.current.destroy();
-        } catch {}
-      }
-      lenisRef.current = null;
       cardsRef.current = [];
       lastTRef.current.clear();
       doneRef.current = false;
@@ -368,16 +379,31 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     blurAmount,
     useWindowScroll,
     update,
-    onScroll,
   ]);
+
+  // Cleanup Lenis/RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (lenisRef.current) {
+        try {
+          lenisRef.current.off?.("scroll", onScroll);
+        } catch {}
+        try {
+          lenisRef.current.destroy();
+        } catch {}
+      }
+      lenisRef.current = null;
+    };
+  }, [onScroll]);
 
   // Reduced motion → render biasa (tanpa transform)
   if (prefersReduced) {
     return (
-      <div className={["relative w-full", className].join(" ")}>
+      <div ref={hostRef} className={["relative w-full", className].join(" ")}>
         <div className="relative w-full">
           {children}
-          <div className="h-[40vh]" />
+          <div className="scroll-stack-end h-[40vh]" />
         </div>
       </div>
     );
@@ -385,14 +411,19 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
   return (
     <div
-      ref={scrollerRef}
-      className={["relative w-full overflow-visible", className].join(" ")}
+      ref={hostRef}
+      className={["relative w-full", className].join(" ")}
       data-window-scroll={useWindowScroll ? "true" : "false"}
     >
-      <div className="scroll-stack-inner relative w-full">
-        {children}
-        {/* spacer agar pin terakhir release mulus */}
-        <div className="scroll-stack-end h-[50vh]" />
+      <div
+        ref={useWindowScroll ? undefined : scrollerRef}
+        className={["relative w-full", useWindowScroll ? "overflow-visible" : "overflow-auto"].join(" ")}
+      >
+        <div className="scroll-stack-inner relative w-full">
+          {children}
+          {/* spacer agar pin terakhir release mulus */}
+          <div className="scroll-stack-end h-[50vh]" />
+        </div>
       </div>
     </div>
   );
