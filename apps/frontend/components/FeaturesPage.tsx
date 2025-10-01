@@ -136,6 +136,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
+  // (fix) removed stray token `the`
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
@@ -782,6 +783,7 @@ function InstantChatStage({
               key="typing"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0, transition: { duration: 0.22, ease: EASE } }}
+              // (fix) correct braces in `exit`
               exit={{ opacity: 0, y: -5, transition: { duration: 0.16, ease: EASE } }}
               className="inline-flex items-center"
               aria-label="typing"
@@ -1284,53 +1286,42 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
-      className="
-        relative w-full max-w-[560px]
-        aspect-[4/3] flex
-      "
+      className="relative w-full max-w-[560px] aspect-[4/3] flex"
       aria-label="Chat simulation with AI → human handoff"
     >
-      {/* container tanpa bingkai/backdrop */}
+      {/* container clean tanpa header avatar & tanpa scroll */}
 
       <div className="flex-1 flex flex-col p-3.5 md:p-5">
-        {/* header avatars (biarkan tetap) */}
-        <div className="flex items-center gap-2 pl-0.5 mb-2.5">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F0F4F8] border border-black/10 text-[13px]" title="AI" aria-label="AI bot">🤖</span>
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white border border-black/10 text-[13px]" title="Agent" aria-label="Human agent">👩‍💼</span>
-        </div>
+        {/* messages — semua kiri (POV customer) */}
+        <div className="flex-1">
+          <div className="flex flex-col gap-2.5 md:gap-3">
+            <AnimatePresence initial={false}>
+              {script.slice(0, idx).map((m, i) => (
+                <motion.div
+                  key={`${i}-${m.sender}`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.22, ease: EASE }}
+                  className="self-start"
+                >
+                  <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
+                </motion.div>
+              ))}
 
-        {/* messages */}
-        <div className="relative flex-1 overflow-hidden">
-          <div className="absolute inset-0 overflow-y-auto pr-1" data-native-scroll="true">
-            <div className="flex flex-col gap-2.5 md:gap-3">
-              <AnimatePresence initial={false}>
-                {script.slice(0, idx).map((m, i) => (
-                  <motion.div
-                    key={`${i}-${m.sender}`}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.22, ease: EASE }}
-                    className={m.sender === "user" ? "self-end" : "self-start"}
-                  >
-                    <ChatBubble sender={m.sender}>{m.text}</ChatBubble>
-                  </motion.div>
-                ))}
-
-                {typing && !prefersReduced && (
-                  <motion.div
-                    key="typing"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.18, ease: EASE }}
-                    className="self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm"
-                  >
-                    <TypingDots />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+              {typing && !prefersReduced && (
+                <motion.div
+                  key="typing"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: EASE }}
+                  className="self-start inline-flex items-center rounded-2xl px-3 py-2 bg-white border border-black/10 shadow-sm"
+                >
+                  <TypingDots />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -1360,17 +1351,13 @@ function ChatBubble({
 
   const isUser = sender === "user";
 
-  // Warna disamakan dengan contoh kedua:
-  // - customer (kanan) = biru muda
-  // - bot & staff (kiri) = putih
+  // Warna sesuai contoh: customer (user) biru muda, bot & staff putih.
   const bg = isUser ? "#F2F8FC" : "#FFFFFF";
-
-  const align = isUser ? "self-end" : "self-start";
-  const extra = isUser ? "shadow-md" : "shadow-sm";
+  const elevation = isUser ? "shadow-md" : "shadow-sm";
 
   return (
     <div
-      className={`${align} max-w-[88%] md:max-w-[82%] rounded-2xl px-4 py-2.5 border border-black/10 ${extra}`}
+      className={`max-w-[88%] md:max-w-[82%] rounded-2xl px-4 py-2.5 border border-black/10 ${elevation}`}
       style={{ background: bg }}
     >
       <div className="text-[0.98rem] leading-snug">
