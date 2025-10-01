@@ -52,9 +52,9 @@ export type ScrollStackProps = {
   /** Jarak tumpukan (px) saat pinned */
   itemStackDistance?: number;
 
-  /** Posisi stack relatif viewport; px atau % */
+  /** Posisi stack relatif viewport; px atau % (untuk align="top") */
   stackPosition?: number | string;
-  /** Posisi akhir transisi scale; px atau % */
+  /** Posisi akhir transisi scale; px atau % (untuk align="top") */
   scaleEndPosition?: number | string;
 
   /** Skala dasar kartu paling depan */
@@ -74,6 +74,9 @@ export type ScrollStackProps = {
   /** Tinggi spacer pelepas pin di akhir (px atau %, default "20vh") */
   endSpacer?: number | string;
 
+  /** Penyelarasan pin saat in-view */
+  align?: "top" | "center";
+
   /** Dipanggil saat kartu terakhir sedang “pinned/in-view” */
   onStackComplete?: VoidFn;
 };
@@ -92,6 +95,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   useWindowScroll = true,
   enableLenis = true,
   endSpacer = "20vh",
+  align = "top", // <- default aman: perilaku lama
   onStackComplete,
 }) => {
   const hostRef = useRef<HTMLDivElement | null>(null);      // host of this instance
@@ -143,7 +147,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         const r = el.getBoundingClientRect(); // includes transforms → cocok dengan logika animasi
         return r.top + window.scrollY;
       }
-      // wrapper: gunakan offsetTop (stabil) + scrollTop
       const wrapper = scrollerRef.current!;
       return el.offsetTop - (wrapper.offsetTop || 0);
     },
@@ -156,6 +159,29 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     []
   );
 
+  /** Anchor Y (posisi target top kartu saat pin) */
+  const anchorYFor = useCallback(
+    (h: number, card: HTMLElement) => {
+      if (align === "center") {
+        return (h - card.offsetHeight) / 2;
+      }
+      // align === "top"
+      return toPx(stackPosition, h);
+    },
+    [align, stackPosition, toPx]
+  );
+
+  /** Anchor untuk scale end */
+  const scaleAnchorYFor = useCallback(
+    (h: number, card: HTMLElement) => {
+      if (align === "center") {
+        return (h - card.offsetHeight) / 2;
+      }
+      return toPx(scaleEndPosition, h);
+    },
+    [align, scaleEndPosition, toPx]
+  );
+
   const update = useCallback(() => {
     if (!cardsRef.current.length || busyRef.current) {
       tickingRef.current = false;
@@ -164,8 +190,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     busyRef.current = true;
 
     const { top, h } = getScroll();
-    const stackY = toPx(stackPosition, h);
-    const scaleEndY = toPx(scaleEndPosition, h);
 
     // Scope ke instance ini
     const rootEl = hostRef.current!;
@@ -178,22 +202,30 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
       : 0;
 
-    // Hitung topIdx sekali per frame (pakai offset aktual per kartu)
+    // Hitung topIdx sekali per frame (pakai anchor sesuai mode)
     let topIdx = 0;
     if (blurAmount) {
       for (let j = 0; j < cardsRef.current.length; j++) {
-        const jt = getOffset(cardsRef.current[j]!);
-        const js = jt - stackY - itemStackDistance * j;
+        const cardJ = cardsRef.current[j]!;
+        const aj = anchorYFor(h, cardJ);
+        const jt = getOffset(cardJ);
+        const js = jt - aj - itemStackDistance * j;
         if (top >= js) topIdx = j;
         else break;
       }
     }
 
     cardsRef.current.forEach((card, i) => {
+      const anchorY = anchorYFor(h, card);
+      const scaleAnchorY = scaleAnchorYFor(h, card);
+
       const cardTop = getOffset(card);
-      const start = cardTop - stackY - itemStackDistance * i;
-      const end = cardTop - scaleEndY;
+      const start = cardTop - anchorY - itemStackDistance * i;
+      const end = cardTop - scaleAnchorY;
       const pinStart = start;
+
+      // Saat align="center", kita rilis saat spacer melewati tengah viewport.
+      // Kita pakai heuristik yang nyaman (h/2) — sudah terasa natural untuk semua ukuran kartu.
       const pinEnd = Math.max(endTop - h / 2, pinStart + 1);
 
       const p = prog(top, start, end);
@@ -206,8 +238,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
       let y = 0;
       const pinned = top >= pinStart && top <= pinEnd;
-      if (pinned) y = top - cardTop + stackY + itemStackDistance * i;
-      else if (top > pinEnd) y = pinEnd - cardTop + stackY + itemStackDistance * i;
+      if (pinned) y = top - cardTop + anchorY + itemStackDistance * i;
+      else if (top > pinEnd) y = pinEnd - cardTop + anchorY + itemStackDistance * i;
 
       const tr = {
         y: Math.round(y * 100) / 100,
@@ -227,6 +259,9 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       if (changed) {
         card.style.transform = `translate3d(0, ${tr.y}px, 0) scale(${tr.s}) rotate(${tr.r}deg)`;
         card.style.filter = tr.b > 0 ? `blur(${tr.b}px)` : "";
+        card.style.willChange = "transform, filter";
+        card.style.transformOrigin = "top center";
+        card.style.backfaceVisibility = "hidden";
         lastTRef.current.set(i, tr);
       }
 
@@ -253,15 +288,15 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     itemStackDistance,
     onStackComplete,
     rotationAmount,
-    scaleEndPosition,
-    stackPosition,
     toPx,
     prog,
+    align,
+    anchorYFor,
+    scaleAnchorYFor,
   ]);
 
   const onScroll = useCallback(() => {
     if (lenisRef.current) {
-      // Lenis memanggil per rAF sendiri
       update();
       return;
     }
