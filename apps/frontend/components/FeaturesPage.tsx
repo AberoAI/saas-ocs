@@ -1285,28 +1285,15 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.3, ease: EASE }}
       className="
-        relative w-full max-w-[560px] overflow-hidden
-        rounded-[22px] border border-white/60 bg-white/60
-        md:backdrop-blur-xl backdrop-blur
-        supports-[not(backdrop-filter:blur(0))]:bg-white/90
-        shadow-[0_10px_40px_-10px_rgba(0,0,0,0.12)]
+        relative w-full max-w-[560px]
         aspect-[4/3] flex
       "
       aria-label="Chat simulation with AI → human handoff"
     >
-      {/* warm blobs background */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 rounded-[22px]"
-        style={{
-          background:
-            "radial-gradient(40% 40% at 25% 30%, rgba(255,183,107,0.18) 0%, transparent 60%)," +
-            "radial-gradient(45% 45% at 80% 70%, rgba(255,214,164,0.18) 0%, transparent 60%)",
-        }}
-      />
+      {/* container tanpa bingkai/backdrop */}
 
       <div className="flex-1 flex flex-col p-3.5 md:p-5">
-        {/* header avatars */}
+        {/* header avatars (biarkan tetap) */}
         <div className="flex items-center gap-2 pl-0.5 mb-2.5">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#F0F4F8] border border-black/10 text-[13px]" title="AI" aria-label="AI bot">🤖</span>
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white border border-black/10 text-[13px]" title="Agent" aria-label="Human agent">👩‍💼</span>
@@ -1372,10 +1359,11 @@ function ChatBubble({
   }
 
   const isUser = sender === "user";
-  const bg =
-    sender === "ai" ? "#FFF4EE" :
-    sender === "human" ? "#FFFFFF" :
-    "#F2F8FC";
+
+  // Warna disamakan dengan contoh kedua:
+  // - customer (kanan) = biru muda
+  // - bot & staff (kiri) = putih
+  const bg = isUser ? "#F2F8FC" : "#FFFFFF";
 
   const align = isUser ? "self-end" : "self-start";
   const extra = isUser ? "shadow-md" : "shadow-sm";
