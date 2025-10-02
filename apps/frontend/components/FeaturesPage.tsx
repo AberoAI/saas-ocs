@@ -100,7 +100,7 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
   return false;
 };
 
-/* cubic-bezier helper (y only; cukup untuk easing terhadap waktu) */
+/* cubic-bezier helper (y only) */
 const cubicBezierY = (p0y: number, p1y: number) => (t: number) => {
   const u = 1 - t;
   return 3 * u * u * t * p0y + 3 * u * t * t * p1y + t * t * t;
@@ -144,7 +144,6 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
-  // fix: removed stray token
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
@@ -212,7 +211,7 @@ export default function FeaturesPage() {
   const BRAND_BG_12 = `${BRAND}1F`;
 
   /* =======================
-   * Sticky viewport multi-step
+   * Sticky viewport multi-step (stabil, anti-loop)
    * ======================= */
   const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -224,16 +223,27 @@ export default function FeaturesPage() {
     _setStep(v);
   }, []);
 
-  const lockRef = useRef(false);
+  // --- NEW: tiny state machine to prevent loops
+  // 'idle' → normal | 'gesturing' → user wheel/touch burst | 'animating' → programmatic snap
+  const modeRef = useRef<'idle' | 'gesturing' | 'animating'>('idle');
+
+  // NEW: ignore scroll events for a short window after snap to kill rebound
+  const ignoreScrollUntilRef = useRef(0);
+
+  // direction + cool-down
   const lastDirRef = useRef<1 | -1 | 0>(0);
   const lastChangeAtRef = useRef(0);
   const COOLDOWN = 260;
 
+  // geometry caches
   const containerTopRef = useRef(0);
   const viewportHRef = useRef(0);
 
   // wheel accumulation (untuk gesture halus)
   const wheelAccRef = useRef(0);
+
+  // gesture end debounce
+  const gestureTimerRef = useRef<number | null>(null);
 
   // animasi scroll kustom
   const animRef = useRef<number | null>(null);
@@ -243,39 +253,6 @@ export default function FeaturesPage() {
       animRef.current = null;
     }
   }, []);
-
-  const animateTo = useCallback(
-    (to: number, duration = 420) => {
-      cancelAnim();
-      const start = window.scrollY;
-      const dist = to - start;
-      if (Math.abs(dist) < 1) {
-        window.scrollTo({ top: to, behavior: "auto" });
-        return;
-      }
-      lockRef.current = true;
-      const t0 = performance.now();
-
-      const tick = (now: number) => {
-        const p = Math.min(1, (now - t0) / duration);
-        const eased = prefersReduced ? p : easeFn(p);
-        const y = start + dist * eased;
-        window.scrollTo({ top: y, behavior: "auto" });
-
-        if (p < 1 && lockRef.current) {
-          animRef.current = requestAnimationFrame(tick);
-        } else {
-          animRef.current = null;
-          window.scrollTo({ top: to, behavior: "auto" }); // align
-          lockRef.current = false;
-          lastChangeAtRef.current = performance.now();
-        }
-      };
-
-      animRef.current = requestAnimationFrame(tick);
-    },
-    [cancelAnim, prefersReduced]
-  );
 
   const recalc = useCallback(() => {
     const root = containerRef.current;
@@ -323,6 +300,49 @@ export default function FeaturesPage() {
 
   const vh = useCallback(() => viewportHRef.current || getVVH(), []);
 
+  // NEW: safer animateTo with hard guards + ignore window
+  const animateTo = useCallback(
+    (to: number, duration = 420) => {
+      cancelAnim();
+
+      const start = window.scrollY;
+      const dist = to - start;
+      if (Math.abs(dist) < 1) {
+        window.scrollTo({ top: to, behavior: "auto" });
+        lastChangeAtRef.current = performance.now();
+        ignoreScrollUntilRef.current = performance.now() + 120;
+        modeRef.current = 'idle';
+        return;
+      }
+
+      modeRef.current = 'animating';
+      const t0 = performance.now();
+      const d = Math.max(0, prefersReduced ? 0 : duration);
+
+      const tick = (now: number) => {
+        const p = d === 0 ? 1 : Math.min(1, (now - t0) / d);
+        const eased = prefersReduced ? p : easeFn(p);
+        const y = start + dist * eased;
+        window.scrollTo({ top: y, behavior: "auto" });
+
+        if (p < 1 && modeRef.current === 'animating') {
+          animRef.current = requestAnimationFrame(tick);
+        } else {
+          animRef.current = null;
+          window.scrollTo({ top: to, behavior: "auto" }); // align
+          lastChangeAtRef.current = performance.now();
+          ignoreScrollUntilRef.current = performance.now() + 160; // ignore rebound
+          setTimeout(() => {
+            if (modeRef.current === 'animating') modeRef.current = 'idle';
+          }, 60);
+        }
+      };
+
+      animRef.current = requestAnimationFrame(tick);
+    },
+    [cancelAnim, prefersReduced]
+  );
+
   const scrollToStep = useCallback(
     (next: number, dir: 1 | -1) => {
       const top = containerTopRef.current + next * vh();
@@ -336,6 +356,10 @@ export default function FeaturesPage() {
 
   const interceptionEnabled = !prefersReduced;
 
+  // Hysteresis: require > half-screen + a little margin before re-snapping
+  const FRACTION_TO_SWITCH = 0.55; // >0.5 to avoid flapping
+  const PIXEL_HYSTERESIS = Math.min(vh() * 0.18, 140);
+
   useEffect(() => {
     if (!interceptionEnabled) return;
     const root = containerRef.current;
@@ -344,29 +368,45 @@ export default function FeaturesPage() {
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
+    const endGestureSoon = () => {
+      if (gestureTimerRef.current) window.clearTimeout(gestureTimerRef.current);
+      gestureTimerRef.current = window.setTimeout(() => {
+        if (modeRef.current === 'gesturing') modeRef.current = 'idle';
+        gestureTimerRef.current = null;
+        wheelAccRef.current = 0;
+      }, 180);
+    };
+
     const go = (dir: 1 | -1) => {
+      if (modeRef.current === 'animating') return;
       const next = Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + dir));
       if (next !== stepRef.current) {
         wheelAccRef.current = 0;
+        modeRef.current = 'animating';
         scrollToStep(next, dir);
       }
     };
 
     const onWheel = (e: WheelEvent) => {
       if (!inViewport()) return;
-      if (lockRef.current) return;
+      if (modeRef.current === 'animating') return;
+
       if (e.ctrlKey || isEditable(e.target) || isInteractive(e.target)) return;
       if (canScrollWithin(e.target)) return;
 
       e.preventDefault();
 
+      modeRef.current = 'gesturing';
+      endGestureSoon();
+
       const delta = normalizeWheelDelta(e, vh());
+
       if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) {
         wheelAccRef.current = 0;
       }
       wheelAccRef.current += delta;
 
-      const threshold = Math.max(40, Math.min(140, vh() * 0.08));
+      const threshold = Math.max(60, Math.min(180, vh() * 0.09));
       if (Math.abs(wheelAccRef.current) >= threshold) {
         const dir: 1 | -1 = wheelAccRef.current > 0 ? 1 : -1;
         go(dir);
@@ -380,10 +420,12 @@ export default function FeaturesPage() {
       if (isEditable(e.target) || isInteractive(e.target)) return;
       startY = e.touches[0].clientY;
       cancelAnim();
-      lockRef.current = false;
+      modeRef.current = 'gesturing';
+      endGestureSoon();
     };
     const onTouchMove = (e: TouchEvent) => {
-      if (!inViewport() || lockRef.current) return;
+      if (!inViewport()) return;
+      if (modeRef.current === 'animating') return;
       if (isEditable(e.target) || isInteractive(e.target)) return;
       if (canScrollWithin(e.target)) return;
 
@@ -393,17 +435,20 @@ export default function FeaturesPage() {
       e.preventDefault();
       const dir: 1 | -1 = delta > 0 ? 1 : -1;
       startY = e.touches[0].clientY;
+      endGestureSoon();
       go(dir);
     };
+    const onTouchEnd = () => endGestureSoon();
 
     // Keyboard
     const onKey = (e: KeyboardEvent) => {
-      if (!inViewport() || lockRef.current) return;
+      if (!inViewport()) return;
+      if (modeRef.current === 'animating') return;
       if (isEditable(e.target) || isInteractive(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
       if (e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !e.shiftKey)) dir = 1;
-      else if (e.key === "ArrowUp" || e.key === "PageUp" || (e.key === " " && e.shiftKey)) dir = -1; // ✅ Shift+Space naik
+      else if (e.key === "ArrowUp" || e.key === "PageUp" || (e.key === " " && e.shiftKey)) dir = -1;
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
       else return;
@@ -411,42 +456,59 @@ export default function FeaturesPage() {
       e.preventDefault();
       if (dir === 0) {
         const next = e.key === "Home" ? 0 : TOTAL_STEPS - 1;
-        if (next !== stepRef.current)
+        if (next !== stepRef.current) {
+          modeRef.current = 'animating';
           scrollToStep(next, (lastDirRef.current || 1) as 1 | -1);
+        }
         return;
       }
-      go(dir as 1 | -1);
+      modeRef.current = 'gesturing';
+      endGestureSoon();
+      scrollToStep(
+        Math.max(0, Math.min(TOTAL_STEPS - 1, stepRef.current + (dir as 1 | -1))),
+        dir as 1 | -1
+      );
     };
 
     root.addEventListener("wheel", onWheel, { passive: false, signal });
     root.addEventListener("touchstart", onTouchStart, { passive: true, signal });
     root.addEventListener("touchmove", onTouchMove, { passive: false, signal });
+    root.addEventListener("touchend", onTouchEnd, { passive: true, signal });
     window.addEventListener("keydown", onKey, { signal });
 
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep, cancelAnim, vh]);
 
-  // Sync while dragging scrollbar
+  // Sync while dragging scrollbar (do not snap during animation; apply hysteresis)
   useEffect(() => {
     if (!interceptionEnabled) return;
+
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
     const onScroll = () => {
-      if (!inViewport() || lockRef.current) return;
+      if (!inViewport()) return;
+      if (modeRef.current === 'animating') return;
 
       const now = performance.now();
-      if (now - lastChangeAtRef.current < COOLDOWN) return;
+      if (now < ignoreScrollUntilRef.current) return;
 
       const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round((pos + vh() * 0.08) / vh());
-      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
-      if (clamped === stepRef.current) return;
+      const h = vh();
+      const progress = pos / (h || 1);
+      const targetIdx = Math.round(progress);
+      const distPx = Math.abs(progress - stepRef.current) * h;
 
-      const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
-      lastDirRef.current = dir;
-      lastChangeAtRef.current = now;
-      setStep(clamped);
+      if (
+        targetIdx !== stepRef.current &&
+        Math.abs(progress - stepRef.current) > 0.55 &&
+        distPx > Math.min(vh() * 0.18, 140)
+      ) {
+        const dir: 1 | -1 = targetIdx > stepRef.current ? 1 : -1;
+        lastDirRef.current = dir;
+        lastChangeAtRef.current = now;
+        setStep(Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx)));
+      }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true, signal });
@@ -557,7 +619,7 @@ export default function FeaturesPage() {
                         <motion.h3
                           variants={contentStagger.item}
                           className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
-                          tabIndex={-1} // tetap non-focusable
+                          tabIndex={-1}
                           ref={featureTitleRef}
                           style={{ outline: "none" }}
                         >
@@ -566,7 +628,7 @@ export default function FeaturesPage() {
 
                         {/* Quote + body (col 2) */}
                         {(() => {
-                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`)); // ✅ avoid cast
+                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`));
                           const { quote, rest } = splitQuoted(descRaw);
                           return (
                             <motion.div
@@ -647,15 +709,12 @@ function FeatureStage({
   if (stepKey === "instant") {
     return <InstantChatStage prefersReduced={prefersReduced} locale={locale} />;
   }
-
   if (stepKey === "multitenant") {
     return <AnalyticsTableStage prefersReduced={prefersReduced} />;
   }
-
   if (stepKey === "analytics") {
     return <AnalyticsRealtimeStage prefersReduced={prefersReduced} />;
   }
-
   if (stepKey === "handoff") {
     return <HandoffStage prefersReduced={prefersReduced} locale={locale} />;
   }
@@ -1064,7 +1123,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
             <col className="w-[26%]" />
           </colgroup>
 
-        <thead>
+          <thead>
             <tr className="text-left text-foreground/80">
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium">Branch</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Agents</th>
@@ -1352,8 +1411,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
   );
 }
 
-/* small chat bubble
-   NOTE: ditambah sedikit pengaturan max-width agar proporsi isu "lurus" makin hilang */
+/* small chat bubble */
 function ChatBubble({
   sender,
   children,
