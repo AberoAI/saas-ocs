@@ -18,7 +18,7 @@ import {
   useRef,
   useState,
   type ReactNode,
-  useLayoutEffect, // ✅ added
+  useLayoutEffect,
 } from "react";
 
 /** =========================================================
@@ -45,7 +45,8 @@ type IntlMessages = {
   };
 };
 
-type Locale = string; // long-term friendly
+// tetap fleksibel, tapi hint ke TR/EN
+type Locale = "tr" | "en" | (string & {});
 
 /* =======================
  * Constants
@@ -65,7 +66,8 @@ const isEditable = (el: EventTarget | null): boolean => {
   if (tag === "input" || tag === "textarea" || tag === "select") return true;
   let cur: HTMLElement | null = node;
   while (cur) {
-    if (cur.getAttribute?.("contenteditable") === "true") return true;
+    const ce = cur.getAttribute?.("contenteditable");
+    if (ce && ce !== "false") return true; // mendukung "", "plaintext-only", dll.
     cur = cur.parentElement;
   }
   return false;
@@ -116,9 +118,10 @@ const normalizeWheelDelta = (e: WheelEvent, vhPx: number) => {
 };
 
 /* =======================
- * Quote splitter */
+ * Quote splitter (dengan guard panjang)
+ * ======================= */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
-  const m = desc.match(/“([^”]+)”/); // smart quotes
+  const m = desc.match(/“([^”]{1,240})”/); // smart quotes, batasi 240
   if (m && m.index !== undefined) {
     const before = desc.slice(0, m.index).trim();
     const after = desc
@@ -128,7 +131,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m[1], rest: rest || "" };
   }
-  const m2 = desc.match(/"([^"]+)"/); // straight quotes
+  const m2 = desc.match(/"([^"]{1,240})"/); // straight quotes
   if (m2 && m2.index !== undefined) {
     const before = desc.slice(0, m2.index).trim();
     const after = desc
@@ -144,7 +147,6 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
 export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
-  // fix: removed stray token
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
@@ -153,7 +155,9 @@ export default function FeaturesPage() {
   const withLocale = (href: string) => {
     if (/^https?:\/\/.*/.test(href)) return href;
     if (href.startsWith("#")) return href;
-    return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
+    const localHref = href.startsWith("/") ? href : `/${href}`;
+    // cegah double prefix: /tr + /tr/...
+    return localHref.startsWith(`${localePrefix}/`) ? localHref : `${localePrefix}${localHref}`;
   };
 
   // 6 poin fitur
@@ -288,7 +292,7 @@ export default function FeaturesPage() {
     root.style.setProperty("--vvh", `${h}px`);
   }, []);
 
-  // ✅ do recalc before first paint to avoid 1-frame layout jump
+  // do recalc before first paint
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
     recalc();
@@ -403,7 +407,7 @@ export default function FeaturesPage() {
 
       let dir: 1 | -1 | 0 | null = null;
       if (e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !e.shiftKey)) dir = 1;
-      else if (e.key === "ArrowUp" || e.key === "PageUp" || (e.key === " " && e.shiftKey)) dir = -1; // ✅ Shift+Space naik
+      else if (e.key === "ArrowUp" || e.key === "PageUp" || (e.key === " " && e.shiftKey)) dir = -1; // Shift+Space naik
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
       else return;
@@ -426,27 +430,32 @@ export default function FeaturesPage() {
     return () => ctrl.abort();
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, scrollToStep, cancelAnim, vh]);
 
-  // Sync while dragging scrollbar
+  // Sync while dragging scrollbar + rAF throttle
   useEffect(() => {
     if (!interceptionEnabled) return;
     const ctrl = new AbortController();
     const { signal } = ctrl;
 
+    let ticking = false;
     const onScroll = () => {
       if (!inViewport() || lockRef.current) return;
-
-      const now = performance.now();
-      if (now - lastChangeAtRef.current < COOLDOWN) return;
-
-      const pos = window.scrollY - containerTopRef.current;
-      const targetIdx = Math.round((pos + vh() * 0.08) / vh());
-      const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
-      if (clamped === stepRef.current) return;
-
-      const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
-      lastDirRef.current = dir;
-      lastChangeAtRef.current = now;
-      setStep(clamped);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const now = performance.now();
+        if (now - lastChangeAtRef.current >= COOLDOWN) {
+          const pos = window.scrollY - containerTopRef.current;
+          const targetIdx = Math.round((pos + vh() * 0.08) / vh());
+          const clamped = Math.max(0, Math.min(TOTAL_STEPS - 1, targetIdx));
+          if (clamped !== stepRef.current) {
+            const dir: 1 | -1 = clamped > stepRef.current ? 1 : -1;
+            lastDirRef.current = dir;
+            lastChangeAtRef.current = now;
+            setStep(clamped);
+          }
+        }
+        ticking = false;
+      });
     };
 
     window.addEventListener("scroll", onScroll, { passive: true, signal });
@@ -467,13 +476,16 @@ export default function FeaturesPage() {
    * Render
    * ======================= */
   return (
-    <main className="mx-auto max-w-6xl px-6">
+    <main className="mx-auto max-w-6xl px-6" aria-labelledby="features-hero-title">
       <div
         ref={containerRef}
         className="relative"
-        style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }} // ✅ fallback 100vh
+        style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }} // fallback 100vh
       >
-        <div className="sticky top-0 h-screen flex items-center justify-center">
+        <div
+          className="sticky top-0 h-screen flex items-center justify-center relative"
+          style={{ overscrollBehavior: "contain" }}
+        >
           <div className="w-full">
             <AnimatePresence mode="wait">
               {/* Step 0: HERO */}
@@ -481,7 +493,7 @@ export default function FeaturesPage() {
                 <motion.section key="step-hero" {...stageFade} className="text-center">
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-                    style={{ background: `${BRAND}14` }}
+                    style={{ background: `${BRAND}14`, border: "1px solid rgba(0,0,0,0.06)" }}
                     variants={rise}
                     initial="hidden"
                     animate="visible"
@@ -491,6 +503,7 @@ export default function FeaturesPage() {
                   </motion.span>
 
                   <motion.h1
+                    id="features-hero-title"
                     className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                     variants={rise}
                     initial="hidden"
@@ -521,7 +534,6 @@ export default function FeaturesPage() {
               {/* Step 1..6: content + stage */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  {/* CHANGE: md:items-start -> md:items-center */}
                   <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
                     {/* LEFT: text */}
                     <motion.div
@@ -533,7 +545,6 @@ export default function FeaturesPage() {
                         y: prefersReduced ? 0 : -6,
                         transition: { duration: 0.2, ease: EASE },
                       }}
-                      /* CHANGE: ensure vertical centering across breakpoints */
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
                     >
                       {/* ====== GRID: ikon | judul/quote/desc ====== */}
@@ -562,15 +573,15 @@ export default function FeaturesPage() {
                         <motion.h3
                           variants={contentStagger.item}
                           className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
-                          tabIndex={-1} // ✅ focusable for SR jump
-                          ref={featureTitleRef} // ✅
+                          tabIndex={-1}
+                          ref={featureTitleRef}
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
 
                         {/* Quote + body (col 2) */}
                         {(() => {
-                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`)); // ✅ avoid cast
+                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`));
                           const { quote, rest } = splitQuoted(descRaw);
                           return (
                             <motion.div
@@ -629,6 +640,19 @@ export default function FeaturesPage() {
                 </motion.section>
               )}
             </AnimatePresence>
+
+            {/* Step dots (md+) */}
+            <div className="hidden md:flex absolute bottom-4 left-1/2 -translate-x-1/2 gap-2">
+              {[...Array(TOTAL_STEPS)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => scrollToStep(i, i > step ? 1 : -1)}
+                  aria-label={`Go to step ${i + 1}`}
+                  className={`h-2.5 w-2.5 rounded-full transition ${i === step ? "scale-110" : "opacity-60 hover:opacity-90"}`}
+                  style={{ background: i === step ? BRAND : "rgba(0,0,0,0.2)" }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -653,7 +677,7 @@ function FeatureStage({
   }
 
   if (stepKey === "multitenant") {
-    return <AnalyticsTableStage prefersReduced={prefersReduced} />;
+    return <TenantAccessStage prefersReduced={prefersReduced} />;
   }
 
   if (stepKey === "analytics") {
@@ -1001,8 +1025,9 @@ function SchultzBackdrop({ prefersReduced }: { prefersReduced: boolean }) {
 }
 
 /* =======================
- * AnalyticsTableStage — pengganti stage multitenant */
-function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
+ * TenantAccessStage — pengganti stage multitenant (semantik lebih tepat)
+ * ======================= */
+function TenantAccessStage({ prefersReduced }: { prefersReduced: boolean }) {
   const rows = [
     { name: "HQ",       agents: 24, queues: 8, sla: 99, status: "Active" as const,  type: "hq" as const },
     { name: "Branch A", agents: 12, queues: 3, sla: 98, status: "Standby" as const, type: "branch" as const },
@@ -1023,7 +1048,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
 
   return (
     <motion.div
-      key="analytics-table-ss"
+      key="tenant-access-stage"
       variants={container}
       initial="hidden"
       animate="visible"
@@ -1068,7 +1093,7 @@ function AnalyticsTableStage({ prefersReduced }: { prefersReduced: boolean }) {
             <col className="w-[26%]" />
           </colgroup>
 
-        <thead>
+          <thead>
             <tr className="text-left text-foreground/80">
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium">Branch</th>
               <th className="px-4 md:px-5 py-2.5 md:py-3 font-medium text-right">Agents</th>
@@ -1356,8 +1381,7 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
   );
 }
 
-/* small chat bubble
-   NOTE: ditambah sedikit pengaturan max-width agar proporsi isu "lurus" makin hilang */
+/* small chat bubble */
 function ChatBubble({
   sender,
   children,
