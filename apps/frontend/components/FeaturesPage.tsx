@@ -11,7 +11,15 @@ import {
   useMotionValue,
   animate,
 } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  useLayoutEffect, // ✅ added
+} from "react";
 
 /** =========================================================
  *  STABILITY FIRST EDITION — safest defaults (tightened spacing)
@@ -280,6 +288,12 @@ export default function FeaturesPage() {
     root.style.setProperty("--vvh", `${h}px`);
   }, []);
 
+  // ✅ do recalc before first paint to avoid 1-frame layout jump
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    recalc();
+  }, [recalc]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     recalc();
@@ -388,8 +402,8 @@ export default function FeaturesPage() {
       if (isEditable(e.target) || isInteractive(e.target)) return;
 
       let dir: 1 | -1 | 0 | null = null;
-      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") dir = 1;
-      else if (e.key === "ArrowUp" || e.key === "PageUp") dir = -1;
+      if (e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !e.shiftKey)) dir = 1;
+      else if (e.key === "ArrowUp" || e.key === "PageUp" || (e.key === " " && e.shiftKey)) dir = -1; // ✅ Shift+Space naik
       else if (e.key === "Home") dir = 0;
       else if (e.key === "End") dir = 0;
       else return;
@@ -440,6 +454,16 @@ export default function FeaturesPage() {
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
 
   /* =======================
+   * A11Y: focus title when step changes
+   * ======================= */
+  const featureTitleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (step >= 1 && step <= items.length) {
+      featureTitleRef.current?.focus();
+    }
+  }, [step, items.length]);
+
+  /* =======================
    * Render
    * ======================= */
   return (
@@ -447,7 +471,7 @@ export default function FeaturesPage() {
       <div
         ref={containerRef}
         className="relative"
-        style={{ height: `calc(var(--vvh) * ${TOTAL_STEPS})` }}
+        style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }} // ✅ fallback 100vh
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
@@ -509,8 +533,8 @@ export default function FeaturesPage() {
                         y: prefersReduced ? 0 : -6,
                         transition: { duration: 0.2, ease: EASE },
                       }}
-                      /* CHANGE: add md:self-center to ensure vertical centering */
-                      className="w-full max-w-3xl md:max-w-none text-center md:text-left md:self-center"
+                      /* CHANGE: ensure vertical centering across breakpoints */
+                      className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
                     >
                       {/* ====== GRID: ikon | judul/quote/desc ====== */}
                       <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
@@ -538,13 +562,15 @@ export default function FeaturesPage() {
                         <motion.h3
                           variants={contentStagger.item}
                           className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
+                          tabIndex={-1} // ✅ focusable for SR jump
+                          ref={featureTitleRef} // ✅
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
 
                         {/* Quote + body (col 2) */}
                         {(() => {
-                          const descRaw = t(`cards.${items[step - 1].key}.desc`) as unknown as string;
+                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`)); // ✅ avoid cast
                           const { quote, rest } = splitQuoted(descRaw);
                           return (
                             <motion.div
@@ -1167,7 +1193,7 @@ function AnalyticsRealtimeStage({ prefersReduced }: { prefersReduced: boolean })
 
       <div className="px-2 md:px-4 pb-4 md:pb-5">
         <div className="relative h-[180px] rounded-xl bg-white/65 border border-white/60 overflow-hidden">
-          <svg className="absolute inset-0 w-full h-full" aria-hidden>
+          <svg className="absolute inset-0 w-full h-full" aria-hidden shapeRendering="crispEdges">
             {[0, 1, 2, 3].map((i) => (
               <line
                 key={i}
