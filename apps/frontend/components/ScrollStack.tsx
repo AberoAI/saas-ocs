@@ -343,8 +343,8 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
         bgBIndexRef.current = incoming;
       }
 
-      bgARef.current.style.opacity = `${1 - cross}`;
-      bgBRef.current.style.opacity = `${cross}`;
+      bgARef.current!.style.opacity = `${1 - cross}`;
+      bgBRef.current!.style.opacity = `${cross}`;
     }
 
     busyRef.current = false;
