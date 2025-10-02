@@ -169,7 +169,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       }
       const wrapper = scrollerRef.current!;
       const rect = el.getBoundingClientRect();
-      const wrect = wrapper.getBoundingClientRect();
+        const wrect = wrapper.getBoundingClientRect();
       return rect.top - wrect.top + wrapper.scrollTop;
     },
     [useWindowScroll]
@@ -210,10 +210,17 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       el.style.backgroundImage = "";
       return;
     }
-    // Tailwind bg style via inline:
     el.style.backgroundImage = `url(${url})`;
     el.style.backgroundSize = "cover";
     el.style.backgroundPosition = "center";
+  };
+
+  // ✅ clamp/fallback untuk akses backgrounds
+  const pickBg = (idx: number, arr?: string[]) => {
+    if (!arr || arr.length === 0) return undefined;
+    if (idx < 0) return arr[0];
+    if (idx >= arr.length) return arr[arr.length - 1];
+    return arr[idx];
   };
 
   const update = useCallback(() => {
@@ -348,11 +355,11 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       const incoming = nIdx;
 
       if (bgAIndexRef.current !== active) {
-        setBgImage(bgARef.current, backgrounds[active]);
+        setBgImage(bgARef.current, pickBg(active, backgrounds));
         bgAIndexRef.current = active;
       }
       if (bgBIndexRef.current !== incoming) {
-        setBgImage(bgBRef.current, backgrounds[incoming]);
+        setBgImage(bgBRef.current, pickBg(incoming, backgrounds));
         bgBIndexRef.current = incoming;
       }
 
@@ -503,8 +510,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     if (backgrounds && backgrounds.length && bgARef.current && bgBRef.current) {
       const first = 0;
       const next = Math.min(1, cards.length - 1);
-      setBgImage(bgARef.current, backgrounds[first]);
-      setBgImage(bgBRef.current, backgrounds[next]);
+      setBgImage(bgARef.current, pickBg(first, backgrounds));
+      setBgImage(bgBRef.current, pickBg(next, backgrounds));
       bgAIndexRef.current = first;
       bgBIndexRef.current = next;
       bgARef.current.style.opacity = "1";
@@ -517,6 +524,9 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       const handler = () => onScroll();
       el?.addEventListener("scroll", handler as EventListener, { passive: true } as AddEventListenerOptions);
       update();
+
+      // panggil sekali lagi setelah layout settle (hindari flash)
+      requestAnimationFrame(() => update());
 
       const onResize = () => onScroll();
       window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
@@ -533,6 +543,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
 
     // Dengan Lenis
     update();
+    requestAnimationFrame(() => update());
 
     return () => {
       cardsRef.current = [];
@@ -554,6 +565,33 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     onScroll,
     backgrounds,
   ]);
+
+  // ✅ Resize → update juga saat Lenis aktif
+  useEffect(() => {
+    const onResize = () => {
+      if (!tickingRef.current) {
+        tickingRef.current = true;
+        requestAnimationFrame(() => update());
+      }
+    };
+    window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
+    return () => window.removeEventListener("resize", onResize as EventListener);
+  }, [update]);
+
+  // ✅ Re-init background saat daftar backgrounds berubah (mis. data async)
+  useEffect(() => {
+    if (!backgrounds || !backgrounds.length || !bgARef.current || !bgBRef.current) return;
+    const cards = cardsRef.current;
+    const first = Math.min(bgAIndexRef.current ?? 0, Math.max(0, cards.length - 1));
+    const next = Math.min(first + 1, Math.max(0, cards.length - 1));
+    setBgImage(bgARef.current, pickBg(first, backgrounds));
+    setBgImage(bgBRef.current, pickBg(next, backgrounds));
+    bgAIndexRef.current = first;
+    bgBIndexRef.current = next;
+    bgARef.current.style.opacity = "1";
+    bgBRef.current.style.opacity = "0";
+    requestAnimationFrame(() => update());
+  }, [backgrounds, update]);
 
   // Cleanup Lenis/RAF on unmount
   useEffect(() => {
