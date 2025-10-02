@@ -11,7 +11,7 @@ import React, {
 } from "react";
 
 /** =========================
- * Minimal typings untuk Lenis
+ * Minimal typings untuk Lenis (opsional, tetap dipertahankan)
  * ========================= */
 type LenisEvent = "scroll";
 type LenisHandler = (e?: unknown) => void;
@@ -22,19 +22,23 @@ interface Lenis {
   raf(time: number): void;
   destroy(): void;
 }
-
 type LenisConstructor = new (options?: Record<string, unknown>) => Lenis;
 
 type VoidFn = () => void;
 
+/** =========================================================
+ * Item kartu: abu-abu pucat, border halus, shadow ringan.
+ * ========================================================= */
 export const ScrollStackItem: React.FC<
   PropsWithChildren<{ itemClassName?: string }>
 > = ({ children, itemClassName = "" }) => (
   <div
     className={[
       "scroll-stack-card",
-      "relative w-full rounded-[22px] bg-white/90 border border-white/60",
-      "backdrop-blur-md shadow-[0_20px_60px_-18px_rgba(0,0,0,0.18)]",
+      // abu-abu pucat
+      "relative w-full rounded-[22px] bg-gray-50 border border-gray-200",
+      // halus & ringan
+      "shadow-[0_18px_40px_-16px_rgba(0,0,0,0.12)]",
       itemClassName,
     ].join(" ")}
   >
@@ -42,95 +46,72 @@ export const ScrollStackItem: React.FC<
   </div>
 );
 
+/** =========================================================
+ * Props publik (dipertahankan), beberapa tidak dipakai bila
+ * tidak relevan dengan animasi yang baru.
+ * ========================================================= */
 export type ScrollStackProps = {
   className?: string;
-
-  /** Spasi antar kartu (px) */
-  itemDistance?: number;
-  /** Skala berkurang per kedalaman (0.03 = 3%) */
-  itemScale?: number;
-  /** Jarak tumpukan (px) saat pinned */
-  itemStackDistance?: number;
-
-  /** Posisi stack relatif viewport; px atau % (untuk align="top") */
-  stackPosition?: number | string;
-  /** Posisi akhir transisi scale; px atau % (untuk align="top") */
-  scaleEndPosition?: number | string;
-
-  /** Skala dasar kartu paling depan */
-  baseScale?: number;
-
-  /** Rotasi per kedalaman (derajat) */
-  rotationAmount?: number;
-  /** Blur per kedalaman (px) */
-  blurAmount?: number;
-
-  /** Pakai scroll window (true) atau wrapper internal (false) */
+  itemDistance?: number;        // jarak natural antar kartu (layout)
+  itemScale?: number;           // pengurangan skala per kedalaman
+  itemStackDistance?: number;   // offset visual saat ditumpuk
+  stackPosition?: number | string;  // posisi pin (px atau %)
+  scaleEndPosition?: number | string; // tidak dipakai di versi ini
+  baseScale?: number;           // skala kartu aktif
+  rotationAmount?: number;      // tidak dipakai (0)
+  blurAmount?: number;          // tidak dipakai (0)
   useWindowScroll?: boolean;
-
-  /** Aktifkan smooth scrolling via Lenis jika tersedia */
   enableLenis?: boolean;
-
-  /** Tinggi spacer pelepas pin di akhir (px atau %, default "20vh") */
-  endSpacer?: number | string;
-
-  /** Penyelarasan pin saat in-view */
-  align?: "top" | "center";
-
-  /** Memudarkan kartu di belakang kartu aktif per tingkat (0..1). 0 = nonaktif */
-  fadeAmount?: number;
-
-  /** Daftar background untuk 2-layer system (index mengikuti urutan kartu) */
-  backgrounds?: string[];
-
-  /** Overlay/tint untuk background (Tailwind classes), default: "bg-black/30" */
-  backgroundOverlayClassName?: string;
-
-  /** Dipanggil saat kartu terakhir sedang “pinned/in-view” */
+  endSpacer?: number | string;  // spacer pelepas pin di akhir
+  align?: "top" | "center";     // posisi pin (pakai 'top' agar stabil)
+  fadeAmount?: number;          // tidak dipakai (logika baru fixed)
+  backgrounds?: string[];       // diabaikan (base putih)
+  backgroundOverlayClassName?: string; // diabaikan
   onStackComplete?: VoidFn;
 };
 
+/** =========================================================
+ * Inti stack:
+ * - Base putih (tanpa background image).
+ * - Menampilkan 1 layer aktif + 2 layer di belakang dengan fade.
+ * - Layer lebih dari 2 di belakang -> menghilang.
+ * - Saat scroll naik/turun terjadi transisi silang (cross-fade/slide)
+ *   antara aktif dan kandidat berikut/previous.
+ * ========================================================= */
 const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
   children,
   className = "",
-  itemDistance = 100,
-  itemScale = 0.03,
-  itemStackDistance = 30,
+  itemDistance = 110,
+  itemScale = 0.04,
+  itemStackDistance = 18,
   stackPosition = "18%",
-  scaleEndPosition = "8%",
-  baseScale = 0.86,
+  // scaleEndPosition ignored (pinning sederhana)
+  baseScale = 1,
   rotationAmount = 0,
   blurAmount = 0,
   useWindowScroll = true,
   enableLenis = true,
-  endSpacer = "20vh",
-  align = "center",
-  fadeAmount = 0,
-  backgrounds,
-  backgroundOverlayClassName = "bg-black/30",
+  endSpacer = "18vh",
+  align = "top",
+  // fadeAmount ignored (kita pakai nilai tetap)
+  // backgrounds ignored (base putih)
+  // backgroundOverlayClassName ignored
   onStackComplete,
 }) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  // Lenis ctor & instance
+  // Lenis (opsional)
   const LenisCtorRef = useRef<LenisConstructor | null>(null);
   const lenisRef = useRef<Lenis | null>(null);
 
   const cardsRef = useRef<HTMLElement[]>([]);
-  const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number; o: number }>>(new Map());
-  const doneRef = useRef(false);
-  const busyRef = useRef(false);
+  const transformsRef = useRef<Map<number, string>>(new Map());
+  const lastOpacityRef = useRef<Map<number, number>>(new Map());
   const tickingRef = useRef(false);
   const lastScrollTopRef = useRef(0);
-
-  // 2-layer background
-  const bgWrapRef = useRef<HTMLDivElement | null>(null);
-  const bgARef = useRef<HTMLDivElement | null>(null);
-  const bgBRef = useRef<HTMLDivElement | null>(null);
-  const bgAIndexRef = useRef<number | null>(null);
-  const bgBIndexRef = useRef<number | null>(null);
+  const doneRef = useRef(false);
 
   // prefers-reduced-motion
   const [prefersReduced, setPrefersReduced] = useState(false);
@@ -149,7 +130,9 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
   }, []);
 
   const toPx = useCallback((v: number | string, h: number) => {
-    return typeof v === "string" && v.includes("%") ? (parseFloat(v) / 100) * h : Number(v);
+    return typeof v === "string" && v.includes("%")
+      ? (parseFloat(v) / 100) * h
+      : Number(v);
   }, []);
 
   const getScroll = useCallback(() => {
@@ -175,199 +158,146 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
   );
 
   const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
-  const prog = useCallback(
-    (x: number, a: number, b: number) => (a === b ? 1 : clamp01((x - a) / (b - a))),
-    []
-  );
+  const prog = (x: number, a: number, b: number) =>
+    a === b ? 1 : clamp01((x - a) / (b - a));
 
-  const anchorYFor = useCallback(
-    (h: number, card: HTMLElement) => {
-      if (align === "center") {
-        return (h - card.offsetHeight) / 2;
-      }
-      return toPx(stackPosition, h);
-    },
-    [align, stackPosition, toPx]
-  );
-
-  const scaleAnchorYFor = useCallback(
-    (h: number, card: HTMLElement) => {
-      if (align === "center") {
-        return (h - card.offsetHeight) / 2;
-      }
-      return toPx(scaleEndPosition, h);
-    },
-    [align, scaleEndPosition, toPx]
-  );
-
-  const setBgImage = (el: HTMLDivElement, url: string | undefined) => {
-    if (!el) return;
-    if (!url) {
-      el.style.backgroundImage = "";
-      return;
-    }
-    el.style.backgroundImage = `url(${url})`;
-    el.style.backgroundSize = "cover";
-    el.style.backgroundPosition = "center";
-  };
-
-  const pickBg = (idx: number, arr?: string[]) => {
-    if (!arr || arr.length === 0) return undefined;
-    if (idx < 0) return arr[0];
-    if (idx >= arr.length) return arr[arr.length - 1];
-    return arr[idx];
-  };
-
+  /** ---------------------------------------------------------
+   * Mesin layout:
+   *   - kartu dipin di anchorY
+   *   - tentukan activeIdx dari scroll position
+   *   - tampilkan: active, active-1, active-2
+   *   - transisi silang antara active dan active+1
+   * -------------------------------------------------------- */
   const update = useCallback(() => {
-    if (!cardsRef.current.length || busyRef.current) {
+    if (!cardsRef.current.length) {
       tickingRef.current = false;
       return;
     }
-    busyRef.current = true;
 
     const { top, h } = getScroll();
-    const dir = top > lastScrollTopRef.current ? 1 : top < lastScrollTopRef.current ? -1 : 0;
+    const dir =
+      top > lastScrollTopRef.current ? 1 : top < lastScrollTopRef.current ? -1 : 0;
     lastScrollTopRef.current = top;
 
-    const rootEl = hostRef.current!;
-    const endEl = rootEl.querySelector(".scroll-stack-end") as HTMLElement | null;
+    const anchorY = (card: HTMLElement) => {
+      if (align === "center") return (h - card.offsetHeight) / 2;
+      return toPx(stackPosition, h);
+    };
 
-    const fallbackEndEl = cardsRef.current[cardsRef.current.length - 1];
-    const endTop = endEl
-      ? (useWindowScroll ? endEl.getBoundingClientRect().top + window.scrollY : getOffset(endEl))
-      : fallbackEndEl
-      ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
-      : 0;
-
-    let topIdx = 0;
-    if (cardsRef.current.length) {
-      for (let j = 0; j < cardsRef.current.length; j++) {
-        const cardJ = cardsRef.current[j]!;
-        const aj = anchorYFor(h, cardJ);
-        const jt = getOffset(cardJ);
-        const js = jt - aj - itemStackDistance * j;
-        if (top >= js) topIdx = j;
-        else break;
-      }
-    }
-
-    const nIdx = dir >= 0 ? Math.min(topIdx + 1, cardsRef.current.length - 1) : Math.max(topIdx - 1, 0);
-    let cross = 0;
-
+    // 1) Tentukan index aktif berdasarkan "start lines"
+    let activeIdx = 0;
+    const starts: number[] = [];
     cardsRef.current.forEach((card, i) => {
-      const anchorY = anchorYFor(h, card);
-      const scaleAnchorY = scaleAnchorYFor(h, card);
+      const start = getOffset(card) - anchorY(card) - itemStackDistance * i;
+      starts.push(start);
+      if (top >= start) activeIdx = i;
+    });
+    activeIdx = Math.min(activeIdx, cardsRef.current.length - 1);
 
-      const cardTop = getOffset(card);
-      const start = cardTop - anchorY - itemStackDistance * i;
-      const end = cardTop - scaleAnchorY;
-      const pinStart = start;
-      const pinEnd = Math.max(endTop - h / 2, pinStart + 1);
+    // progress silang menuju kartu berikutnya
+    const nextIdx = Math.min(activeIdx + 1, cardsRef.current.length - 1);
+    const cross = prog(top, starts[activeIdx], starts[nextIdx] ?? starts[activeIdx]);
 
-      const p = prog(top, start, end);
-      const sTarget = baseScale + i * itemScale;
-      const s = 1 - p * (1 - sTarget);
-      const r = rotationAmount ? i * rotationAmount * p : 0;
+    // 2) apply transform per kartu
+    cardsRef.current.forEach((card, i) => {
+      // default: sembunyikan
+      let scale = baseScale;
+      let ty = 0;
+      let opacity = 0;
+      let z = 0;
 
-      if (i === nIdx) {
-        cross = dir >= 0 ? p : 1 - p;
-        if (Number.isNaN(cross)) cross = 0;
-        if (cross < 0) cross = 0;
-        if (cross > 1) cross = 1;
+      // kedalaman relatif thd activeIdx
+      const depth = activeIdx - i; // 0 = aktif, 1 = satu di belakang, dst.
+      const isIncoming = i === activeIdx + 1;
+
+      if (i > activeIdx + 1) {
+        // Belum saatnya tampil (di depan): sembunyikan di bawah sedikit
+        scale = baseScale;
+        ty = 40;
+        opacity = 0;
+        z = 500 + (cardsRef.current.length - i);
+      } else if (depth === 0) {
+        // kartu aktif → transisi ke belakang saat cross naik
+        const backSlide = itemStackDistance * cross;
+        const backScale = baseScale - itemScale * cross;
+        scale = backScale;
+        ty = backSlide;
+        opacity = 1 - 0.08 * cross;
+        z = 1000; // paling atas saat ini
+      } else if (depth === 1) {
+        // satu di belakang aktif
+        // saat cross penuh, akan jadi depth=2
+        const extra = itemStackDistance * cross;
+        scale = baseScale - itemScale * (1 + cross);
+        ty = itemStackDistance * (1 + cross);
+        opacity = 0.7 - 0.15 * cross;
+        z = 999 - 1;
+      } else if (depth === 2) {
+        // dua di belakang aktif (maks yang masih terlihat)
+        scale = baseScale - itemScale * 2;
+        ty = itemStackDistance * 2;
+        opacity = 0.42;
+        z = 999 - 2;
+      } else if (depth > 2) {
+        // lebih dari dua di belakang → hilang
+        scale = baseScale - itemScale * 3;
+        ty = itemStackDistance * 3;
+        opacity = 0;
+        z = 10;
       }
 
-      let b = 0;
-      if (blurAmount && i < topIdx) b = Math.max(0, (topIdx - i) * blurAmount);
-
-      let o = 1;
-      if (fadeAmount > 0 && i < topIdx) {
-        const depth = topIdx - i;
-        o = Math.max(0, 1 - depth * fadeAmount);
+      if (isIncoming) {
+        // kartu yang akan masuk (active+1) naik dari bawah & fade-in
+        const inTy = itemStackDistance * (1 - cross);
+        const inScale = baseScale - itemScale * (1 - cross);
+        scale = inScale;
+        ty = inTy;
+        opacity = 0.25 + 0.75 * cross;
+        z = 1001; // naik menutup aktif saat cross→1
       }
 
-      let y = 0;
-      const pinned = top >= pinStart && top <= pinEnd;
-      if (pinned) y = top - cardTop + anchorY + itemStackDistance * i;
-      else if (top > pinEnd) y = pinEnd - cardTop + anchorY + itemStackDistance * i;
+      const transform = `translate3d(0, ${ty}px, 0) scale(${scale})`;
+      if (rotationAmount) card.style.rotate = `${rotationAmount}deg`; // default 0
 
-      const tr = {
-        y: Math.round(y * 100) / 100,
-        s: Math.round(s * 1000) / 1000,
-        r: Math.round(r * 100) / 100,
-        b: Math.round(b * 100) / 100,
-        o: Math.round(o * 1000) / 1000,
-      };
-
-      const last = lastTRef.current.get(i);
-      const changed =
-        !last ||
-        Math.abs(last.y - tr.y) > 0.1 ||
-        Math.abs(last.s - tr.s) > 0.001 ||
-        Math.abs(last.r - tr.r) > 0.1 ||
-        Math.abs(last.b - tr.b) > 0.1 ||
-        Math.abs(last.o - tr.o) > 0.001;
-
-      if (changed) {
-        card.style.transform = `translate3d(0, ${tr.y}px, 0) scale(${tr.s}) rotate(${tr.r}deg)`;
-        card.style.filter = tr.b > 0 ? `blur(${tr.b}px)` : "";
-        card.style.opacity = `${tr.o}`;
-        card.style.willChange = "transform, filter, opacity";
-        card.style.transformOrigin = "top center";
-        card.style.backfaceVisibility = "hidden";
-        lastTRef.current.set(i, tr);
+      if (transformsRef.current.get(i) !== transform) {
+        card.style.transform = transform;
+        transformsRef.current.set(i, transform);
       }
-
-      card.style.zIndex = String(1000 + (cardsRef.current.length - i));
-
-      if (i === cardsRef.current.length - 1) {
-        const inView = top >= pinStart && top <= pinEnd;
-        if (inView && !doneRef.current) {
-          doneRef.current = true;
-          onStackComplete?.();
-        } else if (!inView && doneRef.current) {
-          doneRef.current = false;
-        }
+      if (lastOpacityRef.current.get(i) !== opacity) {
+        card.style.opacity = String(opacity);
+        lastOpacityRef.current.set(i, opacity);
       }
+      card.style.willChange = "transform, opacity";
+      card.style.transformOrigin = "top center";
+      card.style.backfaceVisibility = "hidden";
+      card.style.zIndex = String(z);
+      if (blurAmount) card.style.filter = depth >= 1 ? `blur(${Math.min(blurAmount * depth, 6)}px)` : "";
+      // pinning: posisikan secara visual di anchor (menggunakan translateY di atas),
+      // posisi dokumen tetap menggunakan flow (margin bottom).
     });
 
-    if (backgrounds && backgrounds.length && bgARef.current && bgBRef.current) {
-      const active = topIdx;
-      const incoming = nIdx;
-
-      if (bgAIndexRef.current !== active) {
-        setBgImage(bgARef.current, pickBg(active, backgrounds));
-        bgAIndexRef.current = active;
-      }
-      if (bgBIndexRef.current !== incoming) {
-        setBgImage(bgBRef.current, pickBg(incoming, backgrounds));
-        bgBIndexRef.current = incoming;
-      }
-
-      bgARef.current!.style.opacity = `${1 - cross}`;
-      bgBRef.current!.style.opacity = `${cross}`;
+    // callback saat terakhir pinned
+    if (activeIdx === cardsRef.current.length - 1 && !doneRef.current) {
+      doneRef.current = true;
+      onStackComplete?.();
+    }
+    if (activeIdx < cardsRef.current.length - 1 && doneRef.current) {
+      doneRef.current = false;
     }
 
-    busyRef.current = false;
     tickingRef.current = false;
   }, [
+    align,
     baseScale,
     blurAmount,
-    fadeAmount,
     getOffset,
     getScroll,
     itemScale,
     itemStackDistance,
     onStackComplete,
     rotationAmount,
-    scaleEndPosition,
     stackPosition,
     toPx,
-    prog,
-    align,
-    anchorYFor,
-    scaleAnchorYFor,
-    backgrounds,
-    useWindowScroll,
   ]);
 
   const onScroll = useCallback(() => {
@@ -377,17 +307,17 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
     }
     if (!tickingRef.current) {
       tickingRef.current = true;
-      requestAnimationFrame(() => update());
+      requestAnimationFrame(update);
     }
   }, [update]);
 
+  /** Lenis (opsional) — tetap dipertahankan agar smooth, tapi tidak wajib */
   const initLenis = useCallback(() => {
     if (!enableLenis || prefersReduced) return;
     if (!LenisCtorRef.current) return;
     if (lenisRef.current) return;
 
     const Ctor = LenisCtorRef.current;
-
     if (useWindowScroll) {
       const lenis = new Ctor({
         duration: 1.05,
@@ -411,7 +341,6 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
 
     const wrapper = scrollerRef.current;
     if (!wrapper) return;
-
     const lenis = new Ctor({
       wrapper,
       content: wrapper.querySelector(".scroll-stack-inner") ?? undefined,
@@ -442,15 +371,11 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
       try {
         const mod = await import("lenis");
         if (!mounted) return;
-
-        type LenisModule = { default: unknown } | Record<string, unknown>;
-        const maybe = mod as LenisModule;
-
+        const maybe = mod as { default?: unknown };
         const ctor =
           maybe && "default" in maybe && typeof maybe.default === "function"
             ? (maybe.default as LenisConstructor)
             : undefined;
-
         if (ctor) {
           LenisCtorRef.current = ctor;
           initLenis();
@@ -466,98 +391,55 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
 
   useLayoutEffect(() => {
     const scope = hostRef.current!;
-    const cards = Array.from(scope.querySelectorAll(":scope .scroll-stack-card")) as HTMLElement[];
+    const cards = Array.from(
+      scope.querySelectorAll(":scope .scroll-stack-card")
+    ) as HTMLElement[];
     cardsRef.current = cards;
 
+    // siapkan margin antar kartu (flow dokumen)
     cards.forEach((card, i) => {
       if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
-      card.style.willChange = "transform, filter, opacity";
+      // reset awal
+      card.style.opacity = "0";
+      card.style.transform = "translate3d(0, 40px, 0) scale(1)";
+      card.style.willChange = "transform, opacity";
       card.style.transformOrigin = "top center";
       card.style.backfaceVisibility = "hidden";
-      card.style.transform = "translateZ(0)";
-      card.style.zIndex = String(1000 + (cards.length - i));
     });
 
-    if (backgrounds && backgrounds.length && bgARef.current && bgBRef.current) {
-      const first = 0;
-      const next = Math.min(1, cards.length - 1);
-      setBgImage(bgARef.current, pickBg(first, backgrounds));
-      setBgImage(bgBRef.current, pickBg(next, backgrounds));
-      bgAIndexRef.current = first;
-      bgBIndexRef.current = next;
-      bgARef.current.style.opacity = "1";
-      bgBRef.current.style.opacity = "0";
-    }
+    // event scroll/resize
+    const el: Window | HTMLElement | null = useWindowScroll
+      ? window
+      : scrollerRef.current;
+    const handler = () => onScroll();
+    el?.addEventListener("scroll", handler as EventListener, {
+      passive: true,
+    } as AddEventListenerOptions);
 
-    if (!lenisRef.current) {
-      const el: Window | HTMLElement | null = useWindowScroll ? window : scrollerRef.current;
-      const handler = () => onScroll();
-      el?.addEventListener("scroll", handler as EventListener, { passive: true } as AddEventListenerOptions);
-      update();
+    const onResize = () => onScroll();
+    window.addEventListener("resize", onResize as EventListener, {
+      passive: true,
+    } as AddEventListenerOptions);
 
-      requestAnimationFrame(() => update());
-
-      const onResize = () => onScroll();
-      window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
-
-      return () => {
-        el?.removeEventListener("scroll", handler as EventListener);
-        window.removeEventListener("resize", onResize as EventListener);
-        cardsRef.current = [];
-        lastTRef.current.clear();
-        doneRef.current = false;
-        tickingRef.current = false;
-      };
-    }
-
-    update();
-    requestAnimationFrame(() => update());
+    // initial paint
+    requestAnimationFrame(update);
 
     return () => {
+      el?.removeEventListener("scroll", handler as EventListener);
+      window.removeEventListener("resize", onResize as EventListener);
       cardsRef.current = [];
-      lastTRef.current.clear();
-      doneRef.current = false;
-      tickingRef.current = false;
+      transformsRef.current.clear();
+      lastOpacityRef.current.clear();
     };
   }, [
     itemDistance,
     itemScale,
     itemStackDistance,
-    stackPosition,
-    scaleEndPosition,
     baseScale,
-    rotationAmount,
-    blurAmount,
     useWindowScroll,
-    update,
     onScroll,
-    backgrounds,
+    update,
   ]);
-
-  useEffect(() => {
-    const onResize = () => {
-      if (!tickingRef.current) {
-        tickingRef.current = true;
-        requestAnimationFrame(() => update());
-      }
-    };
-    window.addEventListener("resize", onResize as EventListener, { passive: true } as AddEventListenerOptions);
-    return () => window.removeEventListener("resize", onResize as EventListener);
-  }, [update]);
-
-  useEffect(() => {
-    if (!backgrounds || !backgrounds.length || !bgARef.current || !bgBRef.current) return;
-    const cards = cardsRef.current;
-    const first = Math.min(bgAIndexRef.current ?? 0, Math.max(0, cards.length - 1));
-    const next = Math.min(first + 1, Math.max(0, cards.length - 1));
-    setBgImage(bgARef.current, pickBg(first, backgrounds));
-    setBgImage(bgBRef.current, pickBg(next, backgrounds));
-    bgAIndexRef.current = first;
-    bgBIndexRef.current = next;
-    bgARef.current.style.opacity = "1";
-    bgBRef.current.style.opacity = "0";
-    requestAnimationFrame(() => update());
-  }, [backgrounds, update]);
 
   useEffect(() => {
     return () => {
@@ -575,24 +457,17 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
   }, [onScroll]);
 
   if (prefersReduced) {
+    // fallback: tampilkan kartu biasa (tanpa animasi)
     return (
       <div ref={hostRef} className={["relative w-full", className].join(" ")}>
-        {backgrounds && backgrounds.length > 0 && (
-          <div className="fixed inset-0 -z-10">
-            <div
-              className="absolute inset-0 bg-center bg-cover"
-              style={{ backgroundImage: `url(${backgrounds[0]})` }}
-            />
-            <div className={`absolute inset-0 ${backgroundOverlayClassName}`} />
-          </div>
-        )}
-        <div className="relative w-full">
-          {children}
-          <div
-            className="scroll-stack-end"
-            style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}
-          />
-        </div>
+        <div className="relative w-full">{children}</div>
+        <div
+          className="scroll-stack-end"
+          style={{
+            height:
+              typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer),
+          }}
+        />
       </div>
     );
   }
@@ -600,29 +475,25 @@ const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
   return (
     <div
       ref={hostRef}
-      className={["relative w-full", className].join(" ")}
+      className={["relative w-full bg-white", className].join(" ")}
       data-window-scroll={useWindowScroll ? "true" : "false"}
     >
-      {backgrounds && backgrounds.length > 0 && (
-        <div ref={bgWrapRef} className="pointer-events-none fixed inset-0 -z-10">
-          <div ref={bgARef} className="absolute inset-0 bg-center bg-cover transition-opacity duration-150 will-change-[opacity]">
-            <div className={`absolute inset-0 ${backgroundOverlayClassName}`} />
-          </div>
-          <div ref={bgBRef} className="absolute inset-0 bg-center bg-cover transition-opacity duration-150 will-change-[opacity]" style={{ opacity: 0 }}>
-            <div className={`absolute inset-0 ${backgroundOverlayClassName}`} />
-          </div>
-        </div>
-      )}
-
       <div
         ref={useWindowScroll ? undefined : scrollerRef}
-        className={["relative w-full", useWindowScroll ? "overflow-visible" : "overflow-auto"].join(" ")}
+        className={[
+          "relative w-full",
+          useWindowScroll ? "overflow-visible" : "overflow-auto",
+          "bg-white",
+        ].join(" ")}
       >
         <div className="scroll-stack-inner relative w-full">
           {children}
           <div
             className="scroll-stack-end"
-            style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}
+            style={{
+              height:
+                typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer),
+            }}
           />
         </div>
       </div>

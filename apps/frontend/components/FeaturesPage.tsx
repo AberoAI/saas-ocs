@@ -163,16 +163,8 @@ export default function FeaturesPage() {
 
   const BRAND_BG_12 = `${BRAND}1F`;
 
-  // ⬇️ OPTIONAL: aktifkan 2-layer background ScrollStack (isi path gambar kamu)
-  const backgrounds = [
-    "/images/bg/hero-1.jpg",
-    "/images/bg/hero-2.jpg",
-    "/images/bg/hero-3.jpg",
-    "/images/bg/hero-4.jpg",
-  ];
-
   return (
-    <main className="mx-auto max-w-6xl px-6">
+    <main className="mx-auto max-w-6xl px-6 bg-white">
       {/* HERO */}
       <section className="text-center pt-16 pb-10">
         <motion.span
@@ -220,19 +212,13 @@ export default function FeaturesPage() {
         <ScrollStack
           useWindowScroll
           enableLenis
-          itemDistance={100}
-          itemScale={0.03}
-          itemStackDistance={30}
+          itemDistance={120}
+          itemScale={0.05}
+          itemStackDistance={22}
           stackPosition="18%"
-          scaleEndPosition="8%"
-          baseScale={0.86}
+          baseScale={1}
           rotationAmount={0}
           blurAmount={0}
-          /* ⬇️ aktifkan 2-layer background jika gambar tersedia */
-          backgrounds={backgrounds}
-          backgroundOverlayClassName="bg-gradient-to-b from-black/35 via-black/35 to-black/60"
-          /* kurangi ghost layers */
-          fadeAmount={0.12}
         >
           {items.map((it) => (
             <ScrollStackItem key={it.key} itemClassName="px-4 md:px-6 py-6 md:py-8">
@@ -1015,7 +1001,7 @@ function AnalyticsRealtimeStage({
             ))}
           </svg>
 
-          <div className="absolute inset-0 flex items-end px-3 md:px-4 gap-[6px] md:gap-[8px]">
+          <div className="absolute inset-0 flex items	end px-3 md:px-4 gap-[6px] md:gap-[8px]">
             {(prefersReduced ? barsA : barsB).map((h, i) => (
               <motion.div
                 key={i}
