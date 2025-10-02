@@ -454,14 +454,9 @@ export default function FeaturesPage() {
   }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
 
   /* =======================
-   * A11Y: focus title when step changes
+   * Title ref — no auto-focus (avoid blue ring)
    * ======================= */
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
-  useEffect(() => {
-    if (step >= 1 && step <= items.length) {
-      featureTitleRef.current?.focus();
-    }
-  }, [step, items.length]);
 
   /* =======================
    * Render
@@ -561,9 +556,10 @@ export default function FeaturesPage() {
                         {/* Title (col 2) */}
                         <motion.h3
                           variants={contentStagger.item}
-                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
-                          tabIndex={-1} // ✅ focusable for SR jump
-                          ref={featureTitleRef} // ✅
+                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
+                          tabIndex={-1} // tetap non-focusable
+                          ref={featureTitleRef}
+                          style={{ outline: "none" }}
                         >
                           {t(`cards.${items[step - 1].key}.title`)}
                         </motion.h3>
