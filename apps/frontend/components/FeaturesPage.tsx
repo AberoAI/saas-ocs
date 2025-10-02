@@ -12,6 +12,7 @@ import {
   animate,
 } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { TextAnimate } from "@/registry/magicui/text-animate"; // <-- ADDED
 
 /** =========================================================
  *  STABILITY FIRST EDITION — safest defaults (tightened spacing)
@@ -473,7 +474,13 @@ export default function FeaturesPage() {
                     animate="visible"
                     custom={0.12}
                   >
-                    {t("title")}
+                    {prefersReduced ? (
+                      t("title")
+                    ) : (
+                      <TextAnimate animation="blurInUp" by="character" once>
+                        {t("title")}
+                      </TextAnimate>
+                    )}
                   </motion.h1>
 
                   {/* SUBTITLE */}
@@ -484,7 +491,13 @@ export default function FeaturesPage() {
                     animate="visible"
                     custom={0.18}
                   >
-                    {t("subtitle")}
+                    {prefersReduced ? (
+                      t("subtitle")
+                    ) : (
+                      <TextAnimate animation="blurInUp" by="character" once>
+                        {t("subtitle")}
+                      </TextAnimate>
+                    )}
                   </motion.p>
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
