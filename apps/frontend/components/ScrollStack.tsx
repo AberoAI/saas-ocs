@@ -90,7 +90,7 @@ export type ScrollStackProps = {
   onStackComplete?: VoidFn;
 };
 
-export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
+const ScrollStack: React.FC<React.PropsWithChildren<ScrollStackProps>> = ({
   children,
   className = "",
   itemDistance = 100,
@@ -104,14 +104,14 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   useWindowScroll = true,
   enableLenis = true,
   endSpacer = "20vh",
-  align = "center", // ⬅️ default center agar setiap poin benar-benar di tengah
+  align = "center",
   fadeAmount = 0,
   backgrounds,
   backgroundOverlayClassName = "bg-black/30",
   onStackComplete,
 }) => {
-  const hostRef = useRef<HTMLDivElement | null>(null);      // host of this instance
-  const scrollerRef = useRef<HTMLDivElement | null>(null);  // internal scroller when useWindowScroll=false
+  const hostRef = useRef<HTMLDivElement | null>(null);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
 
   // Lenis ctor & instance
@@ -122,17 +122,17 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
   const lastTRef = useRef<Map<number, { y: number; s: number; r: number; b: number; o: number }>>(new Map());
   const doneRef = useRef(false);
   const busyRef = useRef(false);
-  const tickingRef = useRef(false); // coalesce native scroll → 1× per frame
-  const lastScrollTopRef = useRef(0); // arah scroll
+  const tickingRef = useRef(false);
+  const lastScrollTopRef = useRef(0);
 
-  // === 2-LAYER BACKGROUND ===
+  // 2-layer background
   const bgWrapRef = useRef<HTMLDivElement | null>(null);
   const bgARef = useRef<HTMLDivElement | null>(null);
   const bgBRef = useRef<HTMLDivElement | null>(null);
   const bgAIndexRef = useRef<number | null>(null);
   const bgBIndexRef = useRef<number | null>(null);
 
-  // Compute prefers-reduced-motion safely on client
+  // prefers-reduced-motion
   const [prefersReduced, setPrefersReduced] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
@@ -160,7 +160,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     return { top: el.scrollTop, h: el.clientHeight };
   }, [useWindowScroll]);
 
-  // Offset akurat untuk window & wrapper (relatif ke dokumen/wrapper + mempertimbangkan scroll)
   const getOffset = useCallback(
     (el: HTMLElement) => {
       if (useWindowScroll) {
@@ -169,7 +168,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       }
       const wrapper = scrollerRef.current!;
       const rect = el.getBoundingClientRect();
-        const wrect = wrapper.getBoundingClientRect();
+      const wrect = wrapper.getBoundingClientRect();
       return rect.top - wrect.top + wrapper.scrollTop;
     },
     [useWindowScroll]
@@ -181,19 +180,16 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     []
   );
 
-  /** Anchor Y (posisi target top kartu saat pin) */
   const anchorYFor = useCallback(
     (h: number, card: HTMLElement) => {
       if (align === "center") {
         return (h - card.offsetHeight) / 2;
       }
-      // align === "top"
       return toPx(stackPosition, h);
     },
     [align, stackPosition, toPx]
   );
 
-  /** Anchor untuk scale end */
   const scaleAnchorYFor = useCallback(
     (h: number, card: HTMLElement) => {
       if (align === "center") {
@@ -215,7 +211,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     el.style.backgroundPosition = "center";
   };
 
-  // ✅ clamp/fallback untuk akses backgrounds
   const pickBg = (idx: number, arr?: string[]) => {
     if (!arr || arr.length === 0) return undefined;
     if (idx < 0) return arr[0];
@@ -234,7 +229,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     const dir = top > lastScrollTopRef.current ? 1 : top < lastScrollTopRef.current ? -1 : 0;
     lastScrollTopRef.current = top;
 
-    // Scope ke instance ini
     const rootEl = hostRef.current!;
     const endEl = rootEl.querySelector(".scroll-stack-end") as HTMLElement | null;
 
@@ -245,7 +239,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       ? getOffset(fallbackEndEl) + fallbackEndEl.offsetHeight
       : 0;
 
-    // Hitung topIdx sekali per frame (pakai anchor sesuai mode)
     let topIdx = 0;
     if (cardsRef.current.length) {
       for (let j = 0; j < cardsRef.current.length; j++) {
@@ -258,12 +251,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       }
     }
 
-    // Untuk cross-fade background
-    const nIdx =
-      dir >= 0
-        ? Math.min(topIdx + 1, cardsRef.current.length - 1)
-        : Math.max(topIdx - 1, 0);
-    let cross = 0; // 0..1
+    const nIdx = dir >= 0 ? Math.min(topIdx + 1, cardsRef.current.length - 1) : Math.max(topIdx - 1, 0);
+    let cross = 0;
 
     cardsRef.current.forEach((card, i) => {
       const anchorY = anchorYFor(h, card);
@@ -273,8 +262,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       const start = cardTop - anchorY - itemStackDistance * i;
       const end = cardTop - scaleAnchorY;
       const pinStart = start;
-
-      // Saat align="center", rilis saat spacer melewati tengah viewport
       const pinEnd = Math.max(endTop - h / 2, pinStart + 1);
 
       const p = prog(top, start, end);
@@ -282,9 +269,7 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       const s = 1 - p * (1 - sTarget);
       const r = rotationAmount ? i * rotationAmount * p : 0;
 
-      // Ambil progress untuk neighbor → dipakai sebagai cross-fade bg
       if (i === nIdx) {
-        // saat scroll turun: p naik 0→1, saat scroll naik kita balik supaya tetap 0→1
         cross = dir >= 0 ? p : 1 - p;
         if (Number.isNaN(cross)) cross = 0;
         if (cross < 0) cross = 0;
@@ -292,10 +277,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       }
 
       let b = 0;
-      // blur berdasarkan kedalaman relatif
       if (blurAmount && i < topIdx) b = Math.max(0, (topIdx - i) * blurAmount);
 
-      // Fade kartu di belakang kartu aktif untuk kurangi "ghost layers"
       let o = 1;
       if (fadeAmount > 0 && i < topIdx) {
         const depth = topIdx - i;
@@ -334,10 +317,8 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         lastTRef.current.set(i, tr);
       }
 
-      // z-index: kartu lebih depan berada di atas
       card.style.zIndex = String(1000 + (cardsRef.current.length - i));
 
-      // callback kartu terakhir
       if (i === cardsRef.current.length - 1) {
         const inView = top >= pinStart && top <= pinEnd;
         if (inView && !doneRef.current) {
@@ -349,7 +330,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       }
     });
 
-    // === UPDATE 2-LAYER BACKGROUND SECARA IMPERATIVE ===
     if (backgrounds && backgrounds.length && bgARef.current && bgBRef.current) {
       const active = topIdx;
       const incoming = nIdx;
@@ -363,7 +343,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
         bgBIndexRef.current = incoming;
       }
 
-      // cross-fade: A = 1 - cross, B = cross
       bgARef.current.style.opacity = `${1 - cross}`;
       bgBRef.current.style.opacity = `${cross}`;
     }
@@ -402,9 +381,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     }
   }, [update]);
 
-  /** =========================
-   * Init Lenis via dynamic import
-   * ========================= */
   const initLenis = useCallback(() => {
     if (!enableLenis || prefersReduced) return;
     if (!LenisCtorRef.current) return;
@@ -459,7 +435,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     lenisRef.current = lenis;
   }, [enableLenis, prefersReduced, onScroll, useWindowScroll]);
 
-  // dynamic import lenis sekali (client only)
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -489,24 +464,20 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     };
   }, [enableLenis, prefersReduced, initLenis]);
 
-  // Kumpulkan kartu dalam scope instance ini
   useLayoutEffect(() => {
     const scope = hostRef.current!;
     const cards = Array.from(scope.querySelectorAll(":scope .scroll-stack-card")) as HTMLElement[];
     cardsRef.current = cards;
 
-    // Gaya dasar kartu
     cards.forEach((card, i) => {
       if (i < cards.length - 1) card.style.marginBottom = `${itemDistance}px`;
       card.style.willChange = "transform, filter, opacity";
       card.style.transformOrigin = "top center";
       card.style.backfaceVisibility = "hidden";
       card.style.transform = "translateZ(0)";
-      // z-index awal (akan diupdate di update())
       card.style.zIndex = String(1000 + (cards.length - i));
     });
 
-    // Inisialisasi background pertama kali (jika ada)
     if (backgrounds && backgrounds.length && bgARef.current && bgBRef.current) {
       const first = 0;
       const next = Math.min(1, cards.length - 1);
@@ -518,14 +489,12 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       bgBRef.current.style.opacity = "0";
     }
 
-    // Tanpa Lenis → listener native (coalesced)
     if (!lenisRef.current) {
       const el: Window | HTMLElement | null = useWindowScroll ? window : scrollerRef.current;
       const handler = () => onScroll();
       el?.addEventListener("scroll", handler as EventListener, { passive: true } as AddEventListenerOptions);
       update();
 
-      // panggil sekali lagi setelah layout settle (hindari flash)
       requestAnimationFrame(() => update());
 
       const onResize = () => onScroll();
@@ -541,7 +510,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       };
     }
 
-    // Dengan Lenis
     update();
     requestAnimationFrame(() => update());
 
@@ -566,7 +534,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     backgrounds,
   ]);
 
-  // ✅ Resize → update juga saat Lenis aktif
   useEffect(() => {
     const onResize = () => {
       if (!tickingRef.current) {
@@ -578,7 +545,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     return () => window.removeEventListener("resize", onResize as EventListener);
   }, [update]);
 
-  // ✅ Re-init background saat daftar backgrounds berubah (mis. data async)
   useEffect(() => {
     if (!backgrounds || !backgrounds.length || !bgARef.current || !bgBRef.current) return;
     const cards = cardsRef.current;
@@ -593,7 +559,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     requestAnimationFrame(() => update());
   }, [backgrounds, update]);
 
-  // Cleanup Lenis/RAF on unmount
   useEffect(() => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -609,11 +574,9 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
     };
   }, [onScroll]);
 
-  // Reduced motion → render biasa (tanpa transform)
   if (prefersReduced) {
     return (
       <div ref={hostRef} className={["relative w-full", className].join(" ")}>
-        {/* Background (optional) */}
         {backgrounds && backgrounds.length > 0 && (
           <div className="fixed inset-0 -z-10">
             <div
@@ -640,14 +603,11 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       className={["relative w-full", className].join(" ")}
       data-window-scroll={useWindowScroll ? "true" : "false"}
     >
-      {/* === 2-LAYER BACKGROUND SYSTEM (A & B) === */}
       {backgrounds && backgrounds.length > 0 && (
         <div ref={bgWrapRef} className="pointer-events-none fixed inset-0 -z-10">
-          {/* Layer A (active) */}
           <div ref={bgARef} className="absolute inset-0 bg-center bg-cover transition-opacity duration-150 will-change-[opacity]">
             <div className={`absolute inset-0 ${backgroundOverlayClassName}`} />
           </div>
-          {/* Layer B (incoming) */}
           <div ref={bgBRef} className="absolute inset-0 bg-center bg-cover transition-opacity duration-150 will-change-[opacity]" style={{ opacity: 0 }}>
             <div className={`absolute inset-0 ${backgroundOverlayClassName}`} />
           </div>
@@ -660,7 +620,6 @@ export const ScrollStack: React.FC<PropsWithChildren<ScrollStackProps>> = ({
       >
         <div className="scroll-stack-inner relative w-full">
           {children}
-          {/* spacer agar pin terakhir release mulus — configurable */}
           <div
             className="scroll-stack-end"
             style={{ height: typeof endSpacer === "number" ? `${endSpacer}px` : String(endSpacer) }}

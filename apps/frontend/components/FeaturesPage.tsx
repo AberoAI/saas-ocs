@@ -163,6 +163,14 @@ export default function FeaturesPage() {
 
   const BRAND_BG_12 = `${BRAND}1F`;
 
+  // ⬇️ OPTIONAL: aktifkan 2-layer background ScrollStack (isi path gambar kamu)
+  const backgrounds = [
+    "/images/bg/hero-1.jpg",
+    "/images/bg/hero-2.jpg",
+    "/images/bg/hero-3.jpg",
+    "/images/bg/hero-4.jpg",
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       {/* HERO */}
@@ -220,6 +228,11 @@ export default function FeaturesPage() {
           baseScale={0.86}
           rotationAmount={0}
           blurAmount={0}
+          /* ⬇️ aktifkan 2-layer background jika gambar tersedia */
+          backgrounds={backgrounds}
+          backgroundOverlayClassName="bg-gradient-to-b from-black/35 via-black/35 to-black/60"
+          /* kurangi ghost layers */
+          fadeAmount={0.12}
         >
           {items.map((it) => (
             <ScrollStackItem key={it.key} itemClassName="px-4 md:px-6 py-6 md:py-8">
