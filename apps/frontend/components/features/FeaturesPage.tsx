@@ -8,7 +8,8 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
-import { TextAnimate } from "../../registry/magicui/text-animate"; // ← relative path
+// ⬇️ GANTI alias @ ke relative path
+import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
 const InstantChatStage = dynamic(() => import("./stages/InstantChatStage"));
@@ -160,50 +161,40 @@ export default function FeaturesPage() {
                   </motion.span>
 
                   {/* Title */}
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurIn"
-                      by="character"
-                      as="h1"
-                      once
-                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                    >
-                      {t("title")}
-                    </TextAnimate>
-                  ) : (
-                    <motion.h1
-                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.12}
-                    >
-                      {t("title")}
-                    </motion.h1>
-                  )}
+                  <motion.div variants={rise} initial="hidden" animate="visible" custom={0.12}>
+                    {shouldAnimateHero ? (
+                      <TextAnimate
+                        animation="blurIn"
+                        as="h1"
+                        once
+                        className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                      >
+                        {t("title")}
+                      </TextAnimate>
+                    ) : (
+                      <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                        {t("title")}
+                      </h1>
+                    )}
+                  </motion.div>
 
                   {/* Subtitle */}
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurInUp"
-                      by="word"
-                      as="p"
-                      once
-                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                    >
-                      {t("subtitle")}
-                    </TextAnimate>
-                  ) : (
-                    <motion.p
-                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.18}
-                    >
-                      {t("subtitle")}
-                    </motion.p>
-                  )}
+                  <motion.div variants={rise} initial="hidden" animate="visible" custom={0.18}>
+                    {shouldAnimateHero ? (
+                      <TextAnimate
+                        animation="blurIn"
+                        as="p"
+                        once
+                        className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                      >
+                        {t("subtitle")}
+                      </TextAnimate>
+                    ) : (
+                      <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                        {t("subtitle")}
+                      </p>
+                    )}
+                  </motion.div>
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
