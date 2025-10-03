@@ -154,6 +154,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
+                      trigger="mount" // << hanya animasi saat mount
                     >
                       {t("title")}
                     </TextAnimate>
@@ -174,6 +175,7 @@ export default function FeaturesPage() {
                         once
                         as="p"
                         className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                        trigger="mount" // << hanya animasi saat mount
                       >
                         {t("subtitle")}
                       </TextAnimate>

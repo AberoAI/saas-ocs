@@ -5,6 +5,7 @@ import { motion, type Variants } from "framer-motion";
 
 type AnimationName = "blurIn" | "blurInUp" | "fadeIn" | "fadeInUp";
 type SplitBy = "none" | "character" | "word";
+type Trigger = "inView" | "mount"; // NEW
 
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -17,6 +18,8 @@ type TextAnimateProps = {
   children: React.ReactNode;
   /** dipanggil setelah animasi selesai (seluruh blok/urutan) */
   onDone?: () => void;
+  /** NEW: tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
+  trigger?: Trigger;
 };
 
 function getChildVariant(animation: AnimationName) {
@@ -53,22 +56,31 @@ export function TextAnimate({
   className,
   children,
   onDone,
+  trigger = "inView", // NEW default
 }: TextAnimateProps) {
   const Tag = (as || "span") as React.ElementType;
   const childVar = getChildVariant(animation);
 
   const isStringChild = typeof children === "string";
+  const common = {
+    initial: "hidden" as const,
+    variants: childVar as Variants,
+    onAnimationComplete: () => onDone?.(),
+  };
+
+  // Helper untuk memilih prop animate/whileInView
+  const triggerProps =
+    trigger === "mount"
+      ? { animate: "show" as const } // animate sekali saat mount
+      : { whileInView: "show" as const, viewport: { once } as const }; // perilaku lama
 
   if (!isStringChild || by === "none") {
     return (
       <Tag className={className}>
         <motion.span
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once }}
-          variants={childVar as Variants}
+          {...common}
+          {...triggerProps}
           style={{ display: "inline-block" }}
-          onAnimationComplete={() => onDone?.()}
         >
           {children}
         </motion.span>
@@ -85,9 +97,8 @@ export function TextAnimate({
       <motion.span
         aria-hidden
         initial="hidden"
-        whileInView="show"
-        viewport={{ once }}
         variants={container}
+        {...(trigger === "mount" ? { animate: "show" as const } : { whileInView: "show" as const, viewport: { once } as const })}
         style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
         onAnimationComplete={() => onDone?.()}
       >
