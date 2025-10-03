@@ -8,7 +8,7 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
-// ⬇️ GANTI alias @ ke relative path
+// Pakai relative path agar pasti resolv
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
@@ -130,12 +130,22 @@ export default function FeaturesPage() {
 
   // Kontrol animasi hero sekali per locale (hormat reduce-motion)
   const firstVisitHero = useFirstVisitKey(`features-hero-${locale || "en"}`);
-  const hasHeroPlayedRef = useRef(false);
-  const shouldAnimateHero = !prefersReduced && firstVisitHero && !hasHeroPlayedRef.current;
-  useEffect(() => {
-    if (shouldAnimateHero) hasHeroPlayedRef.current = true;
-  }, [shouldAnimateHero]);
 
+  // Tambah override via query ?anim=1 supaya mudah dites
+  const [forceAnim, setForceAnim] = useState(false);
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      setForceAnim(q.get("anim") === "1");
+    } catch {
+      // noop
+    }
+  }, []);
+
+  const shouldAnimateHero = !prefersReduced && (firstVisitHero || forceAnim);
+
+  // Jangan dobel animasi: jika hero pakai TextAnimate, matikan stageFade/rise di HERO
+  // (varian rise masih dipakai untuk konten langkah lain)
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -148,7 +158,13 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
-                <motion.section key="step-hero" {...stageFade} className="text-center">
+                <motion.section
+                  key="step-hero"
+                  // Kalau hero pakai TextAnimate, JANGAN pakai stageFade untuk mencegah “timbul” global
+                  {...(shouldAnimateHero ? {} : stageFade)}
+                  className="text-center"
+                >
+                  {/* Badge tetap pakai rise ringan */}
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -161,40 +177,48 @@ export default function FeaturesPage() {
                   </motion.span>
 
                   {/* Title */}
-                  <motion.div variants={rise} initial="hidden" animate="visible" custom={0.12}>
-                    {shouldAnimateHero ? (
-                      <TextAnimate
-                        animation="blurIn"
-                        as="h1"
-                        once
-                        className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      >
-                        {t("title")}
-                      </TextAnimate>
-                    ) : (
-                      <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                        {t("title")}
-                      </h1>
-                    )}
-                  </motion.div>
+                  {shouldAnimateHero ? (
+                    <TextAnimate
+                      animation="blurIn"
+                      as="h1"
+                      once
+                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                    >
+                      {t("title")}
+                    </TextAnimate>
+                  ) : (
+                    <motion.h1
+                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                      variants={rise}
+                      initial="hidden"
+                      animate="visible"
+                      custom={0.12}
+                    >
+                      {t("title")}
+                    </motion.h1>
+                  )}
 
                   {/* Subtitle */}
-                  <motion.div variants={rise} initial="hidden" animate="visible" custom={0.18}>
-                    {shouldAnimateHero ? (
-                      <TextAnimate
-                        animation="blurIn"
-                        as="p"
-                        once
-                        className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                      >
-                        {t("subtitle")}
-                      </TextAnimate>
-                    ) : (
-                      <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
-                        {t("subtitle")}
-                      </p>
-                    )}
-                  </motion.div>
+                  {shouldAnimateHero ? (
+                    <TextAnimate
+                      animation="blurIn"
+                      as="p"
+                      once
+                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                    >
+                      {t("subtitle")}
+                    </TextAnimate>
+                  ) : (
+                    <motion.p
+                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                      variants={rise}
+                      initial="hidden"
+                      animate="visible"
+                      custom={0.18}
+                    >
+                      {t("subtitle")}
+                    </motion.p>
+                  )}
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
