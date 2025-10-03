@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -59,15 +59,6 @@ export default function FeaturesPage() {
     { key: "booking", icon: "📅" },
   ];
 
-  const rise: Variants = {
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 14 },
-    visible: (delay = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.38, ease: EASE, delay },
-    }),
-  };
-
   const stageFade = useMemo(
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
@@ -111,16 +102,16 @@ export default function FeaturesPage() {
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
-   * ✅ Kunci animasi hero hanya saat pertama load halaman.
-   * - Saat pertama kali di step 0 => animasi tampil.
-   * - Begitu user meninggalkan step 0 sekali saja, tandai ref dan JANGAN animasi lagi.
-   * - Tidak pakai localStorage: per page-load / refresh saja.
+   * ✅ Tampilkan animasi hero HANYA saat pertama kali page dibuka/refresh.
+   * - Pakai ref yang ditandai setelah mount (tidak pakai localStorage).
+   * - Hero section TIDAK dibungkus motion.* agar tidak ada fade/slide saat kembali ke step 0.
    */
-  const hasLeftHeroOnceRef = useRef(false);
-  if (step !== 0) {
-    hasLeftHeroOnceRef.current = true;
-  }
-  const shouldAnimateHero = !prefersReduced && !hasLeftHeroOnceRef.current; // hanya sebelum pernah meninggalkan hero
+  const heroPlayedRef = useRef(false);
+  useEffect(() => {
+    // setelah mount, tandai sudah pernah mainkan animasi
+    heroPlayedRef.current = true;
+  }, []);
+  const shouldAnimateHero = !prefersReduced && !heroPlayedRef.current;
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -134,18 +125,15 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
-                <motion.section key="step-hero" {...stageFade} className="text-center">
-                  {/* Badge tetap pakai rise ringan */}
-                  <motion.span
+                // ⛔️ Bukan motion.section supaya tidak ada animasi container saat kembali ke atas
+                <section key="step-hero" className="text-center">
+                  {/* Badge dibiarkan statis (tanpa animasi container) */}
+                  <span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.05}
                   >
                     {t("badge")}
-                  </motion.span>
+                  </span>
 
                   {/* Title — blur in by character, SEKALI di page-load */}
                   {shouldAnimateHero ? (
@@ -185,7 +173,7 @@ export default function FeaturesPage() {
                     <span className="text-sm">Scroll</span>
                     <span className="animate-bounce" aria-hidden>↓</span>
                   </div>
-                </motion.section>
+                </section>
               )}
 
               {/* Step 1..6 */}
