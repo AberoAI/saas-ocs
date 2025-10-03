@@ -15,6 +15,8 @@ type TextAnimateProps = {
   by?: SplitBy;
   className?: string;
   children: React.ReactNode;
+  /** dipanggil setelah animasi selesai (seluruh blok/urutan) */
+  onDone?: () => void;
 };
 
 function getChildVariant(animation: AnimationName) {
@@ -26,8 +28,8 @@ function getChildVariant(animation: AnimationName) {
       };
     case "fadeInUp":
       return {
-        hidden: { opacity: 0, y: 10 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } },
+        hidden: { opacity: 0, y: 12 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
       };
     case "fadeIn":
       return {
@@ -50,6 +52,7 @@ export function TextAnimate({
   by = "none",
   className,
   children,
+  onDone,
 }: TextAnimateProps) {
   const Tag = (as || "span") as React.ElementType;
   const childVar = getChildVariant(animation);
@@ -65,6 +68,7 @@ export function TextAnimate({
           viewport={{ once }}
           variants={childVar as Variants}
           style={{ display: "inline-block" }}
+          onAnimationComplete={() => onDone?.()}
         >
           {children}
         </motion.span>
@@ -85,6 +89,7 @@ export function TextAnimate({
         viewport={{ once }}
         variants={container}
         style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
+        onAnimationComplete={() => onDone?.()}
       >
         {units.map((u, i) => (
           <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>
