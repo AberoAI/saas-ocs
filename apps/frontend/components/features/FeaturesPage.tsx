@@ -134,34 +134,27 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <section key="step-hero" className="relative text-center">
-                  {/* Headline wrapper dengan minHeight stabil + overlay animasi agar tidak mengubah layout */}
+                  {/* Headline wrapper: beri padding-top agar tidak terjadi margin-collapsing; minHeight tetap stabil */}
                   <div
                     ref={headlineWrapRef}
                     style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-                    className="relative"
+                    className="relative pt-2.5"
                   >
-                    {/* Static H1: selalu memegang layout */}
-                    <h1
-                      className={`mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight transition-opacity duration-150 ${headlineDone ? "opacity-100" : "opacity-0"}`}
-                      aria-hidden={!headlineDone}
-                    >
-                      {t("title")}
-                    </h1>
-
-                    {/* Animated overlay: absolute, tidak memengaruhi layout */}
-                    {shouldAnimateHero && !headlineDone && (
-                      <div className="absolute inset-0 flex justify-center pointer-events-none" aria-hidden>
-                        <TextAnimate
-                          animation="blurIn"
-                          by="character"
-                          once
-                          as="h1"
-                          className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                          onDone={onHeadlineDone}
-                        >
-                          {t("title")}
-                        </TextAnimate>
-                      </div>
+                    {shouldAnimateHero ? (
+                      <TextAnimate
+                        animation="blurIn"
+                        by="character"
+                        once
+                        as="h1"
+                        className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                        onDone={onHeadlineDone}
+                      >
+                        {t("title")}
+                      </TextAnimate>
+                    ) : (
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                        {t("title")}
+                      </h1>
                     )}
                   </div>
 
@@ -185,11 +178,15 @@ export default function FeaturesPage() {
                       </>
                     ) : (
                       <>
+                        {/* placeholder kecil agar layout tidak loncat saat menunggu */}
                         <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
                           {t("subtitle")}
                         </p>
                         {/* placeholder tinggi untuk Scroll indicator */}
-                        <div className="mt-6 sm:mt-7 h-5" aria-hidden />
+                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                          <span className="text-sm">Scroll</span>
+                          <span aria-hidden>↓</span>
+                        </div>
                       </>
                     )
                   ) : (
