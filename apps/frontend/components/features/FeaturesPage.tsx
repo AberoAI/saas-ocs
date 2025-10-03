@@ -17,27 +17,22 @@ const AnalyticsTableStage = dynamic(() => import("./stages/AnalyticsTableStage")
 const AnalyticsRealtimeStage = dynamic(() => import("./stages/AnalyticsRealtimeStage"));
 const HandoffStage = dynamic(() => import("./stages/HandoffStage"));
 
-/* Quote splitter aman untuk TypeScript */
+/* Quote splitter kecil */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
-  const curly = /“([^”]+)”/;
-  const straight = /"([^"]+)"/;
-
-  const m1 = curly.exec(desc);
-  if (m1) {
-    const before = desc.slice(0, m1.index).trim();
-    const after = desc.slice(m1.index + m1[0].length).trim().replace(/^[\s,.;:—-]+/, "");
+  const m = desc.match(/“([^”]+)”/);
+  if (m && m.index !== undefined) {
+    const before = desc.slice(0, m.index).trim();
+    const after = desc.slice(m.index + m[0].length).trim().replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
-    return { quote: m1[1], rest: rest || "" };
+    return { quote: m[1], rest: rest || "" };
   }
-
-  const m2 = straight.exec(desc);
-  if (m2) {
+  const m2 = desc.match(/"([^"]+)"/);
+  if (m2 && m2.index !== undefined) {
     const before = desc.slice(0, m2.index).trim();
     const after = desc.slice(m2.index + m2[0].length).trim().replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
     return { quote: m2[1], rest: rest || "" };
   }
-
   return { rest: desc };
 }
 
@@ -129,7 +124,7 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <section key="step-hero" className="relative text-center">
-                  {/* Headline */}
+                  {/* Headline — blur in by character (sekali saat page load) */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
@@ -147,7 +142,7 @@ export default function FeaturesPage() {
                     </h1>
                   )}
 
-                  {/* Subheadline */}
+                  {/* Subheadline — muncul setelah headline selesai, timbul dari bawah */}
                   {shouldAnimateHero ? (
                     headlineDone ? (
                       <TextAnimate
@@ -160,6 +155,7 @@ export default function FeaturesPage() {
                         {t("subtitle")}
                       </TextAnimate>
                     ) : (
+                      // placeholder kecil agar layout tidak loncat saat menunggu
                       <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
                         {t("subtitle")}
                       </p>
@@ -170,8 +166,8 @@ export default function FeaturesPage() {
                     </p>
                   )}
 
-                  {/* Scroll indicator — tepat di bawah subheadline */}
-                  <div className="mt-6 inline-flex items-center justify-center gap-2 text-foreground/60">
+                  {/* Scroll indicator — pindah ke bawah */}
+                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
                     <span className="animate-bounce" aria-hidden>↓</span>
                   </div>
@@ -181,7 +177,79 @@ export default function FeaturesPage() {
               {/* Step 1..6 */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
-                  {/* ... (bagian isi tetap sama seperti versi sebelumnya) ... */}
+                  <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
+                    {/* LEFT: text */}
+                    <motion.div
+                      variants={contentStagger.container}
+                      initial="hidden"
+                      animate="visible"
+                      exit={{
+                        opacity: 0,
+                        y: prefersReduced ? 0 : -6,
+                        transition: { duration: 0.2, ease: EASE },
+                      }}
+                      className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
+                    >
+                      <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
+                        {/* Icon */}
+                        <motion.div
+                          variants={contentStagger.item}
+                          className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
+                          aria-hidden
+                        >
+                          {!prefersReduced && (
+                            <motion.span
+                              className="absolute inset-0 rounded-xl"
+                              style={{ background: `${BRAND_BG_12}` }}
+                              initial={{ opacity: 0.5, scale: 1 }}
+                              animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
+                              transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
+                            />
+                          )}
+                          <span className="-translate-y-[1px]" style={{ color: BRAND }}>
+                            {items[step - 1].icon}
+                          </span>
+                        </motion.div>
+
+                        {/* Title */}
+                        <motion.h3
+                          variants={contentStagger.item}
+                          className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
+                          tabIndex={-1}
+                          ref={featureTitleRef}
+                          style={{ outline: "none" }}
+                        >
+                          {t(`cards.${items[step - 1].key}.title`)}
+                        </motion.h3>
+
+                        {/* Desc */}
+                        {(() => {
+                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`));
+                          const { quote, rest } = splitQuoted(descRaw);
+                          return (
+                            <motion.div
+                              variants={contentStagger.item}
+                              className="col-start-2 mt-0.5 text-foreground/70 space-y-1 leading-snug"
+                              data-native-scroll="true"
+                              style={{ maxHeight: 260, overflowY: "auto" }}
+                            >
+                              {quote && <p className="italic text-foreground/80 leading-snug">{quote}</p>}
+                              <p>{quote ? rest : descRaw}</p>
+                            </motion.div>
+                          );
+                        })()}
+                      </div>
+                    </motion.div>
+
+                    {/* RIGHT: stage */}
+                    <div className="hidden md:flex self-center justify-center w-full">
+                      <FeatureStage
+                        stepKey={items[step - 1].key}
+                        prefersReduced={!!prefersReduced}
+                        locale={locale}
+                      />
+                    </div>
+                  </div>
                 </motion.section>
               )}
 
