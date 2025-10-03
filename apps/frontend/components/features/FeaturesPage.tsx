@@ -165,12 +165,7 @@ export default function FeaturesPage() {
                       {t("subtitle")}
                     </p>
                   )}
-
-                  {/* Scroll indicator — pindah ke bawah */}
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
-                    <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
-                  </div>
+                  {/* (indikator scroll dihapus dari sini) */}
                 </section>
               )}
 
@@ -281,6 +276,14 @@ export default function FeaturesPage() {
               )}
             </AnimatePresence>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom scroll indicator (moved here) */}
+      <div className="mt-12 mb-10 flex justify-center">
+        <div className="inline-flex items-center gap-2 text-foreground/60">
+          <span className="text-sm">Scroll</span>
+          <span className="animate-bounce" aria-hidden>↓</span>
         </div>
       </div>
     </main>
