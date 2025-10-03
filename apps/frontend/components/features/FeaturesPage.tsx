@@ -162,10 +162,14 @@ export default function FeaturesPage() {
                         </div>
                       </>
                     ) : (
-                      // placeholder kecil agar layout tidak loncat saat menunggu
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
-                        {t("subtitle")}
-                      </p>
+                      <>
+                        {/* placeholder kecil agar layout tidak loncat saat menunggu */}
+                        <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                          {t("subtitle")}
+                        </p>
+                        {/* ✅ placeholder tinggi untuk Scroll indicator agar tidak ada lompatan */}
+                        <div className="mt-6 sm:mt-7 h-5" aria-hidden />
+                      </>
                     )
                   ) : (
                     <>
