@@ -8,7 +8,6 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
-// Pakai relative path agar pasti resolv
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
@@ -36,7 +35,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
   return { rest: desc };
 }
 
-/** Tandai kunjungan pertama per-locale agar animasi hero hanya jalan sekali */
+/** Tandai kunjungan pertama per-locale agar animasi hero pernah dipakai (tetap dipakai juga jika reduce-motion off) */
 function useFirstVisitKey(key: string) {
   const [first, setFirst] = useState(false);
   useEffect(() => {
@@ -128,24 +127,10 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // Kontrol animasi hero sekali per locale (hormat reduce-motion)
+  // Tetap panggil agar tidak jadi unused, tapi hero akan selalu anim kalau reduce-motion off
   const firstVisitHero = useFirstVisitKey(`features-hero-${locale || "en"}`);
+  const shouldAnimateHero = !prefersReduced || firstVisitHero; // → efek aktif kalau reduce-motion off
 
-  // Tambah override via query ?anim=1 supaya mudah dites
-  const [forceAnim, setForceAnim] = useState(false);
-  useEffect(() => {
-    try {
-      const q = new URLSearchParams(window.location.search);
-      setForceAnim(q.get("anim") === "1");
-    } catch {
-      // noop
-    }
-  }, []);
-
-  const shouldAnimateHero = !prefersReduced && (firstVisitHero || forceAnim);
-
-  // Jangan dobel animasi: jika hero pakai TextAnimate, matikan stageFade/rise di HERO
-  // (varian rise masih dipakai untuk konten langkah lain)
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -160,11 +145,11 @@ export default function FeaturesPage() {
               {step === 0 && (
                 <motion.section
                   key="step-hero"
-                  // Kalau hero pakai TextAnimate, JANGAN pakai stageFade untuk mencegah “timbul” global
+                  // Matikan stageFade untuk HERO jika animasi hero aktif (hindari “timbul” menimpa blurIn)
                   {...(shouldAnimateHero ? {} : stageFade)}
                   className="text-center"
                 >
-                  {/* Badge tetap pakai rise ringan */}
+                  {/* Badge boleh pakai rise ringan */}
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -177,29 +162,28 @@ export default function FeaturesPage() {
                   </motion.span>
 
                   {/* Title */}
-                  {shouldAnimateHero ? (
+                  {prefersReduced ? (
+                    <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                      {t("title")}
+                    </h1>
+                  ) : (
                     <TextAnimate
                       animation="blurIn"
+                      by="character"
                       as="h1"
                       once
                       className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                     >
                       {t("title")}
                     </TextAnimate>
-                  ) : (
-                    <motion.h1
-                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.12}
-                    >
-                      {t("title")}
-                    </motion.h1>
                   )}
 
                   {/* Subtitle */}
-                  {shouldAnimateHero ? (
+                  {prefersReduced ? (
+                    <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                      {t("subtitle")}
+                    </p>
+                  ) : (
                     <TextAnimate
                       animation="blurIn"
                       as="p"
@@ -208,16 +192,6 @@ export default function FeaturesPage() {
                     >
                       {t("subtitle")}
                     </TextAnimate>
-                  ) : (
-                    <motion.p
-                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                      variants={rise}
-                      initial="hidden"
-                      animate="visible"
-                      custom={0.18}
-                    >
-                      {t("subtitle")}
-                    </motion.p>
                   )}
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
