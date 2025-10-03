@@ -4,10 +4,12 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
+// ⬇️ GANTI alias @ ke relative path
+import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
 const InstantChatStage = dynamic(() => import("./stages/InstantChatStage"));
@@ -32,6 +34,23 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
     return { quote: m2[1], rest: rest || "" };
   }
   return { rest: desc };
+}
+
+/** Tandai kunjungan pertama per-locale agar animasi hero hanya jalan sekali */
+function useFirstVisitKey(key: string) {
+  const [first, setFirst] = useState(false);
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem(key);
+      if (!seen) {
+        setFirst(true);
+        localStorage.setItem(key, "1");
+      }
+    } catch {
+      // abaikan jika localStorage tidak tersedia
+    }
+  }, [key]);
+  return first;
 }
 
 export default function FeaturesPage() {
@@ -109,6 +128,14 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
+  // Kontrol animasi hero sekali per locale (hormat reduce-motion)
+  const firstVisitHero = useFirstVisitKey(`features-hero-${locale || "en"}`);
+  const hasHeroPlayedRef = useRef(false);
+  const shouldAnimateHero = !prefersReduced && firstVisitHero && !hasHeroPlayedRef.current;
+  useEffect(() => {
+    if (shouldAnimateHero) hasHeroPlayedRef.current = true;
+  }, [shouldAnimateHero]);
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -133,25 +160,41 @@ export default function FeaturesPage() {
                     {t("badge")}
                   </motion.span>
 
-                  <motion.h1
-                    className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.12}
-                  >
-                    {t("title")}
-                  </motion.h1>
+                  {/* Title */}
+                  <motion.div variants={rise} initial="hidden" animate="visible" custom={0.12}>
+                    {shouldAnimateHero ? (
+                      <TextAnimate
+                        animation="blurIn"
+                        as="h1"
+                        once
+                        className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                      >
+                        {t("title")}
+                      </TextAnimate>
+                    ) : (
+                      <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                        {t("title")}
+                      </h1>
+                    )}
+                  </motion.div>
 
-                  <motion.p
-                    className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.18}
-                  >
-                    {t("subtitle")}
-                  </motion.p>
+                  {/* Subtitle */}
+                  <motion.div variants={rise} initial="hidden" animate="visible" custom={0.18}>
+                    {shouldAnimateHero ? (
+                      <TextAnimate
+                        animation="blurIn"
+                        as="p"
+                        once
+                        className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                      >
+                        {t("subtitle")}
+                      </TextAnimate>
+                    ) : (
+                      <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                        {t("subtitle")}
+                      </p>
+                    )}
+                  </motion.div>
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
