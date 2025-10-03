@@ -8,6 +8,7 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
+// gunakan relative path agar pasti resolve di monorepo-mu
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
@@ -33,23 +34,6 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
     return { quote: m2[1], rest: rest || "" };
   }
   return { rest: desc };
-}
-
-/** Tandai kunjungan pertama per-locale agar animasi hero pernah dipakai (tetap dipakai juga jika reduce-motion off) */
-function useFirstVisitKey(key: string) {
-  const [first, setFirst] = useState(false);
-  useEffect(() => {
-    try {
-      const seen = localStorage.getItem(key);
-      if (!seen) {
-        setFirst(true);
-        localStorage.setItem(key, "1");
-      }
-    } catch {
-      // abaikan jika localStorage tidak tersedia
-    }
-  }, [key]);
-  return first;
 }
 
 export default function FeaturesPage() {
@@ -127,9 +111,14 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // Tetap panggil agar tidak jadi unused, tapi hero akan selalu anim kalau reduce-motion off
-  const firstVisitHero = useFirstVisitKey(`features-hero-${locale || "en"}`);
-  const shouldAnimateHero = !prefersReduced || firstVisitHero; // → efek aktif kalau reduce-motion off
+  // HANYA animasi teks hero saat pertama kali komponen mount (atau refresh).
+  // Setelah itu, meskipun scroll balik ke hero, teks tidak dianimasikan lagi.
+  const [heroHasPlayed, setHeroHasPlayed] = useState(false);
+  const shouldAnimateHero = !prefersReduced && !heroHasPlayed;
+  useEffect(() => {
+    // tandai "sudah main" setelah render pertama (tetap izinkan animasi pada frame pertama)
+    setHeroHasPlayed(true);
+  }, []);
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -143,13 +132,8 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
-                <motion.section
-                  key="step-hero"
-                  // Matikan stageFade untuk HERO jika animasi hero aktif (hindari “timbul” menimpa blurIn)
-                  {...(shouldAnimateHero ? {} : stageFade)}
-                  className="text-center"
-                >
-                  {/* Badge boleh pakai rise ringan */}
+                <motion.section key="step-hero" {...stageFade} className="text-center">
+                  {/* Badge masih pakai animasi rise */}
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -161,29 +145,24 @@ export default function FeaturesPage() {
                     {t("badge")}
                   </motion.span>
 
-                  {/* Title */}
-                  {prefersReduced ? (
-                    <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                      {t("title")}
-                    </h1>
-                  ) : (
+                  {/* Title: pakai TextAnimate hanya SEKALI saat mount, TANPA wrapper motion di atasnya */}
+                  {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
-                      by="character"
                       as="h1"
                       once
                       className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                     >
                       {t("title")}
                     </TextAnimate>
+                  ) : (
+                    <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                      {t("title")}
+                    </h1>
                   )}
 
-                  {/* Subtitle */}
-                  {prefersReduced ? (
-                    <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
-                      {t("subtitle")}
-                    </p>
-                  ) : (
+                  {/* Subtitle: sama seperti title — animasi hanya di mount pertama */}
+                  {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
                       as="p"
@@ -192,6 +171,10 @@ export default function FeaturesPage() {
                     >
                       {t("subtitle")}
                     </TextAnimate>
+                  ) : (
+                    <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                      {t("subtitle")}
+                    </p>
                   )}
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
