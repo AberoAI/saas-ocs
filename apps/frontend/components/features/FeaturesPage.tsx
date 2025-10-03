@@ -131,12 +131,16 @@ export default function FeaturesPage() {
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
-              {/* HERO — SELALU MOUNTED, hanya disembunyikan saat step !== 0 */}
+              {/* HERO — SELALU MOUNTED; tidak pernah display:none supaya animasi tidak re-trigger saat scroll */}
               <section
-                className={`relative text-center ${step === 0 ? "" : "hidden"}`}
+                className={
+                  step === 0
+                    ? "relative text-center opacity-100"
+                    : "text-center opacity-0 pointer-events-none absolute inset-0 -z-10"
+                }
                 aria-hidden={step !== 0}
               >
-                {/* Headline wrapper: padding-top hindari margin-collapsing; minHeight tetap stabil */}
+                {/* Headline wrapper: padding-top hindari margin-collapsing; minHeight stabil */}
                 <div
                   ref={headlineWrapRef}
                   style={headlineMinH ? { minHeight: headlineMinH } : undefined}
