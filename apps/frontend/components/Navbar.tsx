@@ -28,10 +28,10 @@ export default function Navbar() {
     return `${localePrefix}${href}`;
   };
 
-  // map key → label i18n
+  // map key → label i18n (pakai variabel 'label' yang memang dipakai)
   const links = NAV_LINKS.map((l) => {
     const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
-    return { key: l.key, label: l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`), href: withLocale(l.href) };
+    return { key: l.key, label, href: withLocale(l.href) };
   });
 
   const isActive = (href: string) => {

@@ -1,5 +1,5 @@
 // apps/frontend/app/[locale]/features/page.tsx
-import FeaturesPage from "@/components/FeaturesPage";
+import FeaturesPage from "@/components/features/FeaturesPage";
 
 export const metadata = {
   alternates: {
