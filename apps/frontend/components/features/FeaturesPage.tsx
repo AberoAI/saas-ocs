@@ -1,3 +1,4 @@
+// apps/frontend/components/features/FeaturesPage.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -102,13 +103,11 @@ export default function FeaturesPage() {
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
-   * ✅ Tampilkan animasi hero HANYA saat pertama kali page dibuka/refresh.
-   * - Pakai ref yang ditandai setelah mount (tidak pakai localStorage).
-   * - Hero section TIDAK dibungkus motion.* agar tidak ada fade/slide saat kembali ke step 0.
+   * ✅ Animasi hero hanya saat pertama kali halaman dibuka/refresh.
+   *   (tanpa localStorage; cukup per page-load)
    */
   const heroPlayedRef = useRef(false);
   useEffect(() => {
-    // setelah mount, tandai sudah pernah mainkan animasi
     heroPlayedRef.current = true;
   }, []);
   const shouldAnimateHero = !prefersReduced && !heroPlayedRef.current;
@@ -125,17 +124,10 @@ export default function FeaturesPage() {
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
-                // ⛔️ Bukan motion.section supaya tidak ada animasi container saat kembali ke atas
+                // Bukan motion.section agar tidak re-fade saat scroll balik ke atas
                 <section key="step-hero" className="text-center">
-                  {/* Badge dibiarkan statis (tanpa animasi container) */}
-                  <span
-                    className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-                    style={{ background: `${BRAND}14` }}
-                  >
-                    {t("badge")}
-                  </span>
-
-                  {/* Title — blur in by character, SEKALI di page-load */}
+                  {/* ⛔️ Badge dihapus agar tidak ada tulisan "Product/Ürün" */}
+                  {/* Title — blur in by character, hanya pada page-load */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
@@ -152,7 +144,7 @@ export default function FeaturesPage() {
                     </h1>
                   )}
 
-                  {/* Subtitle — blur in by word, SEKALI di page-load */}
+                  {/* Subtitle — blur in by word, hanya pada page-load */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
