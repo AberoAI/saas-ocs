@@ -131,17 +131,7 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <motion.section key="step-hero" {...stageFade} className="text-center">
-                  {/* Badge */}
-                  <motion.span
-                    className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
-                    style={{ background: `${BRAND}14` }}
-                    variants={rise}
-                    initial="hidden"
-                    animate="visible"
-                    custom={0.05}
-                  >
-                    {t("badge")}
-                  </motion.span>
+                  {/* 🔥 Badge dihapus (sebelumnya menampilkan t("badge")) */}
 
                   {/* Title — blur in by character (sekali) */}
                   {shouldAnimateHero ? (
