@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef, useEffect, useState, useLayoutEffect, useCallback } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -101,13 +101,25 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** Animasi hero hanya saat pertama kali halaman dibuka — BEKU */
-  // ❗ Bekukan keputusan animasi pada render pertama agar struktur DOM tidak berubah setelah mount
+  /** Animasi hero hanya saat pertama kali halaman dibuka — dibekukan agar markup stabil */
   const shouldAnimateHeroRef = useRef<boolean>(!prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
-  // Untuk menunggu animasi headline selesai baru memulai subheadline
+  // Tinggi headline dibekukan saat mount untuk mencegah micro-shift
+  const headlineWrapRef = useRef<HTMLDivElement>(null);
+  const [headlineMinH, setHeadlineMinH] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    if (headlineWrapRef.current && headlineMinH == null) {
+      const h = headlineWrapRef.current.getBoundingClientRect().height;
+      if (h > 0) setHeadlineMinH(h);
+    }
+  }, [headlineMinH]);
+
+  // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
+  const onHeadlineDone = useCallback(() => {
+    setTimeout(() => setHeadlineDone(true), 60);
+  }, []);
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -122,25 +134,27 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <section key="step-hero" className="relative text-center">
-                  {/* Headline — blur in by character (sekali saat page load) */}
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurIn"
-                      by="character"
-                      once
-                      as="h1"
-                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      onDone={() => setHeadlineDone(true)}
-                    >
-                      {t("title")}
-                    </TextAnimate>
-                  ) : (
-                    <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                      {t("title")}
-                    </h1>
-                  )}
+                  {/* Headline wrapper dengan minHeight stabil */}
+                  <div ref={headlineWrapRef} style={headlineMinH ? { minHeight: headlineMinH } : undefined}>
+                    {shouldAnimateHero ? (
+                      <TextAnimate
+                        animation="blurIn"
+                        by="character"
+                        once
+                        as="h1"
+                        className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                        onDone={onHeadlineDone}
+                      >
+                        {t("title")}
+                      </TextAnimate>
+                    ) : (
+                      <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                        {t("title")}
+                      </h1>
+                    )}
+                  </div>
 
-                  {/* Subheadline — muncul setelah headline selesai, timbul dari bawah */}
+                  {/* Subheadline + Scroll */}
                   {shouldAnimateHero ? (
                     headlineDone ? (
                       <>
@@ -153,7 +167,6 @@ export default function FeaturesPage() {
                         >
                           {t("subtitle")}
                         </TextAnimate>
-                        {/* Scroll indicator — tepat di bawah subheadline */}
                         <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                           <span className="text-sm">Scroll</span>
                           <span className="animate-bounce" aria-hidden>↓</span>
@@ -161,11 +174,10 @@ export default function FeaturesPage() {
                       </>
                     ) : (
                       <>
-                        {/* placeholder kecil agar layout tidak loncat saat menunggu */}
                         <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
                           {t("subtitle")}
                         </p>
-                        {/* ✅ placeholder tinggi untuk Scroll indicator agar tidak ada lompatan */}
+                        {/* placeholder tinggi untuk Scroll indicator */}
                         <div className="mt-6 sm:mt-7 h-5" aria-hidden />
                       </>
                     )
@@ -174,7 +186,6 @@ export default function FeaturesPage() {
                       <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
                         {t("subtitle")}
                       </p>
-                      {/* Scroll indicator — tepat di bawah subheadline */}
                       <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                         <span className="text-sm">Scroll</span>
                         <span className="animate-bounce" aria-hidden>↓</span>
@@ -182,7 +193,7 @@ export default function FeaturesPage() {
                     </>
                   )}
 
-                  {/* (DIHAPUS) Scroll indicator lama yang absolute di bawah viewport */}
+                  {/* (DIHAPUS) indikator lama yang absolute */}
                   {/*
                   <div className="absolute bottom-10 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
