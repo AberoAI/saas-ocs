@@ -14,33 +14,46 @@ type TextAnimateProps = {
   once?: boolean;
   by?: SplitBy;
   className?: string;
+  /** Delay mulai animasi dalam milidetik (opsional) */
+  delayMs?: number;
   children: React.ReactNode;
-  /** dipanggil setelah animasi selesai (seluruh blok/urutan) */
-  onDone?: () => void;
 };
 
-function getChildVariant(animation: AnimationName) {
+function getChildVariant(animation: AnimationName, delaySec = 0) {
   switch (animation) {
     case "blurInUp":
       return {
         hidden: { opacity: 0, y: 12, filter: "blur(6px)" },
-        show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.45, ease: EASE_OUT } },
+        show: {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          transition: { duration: 0.45, ease: EASE_OUT, delay: delaySec },
+        },
       };
     case "fadeInUp":
       return {
-        hidden: { opacity: 0, y: 12 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
+        hidden: { opacity: 0, y: 10 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.4, ease: EASE_OUT, delay: delaySec },
+        },
       };
     case "fadeIn":
       return {
         hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.35, ease: EASE_OUT } },
+        show: { opacity: 1, transition: { duration: 0.35, ease: EASE_OUT, delay: delaySec } },
       };
     case "blurIn":
     default:
       return {
         hidden: { opacity: 0, filter: "blur(8px)" },
-        show: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.45, ease: EASE_OUT } },
+        show: {
+          opacity: 1,
+          filter: "blur(0px)",
+          transition: { duration: 0.45, ease: EASE_OUT, delay: delaySec },
+        },
       };
   }
 }
@@ -51,12 +64,11 @@ export function TextAnimate({
   once = false,
   by = "none",
   className,
+  delayMs = 0,
   children,
-  onDone,
 }: TextAnimateProps) {
   const Tag = (as || "span") as React.ElementType;
-  const childVar = getChildVariant(animation);
-
+  const childVar = getChildVariant(animation, Math.max(0, delayMs) / 1000);
   const isStringChild = typeof children === "string";
 
   if (!isStringChild || by === "none") {
@@ -68,7 +80,6 @@ export function TextAnimate({
           viewport={{ once }}
           variants={childVar as Variants}
           style={{ display: "inline-block" }}
-          onAnimationComplete={() => onDone?.()}
         >
           {children}
         </motion.span>
@@ -89,7 +100,6 @@ export function TextAnimate({
         viewport={{ once }}
         variants={container}
         style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
-        onAnimationComplete={() => onDone?.()}
       >
         {units.map((u, i) => (
           <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>

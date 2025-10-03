@@ -1,11 +1,10 @@
-// apps/frontend/components/features/FeaturesPage.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -50,6 +49,7 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
+  // 6 poin fitur
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
     { key: "instant", icon: "⚡️" },
     { key: "multitenant", icon: "🏢" },
@@ -58,6 +58,15 @@ export default function FeaturesPage() {
     { key: "multilingual", icon: "🌐" },
     { key: "booking", icon: "📅" },
   ];
+
+  const rise: Variants = {
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 14 },
+    visible: (delay = 0) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.38, ease: EASE, delay },
+    }),
+  };
 
   const stageFade = useMemo(
     () => ({
@@ -92,8 +101,8 @@ export default function FeaturesPage() {
 
   const BRAND_BG_12 = `${BRAND}1F`;
 
-  // Sticky viewport multi-step
-  const TOTAL_STEPS = items.length + 2;
+  // Sticky viewport multi-step — gunakan hook
+  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta
   const { containerRef, step } = useStepScroll({
     totalSteps: TOTAL_STEPS,
     reduceMotion: !!prefersReduced,
@@ -101,15 +110,12 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** Animasi hero hanya saat pertama kali halaman dibuka */
-  const heroPlayedRef = useRef(false);
-  useEffect(() => {
-    heroPlayedRef.current = true;
-  }, []);
-  const shouldAnimateHero = !prefersReduced && !heroPlayedRef.current;
-
-  // Untuk menunggu animasi headline selesai baru memulai subheadline
-  const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
+  // ✅ animasi hero hanya saat pertama render (sebelum user meninggalkan step 0)
+  const hasLeftHeroOnceRef = useRef(false);
+  if (step !== 0) {
+    hasLeftHeroOnceRef.current = true;
+  }
+  const shouldAnimateHero = !prefersReduced && !hasLeftHeroOnceRef.current;
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -118,13 +124,26 @@ export default function FeaturesPage() {
         className="relative"
         style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }}
       >
-        <div className="sticky top-0 h-screen flex items-center justify-center">
+        {/* jadikan container sticky sebagai relative agar anchor absolute di bawah bisa bekerja */}
+        <div className="sticky top-0 h-screen flex items-center justify-center relative">
           <div className="w-full">
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
-                <section key="step-hero" className="relative text-center">
-                  {/* Headline — blur in by character (sekali saat page load) */}
+                <motion.section key="step-hero" {...stageFade} className="text-center">
+                  {/* Badge */}
+                  <motion.span
+                    className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
+                    style={{ background: `${BRAND}14` }}
+                    variants={rise}
+                    initial="hidden"
+                    animate="visible"
+                    custom={0.05}
+                  >
+                    {t("badge")}
+                  </motion.span>
+
+                  {/* Title — blur in by character (sekali) */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
@@ -132,7 +151,6 @@ export default function FeaturesPage() {
                       once
                       as="h1"
                       className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      onDone={() => setHeadlineDone(true)}
                     >
                       {t("title")}
                     </TextAnimate>
@@ -142,36 +160,24 @@ export default function FeaturesPage() {
                     </h1>
                   )}
 
-                  {/* Subheadline — muncul setelah headline selesai, timbul dari bawah */}
+                  {/* Subtitle — fadeInUp (sekali), dimulai setelah headline */}
                   {shouldAnimateHero ? (
-                    headlineDone ? (
-                      <TextAnimate
-                        animation="fadeInUp"
-                        by="word"
-                        once
-                        as="p"
-                        className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                      >
-                        {t("subtitle")}
-                      </TextAnimate>
-                    ) : (
-                      // placeholder kecil agar layout tidak loncat saat menunggu
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
-                        {t("subtitle")}
-                      </p>
-                    )
+                    <TextAnimate
+                      animation="fadeInUp"
+                      by="word"
+                      once
+                      delayMs={550}
+                      as="p"
+                      className="mt-5 sm:mt-6 lg:mt-7 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                    >
+                      {t("subtitle")}
+                    </TextAnimate>
                   ) : (
-                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                    <p className="mt-5 sm:mt-6 lg:mt-7 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
                       {t("subtitle")}
                     </p>
                   )}
-
-                  {/* Scroll indicator — pindah ke bawah */}
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
-                    <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
-                  </div>
-                </section>
+                </motion.section>
               )}
 
               {/* Step 1..6 */}
@@ -281,6 +287,14 @@ export default function FeaturesPage() {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Scroll indicator: absolute bottom, hanya di hero */}
+          {step === 0 && (
+            <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
+              <span className="text-sm">Scroll</span>
+              <span className="animate-bounce" aria-hidden>↓</span>
+            </div>
+          )}
         </div>
       </div>
     </main>
@@ -301,6 +315,7 @@ function FeatureStage({
   if (stepKey === "analytics") return <AnalyticsRealtimeStage prefersReduced={prefersReduced} />;
   if (stepKey === "handoff") return <HandoffStage prefersReduced={prefersReduced} locale={locale} />;
 
+  // Fallback visual untuk multilingual/booking (placeholder ringan)
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
     instant: "#FF9AA2",
     multitenant: "#B5EAD7",
