@@ -101,12 +101,10 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** Animasi hero hanya saat pertama kali halaman dibuka */
-  const heroPlayedRef = useRef(false);
-  useEffect(() => {
-    heroPlayedRef.current = true;
-  }, []);
-  const shouldAnimateHero = !prefersReduced && !heroPlayedRef.current;
+  /** Animasi hero hanya saat pertama kali halaman dibuka — BEKU */
+  // ❗ Bekukan keputusan animasi pada render pertama agar struktur DOM tidak berubah setelah mount
+  const shouldAnimateHeroRef = useRef<boolean>(!prefersReduced);
+  const shouldAnimateHero = shouldAnimateHeroRef.current;
 
   // Untuk menunggu animasi headline selesai baru memulai subheadline
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
