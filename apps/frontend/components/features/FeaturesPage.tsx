@@ -1,10 +1,11 @@
+// apps/frontend/components/features/FeaturesPage.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect } from "react"; // ⬅️ tambah useEffect
+import { useMemo, useRef, useEffect, useState } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -49,7 +50,6 @@ export default function FeaturesPage() {
     return `${localePrefix}${href.startsWith("/") ? href : `/${href}`}`;
   };
 
-  // 6 poin fitur
   const items: { key: keyof IntlMessages["features"]["cards"]; icon: string }[] = [
     { key: "instant", icon: "⚡️" },
     { key: "multitenant", icon: "🏢" },
@@ -58,15 +58,6 @@ export default function FeaturesPage() {
     { key: "multilingual", icon: "🌐" },
     { key: "booking", icon: "📅" },
   ];
-
-  const rise: Variants = {
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 14 },
-    visible: (delay = 0) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.38, ease: EASE, delay },
-    }),
-  };
 
   const stageFade = useMemo(
     () => ({
@@ -101,8 +92,8 @@ export default function FeaturesPage() {
 
   const BRAND_BG_12 = `${BRAND}1F`;
 
-  // Sticky viewport multi-step — gunakan hook
-  const TOTAL_STEPS = items.length + 2; // hero + 6 items + cta
+  // Sticky viewport multi-step
+  const TOTAL_STEPS = items.length + 2;
   const { containerRef, step } = useStepScroll({
     totalSteps: TOTAL_STEPS,
     reduceMotion: !!prefersReduced,
@@ -110,13 +101,15 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // ✅ Animasi hero HANYA saat load pertama.
-  // Gunakan effect agar tidak tertembak saat render awal.
-  const hasLeftHeroOnceRef = useRef(false);
+  /** Animasi hero hanya saat pertama kali halaman dibuka */
+  const heroPlayedRef = useRef(false);
   useEffect(() => {
-    if (step !== 0) hasLeftHeroOnceRef.current = true;
-  }, [step]);
-  const shouldAnimateHero = !prefersReduced && !hasLeftHeroOnceRef.current;
+    heroPlayedRef.current = true;
+  }, []);
+  const shouldAnimateHero = !prefersReduced && !heroPlayedRef.current;
+
+  // Untuk menunggu animasi headline selesai baru memulai subheadline
+  const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -125,15 +118,13 @@ export default function FeaturesPage() {
         className="relative"
         style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }}
       >
-        <div className="sticky top-0 h-screen flex items-center justify-center relative">
+        <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
-                <motion.section key="step-hero" {...stageFade} className="text-center">
-                  {/* (badge dihapus) */}
-
-                  {/* Headline — blurIn by character (sekali) */}
+                <section key="step-hero" className="relative text-center">
+                  {/* Headline — blur in by character (sekali saat page load) */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
@@ -141,6 +132,7 @@ export default function FeaturesPage() {
                       once
                       as="h1"
                       className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                      onDone={() => setHeadlineDone(true)}
                     >
                       {t("title")}
                     </TextAnimate>
@@ -150,24 +142,36 @@ export default function FeaturesPage() {
                     </h1>
                   )}
 
-                  {/* Subheadline — fadeInUp (sekali) setelah headline */}
+                  {/* Subheadline — muncul setelah headline selesai, timbul dari bawah */}
                   {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="fadeInUp"
-                      by="word"
-                      once
-                      delayMs={550}
-                      as="p"
-                      className="mt-5 sm:mt-6 lg:mt-7 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                    >
-                      {t("subtitle")}
-                    </TextAnimate>
+                    headlineDone ? (
+                      <TextAnimate
+                        animation="fadeInUp"
+                        by="word"
+                        once
+                        as="p"
+                        className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                      >
+                        {t("subtitle")}
+                      </TextAnimate>
+                    ) : (
+                      // placeholder kecil agar layout tidak loncat saat menunggu
+                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                        {t("subtitle")}
+                      </p>
+                    )
                   ) : (
-                    <p className="mt-5 sm:mt-6 lg:mt-7 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
                       {t("subtitle")}
                     </p>
                   )}
-                </motion.section>
+
+                  {/* Scroll indicator — pindah ke bawah */}
+                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
+                    <span className="text-sm">Scroll</span>
+                    <span className="animate-bounce" aria-hidden>↓</span>
+                  </div>
+                </section>
               )}
 
               {/* Step 1..6 */}
@@ -277,14 +281,6 @@ export default function FeaturesPage() {
               )}
             </AnimatePresence>
           </div>
-
-          {/* Scroll indicator di paling bawah hero */}
-          {step === 0 && (
-            <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
-              <span className="text-sm">Scroll</span>
-              <span className="animate-bounce" aria-hidden>↓</span>
-            </div>
-          )}
         </div>
       </div>
     </main>
