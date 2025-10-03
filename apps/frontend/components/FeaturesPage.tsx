@@ -81,7 +81,8 @@ const isInteractive = (el: EventTarget | null): boolean => {
 };
 
 // Visual viewport height (mobile-safe)
-const getVVH = (): number => (window.visualViewport?.height ?? window.innerHeight);
+const getVVH = (): number =>
+  typeof window === "undefined" ? 0 : (window.visualViewport?.height ?? window.innerHeight);
 
 // Apakah target/ancestor-nya bisa scroll native di sumbu Y?
 const canScrollWithin = (target: EventTarget | null): boolean => {
@@ -90,10 +91,9 @@ const canScrollWithin = (target: EventTarget | null): boolean => {
   while (cur && depth++ < 12) {
     if (cur.dataset?.nativeScroll === "true") return true;
     if (cur.getAttribute?.("role") === "dialog") return true;
-    const style = window.getComputedStyle(cur);
-    const oy = style.overflowY;
-    const canScrollY =
-      (oy === "auto" || oy === "scroll") && cur.scrollHeight > cur.clientHeight;
+    const style = typeof window !== "undefined" ? window.getComputedStyle(cur) : null;
+    const oy = style?.overflowY;
+    const canScrollY = !!style && (oy === "auto" || oy === "scroll") && cur.scrollHeight > cur.clientHeight;
     if (canScrollY) return true;
     cur = cur.parentElement;
   }
@@ -223,17 +223,15 @@ export default function FeaturesPage() {
     _setStep(v);
   }, []);
 
-  // --- NEW: tiny state machine to prevent loops
-  // 'idle' → normal | 'gesturing' → user wheel/touch burst | 'animating' → programmatic snap
+  // --- NEW: tiny state machine
   const modeRef = useRef<'idle' | 'gesturing' | 'animating'>('idle');
 
   // NEW: ignore scroll events for a short window after snap to kill rebound
   const ignoreScrollUntilRef = useRef(0);
 
-  // direction + cool-down
+  // direction timestamp (we no longer need COOLDOWN)
   const lastDirRef = useRef<1 | -1 | 0>(0);
   const lastChangeAtRef = useRef(0);
-  const COOLDOWN = 260;
 
   // geometry caches
   const containerTopRef = useRef(0);
@@ -255,6 +253,7 @@ export default function FeaturesPage() {
   }, []);
 
   const recalc = useCallback(() => {
+    if (typeof window === "undefined") return;
     const root = containerRef.current;
     if (!root) return;
     const rect = root.getBoundingClientRect();
@@ -291,6 +290,7 @@ export default function FeaturesPage() {
   }, [recalc]);
 
   const inViewport = useCallback(() => {
+    if (typeof window === "undefined") return false;
     const root = containerRef.current;
     if (!root) return false;
     const rect = root.getBoundingClientRect();
@@ -298,11 +298,22 @@ export default function FeaturesPage() {
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   }, []);
 
-  const vh = useCallback(() => viewportHRef.current || getVVH(), []);
+  const vh = useCallback(() => {
+    if (viewportHRef.current) return viewportHRef.current;
+    return getVVH() || 1;
+  }, []);
+
+  // SSR-safe hysteresis calculator
+  const getHystPx = useCallback(() => {
+    const base = vh() * 0.18;
+    return Math.min(base || 120, 140) || 120;
+  }, [vh]);
 
   // NEW: safer animateTo with hard guards + ignore window
   const animateTo = useCallback(
     (to: number, duration = 420) => {
+      if (typeof window === "undefined") return;
+
       cancelAnim();
 
       const start = window.scrollY;
@@ -348,7 +359,7 @@ export default function FeaturesPage() {
       const top = containerTopRef.current + next * vh();
       setStep(next);
       lastDirRef.current = dir;
-      lastChangeAtRef.current = performance.now();
+      lastChangeAtRef.current = typeof performance !== "undefined" ? performance.now() : 0;
       animateTo(top, prefersReduced ? 0 : 420);
     },
     [setStep, vh, animateTo, prefersReduced]
@@ -356,12 +367,8 @@ export default function FeaturesPage() {
 
   const interceptionEnabled = !prefersReduced;
 
-  // Hysteresis: require > half-screen + a little margin before re-snapping
-  const FRACTION_TO_SWITCH = 0.55; // >0.5 to avoid flapping
-  const PIXEL_HYSTERESIS = Math.min(vh() * 0.18, 140);
-
   useEffect(() => {
-    if (!interceptionEnabled) return;
+    if (!interceptionEnabled || typeof window === "undefined") return;
     const root = containerRef.current;
     if (!root) return;
 
@@ -481,7 +488,7 @@ export default function FeaturesPage() {
 
   // Sync while dragging scrollbar (do not snap during animation; apply hysteresis)
   useEffect(() => {
-    if (!interceptionEnabled) return;
+    if (!interceptionEnabled || typeof window === "undefined") return;
 
     const ctrl = new AbortController();
     const { signal } = ctrl;
@@ -499,10 +506,11 @@ export default function FeaturesPage() {
       const targetIdx = Math.round(progress);
       const distPx = Math.abs(progress - stepRef.current) * h;
 
+      // Hysteresis: require > 55% + pixel margin
       if (
         targetIdx !== stepRef.current &&
         Math.abs(progress - stepRef.current) > 0.55 &&
-        distPx > Math.min(vh() * 0.18, 140)
+        distPx > getHystPx()
       ) {
         const dir: 1 | -1 = targetIdx > stepRef.current ? 1 : -1;
         lastDirRef.current = dir;
@@ -513,7 +521,7 @@ export default function FeaturesPage() {
 
     window.addEventListener("scroll", onScroll, { passive: true, signal });
     return () => ctrl.abort();
-  }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh]);
+  }, [TOTAL_STEPS, interceptionEnabled, inViewport, setStep, vh, getHystPx]);
 
   /* =======================
    * Title ref — no auto-focus (avoid blue ring)
@@ -1321,7 +1329,8 @@ function MetricCard({ label, value, hint }: { label: string; value: ReactNode; h
 function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; locale: Locale }) {
   type Sender = "user" | "ai" | "human" | "system";
 
-  const script =
+  // ✅ Memoize script supaya dependency useEffect stabil
+  const script = useMemo(() => (
     locale === "tr"
       ? ([
           { sender: "user",  text: "Tedaviden sonra dikişlerim kanamaya başladı, ne yapmalıyım?" },
@@ -1332,7 +1341,8 @@ function HandoffStage({ prefersReduced, locale }: { prefersReduced: boolean; loc
           { sender: "user",  text: "My stitches started bleeding after the treatment, what should I do?" },
           { sender: "ai",    text: "This needs special attention. I’ll connect you with our medical staff." },
           { sender: "human", text: "Hello, my name is Ella. I’m a nurse, and I’ll take over the conversation to assist you further." },
-        ] as Array<{ sender: Sender; text: string }>);
+        ] as Array<{ sender: Sender; text: string }>)
+  ), [locale]);
 
   const [idx, setIdx] = useState(prefersReduced ? script.length : 1);
   const [typing, setTyping] = useState(!prefersReduced);
