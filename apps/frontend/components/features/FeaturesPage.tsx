@@ -4,11 +4,11 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useRef } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
-// gunakan relative path agar pasti resolve di monorepo-mu
+// gunakan relative path dari lokasi file ini ke registry
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
@@ -111,15 +111,6 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // HANYA animasi teks hero saat pertama kali komponen mount (atau refresh).
-  // Setelah itu, meskipun scroll balik ke hero, teks tidak dianimasikan lagi.
-  const [heroHasPlayed, setHeroHasPlayed] = useState(false);
-  const shouldAnimateHero = !prefersReduced && !heroHasPlayed;
-  useEffect(() => {
-    // tandai "sudah main" setelah render pertama (tetap izinkan animasi pada frame pertama)
-    setHeroHasPlayed(true);
-  }, []);
-
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -133,7 +124,7 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <motion.section key="step-hero" {...stageFade} className="text-center">
-                  {/* Badge masih pakai animasi rise */}
+                  {/* Badge masih pakai rise ringan */}
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -145,37 +136,27 @@ export default function FeaturesPage() {
                     {t("badge")}
                   </motion.span>
 
-                  {/* Title: pakai TextAnimate hanya SEKALI saat mount, TANPA wrapper motion di atasnya */}
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurIn"
-                      as="h1"
-                      once
-                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                    >
-                      {t("title")}
-                    </TextAnimate>
-                  ) : (
-                    <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                      {t("title")}
-                    </h1>
-                  )}
+                  {/* Title — blur in by character, sekali saat muncul, tidak retrigger saat scroll */}
+                  <TextAnimate
+                    animation="blurIn"
+                    by="character"
+                    once
+                    as="h1"
+                    className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                  >
+                    {t("title")}
+                  </TextAnimate>
 
-                  {/* Subtitle: sama seperti title — animasi hanya di mount pertama */}
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurIn"
-                      as="p"
-                      once
-                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                    >
-                      {t("subtitle")}
-                    </TextAnimate>
-                  ) : (
-                    <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
-                      {t("subtitle")}
-                    </p>
-                  )}
+                  {/* Subtitle — blur in by word, sekali */}
+                  <TextAnimate
+                    animation="blurIn"
+                    by="word"
+                    once
+                    as="p"
+                    className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                  >
+                    {t("subtitle")}
+                  </TextAnimate>
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
