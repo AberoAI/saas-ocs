@@ -1,3 +1,4 @@
+// apps/frontend/registry/magicui/text-animate.tsx
 "use client";
 
 import * as React from "react";
@@ -18,7 +19,7 @@ type TextAnimateProps = {
   children: React.ReactNode;
   /** dipanggil setelah animasi selesai (seluruh blok/urutan) */
   onDone?: () => void;
-  /** NEW: tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
+  /** tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
   trigger?: Trigger;
 };
 
@@ -56,31 +57,22 @@ export function TextAnimate({
   className,
   children,
   onDone,
-  trigger = "inView", // NEW default
+  trigger = "inView", // default
 }: TextAnimateProps) {
   const Tag = (as || "span") as React.ElementType;
   const childVar = getChildVariant(animation);
 
   const isStringChild = typeof children === "string";
-  const common = {
-    initial: "hidden" as const,
-    variants: childVar as Variants,
-    onAnimationComplete: () => onDone?.(),
-  };
-
-  // Helper untuk memilih prop animate/whileInView
-  const triggerProps =
-    trigger === "mount"
-      ? { animate: "show" as const } // animate sekali saat mount
-      : { whileInView: "show" as const, viewport: { once } as const }; // perilaku lama
 
   if (!isStringChild || by === "none") {
     return (
       <Tag className={className}>
         <motion.span
-          {...common}
-          {...triggerProps}
+          initial="hidden"
+          {...(trigger === "mount" ? { animate: "show" as const } : { whileInView: "show" as const, viewport: { once } as const })}
+          variants={childVar as Variants}
           style={{ display: "inline-block" }}
+          onAnimationComplete={() => onDone?.()}
         >
           {children}
         </motion.span>

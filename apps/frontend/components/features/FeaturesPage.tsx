@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect, useState, useLayoutEffect, useCallback } from "react";
+import { useMemo, useRef, useLayoutEffect, useState, useCallback } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -131,7 +131,7 @@ export default function FeaturesPage() {
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
             <AnimatePresence mode="wait">
-              {/* HERO — SELALU MOUNTED; tidak pernah display:none supaya animasi tidak re-trigger saat scroll */}
+              {/* HERO — SELALU MOUNTED; animasi TIDAK dipicu scroll */}
               <section
                 className={
                   step === 0
@@ -154,7 +154,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
-                      trigger="mount" // << hanya animasi saat mount
+                      trigger="mount" // hanya saat mount, tidak terkait scroll
                     >
                       {t("title")}
                     </TextAnimate>
@@ -175,7 +175,7 @@ export default function FeaturesPage() {
                         once
                         as="p"
                         className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                        trigger="mount" // << hanya animasi saat mount
+                        trigger="mount" // hanya saat mount, tidak terkait scroll
                       >
                         {t("subtitle")}
                       </TextAnimate>
