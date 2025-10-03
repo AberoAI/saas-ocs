@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react"; // ⬅️ tambah useEffect
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -110,11 +110,12 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // ✅ animasi hero hanya saat pertama render (sebelum user meninggalkan step 0)
+  // ✅ Animasi hero HANYA saat load pertama.
+  // Gunakan effect agar tidak tertembak saat render awal.
   const hasLeftHeroOnceRef = useRef(false);
-  if (step !== 0) {
-    hasLeftHeroOnceRef.current = true;
-  }
+  useEffect(() => {
+    if (step !== 0) hasLeftHeroOnceRef.current = true;
+  }, [step]);
   const shouldAnimateHero = !prefersReduced && !hasLeftHeroOnceRef.current;
 
   return (
@@ -124,16 +125,15 @@ export default function FeaturesPage() {
         className="relative"
         style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }}
       >
-        {/* jadikan container sticky sebagai relative agar anchor absolute di bawah bisa bekerja */}
         <div className="sticky top-0 h-screen flex items-center justify-center relative">
           <div className="w-full">
             <AnimatePresence mode="wait">
               {/* HERO */}
               {step === 0 && (
                 <motion.section key="step-hero" {...stageFade} className="text-center">
-                  {/* 🔥 Badge dihapus (sebelumnya menampilkan t("badge")) */}
+                  {/* (badge dihapus) */}
 
-                  {/* Title — blur in by character (sekali) */}
+                  {/* Headline — blurIn by character (sekali) */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
@@ -150,7 +150,7 @@ export default function FeaturesPage() {
                     </h1>
                   )}
 
-                  {/* Subtitle — fadeInUp (sekali), dimulai setelah headline */}
+                  {/* Subheadline — fadeInUp (sekali) setelah headline */}
                   {shouldAnimateHero ? (
                     <TextAnimate
                       animation="fadeInUp"
@@ -278,7 +278,7 @@ export default function FeaturesPage() {
             </AnimatePresence>
           </div>
 
-          {/* Scroll indicator: absolute bottom, hanya di hero */}
+          {/* Scroll indicator di paling bawah hero */}
           {step === 0 && (
             <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 text-foreground/60">
               <span className="text-sm">Scroll</span>
@@ -305,7 +305,6 @@ function FeatureStage({
   if (stepKey === "analytics") return <AnalyticsRealtimeStage prefersReduced={prefersReduced} />;
   if (stepKey === "handoff") return <HandoffStage prefersReduced={prefersReduced} locale={locale} />;
 
-  // Fallback visual untuk multilingual/booking (placeholder ringan)
   const palette: Record<keyof IntlMessages["features"]["cards"], string> = {
     instant: "#FF9AA2",
     multitenant: "#B5EAD7",
