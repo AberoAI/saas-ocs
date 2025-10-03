@@ -8,7 +8,6 @@ import { useMemo, useRef } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
-// gunakan relative path dari lokasi file ini ke registry
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
 // Stage (lazy)
@@ -111,6 +110,18 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
+  /**
+   * ✅ Kunci animasi hero hanya saat pertama load halaman.
+   * - Saat pertama kali di step 0 => animasi tampil.
+   * - Begitu user meninggalkan step 0 sekali saja, tandai ref dan JANGAN animasi lagi.
+   * - Tidak pakai localStorage: per page-load / refresh saja.
+   */
+  const hasLeftHeroOnceRef = useRef(false);
+  if (step !== 0) {
+    hasLeftHeroOnceRef.current = true;
+  }
+  const shouldAnimateHero = !prefersReduced && !hasLeftHeroOnceRef.current; // hanya sebelum pernah meninggalkan hero
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -124,7 +135,7 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <motion.section key="step-hero" {...stageFade} className="text-center">
-                  {/* Badge masih pakai rise ringan */}
+                  {/* Badge tetap pakai rise ringan */}
                   <motion.span
                     className="inline-block rounded-full px-3 py-1 text-xs text-foreground/70"
                     style={{ background: `${BRAND}14` }}
@@ -136,27 +147,39 @@ export default function FeaturesPage() {
                     {t("badge")}
                   </motion.span>
 
-                  {/* Title — blur in by character, sekali saat muncul, tidak retrigger saat scroll */}
-                  <TextAnimate
-                    animation="blurIn"
-                    by="character"
-                    once
-                    as="h1"
-                    className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                  >
-                    {t("title")}
-                  </TextAnimate>
+                  {/* Title — blur in by character, SEKALI di page-load */}
+                  {shouldAnimateHero ? (
+                    <TextAnimate
+                      animation="blurIn"
+                      by="character"
+                      once
+                      as="h1"
+                      className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                    >
+                      {t("title")}
+                    </TextAnimate>
+                  ) : (
+                    <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                      {t("title")}
+                    </h1>
+                  )}
 
-                  {/* Subtitle — blur in by word, sekali */}
-                  <TextAnimate
-                    animation="blurIn"
-                    by="word"
-                    once
-                    as="p"
-                    className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                  >
-                    {t("subtitle")}
-                  </TextAnimate>
+                  {/* Subtitle — blur in by word, SEKALI di page-load */}
+                  {shouldAnimateHero ? (
+                    <TextAnimate
+                      animation="blurIn"
+                      by="word"
+                      once
+                      as="p"
+                      className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                    >
+                      {t("subtitle")}
+                    </TextAnimate>
+                  ) : (
+                    <p className="-mt-1 sm:-mt-0.5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                      {t("subtitle")}
+                    </p>
+                  )}
 
                   <div className="mt-7 inline-flex items-center gap-2 text-foreground/60">
                     <span className="text-sm">Scroll</span>
