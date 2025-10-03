@@ -134,23 +134,34 @@ export default function FeaturesPage() {
               {/* HERO */}
               {step === 0 && (
                 <section key="step-hero" className="relative text-center">
-                  {/* Headline wrapper dengan minHeight stabil */}
-                  <div ref={headlineWrapRef} style={headlineMinH ? { minHeight: headlineMinH } : undefined}>
-                    {shouldAnimateHero ? (
-                      <TextAnimate
-                        animation="blurIn"
-                        by="character"
-                        once
-                        as="h1"
-                        className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                        onDone={onHeadlineDone}
-                      >
-                        {t("title")}
-                      </TextAnimate>
-                    ) : (
-                      <h1 className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                        {t("title")}
-                      </h1>
+                  {/* Headline wrapper dengan minHeight stabil + overlay animasi agar tidak mengubah layout */}
+                  <div
+                    ref={headlineWrapRef}
+                    style={headlineMinH ? { minHeight: headlineMinH } : undefined}
+                    className="relative"
+                  >
+                    {/* Static H1: selalu memegang layout */}
+                    <h1
+                      className={`mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight transition-opacity duration-150 ${headlineDone ? "opacity-100" : "opacity-0"}`}
+                      aria-hidden={!headlineDone}
+                    >
+                      {t("title")}
+                    </h1>
+
+                    {/* Animated overlay: absolute, tidak memengaruhi layout */}
+                    {shouldAnimateHero && !headlineDone && (
+                      <div className="absolute inset-0 flex justify-center pointer-events-none" aria-hidden>
+                        <TextAnimate
+                          animation="blurIn"
+                          by="character"
+                          once
+                          as="h1"
+                          className="mt-2.5 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                          onDone={onHeadlineDone}
+                        >
+                          {t("title")}
+                        </TextAnimate>
+                      </div>
                     )}
                   </div>
 
