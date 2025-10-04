@@ -181,11 +181,17 @@ export default function FeaturesPage() {
                     className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                     onDone={onHeadlineDone}
                     trigger="mount" // hanya saat mount
+                    whiteSpace={locale === "tr" ? "nowrap" : undefined} // NEW: TR satu baris
                   >
                     {t("title")}
                   </TextAnimate>
                 ) : (
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                  <h1
+                    className={
+                      "text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight" +
+                      (locale === "tr" ? " whitespace-nowrap" : "")
+                    }
+                  >
                     {t("title")}
                   </h1>
                 )}

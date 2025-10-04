@@ -5,7 +5,7 @@ import { motion, type Variants } from "framer-motion";
 
 type AnimationName = "blurIn" | "blurInUp" | "fadeIn" | "fadeInUp";
 type SplitBy = "none" | "character" | "word";
-type Trigger = "inView" | "mount"; // NEW
+type Trigger = "inView" | "mount";
 
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -18,8 +18,10 @@ type TextAnimateProps = {
   children: React.ReactNode;
   /** dipanggil setelah animasi selesai (seluruh blok/urutan) */
   onDone?: () => void;
-  /** NEW: tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
+  /** tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
   trigger?: Trigger;
+  /** NEW: kontrol whitespace container; default "pre-wrap" agar perilaku lama tetap sama */
+  whiteSpace?: "pre-wrap" | "nowrap" | "normal";
 };
 
 function getChildVariant(animation: AnimationName) {
@@ -56,7 +58,8 @@ export function TextAnimate({
   className,
   children,
   onDone,
-  trigger = "inView", // NEW default
+  trigger = "inView",
+  whiteSpace = "pre-wrap", // NEW default
 }: TextAnimateProps) {
   const Tag = (as || "span") as React.ElementType;
   const childVar = getChildVariant(animation);
@@ -80,7 +83,7 @@ export function TextAnimate({
         <motion.span
           {...common}
           {...triggerProps}
-          style={{ display: "inline-block" }}
+          style={{ display: "inline-block", whiteSpace }} // NEW
         >
           {children}
         </motion.span>
@@ -89,102 +92,24 @@ export function TextAnimate({
   }
 
   const source = String(children);
+  const units = by === "word" ? source.split(/(\s+)/) : [...source];
+  const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
-  // ===== FIX: "by=character" tapi JAGA batas kata agar tidak patah di tengah huruf =====
-  // Strategi:
-  // - Split ke token kata & spasi: /(\s+)/
-  // - Setiap KATA dibungkus span inline-block (mencegah line break di dalam kata)
-  // - Di dalamnya, huruf2 tetap di-animate (inline-block) seperti biasa
-  if (by === "character") {
-    const tokens = source.split(/(\s+)/);
-
-    // Container untuk stagger per huruf (tetap sama)
-    const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
-
-    return (
-      <Tag className={className} aria-label={source}>
-        <motion.span
-          aria-hidden
-          initial="hidden"
-          variants={container}
-          {...(trigger === "mount"
-            ? { animate: "show" as const }
-            : { whileInView: "show" as const, viewport: { once } as const })}
-          style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
-          onAnimationComplete={() => onDone?.()}
-        >
-          {tokens.map((tok, i) => {
-            // Token spasi: render apa adanya agar jarak antar kata normal
-            if (/^\s+$/.test(tok)) {
-              return <span key={`space-${i}`}>{tok}</span>;
-            }
-            // Token kata: bungkus agar tidak bisa break di tengah huruf
-            const chars = [...tok];
-            return (
-              <span
-                key={`word-${i}`}
-                style={{
-                  display: "inline-block", // mencegah line-break di dalam kata
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {chars.map((ch, j) => (
-                  <motion.span
-                    key={`ch-${i}-${j}`}
-                    variants={childVar as Variants}
-                    style={{ display: "inline-block" }}
-                  >
-                    {ch}
-                  </motion.span>
-                ))}
-              </span>
-            );
-          })}
-        </motion.span>
-      </Tag>
-    );
-  }
-  // ===== END FIX =====
-
-  if (by === "word") {
-    const units = source.split(/(\s+)/);
-    const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
-
-    return (
-      <Tag className={className} aria-label={source}>
-        <motion.span
-          aria-hidden
-          initial="hidden"
-          variants={container}
-          {...(trigger === "mount"
-            ? { animate: "show" as const }
-            : { whileInView: "show" as const, viewport: { once } as const })}
-          style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
-          onAnimationComplete={() => onDone?.()}
-        >
-          {units.map((u, i) =>
-            /^\s+$/.test(u) ? (
-              <span key={i}>{u}</span>
-            ) : (
-              <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>
-                {u}
-              </motion.span>
-            )
-          )}
-        </motion.span>
-      </Tag>
-    );
-  }
-
-  // Fallback (by: "none" sudah ditangani di atas, ini praktis tidak terpakai)
   return (
-    <Tag className={className}>
+    <Tag className={className} aria-label={source}>
       <motion.span
-        {...common}
-        {...triggerProps}
-        style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
+        aria-hidden
+        initial="hidden"
+        variants={container}
+        {...(trigger === "mount" ? { animate: "show" as const } : { whileInView: "show" as const, viewport: { once } as const })}
+        style={{ display: "inline-block", whiteSpace }} // NEW
+        onAnimationComplete={() => onDone?.()}
       >
-        {source}
+        {units.map((u, i) => (
+          <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>
+            {u}
+          </motion.span>
+        ))}
       </motion.span>
     </Tag>
   );
