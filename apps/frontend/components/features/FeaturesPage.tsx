@@ -138,14 +138,13 @@ export default function FeaturesPage() {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  // =================== NEW: Stabilizer untuk 'step' (anti jitter boundary) ===================
+  // =================== Stabilizer untuk 'step' (anti jitter boundary) ===================
   const [stableStep, setStableStep] = useState(step);
   useEffect(() => {
-    // debounce/hysteresis singkat untuk mencegah flip-flop frame-by-frame di ambang step
-    const id = setTimeout(() => setStableStep(step), 90); // 60–120ms works well; 90ms kompromi
+    const id = setTimeout(() => setStableStep(step), 90);
     return () => clearTimeout(id);
   }, [step]);
-  // ==========================================================================================
+  // ======================================================================================
 
   const showHero = stableStep === 0;
 
@@ -157,18 +156,15 @@ export default function FeaturesPage() {
         style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
-          <div className="w-full">
-            {/* ===== HERO DIANIMASIKAN OPACITY-NYA (tetap mounted) ===== */}
+          {/* >>> PERUBAHAN 1: jadikan anchor overlay */}
+          <div className="w-full relative">
+            {/* ===== HERO: selalu overlay absolute; hanya opacity + pointerEvents yang berubah ===== */}
             <motion.section
               initial={false}
               animate={{ opacity: showHero ? 1 : 0 }}
               transition={{ duration: prefersReduced ? 0 : 0.2, ease: EASE }}
-              className={
-                showHero
-                  ? "relative text-center"
-                  : "text-center absolute inset-0 -z-10 pointer-events-none"
-              }
-              style={{ willChange: "opacity" }}
+              className="absolute inset-0 z-10 text-center flex items-center justify-center"
+              style={{ willChange: "opacity", pointerEvents: showHero ? "auto" : "none" }}
               aria-hidden={!showHero}
             >
               {/* Headline */}
