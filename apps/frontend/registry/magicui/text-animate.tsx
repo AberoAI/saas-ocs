@@ -89,24 +89,102 @@ export function TextAnimate({
   }
 
   const source = String(children);
-  const units = by === "word" ? source.split(/(\s+)/) : [...source];
-  const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
+  // ===== FIX: "by=character" tapi JAGA batas kata agar tidak patah di tengah huruf =====
+  // Strategi:
+  // - Split ke token kata & spasi: /(\s+)/
+  // - Setiap KATA dibungkus span inline-block (mencegah line break di dalam kata)
+  // - Di dalamnya, huruf2 tetap di-animate (inline-block) seperti biasa
+  if (by === "character") {
+    const tokens = source.split(/(\s+)/);
+
+    // Container untuk stagger per huruf (tetap sama)
+    const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
+
+    return (
+      <Tag className={className} aria-label={source}>
+        <motion.span
+          aria-hidden
+          initial="hidden"
+          variants={container}
+          {...(trigger === "mount"
+            ? { animate: "show" as const }
+            : { whileInView: "show" as const, viewport: { once } as const })}
+          style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
+          onAnimationComplete={() => onDone?.()}
+        >
+          {tokens.map((tok, i) => {
+            // Token spasi: render apa adanya agar jarak antar kata normal
+            if (/^\s+$/.test(tok)) {
+              return <span key={`space-${i}`}>{tok}</span>;
+            }
+            // Token kata: bungkus agar tidak bisa break di tengah huruf
+            const chars = [...tok];
+            return (
+              <span
+                key={`word-${i}`}
+                style={{
+                  display: "inline-block", // mencegah line-break di dalam kata
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {chars.map((ch, j) => (
+                  <motion.span
+                    key={`ch-${i}-${j}`}
+                    variants={childVar as Variants}
+                    style={{ display: "inline-block" }}
+                  >
+                    {ch}
+                  </motion.span>
+                ))}
+              </span>
+            );
+          })}
+        </motion.span>
+      </Tag>
+    );
+  }
+  // ===== END FIX =====
+
+  if (by === "word") {
+    const units = source.split(/(\s+)/);
+    const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
+
+    return (
+      <Tag className={className} aria-label={source}>
+        <motion.span
+          aria-hidden
+          initial="hidden"
+          variants={container}
+          {...(trigger === "mount"
+            ? { animate: "show" as const }
+            : { whileInView: "show" as const, viewport: { once } as const })}
+          style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
+          onAnimationComplete={() => onDone?.()}
+        >
+          {units.map((u, i) =>
+            /^\s+$/.test(u) ? (
+              <span key={i}>{u}</span>
+            ) : (
+              <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>
+                {u}
+              </motion.span>
+            )
+          )}
+        </motion.span>
+      </Tag>
+    );
+  }
+
+  // Fallback (by: "none" sudah ditangani di atas, ini praktis tidak terpakai)
   return (
-    <Tag className={className} aria-label={source}>
+    <Tag className={className}>
       <motion.span
-        aria-hidden
-        initial="hidden"
-        variants={container}
-        {...(trigger === "mount" ? { animate: "show" as const } : { whileInView: "show" as const, viewport: { once } as const })}
+        {...common}
+        {...triggerProps}
         style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
-        onAnimationComplete={() => onDone?.()}
       >
-        {units.map((u, i) => (
-          <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>
-            {u}
-          </motion.span>
-        ))}
+        {source}
       </motion.span>
     </Tag>
   );
