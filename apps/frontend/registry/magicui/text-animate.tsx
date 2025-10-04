@@ -5,7 +5,7 @@ import { motion, type Variants } from "framer-motion";
 
 type AnimationName = "blurIn" | "blurInUp" | "fadeIn" | "fadeInUp";
 type SplitBy = "none" | "character" | "word";
-type Trigger = "inView" | "mount"; // NEW
+type Trigger = "inView" | "mount";
 
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -18,11 +18,11 @@ type TextAnimateProps = {
   children: React.ReactNode;
   /** dipanggil setelah animasi selesai (seluruh blok/urutan) */
   onDone?: () => void;
-  /** NEW: tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
+  /** tentukan pemicu animasi. default: "inView" (scroll). gunakan "mount" untuk hanya saat komponen di-mount. */
   trigger?: Trigger;
 };
 
-function getChildVariant(animation: AnimationName) {
+function getChildVariant(animation: AnimationName): Variants {
   switch (animation) {
     case "blurInUp":
       return {
@@ -56,31 +56,45 @@ export function TextAnimate({
   className,
   children,
   onDone,
-  trigger = "inView", // NEW default
+  trigger = "inView",
 }: TextAnimateProps) {
   const Tag = (as || "span") as React.ElementType;
-  const childVar = getChildVariant(animation);
+
+  // ✅ variants stabil antar-render
+  const childVar = React.useMemo(() => getChildVariant(animation), [animation]);
+  const containerVar = React.useMemo<Variants>(
+    () => ({ show: { transition: { staggerChildren: 0.03 } } }),
+    []
+  );
 
   const isStringChild = typeof children === "string";
-  const common = {
-    initial: "hidden" as const,
-    variants: childVar as Variants,
-    onAnimationComplete: () => onDone?.(),
-  };
 
-  // Helper untuk memilih prop animate/whileInView
+  // ✅ kunci supaya hanya main sekali saat mount (untuk trigger="mount")
+  const playedRef = React.useRef(false);
+  const mountOnceProps =
+    playedRef.current
+      ? ({ initial: false } as const)
+      : ({ initial: "hidden", animate: "show" } as const);
+
+  // ✅ hindari objek baru tiap render
   const triggerProps =
     trigger === "mount"
-      ? { animate: "show" as const } // animate sekali saat mount
-      : { whileInView: "show" as const, viewport: { once } as const }; // perilaku lama
+      ? mountOnceProps
+      : ({ whileInView: "show", viewport: { once } } as const);
+
+  const handleDone = React.useCallback(() => {
+    if (trigger === "mount") playedRef.current = true;
+    onDone?.();
+  }, [onDone, trigger]);
 
   if (!isStringChild || by === "none") {
     return (
       <Tag className={className}>
         <motion.span
-          {...common}
+          variants={childVar}
           {...triggerProps}
           style={{ display: "inline-block" }}
+          onAnimationComplete={handleDone}
         >
           {children}
         </motion.span>
@@ -90,20 +104,19 @@ export function TextAnimate({
 
   const source = String(children);
   const units = by === "word" ? source.split(/(\s+)/) : [...source];
-  const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
   return (
     <Tag className={className} aria-label={source}>
       <motion.span
         aria-hidden
         initial="hidden"
-        variants={container}
-        {...(trigger === "mount" ? { animate: "show" as const } : { whileInView: "show" as const, viewport: { once } as const })}
+        variants={containerVar}
+        {...triggerProps}
         style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
-        onAnimationComplete={() => onDone?.()}
+        onAnimationComplete={handleDone}
       >
         {units.map((u, i) => (
-          <motion.span key={i} variants={childVar as Variants} style={{ display: "inline-block" }}>
+          <motion.span key={i} variants={childVar} style={{ display: "inline-block" }}>
             {u}
           </motion.span>
         ))}

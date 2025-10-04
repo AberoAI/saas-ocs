@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect, useState, useLayoutEffect, useCallback } from "react";
+import { useMemo, useRef, useState, useLayoutEffect, useCallback } from "react";
 import useStepScroll from "@/hooks/useStepScroll";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
@@ -44,8 +44,7 @@ export default function FeaturesPage() {
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
   const prefersReduced = useReducedMotion();
 
-  // ======== NEW: deteksi path tanpa prefix locale untuk gating animasi hero ========
-  // Contoh:
+  // ======== deteksi path tanpa prefix locale untuk gating animasi hero ========
   //  - /en/features   -> /features
   //  - /tr/ozellikler -> /ozellikler
   //  - /features      -> /features
@@ -55,7 +54,7 @@ export default function FeaturesPage() {
       : pathnameRaw;
 
   const isFeaturesRoute = /^\/(?:features|ozellikler)(?:\/|$)/i.test(pathWithoutLocale);
-  // =================================================================================
+  // ============================================================================
 
   const withLocale = (href: string) => {
     if (/^https?:\/\/.*/.test(href)) return href;
@@ -174,7 +173,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
-                      trigger="mount" // << hanya animasi saat mount (bukan saat scroll)
+                      trigger="mount" // hanya animasi saat mount
                     >
                       {t("title")}
                     </TextAnimate>
@@ -195,7 +194,7 @@ export default function FeaturesPage() {
                         once
                         as="p"
                         className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                        trigger="mount" // << hanya animasi saat mount (bukan saat scroll)
+                        trigger="mount" // hanya animasi saat mount
                       >
                         {t("subtitle")}
                       </TextAnimate>
