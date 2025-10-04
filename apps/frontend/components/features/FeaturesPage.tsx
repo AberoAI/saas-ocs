@@ -206,7 +206,7 @@ export default function FeaturesPage() {
                       by="word"
                       once
                       as="p"
-                      className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                      className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug"
                       trigger="mount" // hanya saat mount
                       onDone={() => setSubtitleDone(true)}
                     >
@@ -227,7 +227,7 @@ export default function FeaturesPage() {
                   </>
                 ) : (
                   <>
-                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-transparent mx-auto leading-snug">
                       {t("subtitle")}
                     </p>
                     <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
@@ -238,7 +238,7 @@ export default function FeaturesPage() {
                 )
               ) : (
                 <>
-                  <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                  <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug">
                     {t("subtitle")}
                   </p>
                   <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
