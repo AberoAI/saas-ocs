@@ -31,7 +31,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
     const before = desc.slice(0, m2.index).trim();
     const after = desc.slice(m2.index + m2[0].length).trim().replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
-    return { quote: m2[1], rest: rest || "" };
+    return { quote: m2[1], rest: rest || "﻿" };
   }
   return { rest: desc };
 }
@@ -139,6 +139,8 @@ export default function FeaturesPage() {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
+  const showHero = step === 0;
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -148,14 +150,18 @@ export default function FeaturesPage() {
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
-            {/* ===== HERO DIPISAH DARI AnimatePresence (tetap mounted) ===== */}
-            <section
+            {/* ===== HERO DIANIMASIKAN OPACITY-NYA (tetap mounted) ===== */}
+            <motion.section
+              initial={false}
+              animate={{ opacity: showHero ? 1 : 0 }}
+              transition={{ duration: prefersReduced ? 0 : 0.22, ease: EASE }}
               className={
-                step === 0
-                  ? "relative text-center opacity-100"
-                  : "text-center opacity-0 pointer-events-none absolute inset-0 -z-10"
+                showHero
+                  ? "relative text-center"
+                  : "text-center absolute inset-0 -z-10 pointer-events-none"
               }
-              aria-hidden={step !== 0}
+              style={{ willChange: "opacity" }}
+              aria-hidden={!showHero}
             >
               {/* Headline */}
               <div
@@ -232,10 +238,10 @@ export default function FeaturesPage() {
                   </div>
                 </>
               )}
-            </section>
+            </motion.section>
 
             {/* ===== SECTION YANG DI-MOUNT/UNMOUNT SAAT SCROLL ===== */}
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="sync" initial={false}>
               {/* Step 1..6 */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
