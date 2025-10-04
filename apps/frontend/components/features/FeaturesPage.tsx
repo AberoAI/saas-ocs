@@ -31,7 +31,7 @@ function splitQuoted(desc: string): { quote?: string; rest: string } {
     const before = desc.slice(0, m2.index).trim();
     const after = desc.slice(m2.index + m2[0].length).trim().replace(/^[\s,.;:—-]+/, "");
     const rest = [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ");
-    return { quote: m2[1], rest: rest || "﻿" };
+    return { quote: m2[1], rest: rest || "" };
   }
   return { rest: desc };
 }
@@ -71,6 +71,7 @@ export default function FeaturesPage() {
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
       animate: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } },
+      // exit dipertahankan di sini; kita pangkas beban exit di section konten (di bawah)
       exit: { opacity: 0, y: prefersReduced ? 0 : -6, transition: { duration: 0.22, ease: EASE } },
     }),
     [prefersReduced]
@@ -129,17 +130,24 @@ export default function FeaturesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headlineMinH]);
 
-  // Subheadline muncul setelah headline selesai
+  // Subheadline muncul setelah headline selesai; "Scroll ↓" muncul setelah subheadline selesai
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
-  // "Scroll ↓" baru tampil setelah subheadline selesai
   const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
 
   const onHeadlineDone = useCallback(() => {
-    // Delay kecil agar layout settle dulu
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  const showHero = step === 0;
+  // =================== NEW: Stabilizer untuk 'step' (anti jitter boundary) ===================
+  const [stableStep, setStableStep] = useState(step);
+  useEffect(() => {
+    // debounce/hysteresis singkat untuk mencegah flip-flop frame-by-frame di ambang step
+    const id = setTimeout(() => setStableStep(step), 90); // 60–120ms works well; 90ms kompromi
+    return () => clearTimeout(id);
+  }, [step]);
+  // ==========================================================================================
+
+  const showHero = stableStep === 0;
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -154,7 +162,7 @@ export default function FeaturesPage() {
             <motion.section
               initial={false}
               animate={{ opacity: showHero ? 1 : 0 }}
-              transition={{ duration: prefersReduced ? 0 : 0.22, ease: EASE }}
+              transition={{ duration: prefersReduced ? 0 : 0.2, ease: EASE }}
               className={
                 showHero
                   ? "relative text-center"
@@ -243,19 +251,22 @@ export default function FeaturesPage() {
             {/* ===== SECTION YANG DI-MOUNT/UNMOUNT SAAT SCROLL ===== */}
             <AnimatePresence mode="sync" initial={false}>
               {/* Step 1..6 */}
-              {step >= 1 && step <= items.length && (
-                <motion.section key="step-content" {...stageFade} className="w-full">
+              {stableStep >= 1 && stableStep <= items.length && (
+                <motion.section
+                  key="step-content"
+                  // pangkas beban exit: hanya opacity (tanpa y) dan durasi singkat
+                  initial={{ opacity: 0, y: prefersReduced ? 0 : 8 }}
+                  animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } }}
+                  exit={{ opacity: 0, y: 0, transition: { duration: 0.16, ease: EASE } }}
+                  className="w-full"
+                >
                   <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
                     {/* LEFT: text */}
                     <motion.div
                       variants={contentStagger.container}
                       initial="hidden"
                       animate="visible"
-                      exit={{
-                        opacity: 0,
-                        y: prefersReduced ? 0 : -6,
-                        transition: { duration: 0.2, ease: EASE },
-                      }}
+                      exit={{ opacity: 0, transition: { duration: 0.14, ease: EASE } }}
                       className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
                     >
                       <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
@@ -275,7 +286,7 @@ export default function FeaturesPage() {
                             />
                           )}
                           <span className="-translate-y-[1px]" style={{ color: BRAND }}>
-                            {items[step - 1].icon}
+                            {items[stableStep - 1].icon}
                           </span>
                         </motion.div>
 
@@ -287,12 +298,12 @@ export default function FeaturesPage() {
                           ref={featureTitleRef}
                           style={{ outline: "none" }}
                         >
-                          {t(`cards.${items[step - 1].key}.title`)}
+                          {t(`cards.${items[stableStep - 1].key}.title`)}
                         </motion.h3>
 
                         {/* Desc */}
                         {(() => {
-                          const descRaw = String(t(`cards.${items[step - 1].key}.desc`));
+                          const descRaw = String(t(`cards.${items[stableStep - 1].key}.desc`));
                           const { quote, rest } = splitQuoted(descRaw);
                           return (
                             <motion.div
@@ -312,7 +323,7 @@ export default function FeaturesPage() {
                     {/* RIGHT: stage */}
                     <div className="hidden md:flex self-center justify-center w-full">
                       <FeatureStage
-                        stepKey={items[step - 1].key}
+                        stepKey={items[stableStep - 1].key}
                         prefersReduced={!!prefersReduced}
                         locale={locale}
                       />
@@ -322,7 +333,7 @@ export default function FeaturesPage() {
               )}
 
               {/* CTA */}
-              {step === items.length + 1 && (
+              {stableStep === items.length + 1 && (
                 <motion.section key="step-cta" {...stageFade} className="text-center">
                   <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
                   <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
