@@ -44,13 +44,13 @@ export default function FeaturesPage() {
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
   const prefersReduced = useReducedMotion();
 
-  // ======== NEW: deteksi path tanpa prefix locale untuk gating animasi hero ========
+  // Deteksi path tanpa prefix locale (untuk memastikan ini route features/ozellikler)
   const pathWithoutLocale =
     localePrefix && pathnameRaw.startsWith(localePrefix)
       ? pathnameRaw.slice(localePrefix.length) || "/"
       : pathnameRaw;
+
   const isFeaturesRoute = /^\/(?:features|ozellikler)(?:\/|$)/i.test(pathWithoutLocale);
-  // =================================================================================
 
   const withLocale = (href: string) => {
     if (/^https?:\/\/.*/.test(href)) return href;
@@ -110,19 +110,15 @@ export default function FeaturesPage() {
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
   /** =========================================================
-   *  Animasi hero HANYA saat halaman features/ozellikler dibuka.
-   *  - Gated oleh isFeaturesRoute dan prefersReduced.
-   *  - Diset agar HANYA sekali per sesi (sessionStorage).
-   *  - Hero SELALU mounted (hanya di-opacity) agar scroll tidak pernah re-trigger animasi.
+   *  HERO animation policy:
+   *  - HANYA animasi saat halaman ini di-mount pertama kali.
+   *  - Tidak pernah re-trigger saat scroll (hero tetap mounted, cuma di-opacity).
+   *  - Tidak pakai sessionStorage agar tidak bikin “hilang” di dev/HMR.
    * ========================================================= */
-  const HERO_PLAYED_KEY = "aberoai:featuresHeroPlayed";
-  const hasPlayedOnce =
-    typeof window !== "undefined" ? sessionStorage.getItem(HERO_PLAYED_KEY) === "1" : false;
-
-  const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced && !hasPlayedOnce);
+  const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
-  // Tinggi headline dibekukan saat mount untuk mencegah micro-shift
+  // Bekukan tinggi headline saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
   const [headlineMinH, setHeadlineMinH] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -133,20 +129,15 @@ export default function FeaturesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headlineMinH]);
 
-  // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
+  // Subheadline muncul setelah headline selesai
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
-  // subheadline done -> barulah "Scroll ↓" muncul + tandai sudah pernah animasi (sessionStorage)
+  // "Scroll ↓" baru tampil setelah subheadline selesai
   const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
 
   const onHeadlineDone = useCallback(() => {
+    // Delay kecil agar layout settle dulu
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
-
-  useEffect(() => {
-    if (subtitleDone && typeof window !== "undefined") {
-      sessionStorage.setItem(HERO_PLAYED_KEY, "1");
-    }
-  }, [subtitleDone]);
 
   return (
     <main className="mx-auto max-w-6xl px-6">
@@ -157,7 +148,7 @@ export default function FeaturesPage() {
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
-            {/* ===== HERO DIPISAH DARI AnimatePresence AGAR TIDAK RESET SAAT STEP BERUBAH ===== */}
+            {/* ===== HERO DIPISAH DARI AnimatePresence (tetap mounted) ===== */}
             <section
               className={
                 step === 0
@@ -166,6 +157,7 @@ export default function FeaturesPage() {
               }
               aria-hidden={step !== 0}
             >
+              {/* Headline */}
               <div
                 ref={headlineWrapRef}
                 style={headlineMinH ? { minHeight: headlineMinH } : undefined}
@@ -179,7 +171,7 @@ export default function FeaturesPage() {
                     as="h1"
                     className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                     onDone={onHeadlineDone}
-                    trigger="mount"
+                    trigger="mount" // hanya saat mount
                   >
                     {t("title")}
                   </TextAnimate>
@@ -200,7 +192,7 @@ export default function FeaturesPage() {
                       once
                       as="p"
                       className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                      trigger="mount"
+                      trigger="mount" // hanya saat mount
                       onDone={() => setSubtitleDone(true)}
                     >
                       {t("subtitle")}
@@ -341,7 +333,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg.black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
