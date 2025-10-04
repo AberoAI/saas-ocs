@@ -105,7 +105,7 @@ export default function FeaturesPage() {
   const shouldAnimateHeroRef = useRef<boolean>(!prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
-  // Lock animasi: setelah main, render elemen biasa
+  // ⬇️ Tambahan: lock animasi agar tidak mengulang saat scroll/remount
   const [headlinePlayed, setHeadlinePlayed] = useState<boolean>(!shouldAnimateHero);
   const [subPlayed, setSubPlayed] = useState<boolean>(!shouldAnimateHero);
 
@@ -122,7 +122,7 @@ export default function FeaturesPage() {
   // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
   const onHeadlineDone = useCallback(() => {
-    setHeadlinePlayed(true);
+    setHeadlinePlayed(true);            // ⬅️ kunci headline agar tidak re-animasi
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
@@ -135,103 +135,101 @@ export default function FeaturesPage() {
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
-            {/* === HERO DI LUAR AnimatePresence: selalu mounted, hanya visibility yang berubah === */}
-            <section
-              key="hero"
-              className={
-                step === 0
-                  ? "relative text-center opacity-100"
-                  : "text-center opacity-0 pointer-events-none absolute inset-0 -z-10"
-              }
-              aria-hidden={step !== 0}
-            >
-              {/* Headline wrapper: padding-top hindari margin-collapsing; minHeight stabil */}
-              <div
-                ref={headlineWrapRef}
-                style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-                className="relative pt-2.5"
+            <AnimatePresence mode="wait">
+              {/* HERO — SELALU MOUNTED; tidak pernah display:none supaya animasi tidak re-trigger saat scroll */}
+              <section
+                className={
+                  step === 0
+                    ? "relative text-center opacity-100"
+                    : "text-center opacity-0 pointer-events-none absolute inset-0 -z-10"
+                }
+                aria-hidden={step !== 0}
               >
-                {shouldAnimateHero && !headlinePlayed ? (
-                  <TextAnimate
-                    animation="blurIn"
-                    by="character"
-                    once
-                    as="h1"
-                    className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                    onDone={onHeadlineDone}
-                    trigger="mount" // hanya saat mount
-                  >
-                    {t("title")}
-                  </TextAnimate>
-                ) : (
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                    {t("title")}
-                  </h1>
-                )}
-              </div>
+                {/* Headline wrapper: padding-top hindari margin-collapsing; minHeight stabil */}
+                <div
+                  ref={headlineWrapRef}
+                  style={headlineMinH ? { minHeight: headlineMinH } : undefined}
+                  className="relative pt-2.5"
+                >
+                  {shouldAnimateHero && !headlinePlayed ? (
+                    <TextAnimate
+                      animation="blurIn"
+                      by="character"
+                      once
+                      as="h1"
+                      className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                      onDone={onHeadlineDone}
+                      trigger="mount" // << hanya animasi saat mount
+                    >
+                      {t("title")}
+                    </TextAnimate>
+                  ) : (
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                      {t("title")}
+                    </h1>
+                  )}
+                </div>
 
-              {/* Subheadline + Scroll */}
-              {shouldAnimateHero ? (
-                headlineDone ? (
-                  <>
-                    {subPlayed ? (
-                      <>
-                        <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
-                          {t("subtitle")}
-                        </p>
-                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                          <span className="text-sm">Scroll</span>
-                          <span className="animate-bounce" aria-hidden>↓</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <TextAnimate
-                          animation="fadeInUp"
-                          by="word"
-                          once
-                          as="p"
-                          className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                          trigger="mount"
-                          onDone={() => setSubPlayed(true)}
-                        >
-                          {t("subtitle")}
-                        </TextAnimate>
-                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                          <span className="text-sm">Scroll</span>
-                          <span className="animate-bounce" aria-hidden>↓</span>
-                        </div>
-                      </>
-                    )}
-                  </>
+                {/* Subheadline + Scroll */}
+                {shouldAnimateHero ? (
+                  headlineDone ? (
+                    <>
+                      {subPlayed ? (
+                        <>
+                          <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                            {t("subtitle")}
+                          </p>
+                          <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                            <span className="text-sm">Scroll</span>
+                            <span className="animate-bounce" aria-hidden>↓</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <TextAnimate
+                            animation="fadeInUp"
+                            by="word"
+                            once
+                            as="p"
+                            className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                            trigger="mount" // << hanya animasi saat mount
+                            onDone={() => setSubPlayed(true)} // ⬅️ kunci subheadline setelah animasi pertama
+                          >
+                            {t("subtitle")}
+                          </TextAnimate>
+                          <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                            <span className="text-sm">Scroll</span>
+                            <span className="animate-bounce" aria-hidden>↓</span>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {/* placeholder kecil agar layout tidak loncat saat menunggu */}
+                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                        {t("subtitle")}
+                      </p>
+                      {/* placeholder tinggi untuk Scroll indicator */}
+                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                        <span className="text-sm">Scroll</span>
+                        <span aria-hidden>↓</span>
+                      </div>
+                    </>
+                  )
                 ) : (
                   <>
-                    {/* placeholder kecil agar layout tidak loncat saat menunggu */}
-                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
                       {t("subtitle")}
                     </p>
-                    {/* placeholder tinggi untuk Scroll indicator */}
-                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                       <span className="text-sm">Scroll</span>
-                      <span aria-hidden>↓</span>
+                      <span className="animate-bounce" aria-hidden>↓</span>
                     </div>
                   </>
-                )
-              ) : (
-                <>
-                  <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
-                    {t("subtitle")}
-                  </p>
-                  <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                    <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
-                  </div>
-                </>
-              )}
-            </section>
+                )}
+              </section>
 
-            {/* === HANYA section dinamis yang ikut AnimatePresence === */}
-            <AnimatePresence mode="wait" initial={false}>
               {/* Step 1..6 */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
