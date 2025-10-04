@@ -44,6 +44,19 @@ export default function FeaturesPage() {
   const locale = (m?.[1]?.toLowerCase() || "") as Locale;
   const prefersReduced = useReducedMotion();
 
+  // ======== NEW: deteksi path tanpa prefix locale untuk gating animasi hero ========
+  // Contoh:
+  //  - /en/features   -> /features
+  //  - /tr/ozellikler -> /ozellikler
+  //  - /features      -> /features
+  const pathWithoutLocale =
+    localePrefix && pathnameRaw.startsWith(localePrefix)
+      ? pathnameRaw.slice(localePrefix.length) || "/"
+      : pathnameRaw;
+
+  const isFeaturesRoute = /^\/(?:features|ozellikler)(?:\/|$)/i.test(pathWithoutLocale);
+  // =================================================================================
+
   const withLocale = (href: string) => {
     if (/^https?:\/\/.*/.test(href)) return href;
     if (href.startsWith("#")) return href;
@@ -101,14 +114,13 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** One-shot anim untuk hero (headline + subheadline).
-   *  Jika sudah pernah di sesi ini, keduanya akan selalu statis.
-   */
-  const [heroPlayed, setHeroPlayed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("features_hero_played") === "1";
-  });
-  const shouldAnimateHero = !prefersReduced && !heroPlayed;
+  /** =========================================================
+   *  Animasi hero HANYA saat halaman features/ozellikler dibuka.
+   *  - Gated oleh isFeaturesRoute dan prefersReduced.
+   *  - Hero SELALU mounted (hanya di-opacity) agar scroll tidak pernah re-trigger animasi.
+   * ========================================================= */
+  const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
+  const shouldAnimateHero = shouldAnimateHeroRef.current;
 
   // Tinggi headline dibekukan saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
@@ -118,20 +130,15 @@ export default function FeaturesPage() {
       const h = headlineWrapRef.current.getBoundingClientRect().height;
       if (h > 0) setHeadlineMinH(h);
     }
+    // kita tidak memasukkan dependencies lain supaya minH dibekukan sekali
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headlineMinH]);
 
-  // Urutan anim: Headline → Subheadline → set heroPlayed=true. Kalau tidak animasi, keduanya dianggap selesai.
+  // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
-  const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
-
   const onHeadlineDone = useCallback(() => {
-    setHeadlineDone(true);
-  }, []);
-
-  const onSubtitleDone = useCallback(() => {
-    setSubtitleDone(true);
-    try { sessionStorage.setItem("features_hero_played", "1"); } catch {}
-    setHeroPlayed(true); // setelah subtitle selesai → stop anim selamanya di sesi ini
+    // Delay kecil agar layout benar-benar stabil
+    setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
   return (
@@ -159,7 +166,7 @@ export default function FeaturesPage() {
                   style={headlineMinH ? { minHeight: headlineMinH } : undefined}
                   className="relative pt-2.5"
                 >
-                  {shouldAnimateHero && !headlineDone ? (
+                  {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
                       by="character"
@@ -167,7 +174,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
-                      trigger="mount"
+                      trigger="mount" // << hanya animasi saat mount (bukan saat scroll)
                     >
                       {t("title")}
                     </TextAnimate>
@@ -180,18 +187,7 @@ export default function FeaturesPage() {
 
                 {/* Subheadline + Scroll */}
                 {shouldAnimateHero ? (
-                  !headlineDone ? (
-                    // placeholder kecil agar layout tidak loncat saat menunggu headline selesai
-                    <>
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
-                        {t("subtitle")}
-                      </p>
-                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
-                        <span className="text-sm">Scroll</span>
-                        <span aria-hidden>↓</span>
-                      </div>
-                    </>
-                  ) : !subtitleDone ? (
+                  headlineDone ? (
                     <>
                       <TextAnimate
                         animation="fadeInUp"
@@ -199,8 +195,7 @@ export default function FeaturesPage() {
                         once
                         as="p"
                         className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                        onDone={onSubtitleDone}
-                        trigger="mount"
+                        trigger="mount" // << hanya animasi saat mount (bukan saat scroll)
                       >
                         {t("subtitle")}
                       </TextAnimate>
@@ -210,14 +205,15 @@ export default function FeaturesPage() {
                       </div>
                     </>
                   ) : (
-                    // setelah subtitle selesai → selalu statis
                     <>
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                      {/* placeholder kecil agar layout tidak loncat saat menunggu */}
+                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
                         {t("subtitle")}
                       </p>
-                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                      {/* placeholder tinggi untuk Scroll indicator */}
+                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
                         <span className="text-sm">Scroll</span>
-                        <span className="animate-bounce" aria-hidden>↓</span>
+                        <span aria-hidden>↓</span>
                       </div>
                     </>
                   )
@@ -331,7 +327,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg.black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
