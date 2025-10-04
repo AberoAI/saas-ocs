@@ -147,6 +147,12 @@ export default function FeaturesPage() {
 
   const showHero = stableStep === 0;
 
+  // === NEW: angkat hero sedikit khusus locale TR ===
+  const heroNudgeClass =
+    locale === "tr"
+      ? "transform-gpu -translate-y-[4vh] sm:-translate-y-[5vh] lg:-translate-y-[6vh]"
+      : "";
+
   return (
     <main className="mx-auto max-w-6xl px-6">
       <div
@@ -162,8 +168,8 @@ export default function FeaturesPage() {
               initial={false}
               animate={{ opacity: showHero ? 1 : 0 }}
               transition={{ duration: prefersReduced ? 0 : 0.2, ease: EASE }}
-              className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
-              style={{ willChange: "opacity", pointerEvents: showHero ? "auto" : "none" }}
+              className={`absolute inset-0 z-10 flex flex-col items-center justify-center text-center ${heroNudgeClass}`}
+              style={{ willChange: "opacity, transform", pointerEvents: showHero ? "auto" : "none" }}
               aria-hidden={!showHero}
             >
               {/* Headline */}
