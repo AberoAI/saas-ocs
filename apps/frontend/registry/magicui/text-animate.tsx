@@ -76,7 +76,7 @@ export function TextAnimate({
 
   if (!isStringChild || by === "none") {
     return (
-      <Tag className={className}>
+      <Tag className={className} style={{ textWrap: "balance" } as React.CSSProperties}>
         <motion.span
           {...common}
           {...triggerProps}
@@ -88,21 +88,25 @@ export function TextAnimate({
     );
   }
 
-  const source = String(children);
+  // ====== PRE-PROCESS TEKS ======
+  // Ikat frasa kunci TR agar tidak pecah baris: "Güçlü Özellikler" -> "Güçlü&nbsp;Özellikler"
+  // (NBSP mencegah break di antara kedua kata tsb, tanpa menyentuh frasa lain)
+  const NBSP = "\u00A0";
+  let source = String(children).replace(/Güçlü Özellikler/g, `Güçlü${NBSP}Özellikler`);
+  // =================================
 
   // ===== FIX: "by=character" tapi JAGA batas kata agar tidak patah di tengah huruf =====
   // Strategi:
   // - Split ke token kata & spasi: /(\s+)/
+  // - Token spasi dirender apa adanya
   // - Setiap KATA dibungkus span inline-block (mencegah line break di dalam kata)
-  // - Di dalamnya, huruf2 tetap di-animate (inline-block) seperti biasa
+  // - Huruf2 tetap di-animate (inline-block)
   if (by === "character") {
     const tokens = source.split(/(\s+)/);
-
-    // Container untuk stagger per huruf (tetap sama)
     const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
     return (
-      <Tag className={className} aria-label={source}>
+      <Tag className={className} aria-label={source} style={{ textWrap: "balance" } as React.CSSProperties}>
         <motion.span
           aria-hidden
           initial="hidden"
@@ -114,17 +118,15 @@ export function TextAnimate({
           onAnimationComplete={() => onDone?.()}
         >
           {tokens.map((tok, i) => {
-            // Token spasi: render apa adanya agar jarak antar kata normal
             if (/^\s+$/.test(tok)) {
               return <span key={`space-${i}`}>{tok}</span>;
             }
-            // Token kata: bungkus agar tidak bisa break di tengah huruf
             const chars = [...tok];
             return (
               <span
                 key={`word-${i}`}
                 style={{
-                  display: "inline-block", // mencegah line-break di dalam kata
+                  display: "inline-block",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -151,7 +153,7 @@ export function TextAnimate({
     const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
     return (
-      <Tag className={className} aria-label={source}>
+      <Tag className={className} aria-label={source} style={{ textWrap: "balance" } as React.CSSProperties}>
         <motion.span
           aria-hidden
           initial="hidden"
@@ -178,7 +180,7 @@ export function TextAnimate({
 
   // Fallback (by: "none" sudah ditangani di atas, ini praktis tidak terpakai)
   return (
-    <Tag className={className}>
+    <Tag className={className} style={{ textWrap: "balance" } as React.CSSProperties}>
       <motion.span
         {...common}
         {...triggerProps}
