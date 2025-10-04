@@ -1,3 +1,4 @@
+// apps/frontend/hooks/useStepScroll.ts
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -5,8 +6,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 /** Engine scroll multi-step untuk viewport sticky. Dipakai ulang lintas halaman. */
 type UseStepScrollOpts = {
   totalSteps: number;
-  reduceMotion?: boolean;         // dari useReducedMotion()
-  enabled?: boolean;              // default true
+  reduceMotion?: boolean;          // dari useReducedMotion()
+  enabled?: boolean;               // default true
   viewportStickySelector?: string; // default containerRef.current
 };
 
@@ -41,6 +42,7 @@ export function useStepScroll(opts: UseStepScrollOpts) {
     }
     return false;
   };
+
   const isInteractive = (el: EventTarget | null): boolean => {
     const node = el as HTMLElement | null;
     if (!node) return false;
@@ -49,24 +51,37 @@ export function useStepScroll(opts: UseStepScrollOpts) {
     if (node.getAttribute?.("role") === "button") return true;
     return isEditable(node);
   };
-  const canScrollWithin = (target: EventTarget | null): boolean => {
+
+  // NEW: cek scrollable ancestor yang masih bisa scroll ke ARAH tertentu
+  const canScrollWithinDir = (target: EventTarget | null, dir: 1 | -1): boolean => {
     let cur = target as HTMLElement | null;
     let depth = 0;
     while (cur && depth++ < 12) {
-      if (cur.dataset?.nativeScroll === "true") return true;
+      if (cur.dataset?.nativeScroll === "true") return true; // container eksplisit
       if (cur.getAttribute?.("role") === "dialog") return true;
       const style = typeof window !== "undefined" ? window.getComputedStyle(cur) : null;
       const oy = style?.overflowY;
-      const canScrollY = !!style && (oy === "auto" || oy === "scroll") && cur.scrollHeight > cur.clientHeight;
-      if (canScrollY) return true;
+      const scrollable = !!style && (oy === "auto" || oy === "scroll") && cur.scrollHeight > cur.clientHeight;
+      if (scrollable) {
+        const atTop = cur.scrollTop <= 0;
+        const atBottom = cur.scrollTop + cur.clientHeight >= cur.scrollHeight - 1;
+        if (dir > 0) {
+          // scroll ke bawah hanya jika belum di bottom
+          if (!atBottom) return true;
+        } else {
+          // scroll ke atas hanya jika belum di top
+          if (!atTop) return true;
+        }
+      }
       cur = cur.parentElement;
     }
     return false;
   };
+
   const normalizeWheelDelta = (e: WheelEvent, vhPx: number) => {
-    if (e.deltaMode === 1) return e.deltaY * 16;      // line → px approx
-    if (e.deltaMode === 2) return e.deltaY * vhPx;    // page → 1vh
-    return e.deltaY;                                   // already px
+    if (e.deltaMode === 1) return e.deltaY * 16;   // line → px approx
+    if (e.deltaMode === 2) return e.deltaY * vhPx; // page → 1vh
+    return e.deltaY;                               // already px
   };
 
   // ===== Refs & state
@@ -89,6 +104,9 @@ export function useStepScroll(opts: UseStepScrollOpts) {
   const wheelAccRef = useRef(0);
   const gestureTimerRef = useRef<number | null>(null);
 
+  // rAF throttle untuk recalc
+  const recalcRafRef = useRef<number | null>(null);
+
   const animRef = useRef<number | null>(null);
   const cancelAnim = useCallback(() => {
     if (animRef.current != null) {
@@ -98,7 +116,7 @@ export function useStepScroll(opts: UseStepScrollOpts) {
   }, []);
 
   // ===== Geometry recalc
-  const recalc = useCallback(() => {
+  const recalcNow = useCallback(() => {
     if (typeof window === "undefined") return;
     const root = containerRef.current;
     if (!root) return;
@@ -109,13 +127,21 @@ export function useStepScroll(opts: UseStepScrollOpts) {
     root.style.setProperty("--vvh", `${h}px`);
   }, []);
 
+  const recalc = useCallback(() => {
+    if (recalcRafRef.current != null) return;
+    recalcRafRef.current = requestAnimationFrame(() => {
+      recalcRafRef.current = null;
+      recalcNow();
+    });
+  }, [recalcNow]);
+
   // Recalc before first paint (hindari jump 1 frame)
   useLayoutEffect(() => {
     if (!enabled || typeof window === "undefined") return;
-    recalc();
-  }, [enabled, recalc]);
+    recalcNow();
+  }, [enabled, recalcNow]);
 
-  // Recalc on resize/viewport/orientation
+  // Recalc on resize/orientation (NO visualViewport.scroll ⇒ hindari reflow saat scroll)
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
     recalc();
@@ -127,7 +153,7 @@ export function useStepScroll(opts: UseStepScrollOpts) {
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", recalc, { signal });
-      window.visualViewport.addEventListener("scroll", recalc, { signal });
+      // ❌ JANGAN: window.visualViewport.addEventListener("scroll", recalc, ...)
     }
 
     window.addEventListener("orientationchange", recalc, { passive: true, signal });
@@ -146,8 +172,9 @@ export function useStepScroll(opts: UseStepScrollOpts) {
     return rect.top < h * 0.85 && rect.bottom > h * 0.15;
   }, []);
   const getHystPx = useCallback(() => {
-    const base = vh() * 0.18;
-    return Math.min(base || 120, 140) || 120;
+    // diperkuat: naikkan base & cap, supaya tidak flip-flop di boundary
+    const base = vh() * 0.22;
+    return Math.min(base || 160, 220) || 160;
   }, [vh]);
 
   // ===== Scroll animation to a step index
@@ -162,7 +189,7 @@ export function useStepScroll(opts: UseStepScrollOpts) {
       if (Math.abs(dist) < 1) {
         window.scrollTo({ top: to, behavior: "auto" });
         lastChangeAtRef.current = performance.now();
-        ignoreScrollUntilRef.current = performance.now() + 120;
+        ignoreScrollUntilRef.current = performance.now() + 260; // ↑ lockout inertia
         modeRef.current = "idle";
         return;
       }
@@ -183,7 +210,7 @@ export function useStepScroll(opts: UseStepScrollOpts) {
           animRef.current = null;
           window.scrollTo({ top: to, behavior: "auto" }); // align
           lastChangeAtRef.current = performance.now();
-          ignoreScrollUntilRef.current = performance.now() + 160;
+          ignoreScrollUntilRef.current = performance.now() + 260; // ↑ lockout inertia
           setTimeout(() => {
             if (modeRef.current === "animating") modeRef.current = "idle";
           }, 60);
@@ -192,12 +219,13 @@ export function useStepScroll(opts: UseStepScrollOpts) {
 
       animRef.current = requestAnimationFrame(tick);
     },
-    [cancelAnim, reduceMotion]
+    [cancelAnim, reduceMotion, easeFn]
   );
 
   const scrollToStep = useCallback(
     (next: number, dir: 1 | -1) => {
-      const top = containerTopRef.current + next * vh();
+      const targetVh = vh(); // freeze vh untuk animasi ini
+      const top = containerTopRef.current + next * targetVh;
       setStep(next);
       lastDirRef.current = dir;
       lastChangeAtRef.current = typeof performance !== "undefined" ? performance.now() : 0;
@@ -223,7 +251,7 @@ export function useStepScroll(opts: UseStepScrollOpts) {
         if (modeRef.current === "gesturing") modeRef.current = "idle";
         gestureTimerRef.current = null;
         wheelAccRef.current = 0;
-      }, 180);
+      }, 220); // ↑ sedikit lebih lama buat inertial trackpad
     };
 
     const go = (dir: 1 | -1) => {
@@ -240,19 +268,26 @@ export function useStepScroll(opts: UseStepScrollOpts) {
       if (!inViewport()) return;
       if (modeRef.current === "animating") return;
       if (e.ctrlKey || isEditable(e.target) || isInteractive(e.target)) return;
-      if (canScrollWithin(e.target)) return;
 
+      const delta = normalizeWheelDelta(e, vh());
+      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+
+      // Jika container dalam arah itu masih bisa scroll, lepas ke native
+      if (canScrollWithinDir(e.target, dir)) return;
+
+      // Kalau tidak, intersep
       e.preventDefault();
       modeRef.current = "gesturing";
       endGestureSoon();
 
-      const delta = normalizeWheelDelta(e, vh());
+      // decay + akumulasi
       if (Math.sign(delta) !== Math.sign(wheelAccRef.current)) wheelAccRef.current = 0;
+      wheelAccRef.current *= 0.9; // decay ringan
       wheelAccRef.current += delta;
 
-      const threshold = Math.max(60, Math.min(180, vh() * 0.09));
+      // threshold lebih tinggi agar tidak gampang tersentak
+      const threshold = Math.max(80, Math.min(240, vh() * 0.12));
       if (Math.abs(wheelAccRef.current) >= threshold) {
-        const dir: 1 | -1 = wheelAccRef.current > 0 ? 1 : -1;
         go(dir);
       }
     };
@@ -271,13 +306,17 @@ export function useStepScroll(opts: UseStepScrollOpts) {
       if (!inViewport()) return;
       if (modeRef.current === "animating") return;
       if (isEditable(e.target) || isInteractive(e.target)) return;
-      if (canScrollWithin(e.target)) return;
 
       const delta = startY - e.touches[0].clientY;
+      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+
+      // Biarkan native scroll jika ancestor masih bisa scroll ke arah itu
+      if (canScrollWithinDir(e.target, dir)) return;
+
       const thresh = Math.max(26, vh() * 0.03);
       if (Math.abs(delta) < thresh) return;
       e.preventDefault();
-      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+
       startY = e.touches[0].clientY;
       endGestureSoon();
       go(dir);
@@ -337,12 +376,20 @@ export function useStepScroll(opts: UseStepScrollOpts) {
       const pos = window.scrollY - containerTopRef.current;
       const h = vh();
       const progress = pos / (h || 1);
+
       const targetIdx = Math.round(progress);
       const distPx = Math.abs(progress - stepRef.current) * h;
 
+      // Bias arah: saat kembali ke atas, minta progress lebih jauh sebelum pindah step
+      const baseBias = 0.58;
+      const bias =
+        lastDirRef.current < 0 ? 0.65 :
+        lastDirRef.current > 0 ? 0.55 :
+        baseBias;
+
       if (
         targetIdx !== stepRef.current &&
-        Math.abs(progress - stepRef.current) > 0.55 &&
+        Math.abs(progress - stepRef.current) > bias &&
         distPx > getHystPx()
       ) {
         const dir: 1 | -1 = targetIdx > stepRef.current ? 1 : -1;
