@@ -138,13 +138,12 @@ export default function FeaturesPage() {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  // =================== Stabilizer untuk 'step' (anti jitter boundary) ===================
+  // Stabilizer untuk 'step' (anti jitter boundary)
   const [stableStep, setStableStep] = useState(step);
   useEffect(() => {
     const id = setTimeout(() => setStableStep(step), 90);
     return () => clearTimeout(id);
   }, [step]);
-  // ======================================================================================
 
   const showHero = stableStep === 0;
 
@@ -156,14 +155,14 @@ export default function FeaturesPage() {
         style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }}
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
-          {/* >>> PERUBAHAN 1: jadikan anchor overlay */}
+          {/* anchor overlay */}
           <div className="w-full relative">
-            {/* ===== HERO: selalu overlay absolute; hanya opacity + pointerEvents yang berubah ===== */}
+            {/* ===== HERO: selalu absolute overlay; hanya opacity + pointerEvents yang berubah ===== */}
             <motion.section
               initial={false}
               animate={{ opacity: showHero ? 1 : 0 }}
               transition={{ duration: prefersReduced ? 0 : 0.2, ease: EASE }}
-              className="absolute inset-0 z-10 text-center flex items-center justify-center"
+              className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
               style={{ willChange: "opacity", pointerEvents: showHero ? "auto" : "none" }}
               aria-hidden={!showHero}
             >
