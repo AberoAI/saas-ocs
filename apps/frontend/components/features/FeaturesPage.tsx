@@ -101,15 +101,14 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** Animasi hero hanya saat pertama kali halaman dibuka — dibekukan agar markup stabil
-   *  Gunakan sessionStorage agar tidak re-trigger saat scroll atau kembali ke step 0.
+  /** One-shot anim untuk hero (headline + subheadline).
+   *  Jika sudah pernah di sesi ini, keduanya akan selalu statis.
    */
-  const initialShouldAnimate =
-    typeof window !== "undefined"
-      ? (!prefersReduced && sessionStorage.getItem("features_hero_played") !== "1")
-      : !prefersReduced;
-  const shouldAnimateHeroRef = useRef<boolean>(initialShouldAnimate);
-  const shouldAnimateHero = shouldAnimateHeroRef.current;
+  const [heroPlayed, setHeroPlayed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem("features_hero_played") === "1";
+  });
+  const shouldAnimateHero = !prefersReduced && !heroPlayed;
 
   // Tinggi headline dibekukan saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
@@ -121,12 +120,18 @@ export default function FeaturesPage() {
     }
   }, [headlineMinH]);
 
-  // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
+  // Urutan anim: Headline → Subheadline → set heroPlayed=true. Kalau tidak animasi, keduanya dianggap selesai.
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
+  const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
+
   const onHeadlineDone = useCallback(() => {
-    // Tandai sudah pernah animasi sekali di sesi ini
+    setHeadlineDone(true);
+  }, []);
+
+  const onSubtitleDone = useCallback(() => {
+    setSubtitleDone(true);
     try { sessionStorage.setItem("features_hero_played", "1"); } catch {}
-    setTimeout(() => setHeadlineDone(true), 60);
+    setHeroPlayed(true); // setelah subtitle selesai → stop anim selamanya di sesi ini
   }, []);
 
   return (
@@ -154,7 +159,7 @@ export default function FeaturesPage() {
                   style={headlineMinH ? { minHeight: headlineMinH } : undefined}
                   className="relative pt-2.5"
                 >
-                  {shouldAnimateHero ? (
+                  {shouldAnimateHero && !headlineDone ? (
                     <TextAnimate
                       animation="blurIn"
                       by="character"
@@ -162,7 +167,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
-                      trigger="mount" // << hanya animasi saat mount (first page open)
+                      trigger="mount"
                     >
                       {t("title")}
                     </TextAnimate>
@@ -175,7 +180,18 @@ export default function FeaturesPage() {
 
                 {/* Subheadline + Scroll */}
                 {shouldAnimateHero ? (
-                  headlineDone ? (
+                  !headlineDone ? (
+                    // placeholder kecil agar layout tidak loncat saat menunggu headline selesai
+                    <>
+                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                        {t("subtitle")}
+                      </p>
+                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                        <span className="text-sm">Scroll</span>
+                        <span aria-hidden>↓</span>
+                      </div>
+                    </>
+                  ) : !subtitleDone ? (
                     <>
                       <TextAnimate
                         animation="fadeInUp"
@@ -183,7 +199,8 @@ export default function FeaturesPage() {
                         once
                         as="p"
                         className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                        trigger="mount" // << hanya animasi saat mount (first page open)
+                        onDone={onSubtitleDone}
+                        trigger="mount"
                       >
                         {t("subtitle")}
                       </TextAnimate>
@@ -193,15 +210,14 @@ export default function FeaturesPage() {
                       </div>
                     </>
                   ) : (
+                    // setelah subtitle selesai → selalu statis
                     <>
-                      {/* placeholder kecil agar layout tidak loncat saat menunggu */}
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
+                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
                         {t("subtitle")}
                       </p>
-                      {/* placeholder tinggi untuk Scroll indicator */}
-                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                         <span className="text-sm">Scroll</span>
-                        <span aria-hidden>↓</span>
+                        <span className="animate-bounce" aria-hidden>↓</span>
                       </div>
                     </>
                   )
@@ -315,7 +331,7 @@ export default function FeaturesPage() {
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg.black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
