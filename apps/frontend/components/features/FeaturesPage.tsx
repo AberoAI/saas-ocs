@@ -45,15 +45,10 @@ export default function FeaturesPage() {
   const prefersReduced = useReducedMotion();
 
   // ======== NEW: deteksi path tanpa prefix locale untuk gating animasi hero ========
-  // Contoh:
-  //  - /en/features   -> /features
-  //  - /tr/ozellikler -> /ozellikler
-  //  - /features      -> /features
   const pathWithoutLocale =
     localePrefix && pathnameRaw.startsWith(localePrefix)
       ? pathnameRaw.slice(localePrefix.length) || "/"
       : pathnameRaw;
-
   const isFeaturesRoute = /^\/(?:features|ozellikler)(?:\/|$)/i.test(pathWithoutLocale);
   // =================================================================================
 
@@ -135,24 +130,20 @@ export default function FeaturesPage() {
       const h = headlineWrapRef.current.getBoundingClientRect().height;
       if (h > 0) setHeadlineMinH(h);
     }
-    // kita tidak memasukkan dependencies lain supaya minH dibekukan sekali
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headlineMinH]);
 
   // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
-
-  // NEW: subheadline done -> barulah "Scroll ↓" muncul + tandai sudah pernah animasi (sessionStorage)
+  // subheadline done -> barulah "Scroll ↓" muncul + tandai sudah pernah animasi (sessionStorage)
   const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
 
   const onHeadlineDone = useCallback(() => {
-    // Delay kecil agar layout benar-benar stabil
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
   useEffect(() => {
     if (subtitleDone && typeof window !== "undefined") {
-      // tandai agar tidak animasi lagi di kunjungan berikutnya (dalam sesi yang sama)
       sessionStorage.setItem(HERO_PLAYED_KEY, "1");
     }
   }, [subtitleDone]);
@@ -166,101 +157,93 @@ export default function FeaturesPage() {
       >
         <div className="sticky top-0 h-screen flex items-center justify-center">
           <div className="w-full">
-            <AnimatePresence mode="wait">
-              {/* HERO — SELALU MOUNTED; tidak pernah display:none supaya animasi tidak re-trigger saat scroll */}
-              <section
-                className={
-                  step === 0
-                    ? "relative text-center opacity-100"
-                    : "text-center opacity-0 pointer-events-none absolute inset-0 -z-10"
-                }
-                aria-hidden={step !== 0}
+            {/* ===== HERO DIPISAH DARI AnimatePresence AGAR TIDAK RESET SAAT STEP BERUBAH ===== */}
+            <section
+              className={
+                step === 0
+                  ? "relative text-center opacity-100"
+                  : "text-center opacity-0 pointer-events-none absolute inset-0 -z-10"
+              }
+              aria-hidden={step !== 0}
+            >
+              <div
+                ref={headlineWrapRef}
+                style={headlineMinH ? { minHeight: headlineMinH } : undefined}
+                className="relative pt-2.5"
               >
-                {/* Headline wrapper: padding-top hindari margin-collapsing; minHeight stabil */}
-                <div
-                  ref={headlineWrapRef}
-                  style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-                  className="relative pt-2.5"
-                >
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurIn"
-                      by="character"
-                      once
-                      as="h1"
-                      className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      onDone={onHeadlineDone}
-                      trigger="mount" // << hanya animasi saat mount (bukan saat scroll)
-                    >
-                      {t("title")}
-                    </TextAnimate>
-                  ) : (
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                      {t("title")}
-                    </h1>
-                  )}
-                </div>
-
-                {/* Subheadline + Scroll */}
                 {shouldAnimateHero ? (
-                  headlineDone ? (
-                    <>
-                      <TextAnimate
-                        animation="fadeInUp"
-                        by="word"
-                        once
-                        as="p"
-                        className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                        trigger="mount" // << hanya animasi saat mount (bukan saat scroll)
-                        onDone={() => setSubtitleDone(true)} // NEW: tandai selesai
-                      >
-                        {t("subtitle")}
-                      </TextAnimate>
+                  <TextAnimate
+                    animation="blurIn"
+                    by="character"
+                    once
+                    as="h1"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                    onDone={onHeadlineDone}
+                    trigger="mount"
+                  >
+                    {t("title")}
+                  </TextAnimate>
+                ) : (
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                    {t("title")}
+                  </h1>
+                )}
+              </div>
 
-                      {/* NEW: "Scroll ↓" hanya muncul setelah subheadline selesai animasi */}
-                      {subtitleDone ? (
-                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                          <span className="text-sm">Scroll</span>
-                          <span className="animate-bounce" aria-hidden>
-                            ↓
-                          </span>
-                        </div>
-                      ) : (
-                        // placeholder agar layout stabil
-                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
-                          <span className="text-sm">Scroll</span>
-                          <span aria-hidden>↓</span>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {/* placeholder kecil agar layout tidak loncat saat menunggu */}
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
-                        {t("subtitle")}
-                      </p>
-                      {/* placeholder tinggi untuk Scroll indicator */}
+              {/* Subheadline + Scroll */}
+              {shouldAnimateHero ? (
+                headlineDone ? (
+                  <>
+                    <TextAnimate
+                      animation="fadeInUp"
+                      by="word"
+                      once
+                      as="p"
+                      className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                      trigger="mount"
+                      onDone={() => setSubtitleDone(true)}
+                    >
+                      {t("subtitle")}
+                    </TextAnimate>
+
+                    {subtitleDone ? (
+                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                        <span className="text-sm">Scroll</span>
+                        <span className="animate-bounce" aria-hidden>↓</span>
+                      </div>
+                    ) : (
                       <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
                         <span className="text-sm">Scroll</span>
                         <span aria-hidden>↓</span>
                       </div>
-                    </>
-                  )
+                    )}
+                  </>
                 ) : (
                   <>
-                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-transparent mx-auto leading-snug">
                       {t("subtitle")}
                     </p>
-                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
                       <span className="text-sm">Scroll</span>
-                      <span className="animate-bounce" aria-hidden>
-                        ↓
-                      </span>
+                      <span aria-hidden>↓</span>
                     </div>
                   </>
-                )}
-              </section>
+                )
+              ) : (
+                <>
+                  <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
+                    {t("subtitle")}
+                  </p>
+                  <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                    <span className="text-sm">Scroll</span>
+                    <span className="animate-bounce" aria-hidden>↓</span>
+                  </div>
+                </>
+              )}
+            </section>
 
+            {/* ===== SECTION YANG DI-MOUNT/UNMOUNT SAAT SCROLL ===== */}
+            <AnimatePresence mode="wait" initial={false}>
               {/* Step 1..6 */}
               {step >= 1 && step <= items.length && (
                 <motion.section key="step-content" {...stageFade} className="w-full">
@@ -351,14 +334,14 @@ export default function FeaturesPage() {
                   <div className="mt-7 flex justify-center gap-3">
                     <a
                       href="#demo"
-                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring/[rgba(38,101,140,0.35)]"
+                      className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ backgroundColor: BRAND }}
                     >
                       {t("cta.primary")}
                     </a>
                     <a
                       href={withLocale("/contact")}
-                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring/[rgba(38,101,140,0.35)]"
+                      className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg.black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
                       style={{ borderColor: "rgba(0,0,0,0.1)" }}
                     >
                       {t("cta.secondary")}
