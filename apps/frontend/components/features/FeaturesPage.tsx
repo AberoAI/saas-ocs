@@ -119,13 +119,6 @@ export default function FeaturesPage() {
   const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
-  // >>> NEW (khusus /tr): paksa "Güçlü Özellikler" tetap satu baris (NBSP)
-  const rawTitle = String(t("title"));
-  const heroTitle =
-    locale === "tr"
-      ? rawTitle.replace(/Güçlü\s+Özellikler/g, "Güçlü\u00A0Özellikler")
-      : rawTitle;
-
   // Bekukan tinggi headline saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
   const [headlineMinH, setHeadlineMinH] = useState<number | null>(null);
@@ -189,11 +182,11 @@ export default function FeaturesPage() {
                     onDone={onHeadlineDone}
                     trigger="mount" // hanya saat mount
                   >
-                    {heroTitle}
+                    {t("title")}
                   </TextAnimate>
                 ) : (
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                    {heroTitle}
+                    {t("title")}
                   </h1>
                 )}
               </div>
