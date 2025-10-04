@@ -1,3 +1,4 @@
+// apps/frontend/components/registry/magicui/text-animate.tsx
 "use client";
 
 import * as React from "react";
@@ -76,7 +77,7 @@ export function TextAnimate({
 
   if (!isStringChild || by === "none") {
     return (
-      <Tag className={className} style={{ textWrap: "balance" } as React.CSSProperties}>
+      <Tag className={className}>
         <motion.span
           {...common}
           {...triggerProps}
@@ -88,25 +89,89 @@ export function TextAnimate({
     );
   }
 
-  // ====== PRE-PROCESS TEKS ======
-  // Ikat frasa kunci TR agar tidak pecah baris: "Güçlü Özellikler" -> "Güçlü&nbsp;Özellikler"
-  // (NBSP mencegah break di antara kedua kata tsb, tanpa menyentuh frasa lain)
-  const NBSP = "\u00A0";
-  let source = String(children).replace(/Güçlü Özellikler/g, `Güçlü${NBSP}Özellikler`);
-  // =================================
+  const source = String(children);
 
-  // ===== FIX: "by=character" tapi JAGA batas kata agar tidak patah di tengah huruf =====
-  // Strategi:
-  // - Split ke token kata & spasi: /(\s+)/
-  // - Token spasi dirender apa adanya
-  // - Setiap KATA dibungkus span inline-block (mencegah line break di dalam kata)
-  // - Huruf2 tetap di-animate (inline-block)
+  // ===== "by=character" dengan kontrol pemenggalan kata & layout =====
   if (by === "character") {
     const tokens = source.split(/(\s+)/);
+
+    // Container untuk stagger per huruf
     const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
+    // Helper: render satu KATA per karakter (tetap animasi per huruf)
+    const renderWord = (word: string, key: React.Key) => {
+      const chars = [...word];
+      return (
+        <span
+          key={`word-${key}`}
+          style={{
+            display: "inline-block", // mencegah line-break di dalam kata
+            whiteSpace: "nowrap",
+          }}
+        >
+          {chars.map((ch, j) => (
+            <motion.span
+              key={`ch-${key}-${j}`}
+              variants={childVar as Variants}
+              style={{ display: "inline-block" }}
+            >
+              {ch}
+            </motion.span>
+          ))}
+        </span>
+      );
+    };
+
+    // OUTPUT dengan kontrol khusus TR: pecah sebelum "Güçlü Özellikler"
+    const out: React.ReactNode[] = [];
+    for (let i = 0; i < tokens.length; i++) {
+      const tok = tokens[i];
+
+      // 1) Jika token spasi dan setelahnya "Güçlü Özellikler", ganti spasi tsb dengan <br />
+      if (
+        /^\s+$/.test(tok) &&
+        tokens[i + 1] === "Güçlü" &&
+        /^\s+$/.test(tokens[i + 2] || "") &&
+        tokens[i + 3] === "Özellikler"
+      ) {
+        out.push(<br key={`br-tr-${i}`} />);
+        continue; // jangan render spasi ini
+      }
+
+      // 2) Jika token saat ini adalah "Güçlü" diikuti spasi + "Özellikler",
+      //    bungkus KEDUANYA dalam satu inline-block agar tak terpecah lagi.
+      if (
+        tok === "Güçlü" &&
+        /^\s+$/.test(tokens[i + 1] || "") &&
+        tokens[i + 2] === "Özellikler"
+      ) {
+        out.push(
+          <span
+            key={`phrase-tr-${i}`}
+            style={{ display: "inline-block", whiteSpace: "nowrap" }}
+          >
+            {renderWord("Güçlü", `g-${i}`)}
+            {/* spasi biasa di dalam wrapper supaya tetap satu baris */}
+            {" "}
+            {renderWord("Özellikler", `o-${i + 2}`)}
+          </span>
+        );
+        i += 2; // lewati spasi + "Özellikler"
+        continue;
+      }
+
+      // Token spasi (default)
+      if (/^\s+$/.test(tok)) {
+        out.push(<span key={`space-${i}`}>{tok}</span>);
+        continue;
+      }
+
+      // Token kata biasa (default)
+      out.push(renderWord(tok, i));
+    }
+
     return (
-      <Tag className={className} aria-label={source} style={{ textWrap: "balance" } as React.CSSProperties}>
+      <Tag className={className} aria-label={source}>
         <motion.span
           aria-hidden
           initial="hidden"
@@ -117,43 +182,19 @@ export function TextAnimate({
           style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
           onAnimationComplete={() => onDone?.()}
         >
-          {tokens.map((tok, i) => {
-            if (/^\s+$/.test(tok)) {
-              return <span key={`space-${i}`}>{tok}</span>;
-            }
-            const chars = [...tok];
-            return (
-              <span
-                key={`word-${i}`}
-                style={{
-                  display: "inline-block",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {chars.map((ch, j) => (
-                  <motion.span
-                    key={`ch-${i}-${j}`}
-                    variants={childVar as Variants}
-                    style={{ display: "inline-block" }}
-                  >
-                    {ch}
-                  </motion.span>
-                ))}
-              </span>
-            );
-          })}
+          {out}
         </motion.span>
       </Tag>
     );
   }
-  // ===== END FIX =====
+  // ===== END (by="character") =====
 
   if (by === "word") {
     const units = source.split(/(\s+)/);
     const container: Variants = { show: { transition: { staggerChildren: 0.03 } } };
 
     return (
-      <Tag className={className} aria-label={source} style={{ textWrap: "balance" } as React.CSSProperties}>
+      <Tag className={className} aria-label={source}>
         <motion.span
           aria-hidden
           initial="hidden"
@@ -178,15 +219,15 @@ export function TextAnimate({
     );
   }
 
-  // Fallback (by: "none" sudah ditangani di atas, ini praktis tidak terpakai)
+  // Fallback
   return (
-    <Tag className={className} style={{ textWrap: "balance" } as React.CSSProperties}>
+    <Tag className={className}>
       <motion.span
         {...common}
         {...triggerProps}
         style={{ display: "inline-block", whiteSpace: "pre-wrap" }}
       >
-        {source}
+        {String(children)}
       </motion.span>
     </Tag>
   );
