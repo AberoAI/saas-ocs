@@ -101,13 +101,15 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** Animasi hero hanya saat pertama kali halaman dibuka — dibekukan agar markup stabil */
-  const shouldAnimateHeroRef = useRef<boolean>(!prefersReduced);
+  /** Animasi hero hanya saat pertama kali halaman dibuka — dibekukan agar markup stabil
+   *  Gunakan sessionStorage agar tidak re-trigger saat scroll atau kembali ke step 0.
+   */
+  const initialShouldAnimate =
+    typeof window !== "undefined"
+      ? (!prefersReduced && sessionStorage.getItem("features_hero_played") !== "1")
+      : !prefersReduced;
+  const shouldAnimateHeroRef = useRef<boolean>(initialShouldAnimate);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
-
-  // ⬇️ Tambahan: lock animasi agar tidak mengulang saat scroll/remount
-  const [headlinePlayed, setHeadlinePlayed] = useState<boolean>(!shouldAnimateHero);
-  const [subPlayed, setSubPlayed] = useState<boolean>(!shouldAnimateHero);
 
   // Tinggi headline dibekukan saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
@@ -122,7 +124,8 @@ export default function FeaturesPage() {
   // Reveal subheadline sedikit ditunda agar repaint headline selesai dulu
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
   const onHeadlineDone = useCallback(() => {
-    setHeadlinePlayed(true);            // ⬅️ kunci headline agar tidak re-animasi
+    // Tandai sudah pernah animasi sekali di sesi ini
+    try { sessionStorage.setItem("features_hero_played", "1"); } catch {}
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
@@ -151,7 +154,7 @@ export default function FeaturesPage() {
                   style={headlineMinH ? { minHeight: headlineMinH } : undefined}
                   className="relative pt-2.5"
                 >
-                  {shouldAnimateHero && !headlinePlayed ? (
+                  {shouldAnimateHero ? (
                     <TextAnimate
                       animation="blurIn"
                       by="character"
@@ -159,7 +162,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
-                      trigger="mount" // << hanya animasi saat mount
+                      trigger="mount" // << hanya animasi saat mount (first page open)
                     >
                       {t("title")}
                     </TextAnimate>
@@ -174,35 +177,20 @@ export default function FeaturesPage() {
                 {shouldAnimateHero ? (
                   headlineDone ? (
                     <>
-                      {subPlayed ? (
-                        <>
-                          <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug">
-                            {t("subtitle")}
-                          </p>
-                          <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                            <span className="text-sm">Scroll</span>
-                            <span className="animate-bounce" aria-hidden>↓</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <TextAnimate
-                            animation="fadeInUp"
-                            by="word"
-                            once
-                            as="p"
-                            className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
-                            trigger="mount" // << hanya animasi saat mount
-                            onDone={() => setSubPlayed(true)} // ⬅️ kunci subheadline setelah animasi pertama
-                          >
-                            {t("subtitle")}
-                          </TextAnimate>
-                          <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                            <span className="text-sm">Scroll</span>
-                            <span className="animate-bounce" aria-hidden>↓</span>
-                          </div>
-                        </>
-                      )}
+                      <TextAnimate
+                        animation="fadeInUp"
+                        by="word"
+                        once
+                        as="p"
+                        className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg italic text-foreground/70 mx-auto leading-snug"
+                        trigger="mount" // << hanya animasi saat mount (first page open)
+                      >
+                        {t("subtitle")}
+                      </TextAnimate>
+                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                        <span className="text-sm">Scroll</span>
+                        <span className="animate-bounce" aria-hidden>↓</span>
+                      </div>
                     </>
                   ) : (
                     <>
