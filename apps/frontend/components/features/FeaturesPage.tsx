@@ -3,240 +3,23 @@
 
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
 import dynamic from "next/dynamic";
-import {
-  useMemo,
-  useRef,
-  useLayoutEffect,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { useMemo, useRef, useLayoutEffect, useState, useCallback } from "react";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
 import { TextAnimate } from "../../registry/magicui/text-animate";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-/* (Opsional) Kalau alias @ bermasalah di proyekmu, ubah ke path relatif:
-   import AnimatedBackgroundFeatures from "../bg/AnimatedBackgroundFeatures";
-*/
+/* Background animasi */
 import AnimatedBackgroundFeatures from "@/components/bg/AnimatedBackgroundFeatures";
 
-/* ===== Stages (lazy) ===== */
+// Stage (lazy)
 const InstantChatStage = dynamic(() => import("./stages/InstantChatStage"));
 const AnalyticsTableStage = dynamic(() => import("./stages/AnalyticsTableStage"));
 const AnalyticsRealtimeStage = dynamic(() => import("./stages/AnalyticsRealtimeStage"));
 const HandoffStage = dynamic(() => import("./stages/HandoffStage"));
 
-/* =====================================================================================
-   INLINE GSAP CANVAS SCENE (menghilangkan error module-not-found sepenuhnya)
-   ===================================================================================== */
-
-/** Pseudo-noise ringan tanpa dependensi (mendekati Simplex secara visual) */
-function nMix(i: number, a: number, b: number) {
-  return Math.sin(i * a) * 0.66 + Math.cos(i * b) * 0.34; // ~[-1..1]
-}
-
-type GsapScrollNoiseSceneProps = {
-  count?: number;          // default 2600
-  spreadX?: number;        // default 240
-  baseSize?: number;       // default 6
-  haloAlpha?: number;      // default 0.6
-  hueStep?: number;        // default 0.3
-  ease?: [number, number, number, number]; // default [0.16,1,0.3,1]
-  scrollHeights?: number;  // default 3 (≈300vh)
-};
-
-function GsapScrollNoiseScene({
-  count = 2600,
-  spreadX = 240,
-  baseSize = 6,
-  haloAlpha = 0.6,
-  hueStep = 0.3,
-  ease = [0.16, 1, 0.3, 1],
-  scrollHeights = 3,
-}: GsapScrollNoiseSceneProps) {
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const wrap = wrapRef.current!;
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d", { alpha: true })!;
-
-    const DPR = Math.min(window.devicePixelRatio || 1, 2);
-    const resize = () => {
-      const w = wrap.clientWidth;
-      const h = window.innerHeight * scrollHeights;
-      canvas.width = Math.floor(w * DPR);
-      canvas.height = Math.floor(h * DPR);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    };
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(wrap);
-
-    type P = { x: number; y: number; r: number; hue: number; rot: number; sx: number; sy: number };
-    const parts: P[] = new Array(count);
-    for (let i = 0; i < count; i++) {
-      const n1 = nMix(i, 0.003, 0.011);
-      const n2 = nMix(i, 0.002, 0.007);
-      const x = n2 * spreadX;
-      const y = (i / count) * (window.innerHeight * scrollHeights);
-      const rot = n2 * 270;
-      const sx = 3 + n1 * 2;
-      const sy = 3 + n2 * 2;
-      const r = baseSize;
-      const hue = (i * hueStep) % 360;
-      parts[i] = { x, y, r, hue, rot, sx, sy };
-    }
-
-    let progress = 0; // 0..1 via ScrollTrigger
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const py = (progress * window.innerHeight) / 3;
-      for (let i = 0; i < count; i++) {
-        const p = parts[i];
-        const local = Math.min(1, Math.max(0, progress * 1.15 + ((i % 97) / 97) * 0.04 - 0.02));
-        if (local <= 0.001) continue;
-
-        ctx.save();
-        ctx.translate(canvas.width / DPR / 2 + p.x, p.y - py);
-        ctx.rotate((p.rot * Math.PI) / 180);
-        ctx.scale(p.sx, p.sy);
-
-        ctx.globalAlpha = local * 0.55;
-        ctx.fillStyle = `hsl(${p.hue} 70% 70%)`;
-        ctx.beginPath();
-        ctx.arc(0, 0, p.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.globalAlpha = local * haloAlpha;
-        ctx.strokeStyle = `hsla(${p.hue}, 70%, 70%, ${haloAlpha})`;
-        ctx.lineWidth = 0.7;
-        ctx.stroke();
-
-        ctx.restore();
-      }
-    };
-
-    let rafId = 0;
-    const loop = () => {
-      draw();
-      rafId = requestAnimationFrame(loop);
-    };
-    loop();
-
-    const st = ScrollTrigger.create({
-      trigger: wrap,
-      start: "top top",
-      end: () => `+=${window.innerHeight * (scrollHeights - 1)}`,
-      scrub: true,
-      onUpdate: (self) => {
-        const t = self.progress;
-        const eased = gsap.parseEase(`cubic-bezier(${ease[0]},${ease[1]},${ease[2]},${ease[3]})`)(t);
-        progress = eased;
-      },
-    });
-
-    return () => {
-      st.kill();
-      cancelAnimationFrame(rafId);
-      ro.disconnect();
-    };
-  }, [baseSize, count, ease, haloAlpha, hueStep, scrollHeights, spreadX]);
-
-  // Keyframes kecil untuk cue panah
-  const cueKF = `
-  @keyframes scrollCue { 0% { transform: translateY(0) } 100% { transform: translateY(10px) } }
-  `;
-
-  return (
-    <div
-      ref={wrapRef}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: `${scrollHeights * 100}vh`,
-        overflow: "hidden",
-        background: "#fff",
-      }}
-    >
-      <style dangerouslySetInnerHTML={{ __html: cueKF }} />
-      {/* Sticky "SCROLL" cue */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-          letterSpacing: "0.2em",
-          fontSize: 11,
-          zIndex: 2,
-          pointerEvents: "none",
-          color: "#000",
-        }}
-      >
-        <span>SCROLL</span>
-        <svg
-          viewBox="0 0 24 24"
-          width={18}
-          height={18}
-          style={{ marginTop: 10, animation: "scrollCue 0.95s ease-in-out alternate infinite" }}
-          aria-hidden
-        >
-          <line x1="12" y1="1" x2="12" y2="22.5" stroke="#000" strokeWidth="1" strokeLinecap="round" />
-          <line x1="12.1" y1="22.4" x2="18.9" y2="15.6" stroke="#000" strokeWidth="1" strokeLinecap="round" />
-          <line x1="11.9" y1="22.4" x2="5.1" y2="15.6" stroke="#000" strokeWidth="1" strokeLinecap="round" />
-        </svg>
-      </div>
-
-      {/* Gradient masks atas/bawah */}
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          left: 0,
-          top: 0,
-          width: "100%",
-          height: 60,
-          background: "linear-gradient(to bottom, #fff 10%, rgba(255,255,255,0))",
-          zIndex: 3,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          left: 0,
-          bottom: 0,
-          width: "100%",
-          height: 60,
-          background: "linear-gradient(to top, #fff 50%, rgba(255,255,255,0))",
-          zIndex: 3,
-          pointerEvents: "none",
-        }}
-      />
-
-      <canvas ref={canvasRef} style={{ position: "absolute", inset: 0 }} />
-    </div>
-  );
-}
-
-/* ===================================================================================== */
-
+/* Quote splitter kecil */
 function splitQuoted(desc: string): { quote?: string; rest: string } {
   const m = desc.match(/“([^”]+)”/);
   if (m && m.index !== undefined) {
@@ -259,6 +42,7 @@ export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
 
+  // Safe narrowing hasil .match()
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localeCode = m?.[1] ?? "";
   const localePrefix = localeCode ? `/${localeCode}` : "";
@@ -266,6 +50,7 @@ export default function FeaturesPage() {
 
   const prefersReduced = useReducedMotion();
 
+  // Deteksi path tanpa prefix locale (untuk memastikan ini route features/ozellikler)
   const pathWithoutLocale =
     localePrefix && pathnameRaw.startsWith(localePrefix)
       ? pathnameRaw.slice(localePrefix.length) || "/"
@@ -288,20 +73,19 @@ export default function FeaturesPage() {
     { key: "booking", icon: "📅" },
   ];
 
-  const sectionContainer = useMemo(
-    (): Variants => ({
-      hidden: { opacity: 0, y: prefersReduced ? 0 : 12 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.38, ease: EASE },
-      },
-    }),
-    [prefersReduced]
-  );
+  // Animasi masuk tiap section saat masuk viewport (continuous scroll)
+  const sectionContainer = useMemo((): Variants => ({
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 12 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.38, ease: EASE }
+    }
+  }), [prefersReduced]);
 
-  const contentStagger = useMemo(
-    (): { container: Variants; item: Variants } => ({
+  // Stagger kecil di dalam section (judul, desk, ikon)
+  const contentStagger = useMemo((): { container: Variants; item: Variants } => {
+    return {
       container: {
         hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
         visible: {
@@ -319,16 +103,22 @@ export default function FeaturesPage() {
         hidden: { opacity: 0, y: prefersReduced ? 0 : 6 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE } },
       },
-    }),
-    [prefersReduced]
-  );
+    };
+  }, [prefersReduced]);
 
   const BRAND_BG_12 = `${BRAND}1F`;
+
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
+  /** =========================================================
+   *  HERO animation policy:
+   *  - HANYA animasi saat halaman ini di-mount pertama kali.
+   *  - Tidak pernah re-trigger saat scroll (komponen tetap rendered).
+   * ========================================================= */
   const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
+  // Bekukan tinggi headline saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
   const [headlineMinH, setHeadlineMinH] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -338,38 +128,34 @@ export default function FeaturesPage() {
     }
   }, [headlineMinH]);
 
+  // Subheadline muncul setelah headline selesai; "Scroll ↓" muncul setelah subheadline selesai
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
   const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
   const onHeadlineDone = useCallback(() => {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
+  // === PUSATKAN HERO UNTUK /tr ===
+  // Hilangkan nudge ke atas agar benar-benar center
   const heroNudgeClass = "";
+  // Gunakan tinggi layar penuh khusus /tr supaya konten persis di tengah viewport
   const heroSectionMinH = locale === "tr" ? "min-h-screen" : "min-h-[68vh]";
 
   return (
+    /* Wrapper full-bleed agar background tidak terbatasi max-w */
     <div className="relative min-h-screen">
-      {/* ===== GSAP Canvas Scene — full-bleed, ~300vh ===== */}
-      <div className="relative w-full">
-        <GsapScrollNoiseScene
-          count={2600}
-          spreadX={260}
-          baseSize={6}
-          scrollHeights={3}
-          hueStep={0.08}
-        />
-      </div>
+      {/* Biarkan debug aktif saat pengembangan; matikan di produksi */}
+      <AnimatedBackgroundFeatures debug />
 
-      {/* (opsional) background tambahan */}
-      {/* <AnimatedBackgroundFeatures debug /> */}
-
+      {/* Konten */}
       <main className="mx-auto max-w-6xl px-6">
-        {/* ===== HERO ===== */}
+        {/* ===== HERO (continuous flow) ===== */}
         <section className={`${heroSectionMinH} flex flex-col items-center justify-center text-center ${heroNudgeClass}`}>
+          {/* Headline */}
           <div
             ref={headlineWrapRef}
             style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-            className="relative"
+            className="relative"  /* hapus pt-2.5 agar benar-benar center */
           >
             {shouldAnimateHero ? (
               <TextAnimate
@@ -442,12 +228,12 @@ export default function FeaturesPage() {
           )}
         </section>
 
-        {/* ===== FEATURES ===== */}
+        {/* ===== FEATURES (continuous sections; tanpa step-scroll) ===== */}
         <div className="space-y-20 md:space-y-24">
           {items.map((it) => (
             <motion.section
               key={it.key}
-              variants={contentStagger.container}
+              variants={sectionContainer}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.35 }}
@@ -486,7 +272,10 @@ export default function FeaturesPage() {
                     {/* Title */}
                     <motion.h3
                       variants={contentStagger.item}
-                      className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5"
+                      className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
+                      tabIndex={-1}
+                      ref={featureTitleRef}
+                      style={{ outline: "none" }}
                     >
                       {t(`cards.${it.key}.title`)}
                     </motion.h3>
@@ -512,7 +301,11 @@ export default function FeaturesPage() {
 
                 {/* RIGHT: stage */}
                 <div className="hidden md:flex self-center justify-center w-full">
-                  <FeatureStage stepKey={it.key} prefersReduced={!!prefersReduced} locale={locale} />
+                  <FeatureStage
+                    stepKey={it.key}
+                    prefersReduced={!!prefersReduced}
+                    locale={locale}
+                  />
                 </div>
               </div>
             </motion.section>

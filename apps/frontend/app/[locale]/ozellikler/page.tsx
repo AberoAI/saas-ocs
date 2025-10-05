@@ -1,14 +1,3 @@
-import FeaturesPage from "@/components/features/FeaturesPage";
-
-export const metadata = {
-  alternates: {
-    languages: {
-      en: "/en/features",
-      tr: "/tr/ozellikler",
-    },
-  },
-};
-
-export default function OzelliklerPage() {
-  return <FeaturesPage />;
-}
+// apps/frontend/app/[locale]/ozellikler/page.tsx
+export {metadata} from "../features/page";
+export {default} from "../features/page";
