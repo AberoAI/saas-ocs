@@ -113,7 +113,6 @@ export default function FeaturesPage() {
   /** =========================================================
    *  HERO animation policy:
    *  - HANYA animasi saat halaman ini di-mount pertama kali.
-   *  - Tidak pernah re-trigger saat scroll (komponen tetap rendered).
    * ========================================================= */
   const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
@@ -135,16 +134,12 @@ export default function FeaturesPage() {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  // Angkat hero sedikit khusus locale TR
-  const heroNudgeClass =
-    locale === "tr"
-      ? "transform-gpu -translate-y-[4vh] sm:-translate-y-[5vh] lg:-translate-y-[6vh]"
-      : "";
+  // === UPDATE: untuk /tr kita TIDAK lagi menggeser hero ke atas, supaya benar-benar di tengah.
+  const heroNudgeClass = ""; // pusatkan di semua locale (khususnya TR)
 
   return (
     /* Wrapper full-bleed agar background tidak terbatasi max-w */
     <div className="relative min-h-screen">
-      {/* Biarkan debug aktif saat pengembangan; matikan di produksi */}
       <AnimatedBackgroundFeatures debug />
 
       {/* Konten */}
@@ -258,7 +253,7 @@ export default function FeaturesPage() {
                       {!prefersReduced && (
                         <motion.span
                           className="absolute inset-0 rounded-xl"
-                          style={{ background: `${BRAND_BG_12}` }}
+                          style={{ background: `${BRAND}1F` }}
                           initial={{ opacity: 0.5, scale: 1 }}
                           animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
                           transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
