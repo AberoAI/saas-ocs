@@ -11,7 +11,7 @@ import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
-/* ⬇️ Tambahan: import background */
+/* Background animasi */
 import AnimatedBackgroundFeatures from "@/components/bg/AnimatedBackgroundFeatures";
 
 // Stage (lazy)
@@ -43,7 +43,7 @@ export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
 
-  /** ✅ FIX: safe narrowing untuk hasil .match() yang bisa null */
+  // Safe narrowing hasil .match()
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localeCode = m?.[1] ?? "";
   const localePrefix = localeCode ? `/${localeCode}` : "";
@@ -78,7 +78,6 @@ export default function FeaturesPage() {
     () => ({
       initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
       animate: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } },
-      // exit dipertahankan di sini; kita pangkas beban exit di section konten (di bawah)
       exit: { opacity: 0, y: prefersReduced ? 0 : -6, transition: { duration: 0.22, ease: EASE } },
     }),
     [prefersReduced]
@@ -134,7 +133,6 @@ export default function FeaturesPage() {
       const h = headlineWrapRef.current.getBoundingClientRect().height;
       if (h > 0) setHeadlineMinH(h);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headlineMinH]);
 
   // Subheadline muncul setelah headline selesai; "Scroll ↓" muncul setelah subheadline selesai
@@ -161,12 +159,13 @@ export default function FeaturesPage() {
       : "";
 
   return (
-    /* ⬇️ Wrapper full-bleed agar background tidak terbatasi max-w */
+    /* Wrapper full-bleed agar background tidak terbatasi max-w */
     <div className="relative min-h-screen">
-      {/* Layer background absolut di belakang semua konten */}
-      <AnimatedBackgroundFeatures />
+      {/* DEBUG ON: percepat animasi untuk verifikasi visual.
+          Untuk produksi, hilangkan `debug`. */}
+      <AnimatedBackgroundFeatures debug />
 
-      {/* Konten asli (tidak diubah) */}
+      {/* Konten asli */}
       <main className="mx-auto max-w-6xl px-6">
         <div
           ref={containerRef}
@@ -176,7 +175,7 @@ export default function FeaturesPage() {
           <div className="sticky top-0 h-screen flex items-center justify-center">
             {/* anchor overlay */}
             <div className="w-full relative">
-              {/* ===== HERO: selalu absolute overlay; hanya opacity + pointerEvents yang berubah ===== */}
+              {/* ===== HERO ===== */}
               <motion.section
                 initial={false}
                 animate={{ opacity: showHero ? 1 : 0 }}
@@ -199,7 +198,7 @@ export default function FeaturesPage() {
                       as="h1"
                       className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
                       onDone={onHeadlineDone}
-                      trigger="mount" // hanya saat mount
+                      trigger="mount"
                     >
                       {t("title")}
                     </TextAnimate>
@@ -220,7 +219,7 @@ export default function FeaturesPage() {
                         once
                         as="p"
                         className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug"
-                        trigger="mount" // hanya saat mount
+                        trigger="mount"
                         onDone={() => setSubtitleDone(true)}
                       >
                         {t("subtitle")}
@@ -268,7 +267,6 @@ export default function FeaturesPage() {
                 {stableStep >= 1 && stableStep <= items.length && (
                   <motion.section
                     key="step-content"
-                    // pangkas beban exit: hanya opacity (tanpa y) dan durasi singkat
                     initial={{ opacity: 0, y: prefersReduced ? 0 : 8 }}
                     animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } }}
                     exit={{ opacity: 0, y: 0, transition: { duration: 0.16, ease: EASE } }}
