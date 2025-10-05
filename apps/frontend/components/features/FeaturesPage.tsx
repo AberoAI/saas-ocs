@@ -4,9 +4,8 @@
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
-import { useMemo, useRef, useEffect, useState, useLayoutEffect, useCallback } from "react";
-import useStepScroll from "@/hooks/useStepScroll";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { useMemo, useRef, useLayoutEffect, useState, useCallback } from "react";
 import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
 import { TextAnimate } from "../../registry/magicui/text-animate";
@@ -74,15 +73,17 @@ export default function FeaturesPage() {
     { key: "booking", icon: "📅" },
   ];
 
-  const stageFade = useMemo(
-    () => ({
-      initial: { opacity: 0, y: prefersReduced ? 0 : 8 },
-      animate: { opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } },
-      exit: { opacity: 0, y: prefersReduced ? 0 : -6, transition: { duration: 0.22, ease: EASE } },
-    }),
-    [prefersReduced]
-  );
+  // Animasi masuk tiap section saat masuk viewport (continuous scroll)
+  const sectionContainer = useMemo((): Variants => ({
+    hidden: { opacity: 0, y: prefersReduced ? 0 : 12 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.38, ease: EASE }
+    }
+  }), [prefersReduced]);
 
+  // Stagger kecil di dalam section (judul, desk, ikon)
   const contentStagger = useMemo((): { container: Variants; item: Variants } => {
     return {
       container: {
@@ -107,20 +108,12 @@ export default function FeaturesPage() {
 
   const BRAND_BG_12 = `${BRAND}1F`;
 
-  // Sticky viewport multi-step
-  const TOTAL_STEPS = items.length + 2;
-  const { containerRef, step } = useStepScroll({
-    totalSteps: TOTAL_STEPS,
-    reduceMotion: !!prefersReduced,
-  });
-
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
   /** =========================================================
    *  HERO animation policy:
    *  - HANYA animasi saat halaman ini di-mount pertama kali.
-   *  - Tidak pernah re-trigger saat scroll (hero tetap mounted, cuma di-opacity).
-   *  - Tidak pakai sessionStorage agar tidak bikin “hilang” di dev/HMR.
+   *  - Tidak pernah re-trigger saat scroll (komponen tetap rendered).
    * ========================================================= */
   const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
@@ -138,21 +131,11 @@ export default function FeaturesPage() {
   // Subheadline muncul setelah headline selesai; "Scroll ↓" muncul setelah subheadline selesai
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
   const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
-
   const onHeadlineDone = useCallback(() => {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  // Stabilizer untuk 'step' (anti jitter boundary)
-  const [stableStep, setStableStep] = useState(step);
-  useEffect(() => {
-    const id = setTimeout(() => setStableStep(step), 90);
-    return () => clearTimeout(id);
-  }, [step]);
-
-  const showHero = stableStep === 0;
-
-  // === NEW: angkat hero sedikit khusus locale TR ===
+  // Angkat hero sedikit khusus locale TR
   const heroNudgeClass =
     locale === "tr"
       ? "transform-gpu -translate-y-[4vh] sm:-translate-y-[5vh] lg:-translate-y-[6vh]"
@@ -161,219 +144,203 @@ export default function FeaturesPage() {
   return (
     /* Wrapper full-bleed agar background tidak terbatasi max-w */
     <div className="relative min-h-screen">
-      {/* DEBUG ON: percepat animasi untuk verifikasi visual.
-          Untuk produksi, hilangkan `debug`. */}
+      {/* Biarkan debug aktif saat pengembangan; matikan di produksi */}
       <AnimatedBackgroundFeatures debug />
 
-      {/* Konten asli */}
+      {/* Konten */}
       <main className="mx-auto max-w-6xl px-6">
-        <div
-          ref={containerRef}
-          className="relative"
-          style={{ height: `calc(var(--vvh, 100vh) * ${TOTAL_STEPS})` }}
-        >
-          <div className="sticky top-0 h-screen flex items-center justify-center">
-            {/* anchor overlay */}
-            <div className="w-full relative">
-              {/* ===== HERO ===== */}
-              <motion.section
-                initial={false}
-                animate={{ opacity: showHero ? 1 : 0 }}
-                transition={{ duration: prefersReduced ? 0 : 0.2, ease: EASE }}
-                className={`absolute inset-0 z-10 flex flex-col items-center justify-center text-center ${heroNudgeClass}`}
-                style={{ willChange: "opacity, transform", pointerEvents: showHero ? "auto" : "none" }}
-                aria-hidden={!showHero}
+        {/* ===== HERO (di alur normal, bukan sticky overlay) ===== */}
+        <section className={`min-h-[68vh] flex flex-col items-center justify-center text-center ${heroNudgeClass}`}>
+          {/* Headline */}
+          <div
+            ref={headlineWrapRef}
+            style={headlineMinH ? { minHeight: headlineMinH } : undefined}
+            className="relative pt-2.5"
+          >
+            {shouldAnimateHero ? (
+              <TextAnimate
+                animation="blurIn"
+                by="character"
+                once
+                as="h1"
+                className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                onDone={onHeadlineDone}
+                trigger="mount"
               >
-                {/* Headline */}
-                <div
-                  ref={headlineWrapRef}
-                  style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-                  className="relative pt-2.5"
-                >
-                  {shouldAnimateHero ? (
-                    <TextAnimate
-                      animation="blurIn"
-                      by="character"
-                      once
-                      as="h1"
-                      className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                      onDone={onHeadlineDone}
-                      trigger="mount"
-                    >
-                      {t("title")}
-                    </TextAnimate>
-                  ) : (
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                      {t("title")}
-                    </h1>
-                  )}
-                </div>
-
-                {/* Subheadline + Scroll */}
-                {shouldAnimateHero ? (
-                  headlineDone ? (
-                    <>
-                      <TextAnimate
-                        animation="fadeInUp"
-                        by="word"
-                        once
-                        as="p"
-                        className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug"
-                        trigger="mount"
-                        onDone={() => setSubtitleDone(true)}
-                      >
-                        {t("subtitle")}
-                      </TextAnimate>
-
-                      {subtitleDone ? (
-                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                          <span className="text-sm">Scroll</span>
-                          <span className="animate-bounce" aria-hidden>↓</span>
-                        </div>
-                      ) : (
-                        <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
-                          <span className="text-sm">Scroll</span>
-                          <span aria-hidden>↓</span>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-transparent mx-auto leading-snug">
-                        {t("subtitle")}
-                      </p>
-                      <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
-                        <span className="text-sm">Scroll</span>
-                        <span aria-hidden>↓</span>
-                      </div>
-                    </>
-                  )
-                ) : (
-                  <>
-                    <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug">
-                      {t("subtitle")}
-                    </p>
-                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                      <span className="text-sm">Scroll</span>
-                      <span className="animate-bounce" aria-hidden>↓</span>
-                    </div>
-                  </>
-                )}
-              </motion.section>
-
-              {/* ===== SECTION YANG DI-MOUNT/UNMOUNT SAAT SCROLL ===== */}
-              <AnimatePresence mode="sync" initial={false}>
-                {/* Step 1..6 */}
-                {stableStep >= 1 && stableStep <= items.length && (
-                  <motion.section
-                    key="step-content"
-                    initial={{ opacity: 0, y: prefersReduced ? 0 : 8 }}
-                    animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: EASE } }}
-                    exit={{ opacity: 0, y: 0, transition: { duration: 0.16, ease: EASE } }}
-                    className="w-full"
-                  >
-                    <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
-                      {/* LEFT: text */}
-                      <motion.div
-                        variants={contentStagger.container}
-                        initial="hidden"
-                        animate="visible"
-                        exit={{ opacity: 0, transition: { duration: 0.14, ease: EASE } }}
-                        className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
-                      >
-                        <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
-                          {/* Icon */}
-                          <motion.div
-                            variants={contentStagger.item}
-                            className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
-                            aria-hidden
-                          >
-                            {!prefersReduced && (
-                              <motion.span
-                                className="absolute inset-0 rounded-xl"
-                                style={{ background: `${BRAND_BG_12}` }}
-                                initial={{ opacity: 0.5, scale: 1 }}
-                                animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
-                                transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
-                              />
-                            )}
-                            <span className="-translate-y-[1px]" style={{ color: BRAND }}>
-                              {items[stableStep - 1].icon}
-                            </span>
-                          </motion.div>
-
-                          {/* Title */}
-                          <motion.h3
-                            variants={contentStagger.item}
-                            className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
-                            tabIndex={-1}
-                            ref={featureTitleRef}
-                            style={{ outline: "none" }}
-                          >
-                            {t(`cards.${items[stableStep - 1].key}.title`)}
-                          </motion.h3>
-
-                          {/* Desc */}
-                          {(() => {
-                            const descRaw = String(t(`cards.${items[stableStep - 1].key}.desc`));
-                            const { quote, rest } = splitQuoted(descRaw);
-                            return (
-                              <motion.div
-                                variants={contentStagger.item}
-                                className="col-start-2 mt-0.5 text-foreground/70 space-y-1 leading-snug"
-                                data-native-scroll="true"
-                                style={{ maxHeight: 260, overflowY: "auto" }}
-                              >
-                                {quote && <p className="italic text-foreground/80 leading-snug">{quote}</p>}
-                                <p>{quote ? rest : descRaw}</p>
-                              </motion.div>
-                            );
-                          })()}
-                        </div>
-                      </motion.div>
-
-                      {/* RIGHT: stage */}
-                      <div className="hidden md:flex self-center justify-center w-full">
-                        <FeatureStage
-                          stepKey={items[stableStep - 1].key}
-                          prefersReduced={!!prefersReduced}
-                          locale={locale}
-                        />
-                      </div>
-                    </div>
-                  </motion.section>
-                )}
-
-                {/* CTA */}
-                {stableStep === items.length + 1 && (
-                  <motion.section key="step-cta" {...stageFade} className="text-center">
-                    <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
-                    <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
-                      {t("subtitle")}
-                    </p>
-
-                    <div className="mt-7 flex justify-center gap-3">
-                      <a
-                        href="#demo"
-                        className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
-                        style={{ backgroundColor: BRAND }}
-                      >
-                        {t("cta.primary")}
-                      </a>
-                      <a
-                        href={withLocale("/contact")}
-                        className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
-                        style={{ borderColor: "rgba(0,0,0,0.1)" }}
-                      >
-                        {t("cta.secondary")}
-                      </a>
-                    </div>
-                  </motion.section>
-                )}
-              </AnimatePresence>
-            </div>
+                {t("title")}
+              </TextAnimate>
+            ) : (
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                {t("title")}
+              </h1>
+            )}
           </div>
+
+          {/* Subheadline + Scroll */}
+          {shouldAnimateHero ? (
+            headlineDone ? (
+              <>
+                <TextAnimate
+                  animation="fadeInUp"
+                  by="word"
+                  once
+                  as="p"
+                  className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug"
+                  trigger="mount"
+                  onDone={() => setSubtitleDone(true)}
+                >
+                  {t("subtitle")}
+                </TextAnimate>
+
+                {subtitleDone ? (
+                  <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                    <span className="text-sm">Scroll</span>
+                    <span className="animate-bounce" aria-hidden>↓</span>
+                  </div>
+                ) : (
+                  <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                    <span className="text-sm">Scroll</span>
+                    <span aria-hidden>↓</span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-transparent mx-auto leading-snug">
+                  {t("subtitle")}
+                </p>
+                <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                  <span className="text-sm">Scroll</span>
+                  <span aria-hidden>↓</span>
+                </div>
+              </>
+            )
+          ) : (
+            <>
+              <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug">
+                {t("subtitle")}
+              </p>
+              <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                <span className="text-sm">Scroll</span>
+                <span className="animate-bounce" aria-hidden>↓</span>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* ===== FEATURES (continuous sections; tanpa step-scroll) ===== */}
+        <div className="space-y-20 md:space-y-24">
+          {items.map((it) => (
+            <motion.section
+              key={it.key}
+              variants={sectionContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.35 }}
+              className="w-full"
+            >
+              <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
+                {/* LEFT: text */}
+                <motion.div
+                  variants={contentStagger.container}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.4 }}
+                  className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
+                >
+                  <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
+                    {/* Icon */}
+                    <motion.div
+                      variants={contentStagger.item}
+                      className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
+                      aria-hidden
+                    >
+                      {!prefersReduced && (
+                        <motion.span
+                          className="absolute inset-0 rounded-xl"
+                          style={{ background: `${BRAND_BG_12}` }}
+                          initial={{ opacity: 0.5, scale: 1 }}
+                          animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
+                          transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
+                        />
+                      )}
+                      <span className="-translate-y-[1px]" style={{ color: BRAND }}>
+                        {it.icon}
+                      </span>
+                    </motion.div>
+
+                    {/* Title */}
+                    <motion.h3
+                      variants={contentStagger.item}
+                      className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
+                      tabIndex={-1}
+                      ref={featureTitleRef}
+                      style={{ outline: "none" }}
+                    >
+                      {t(`cards.${it.key}.title`)}
+                    </motion.h3>
+
+                    {/* Desc */}
+                    {(() => {
+                      const descRaw = String(t(`cards.${it.key}.desc`));
+                      const { quote, rest } = splitQuoted(descRaw);
+                      return (
+                        <motion.div
+                          variants={contentStagger.item}
+                          className="col-start-2 mt-0.5 text-foreground/70 space-y-1 leading-snug"
+                          data-native-scroll="true"
+                          style={{ maxHeight: 260, overflowY: "auto" }}
+                        >
+                          {quote && <p className="italic text-foreground/80 leading-snug">{quote}</p>}
+                          <p>{quote ? rest : descRaw}</p>
+                        </motion.div>
+                      );
+                    })()}
+                  </div>
+                </motion.div>
+
+                {/* RIGHT: stage */}
+                <div className="hidden md:flex self-center justify-center w-full">
+                  <FeatureStage
+                    stepKey={it.key}
+                    prefersReduced={!!prefersReduced}
+                    locale={locale}
+                  />
+                </div>
+              </div>
+            </motion.section>
+          ))}
         </div>
+
+        {/* ===== CTA ===== */}
+        <motion.section
+          initial={{ opacity: 0, y: prefersReduced ? 0 : 12 }}
+          whileInView={{ opacity: 1, y: 0, transition: { duration: 0.38, ease: EASE } }}
+          viewport={{ once: true, amount: 0.35 }}
+          className="text-center py-20 md:py-24"
+        >
+          <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
+          <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
+            {t("subtitle")}
+          </p>
+
+          <div className="mt-7 flex justify-center gap-3">
+            <a
+              href="#demo"
+              className="rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm hover:shadow transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+              style={{ backgroundColor: BRAND }}
+            >
+              {t("cta.primary")}
+            </a>
+            <a
+              href={withLocale("/contact")}
+              className="rounded-xl border border-black/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-black/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(38,101,140,0.35)]"
+              style={{ borderColor: "rgba(0,0,0,0.1)" }}
+            >
+              {t("cta.secondary")}
+            </a>
+          </div>
+        </motion.section>
       </main>
     </div>
   );
@@ -407,9 +374,9 @@ function FeatureStage({
     <motion.div
       key={stepKey}
       initial={{ opacity: 0, scale: 0.985, y: 6 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE } }}
+      viewport={{ once: true, amount: 0.3 }}
       exit={{ opacity: 0, y: -6 }}
-      transition={{ duration: 0.3, ease: EASE }}
       className="aspect-square w-[64vw] max-w-[420px] rounded-2xl"
       style={{ background: `${base}80` }}
       aria-label="Feature animation stage"
