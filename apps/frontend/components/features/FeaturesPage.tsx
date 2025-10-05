@@ -13,8 +13,6 @@ import { TextAnimate } from "../../registry/magicui/text-animate";
 
 /* Background animasi */
 import AnimatedBackgroundFeatures from "@/components/bg/AnimatedBackgroundFeatures";
-/* 👇 NEW: Soft wave footer untuk hero */
-import SoftWave from "@/components/bg/SoftWave";
 
 // Stage (lazy)
 const InstantChatStage = dynamic(() => import("./stages/InstantChatStage"));
@@ -261,9 +259,6 @@ export default function FeaturesPage() {
                     </div>
                   </>
                 )}
-
-                {/* 👇 Soft wave “footer” hero */}
-                <SoftWave />
               </motion.section>
 
               {/* ===== SECTION YANG DI-MOUNT/UNMOUNT SAAT SCROLL ===== */}
