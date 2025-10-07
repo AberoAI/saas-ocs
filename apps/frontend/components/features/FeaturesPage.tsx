@@ -42,7 +42,6 @@ export default function FeaturesPage() {
   const t = useTranslations("features");
   const pathnameRaw = usePathname() || "/";
 
-  // Safe narrowing hasil .match()
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localeCode = m?.[1] ?? "";
   const localePrefix = localeCode ? `/${localeCode}` : "";
@@ -50,7 +49,6 @@ export default function FeaturesPage() {
 
   const prefersReduced = useReducedMotion();
 
-  // Deteksi path tanpa prefix locale (untuk memastikan ini route features/ozellikler)
   const pathWithoutLocale =
     localePrefix && pathnameRaw.startsWith(localePrefix)
       ? pathnameRaw.slice(localePrefix.length) || "/"
@@ -73,7 +71,6 @@ export default function FeaturesPage() {
     { key: "booking", icon: "📅" },
   ];
 
-  // Animasi masuk tiap section saat masuk viewport (continuous scroll)
   const sectionContainer = useMemo((): Variants => ({
     hidden: { opacity: 0, y: prefersReduced ? 0 : 12 },
     visible: {
@@ -83,7 +80,6 @@ export default function FeaturesPage() {
     }
   }), [prefersReduced]);
 
-  // Stagger kecil di dalam section (judul, desk, ikon)
   const contentStagger = useMemo((): { container: Variants; item: Variants } => {
     return {
       container: {
@@ -110,15 +106,9 @@ export default function FeaturesPage() {
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
 
-  /** =========================================================
-   *  HERO animation policy:
-   *  - HANYA animasi saat halaman ini di-mount pertama kali.
-   *  - Tidak pernah re-trigger saat scroll (komponen tetap rendered).
-   * ========================================================= */
   const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
-  // Bekukan tinggi headline saat mount untuk mencegah micro-shift
   const headlineWrapRef = useRef<HTMLDivElement>(null);
   const [headlineMinH, setHeadlineMinH] = useState<number | null>(null);
   useLayoutEffect(() => {
@@ -128,34 +118,32 @@ export default function FeaturesPage() {
     }
   }, [headlineMinH]);
 
-  // Subheadline muncul setelah headline selesai; "Scroll ↓" muncul setelah subheadline selesai
   const [headlineDone, setHeadlineDone] = useState(!shouldAnimateHero);
   const [subtitleDone, setSubtitleDone] = useState(!shouldAnimateHero);
   const onHeadlineDone = useCallback(() => {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  // === PUSATKAN HERO UNTUK /tr ===
-  // Hilangkan nudge ke atas agar benar-benar center
+  // === PUSATKAN HERO SECARA SEMPURNA ===
   const heroNudgeClass = "";
-  // Gunakan tinggi layar penuh khusus /tr supaya konten persis di tengah viewport
-  const heroSectionMinH = locale === "tr" ? "min-h-screen" : "min-h-[68vh]";
+  const NAV_H = 72; // tinggi navbar (px)
+  const heroSectionMinH = ""; // gunakan calc untuk center vertikal
 
   return (
-    /* Wrapper full-bleed agar background tidak terbatasi max-w */
     <div className="relative min-h-screen">
-      {/* Biarkan debug aktif saat pengembangan; matikan di produksi */}
       <AnimatedBackgroundFeatures debug />
 
-      {/* Konten */}
       <main className="mx-auto max-w-6xl px-6">
         {/* ===== HERO (continuous flow) ===== */}
-        <section className={`${heroSectionMinH} flex flex-col items-center justify-center text-center ${heroNudgeClass}`}>
+        <section
+          className="grid place-items-center text-center"
+          style={{ minHeight: `calc(100dvh - ${NAV_H}px)` }}
+        >
           {/* Headline */}
           <div
             ref={headlineWrapRef}
             style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-            className="relative"  /* hapus pt-2.5 agar benar-benar center */
+            className="relative"
           >
             {shouldAnimateHero ? (
               <TextAnimate
@@ -228,7 +216,7 @@ export default function FeaturesPage() {
           )}
         </section>
 
-        {/* ===== FEATURES (continuous sections; tanpa step-scroll) ===== */}
+        {/* ===== FEATURES ===== */}
         <div className="space-y-20 md:space-y-24">
           {items.map((it) => (
             <motion.section
@@ -240,7 +228,6 @@ export default function FeaturesPage() {
               className="w-full"
             >
               <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
-                {/* LEFT: text */}
                 <motion.div
                   variants={contentStagger.container}
                   initial="hidden"
@@ -249,7 +236,6 @@ export default function FeaturesPage() {
                   className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
                 >
                   <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
-                    {/* Icon */}
                     <motion.div
                       variants={contentStagger.item}
                       className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
@@ -269,7 +255,6 @@ export default function FeaturesPage() {
                       </span>
                     </motion.div>
 
-                    {/* Title */}
                     <motion.h3
                       variants={contentStagger.item}
                       className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
@@ -280,7 +265,6 @@ export default function FeaturesPage() {
                       {t(`cards.${it.key}.title`)}
                     </motion.h3>
 
-                    {/* Desc */}
                     {(() => {
                       const descRaw = String(t(`cards.${it.key}.desc`));
                       const { quote, rest } = splitQuoted(descRaw);
@@ -299,7 +283,6 @@ export default function FeaturesPage() {
                   </div>
                 </motion.div>
 
-                {/* RIGHT: stage */}
                 <div className="hidden md:flex self-center justify-center w-full">
                   <FeatureStage
                     stepKey={it.key}
