@@ -139,81 +139,84 @@ export default function FeaturesPage() {
           className="grid place-items-center text-center"
           style={{ minHeight: `calc(100dvh - ${NAV_H}px)` }}
         >
-          {/* Headline */}
-          <div
-            ref={headlineWrapRef}
-            style={headlineMinH ? { minHeight: headlineMinH } : undefined}
-            className="relative"
-          >
-            {shouldAnimateHero ? (
-              <TextAnimate
-                animation="blurIn"
-                by="character"
-                once
-                as="h1"
-                className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
-                onDone={onHeadlineDone}
-                trigger="mount"
-              >
-                {t("title")}
-              </TextAnimate>
-            ) : (
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
-                {t("title")}
-              </h1>
-            )}
-          </div>
-
-          {/* Subheadline + Scroll */}
-          {shouldAnimateHero ? (
-            headlineDone ? (
-              <>
+          {/* Bungkus untuk memastikan center horizontal */}
+          <div className="w-full flex flex-col items-center">
+            {/* Headline */}
+            <div
+              ref={headlineWrapRef}
+              style={headlineMinH ? { minHeight: headlineMinH } : undefined}
+              className="relative w-full"
+            >
+              {shouldAnimateHero ? (
                 <TextAnimate
-                  animation="fadeInUp"
-                  by="word"
+                  animation="blurIn"
+                  by="character"
                   once
-                  as="p"
-                  className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug"
+                  as="h1"
+                  className="text-center mx-auto max-w-6xl text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight"
+                  onDone={onHeadlineDone}
                   trigger="mount"
-                  onDone={() => setSubtitleDone(true)}
                 >
-                  {t("subtitle")}
+                  {t("title")}
                 </TextAnimate>
+              ) : (
+                <h1 className="text-center mx-auto max-w-6xl text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight">
+                  {t("title")}
+                </h1>
+              )}
+            </div>
 
-                {subtitleDone ? (
-                  <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                    <span className="text-sm">Scroll</span>
-                    <span className="animate-bounce" aria-hidden>↓</span>
-                  </div>
-                ) : (
+            {/* Subheadline + Scroll */}
+            {shouldAnimateHero ? (
+              headlineDone ? (
+                <>
+                  <TextAnimate
+                    animation="fadeInUp"
+                    by="word"
+                    once
+                    as="p"
+                    className="mt-4 sm:mt-5 max-w-2xl text-center mx-auto text-base sm:text-lg not-italic text-foreground/70 leading-snug"
+                    trigger="mount"
+                    onDone={() => setSubtitleDone(true)}
+                  >
+                    {t("subtitle")}
+                  </TextAnimate>
+
+                  {subtitleDone ? (
+                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
+                      <span className="text-sm">Scroll</span>
+                      <span className="animate-bounce" aria-hidden>↓</span>
+                    </div>
+                  ) : (
+                    <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                      <span className="text-sm">Scroll</span>
+                      <span aria-hidden>↓</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="mt-4 sm:mt-5 max-w-2xl text-center mx-auto text-base sm:text-lg not-italic text-transparent leading-snug">
+                    {t("subtitle")}
+                  </p>
                   <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
                     <span className="text-sm">Scroll</span>
                     <span aria-hidden>↓</span>
                   </div>
-                )}
-              </>
+                </>
+              )
             ) : (
               <>
-                <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-transparent mx-auto leading-snug">
+                <p className="mt-4 sm:mt-5 max-w-2xl text-center mx-auto text-base sm:text-lg not-italic text-foreground/70 leading-snug">
                   {t("subtitle")}
                 </p>
-                <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
+                <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                   <span className="text-sm">Scroll</span>
-                  <span aria-hidden>↓</span>
+                  <span className="animate-bounce" aria-hidden>↓</span>
                 </div>
               </>
-            )
-          ) : (
-            <>
-              <p className="mt-4 sm:mt-5 max-w-2xl text-base sm:text-lg not-italic text-foreground/70 mx-auto leading-snug">
-                {t("subtitle")}
-              </p>
-              <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
-                <span className="text-sm">Scroll</span>
-                <span className="animate-bounce" aria-hidden>↓</span>
-              </div>
-            </>
-          )}
+            )}
+          </div>
         </section>
 
         {/* ===== FEATURES ===== */}
