@@ -10,8 +10,8 @@ import { BRAND, EASE } from "./constants";
 import type { IntlMessages, Locale } from "./types";
 import { TextAnimate } from "../../registry/magicui/text-animate";
 
-// 🔹 Background baru khusus HERO
-import FeatureHeroBG from "@/components/bg/FeatureHeroBG";
+/* Background animasi */
+import AnimatedBackgroundFeatures from "@/components/bg/AnimatedBackgroundFeatures";
 
 // Stage (lazy)
 const InstantChatStage = dynamic(() => import("./stages/InstantChatStage"));
@@ -43,7 +43,7 @@ export default function FeaturesPage() {
   const pathnameRaw = usePathname() || "/";
 
   const m = pathnameRaw.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
-  const localeCode = m?.[1] ?? ""; // ✅ perbaikan: hilangkan kata "the"
+  const localeCode = m?.[1] ?? "";
   const localePrefix = localeCode ? `/${localeCode}` : "";
   const locale = (localeCode.toLowerCase() || "") as Locale;
 
@@ -127,19 +127,19 @@ export default function FeaturesPage() {
   // === PUSATKAN HERO SECARA SEMPURNA ===
   const heroNudgeClass = "";
   const NAV_H = 72; // tinggi navbar (px)
+  const heroSectionMinH = ""; // gunakan calc untuk center vertikal
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen">
+      <AnimatedBackgroundFeatures debug />
+
       <main className="mx-auto max-w-6xl px-6">
-        {/* ===== HERO (hanya section ini yang punya background biru) ===== */}
+        {/* ===== HERO (continuous flow) ===== */}
         <section
-          className="relative grid place-items-center text-center"
+          className="grid place-items-center text-center"
           style={{ minHeight: `calc(100dvh - ${NAV_H}px)` }}
         >
-          {/* BG khusus hero */}
-          <FeatureHeroBG />
-
-          {/* Konten hero */}
+          {/* Bungkus untuk memastikan center horizontal */}
           <div className="w-full flex flex-col items-center">
             {/* Headline */}
             <div
@@ -219,7 +219,7 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* ===== FEATURES (putih) ===== */}
+        {/* ===== FEATURES ===== */}
         <div className="space-y-20 md:space-y-24">
           {items.map((it) => (
             <motion.section
@@ -231,7 +231,6 @@ export default function FeaturesPage() {
               className="w-full"
             >
               <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
-                {/* LEFT: text */}
                 <motion.div
                   variants={contentStagger.container}
                   initial="hidden"
@@ -240,18 +239,25 @@ export default function FeaturesPage() {
                   className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
                 >
                   <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
-                    {/* Icon */}
                     <motion.div
                       variants={contentStagger.item}
                       className="relative h-9 w-9 md:h-11 md:w-11 rounded-xl text-lg md:text-xl flex items-center justify-center select-none mt-[2px]"
                       aria-hidden
                     >
+                      {!prefersReduced && (
+                        <motion.span
+                          className="absolute inset-0 rounded-xl"
+                          style={{ background: `${BRAND_BG_12}` }}
+                          initial={{ opacity: 0.5, scale: 1 }}
+                          animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
+                          transition={{ duration: 1.5, ease: "easeOut", repeat: Infinity, repeatDelay: 0.5 }}
+                        />
+                      )}
                       <span className="-translate-y-[1px]" style={{ color: BRAND }}>
                         {it.icon}
                       </span>
                     </motion.div>
 
-                    {/* Title */}
                     <motion.h3
                       variants={contentStagger.item}
                       className="col-start-2 text-xl md:text-[1.375rem] font-semibold leading-tight tracking-tight mb-0.5 outline-none focus:outline-none focus-visible:outline-none"
@@ -262,7 +268,6 @@ export default function FeaturesPage() {
                       {t(`cards.${it.key}.title`)}
                     </motion.h3>
 
-                    {/* Desc */}
                     {(() => {
                       const descRaw = String(t(`cards.${it.key}.desc`));
                       const { quote, rest } = splitQuoted(descRaw);
@@ -281,7 +286,6 @@ export default function FeaturesPage() {
                   </div>
                 </motion.div>
 
-                {/* RIGHT: stage */}
                 <div className="hidden md:flex self-center justify-center w-full">
                   <FeatureStage
                     stepKey={it.key}
