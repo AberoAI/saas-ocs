@@ -55,7 +55,8 @@ export default function LocaleHomePage() {
       <section className="relative">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-4xl text-center py-24 md:py-32">
-            <h1 className="text-5xl md:text-7xl font-semibold leading-[1.05] tracking-tight">
+            {/* ↓↓↓ HANYA baris ini yang saya kecilkan ukurannya ↓↓↓ */}
+            <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
