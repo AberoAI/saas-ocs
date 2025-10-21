@@ -3,7 +3,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import HeroChatMock from "../components/HeroChatMock";
+// import HeroChatMock from "../components/HeroChatMock"; // ❌ nonaktifkan
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
@@ -38,9 +38,8 @@ export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
 
-  // Ambil headline & subheadline dari i18n
+  // Ambil headline dari i18n (subheadline tidak dipakai di hero minimal)
   const rawHeadline = t("hero.headline");
-  const subheadline = t("hero.sub");
 
   // Otomatis highlight segmen angka/persentase (mis. "Over 65%" / "%65")
   const hlMatch = rawHeadline.match(/Over 65%|%?\d+[.,]?\d*%?/);
@@ -52,54 +51,16 @@ export default function LocaleHomePage() {
     <>
       {/* Navbar global sudah dirender oleh app/layout.tsx */}
 
-      {/* Hero */}
+      {/* Hero minimal (sesuai foto kedua) */}
       <section className="relative">
-        <div
-          className="
-            mx-auto grid max-w-6xl grid-cols-1 items-center
-            gap-10 px-6
-            py-[clamp(32px,6vh,72px)]
-            md:grid-cols-2
-          "
-        >
-          <div>
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-medium text-black/70">
-              <span className="size-2 rounded-full bg-emerald-500"></span>
-              {t("hero.badge")}
-            </p>
-
-            {/* Headline/Subheadline */}
-            <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-4xl text-center py-24 md:py-32">
+            <h1 className="text-5xl md:text-7xl font-semibold leading-[1.05] tracking-tight">
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </h1>
-            <p className="mt-2 text-lg text-black/70 md:text-xl">{subheadline}</p>
-
-            {/* CTA: mengikuti i18n */}
-            <div className="mt-8">
-              <Link
-                href="/demo"
-                className="rounded-xl bg-[#7D948A] hover:bg-[#64786f] px-5 py-3 text-white font-medium shadow-md transition"
-              >
-                {t("cta.secondary")}
-              </Link>
-            </div>
-
-            {/* Footnotes di bawah CTA: 2 item saja */}
-            <ul className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-black/60">
-              {[t("misc.cancelAnytime"), t("misc.noCreditCard")].map((label, idx) => (
-                <li key={idx} className="inline-flex items-center">
-                  {idx > 0 && <span aria-hidden className="mx-2">•</span>}
-                  <span>{label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Mock UI (dipisah ke komponen) */}
-          <div className="relative justify-self-center md:justify-self-end">
-            <HeroChatMock />
+            <p className="mt-16 text-sm text-black/60">Scroll ↓</p>
           </div>
         </div>
       </section>
