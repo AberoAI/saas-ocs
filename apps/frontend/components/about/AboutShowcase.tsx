@@ -5,12 +5,10 @@ export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        {/* Kartu gradient tunggal (tanpa panel dalam) */}
+        {/* Kartu gradient tunggal, tanpa shadow & stroke */}
         <div
           className="
             relative overflow-hidden rounded-[30px]
-            ring-1 ring-black/5
-            shadow-[0_8px_28px_-10px_rgba(2,36,66,0.12)]
             bg-[linear-gradient(180deg,#C1EEFF_4%,#E8F8F5_62%,#F2FBFB_100%)]
             min-h-[320px] md:min-h-[360px]
             p-6 md:p-10 lg:p-14
@@ -25,8 +23,7 @@ export default function AboutShowcase() {
           <div
             className="
               pointer-events-none absolute -bottom-10 right-6 h-24 w-40
-              rounded-tl-[36px] bg-white/75 ring-1 ring-black/10
-              shadow-[0_6px_18px_-10px_rgba(2,36,66,0.18)]
+              rounded-tl-[36px] bg-white/70
             "
             aria-hidden="true"
           />
