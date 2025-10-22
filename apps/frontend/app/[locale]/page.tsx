@@ -4,6 +4,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 // import HeroChatMock from "../components/HeroChatMock"; // ❌ nonaktifkan
+import ScrollHint from "@/components/hero/ScrollHint"; // ✅ tambahkan
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
@@ -55,13 +56,15 @@ export default function LocaleHomePage() {
       <section className="relative">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-4xl text-center py-24 md:py-32">
-            {/* ↓↓↓ HANYA baris ini yang saya kecilkan ukurannya ↓↓↓ */}
+            {/* ukuran headline tetap sesuai versimu sekarang */}
             <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </h1>
-            <p className="mt-16 text-sm text-black/60">Scroll ↓</p>
+
+            {/* Scroll hint animasi halus */}
+            <ScrollHint />
           </div>
         </div>
       </section>
