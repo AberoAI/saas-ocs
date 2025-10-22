@@ -69,7 +69,8 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* About Us (short version) */}
+      {/* About Us (short version) — DINONAKTIFKAN */}
+      {/*
       <section id="about" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">{t("landing.about.title")}</h2>
@@ -89,6 +90,7 @@ export default function LocaleHomePage() {
           </div>
         </div>
       </section>
+      */}
 
       {/* Features */}
       <section id="features" className="border-t border-black/10 bg-white">
@@ -121,7 +123,7 @@ export default function LocaleHomePage() {
       <section id="faq" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
             <Faq q="Bisakah pakai banyak cabang?" a="Bisa. Fitur multi-tenant memudahkan kelola banyak unit bisnis dalam satu akun." />
             <Faq q="Ada free trial?" a="Ada. Daftar dan mulai uji coba langsung tanpa kartu kredit." />
