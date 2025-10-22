@@ -5,7 +5,7 @@ export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        {/* Kartu gradient tunggal, tanpa shadow & stroke */}
+        {/* Kartu gradient tunggal (flat, tanpa stroke & shadow) */}
         <div
           className="
             relative overflow-hidden rounded-[30px]
@@ -19,26 +19,50 @@ export default function AboutShowcase() {
             Live chat powered by AberoAI
           </span>
 
-          {/* Notch dekoratif kanan bawah */}
+          {/*
+            =============================
+            NOTCH & PLATFORM (kanan-bawah)
+            =============================
+            - Platform: bar putih yang nempel di sisi kanan bawah
+            - Notch: lingkaran putih yang “menggigit” ke area gradient
+          */}
+          {/* Platform putih (menempel sisi kanan) */}
           <div
             className="
-              pointer-events-none absolute -bottom-10 right-6 h-24 w-40
-              rounded-tl-[36px] bg-white/70
+              absolute bottom-0 right-0
+              h-[88px] md:h-[96px] w-[42%]
+              bg-white/90
+              rounded-tl-[44px]
             "
             aria-hidden="true"
           />
 
-          {/* Garis kecil dekoratif */}
-          <svg
-            className="pointer-events-none absolute bottom-6 right-10 h-4 w-24 opacity-60"
-            viewBox="0 0 96 16"
-            fill="none"
+          {/* Notch bundar (concave) — posisinya sedikit ke kiri dari platform */}
+          <div
+            className="
+              absolute bottom-0
+              left-[56%] md:left-[58%]
+              h-[120px] w-[120px] md:h-[132px] md:w-[132px]
+              -translate-x-1/2
+              bg-white/90 rounded-full
+            "
+            aria-hidden="true"
+          />
+
+          {/* Garis status di atas platform */}
+          <div
+            className="
+              pointer-events-none absolute
+              bottom-8 md:bottom-9
+              left-[62%] md:left-[64%]
+              flex items-center gap-4 opacity-75
+            "
             aria-hidden="true"
           >
-            <rect x="0"  y="7" width="48" height="2" rx="1" fill="#7DBBFF" />
-            <rect x="52" y="7" width="16" height="2" rx="1" fill="#C9DCE5" />
-            <rect x="72" y="7" width="8"  height="2" rx="1" fill="#E0ECF2" />
-          </svg>
+            <span className="inline-block h-[6px] w-[120px] rounded-full bg-[#7DBBFF]" />
+            <span className="inline-block h-[6px] w-[44px] rounded-full bg-[#C9DCE5]" />
+            <span className="inline-block h-[6px] w-[44px] rounded-full bg-[#E0ECF2]" />
+          </div>
         </div>
       </div>
     </section>
