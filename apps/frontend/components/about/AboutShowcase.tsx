@@ -4,8 +4,8 @@ import React from "react";
 export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        {/* Kartu gradient tunggal (flat, tanpa stroke & shadow) */}
+      <div className="relative mx-auto max-w-7xl px-6 py-12 md:py-16">
+        {/* KARTU GRADIENT — flat, single layer, no stroke/shadow */}
         <div
           className="
             relative overflow-hidden rounded-[30px]
@@ -14,55 +14,43 @@ export default function AboutShowcase() {
             p-6 md:p-10 lg:p-14
           "
         >
-          {/* Label kecil kiri bawah */}
+          {/* Label kecil kiri-bawah (boleh dibiarkan; tidak memengaruhi bentuk) */}
           <span className="absolute bottom-4 left-5 text-[11px] text-black/55 select-none">
             Live chat powered by AberoAI
           </span>
 
           {/*
-            =============================
-            NOTCH & PLATFORM (kanan-bawah)
-            =============================
-            - Platform: bar putih yang nempel di sisi kanan bawah
-            - Notch: lingkaran putih yang “menggigit” ke area gradient
+            NOTCH concave: lingkaran putih 'menggigit' area kartu.
+            - Ditaruh DI ATAS kartu, karena parent overflow-hidden -> terlihat sebagai potongan.
+            - Posisi kira-kira 64% dari lebar (silakan fine-tune persen bila perlu).
           */}
-          {/* Platform putih (menempel sisi kanan) */}
           <div
             className="
-              absolute bottom-0 right-0
-              h-[88px] md:h-[96px] w-[42%]
-              bg-white/90
-              rounded-tl-[44px]
+              absolute bottom-[-28px]
+              left-[64%] md:left-[66%]
+              h-[140px] w-[140px] md:h-[160px] md:w-[160px]
+              rounded-full bg-white
             "
             aria-hidden="true"
           />
+        </div>
 
-          {/* Notch bundar (concave) — posisinya sedikit ke kiri dari platform */}
-          <div
-            className="
-              absolute bottom-0
-              left-[56%] md:left-[58%]
-              h-[120px] w-[120px] md:h-[132px] md:w-[132px]
-              -translate-x-1/2
-              bg-white/90 rounded-full
-            "
-            aria-hidden="true"
-          />
-
-          {/* Garis status di atas platform */}
-          <div
-            className="
-              pointer-events-none absolute
-              bottom-8 md:bottom-9
-              left-[62%] md:left-[64%]
-              flex items-center gap-4 opacity-75
-            "
-            aria-hidden="true"
-          >
-            <span className="inline-block h-[6px] w-[120px] rounded-full bg-[#7DBBFF]" />
-            <span className="inline-block h-[6px] w-[44px] rounded-full bg-[#C9DCE5]" />
-            <span className="inline-block h-[6px] w-[44px] rounded-full bg-[#E0ECF2]" />
-          </div>
+        {/*
+          GARIS STATUS dipindah ke LUAR kartu (background halaman),
+          sejajar di kanan notch.
+        */}
+        <div
+          className="
+            pointer-events-none absolute
+            bottom-8 md:bottom-9
+            right-16 md:right-20
+            flex items-center gap-4 opacity-80
+          "
+          aria-hidden="true"
+        >
+          <span className="inline-block h-[6px] w-[120px] rounded-full bg-[#7DBBFF]" />
+          <span className="inline-block h-[6px] w-[44px]  rounded-full bg-[#C9DCE5]" />
+          <span className="inline-block h-[6px] w-[44px]  rounded-full bg-[#E0ECF2]" />
         </div>
       </div>
     </section>
