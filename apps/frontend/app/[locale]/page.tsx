@@ -4,7 +4,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 // import HeroChatMock from "../components/HeroChatMock"; // ❌ nonaktifkan
-import ScrollHint from "@/components/hero/ScrollHint"; // ✅ tambahkan
+import ScrollHint from "@/components/hero/ScrollHint"; // ✅ sudah ada
+import AboutShowcase from "@/components/about/AboutShowcase"; // ✅ tambahkan
 
 /** -- Helper (tetap) -- */
 function getBizName(): string {
@@ -56,7 +57,6 @@ export default function LocaleHomePage() {
       <section className="relative">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-4xl text-center py-24 md:py-32">
-            {/* ukuran headline tetap sesuai versimu sekarang */}
             <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
@@ -69,28 +69,13 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* About Us (short version) — DINONAKTIFKAN */}
+      {/* About lama DINONAKTIFKAN */}
       {/*
-      <section id="about" className="border-t border-black/10 bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-2xl font-semibold md:text-3xl">{t("landing.about.title")}</h2>
-          <p className="mt-4 text-black/70 md:text-lg max-w-3xl">
-            {t("landing.about.text1")}
-          </p>
-          <p className="mt-3 text-black/70 md:text-lg max-w-3xl">
-            {t("landing.about.text2")}
-          </p>
-          <div className="mt-6">
-            <Link
-              href="/about"
-              className="inline-flex items-center rounded-xl bg-[#7D948A] hover:bg-[#64786f] px-5 py-3 text-sm font-medium text-white shadow-md transition"
-            >
-              {t("landing.about.cta")}
-            </Link>
-          </div>
-        </div>
-      </section>
+      <section id="about" className="border-t border-black/10 bg-white"> ... </section>
       */}
+
+      {/* Layer berwarna di atas background putih */}
+      <AboutShowcase />
 
       {/* Features */}
       <section id="features" className="border-t border-black/10 bg-white">
@@ -123,7 +108,7 @@ export default function LocaleHomePage() {
       <section id="faq" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
             <Faq q="Bisakah pakai banyak cabang?" a="Bisa. Fitur multi-tenant memudahkan kelola banyak unit bisnis dalam satu akun." />
             <Faq q="Ada free trial?" a="Ada. Daftar dan mulai uji coba langsung tanpa kartu kredit." />
