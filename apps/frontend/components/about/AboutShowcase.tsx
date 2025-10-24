@@ -2,8 +2,11 @@ import React from "react";
 
 const PATH_D = `M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V820.5C1882 863.026 1847.53 897.5 1805 897.5H1598.25C1561.11 897.5 1531 927.609 1531 964.75C1531 1001.89 1500.89 1032 1463.75 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z`;
 
+// Tambah shape-rendering agar anti-aliasing kurva lebih halus
 function makeMaskDataURI(path: string) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none'><path d='${path}' fill='white'/></svg>`;
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
+    `<path d='${path}' fill='white'/></svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
@@ -15,8 +18,8 @@ type Props = {
 
 export default function AboutShowcase({
   className = "",
-  showLabel: _showLabel = true, // dibiarkan tapi tidak dipakai
-  label: _label = "Live chat powered by", // dibiarkan tapi tidak dipakai
+  showLabel: _showLabel = true,   // kept but unused
+  label: _label = "Live chat powered by", // kept but unused
 }: Props) {
   const maskURI = makeMaskDataURI(PATH_D);
 
@@ -34,8 +37,8 @@ export default function AboutShowcase({
         <div
           className="
             relative block w-full
-            h-[clamp(490px,72vh,970px)]  /* +10px tinggi dari sebelumnya */
-            rounded-[34px] md:rounded-[40px] lg:rounded-[44px]  /* radius diperhalus */
+            h-[clamp(490px,72vh,970px)]
+            rounded-none               /* ⬅️ Hapus border-radius: biarkan mask yang membentuk kurva */
             overflow-hidden
             !max-w-none !mx-0
             bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
