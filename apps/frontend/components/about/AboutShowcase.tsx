@@ -34,8 +34,8 @@ export default function AboutShowcase({
         <div
           className="
             relative block w-full
-            h-[clamp(490px,72vh,970px)]  /* +10px dari versi sebelumnya */
-            rounded-[22px] md:rounded-[26px] lg:rounded-[28px]
+            h-[clamp(490px,72vh,970px)]  /* +10px tinggi dari sebelumnya */
+            rounded-[34px] md:rounded-[40px] lg:rounded-[44px]  /* radius diperhalus */
             overflow-hidden
             !max-w-none !mx-0
             bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
