@@ -9,15 +9,9 @@ function makeMaskDataURI(path: string) {
 
 type Props = {
   className?: string;
-  showLabel?: boolean;
-  label?: string;
 };
 
-export default function AboutShowcase({
-  className = "",
-  showLabel = true,
-  label = "Live chat powered by",
-}: Props) {
+export default function AboutShowcase({ className = "" }: Props) {
   const maskURI = makeMaskDataURI(PATH_D);
 
   return (
@@ -34,7 +28,7 @@ export default function AboutShowcase({
         <div
           className="
             relative block w-full
-            h-[clamp(480px,72vh,960px)]  /* 2x lebih tinggi */
+            h-[clamp(360px,54vh,720px)]  /* 1.5× lebih tinggi */
             rounded-[22px] md:rounded-[26px] lg:rounded-[28px]
             overflow-hidden
             !max-w-none !mx-0
@@ -49,16 +43,7 @@ export default function AboutShowcase({
             WebkitMaskSize: "100% 100%",
             maskSize: "100% 100%",
           }}
-        >
-          {showLabel && (
-            <div className="absolute bottom-3 left-4 text-[12px] text-black/60 dark:text-black/70">
-              {label}{" "}
-              <span className="font-semibold" style={{ color: "var(--brand,#26658C)" }}>
-                AberoAI
-              </span>
-            </div>
-          )}
-        </div>
+        />
       </div>
     </section>
   );
