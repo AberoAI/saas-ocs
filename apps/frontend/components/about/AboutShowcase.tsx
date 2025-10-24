@@ -34,7 +34,7 @@ export default function AboutShowcase({
         <div
           className="
             relative block w-full
-            h-[clamp(480px,72vh,960px)]  /* tetap: 2x lebih tinggi sesuai code semula */
+            h-[clamp(490px,72vh,970px)]  /* +10px dari versi sebelumnya */
             rounded-[22px] md:rounded-[26px] lg:rounded-[28px]
             overflow-hidden
             !max-w-none !mx-0
