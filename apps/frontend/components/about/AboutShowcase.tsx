@@ -5,7 +5,7 @@ export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        <div className="relative w-full h-[555px] md:h-[635px] lg:h-[675px]">
+        <div className="relative w-full h-[525px] md:h-[605px] lg:h-[645px]">
           <svg
             viewBox="0 0 1882 1032"
             preserveAspectRatio="xMidYMid meet"
