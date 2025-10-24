@@ -1,17 +1,15 @@
 import React from "react";
 
-// SVG mask: rounded-rect 45px, di-inset 1px agar tidak ter-clipping di sisi kanan/bawah
+/** Rounded-rect 45px, inset 2px agar tidak ke-clip di tepi viewBox */
 function makeMaskDataURI() {
-  const inset = 1;                // naikkan ke 2 jika di beberapa device masih tampak terkikis
-  const vbW = 1882, vbH = 1032;   // ukuran viewBox referensi (ikut desain awal)
-  const rx = 45;                  // corner radius seragam 45px
+  const inset = 2; // naikkan jika di device tertentu masih “terkikis”
+  const vbW = 1882, vbH = 1032;
+  const rx = 45;
   const w = vbW - inset * 2;
   const h = vbH - inset * 2;
 
-  const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${vbW} ${vbH}' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
-      `<rect x='${inset}' y='${inset}' width='${w}' height='${h}' rx='${rx}' ry='${rx}' fill='white'/>` +
-    `</svg>`;
+  // rapikan menjadi satu baris untuk menghindari parsing aneh pada beberapa engine
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${vbW} ${vbH}' preserveAspectRatio='none' shape-rendering='geometricPrecision'><rect x='${inset}' y='${inset}' width='${w}' height='${h}' rx='${rx}' ry='${rx}' fill='white'/></svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
@@ -23,7 +21,7 @@ type Props = {
 
 export default function AboutShowcase({
   className = "",
-  showLabel: _showLabel = true,   // unused
+  showLabel: _showLabel = true, // unused
   label: _label = "Live chat powered by", // unused
 }: Props) {
   const maskURI = makeMaskDataURI();
@@ -47,14 +45,12 @@ export default function AboutShowcase({
             !max-w-none !mx-0
             bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
             dark:bg-[linear-gradient(180deg,#9ED8F0_4%,#CFEDE680_67%,#DDE9F780_100%)]
+            rounded-[45px]  /* fallback jika mask gagal dibaca */
           "
           style={{
-            WebkitMaskImage: maskURI,
-            maskImage: maskURI,
-            WebkitMaskRepeat: "no-repeat",
-            maskRepeat: "no-repeat",
-            WebkitMaskSize: "100% 100%",
-            maskSize: "100% 100%",
+            // Shorthand lebih kompatibel di Chromium/WebKit
+            WebkitMask: `${maskURI} no-repeat 0 0 / 100% 100%`,
+            mask: `${maskURI} no-repeat 0 0 / 100% 100%`,
           }}
         />
       </div>
