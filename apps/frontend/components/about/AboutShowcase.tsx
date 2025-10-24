@@ -2,6 +2,7 @@ import React from "react";
 
 const PATH_D = `M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V820.5C1882 863.026 1847.53 897.5 1805 897.5H1598.25C1561.11 897.5 1531 927.609 1531 964.75C1531 1001.89 1500.89 1032 1463.75 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z`;
 
+// Tambah shape-rendering agar anti-aliasing kurva lebih halus
 function makeMaskDataURI(path: string) {
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
@@ -17,7 +18,7 @@ type Props = {
 
 export default function AboutShowcase({
   className = "",
-  showLabel: _showLabel = true, // kept but unused
+  showLabel: _showLabel = true,   // kept but unused
   label: _label = "Live chat powered by", // kept but unused
 }: Props) {
   const maskURI = makeMaskDataURI(PATH_D);
@@ -31,12 +32,13 @@ export default function AboutShowcase({
         ${className}
       `}
     >
+      {/* Full-bleed aman scrollbar */}
       <div className="relative mx-[calc(50%-50vw)] w-[100vw] px-[var(--gutter)] py-10 md:py-14 col-span-full self-stretch !max-w-none !mx-0">
         <div
           className="
             relative block w-full
             h-[clamp(490px,72vh,970px)]
-            rounded-[20px] md:rounded-[24px] lg:rounded-[26px]  /* radius lebih kecil dan modern */
+            rounded-none               /* ⬅️ Hapus border-radius: biarkan mask yang membentuk kurva */
             overflow-hidden
             !max-w-none !mx-0
             bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
