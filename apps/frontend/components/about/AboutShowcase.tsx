@@ -4,12 +4,11 @@ import React from "react";
 export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
-      <div className="mx-auto max-w-6xl px-6 py-12 md:py-16">
+      <div className="mx-auto w-[92vw] max-w-[1600px] py-12 md:py-16">
         <svg
           viewBox="0 0 1882 1032"
-          className="w-full h-auto"
           preserveAspectRatio="xMidYMid meet"
-          style={{ aspectRatio: "1882 / 1032", borderRadius: "2rem" }}
+          className="w-full h-[55vh] md:h-[60vh] rounded-[2rem]"
           aria-hidden="true"
         >
           <defs>
