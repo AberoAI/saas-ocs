@@ -1,58 +1,57 @@
-import React from "react";
+// apps/frontend/components/about/AboutShowcase.tsx
+"use client";
 
-const PATH_D = `M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V820.5C1882 863.026 1847.53 897.5 1805 897.5H1598.25C1561.11 897.5 1531 927.609 1531 964.75C1531 1001.89 1500.89 1032 1463.75 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z`;
-
-// Tambah shape-rendering agar anti-aliasing kurva lebih halus
-function makeMaskDataURI(path: string) {
-  const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
-    `<path d='${path}' fill='white'/></svg>`;
-  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-}
+import * as React from "react";
 
 type Props = {
   className?: string;
-  showLabel?: boolean;
-  label?: string;
+  children?: React.ReactNode;
 };
 
-export default function AboutShowcase({
-  className = "",
-  showLabel: _showLabel = true,   // kept but unused
-  label: _label = "Live chat powered by", // kept but unused
-}: Props) {
-  const maskURI = makeMaskDataURI(PATH_D);
+export default function AboutShowcase({ className = "", children }: Props) {
+  const gradId = React.useId(); // agar id gradient unik
 
   return (
     <section
-      id="about"
-      className={`
-        bg-white overflow-x-clip w-full !max-w-none !mx-0
-        [--gutter:12px] sm:[--gutter:16px] md:[--gutter:20px] lg:[--gutter:24px]
-        ${className}
-      `}
+      className={[
+        "relative mx-auto w-full max-w-[1440px] rounded-[48px] overflow-hidden",
+        "shadow-[0_12px_40px_rgba(0,0,0,0.12)]",
+        className,
+      ].join(" ")}
     >
-      {/* Full-bleed aman scrollbar */}
-      <div className="relative mx-[calc(50%-50vw)] w-[100vw] px-[var(--gutter)] py-10 md:py-14 col-span-full self-stretch !max-w-none !mx-0">
-        <div
-          className="
-            relative block w-full
-            h-[clamp(490px,72vh,970px)]
-            rounded-none               /* ⬅️ Hapus border-radius: biarkan mask yang membentuk kurva */
-            overflow-hidden
-            !max-w-none !mx-0
-            bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
-            dark:bg-[linear-gradient(180deg,#9ED8F0_4%,#CFEDE680_67%,#DDE9F780_100%)]
-          "
-          style={{
-            WebkitMaskImage: maskURI,
-            maskImage: maskURI,
-            WebkitMaskRepeat: "no-repeat",
-            maskRepeat: "no-repeat",
-            WebkitMaskSize: "100% 100%",
-            maskSize: "100% 100%",
-          }}
-        />
+      <div className="aspect-[1882/1032]">
+        <svg
+          className="h-full w-full block"
+          viewBox="0 0 1882 1032"
+          preserveAspectRatio="xMidYMid slice"
+          shapeRendering="geometricPrecision"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient
+              id={gradId}
+              x1="937"
+              y1="-16.7023"
+              x2="937"
+              y2="1032"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0.043258" stopColor="#C1EEFF" />
+              <stop offset="0.670535" stopColor="#DBF8EF" stopOpacity="0.5" />
+              <stop offset="1" stopColor="#EDF6FF" stopOpacity="0.5" />
+            </linearGradient>
+          </defs>
+
+          <path
+            d="M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V758.5C1882 801.026 1847.53 835.5 1805 835.5H1519C1476.47 835.5 1442 869.974 1442 912.5V955C1442 997.526 1407.53 1032 1365 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z"
+            fill={`url(#${gradId})`}
+          />
+        </svg>
+      </div>
+
+      {/* Tempatkan showcase content di atas background */}
+      <div className="pointer-events-none absolute inset-0">
+        {children}
       </div>
     </section>
   );
