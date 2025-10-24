@@ -2,11 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-// import HeroChatMock from "../components/HeroChatMock"; // ❌ nonaktifkan
-import ScrollHint from "@/components/hero/ScrollHint"; // ✅ sudah ada
-import AboutShowcase from "@/components/about/AboutShowcase"; // ✅ tambahkan
+import ScrollHint from "@/components/hero/ScrollHint";
+import AboutShowcase from "@/components/about/AboutShowcase";
 
-/** -- Helper (tetap) -- */
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
 }
@@ -34,15 +32,11 @@ function Faq({ q, a }: { q: string; a: string }) {
   );
 }
 
-/** ---------- Halaman ---------- */
 export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
-
-  // Ambil headline dari i18n (subheadline tidak dipakai di hero minimal)
   const rawHeadline = t("hero.headline");
 
-  // Otomatis highlight segmen angka/persentase (mis. "Over 65%" / "%65")
   const hlMatch = rawHeadline.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? rawHeadline.slice(0, hlMatch.index!) : rawHeadline;
   const highlight = hlMatch ? hlMatch[0] : "";
@@ -50,45 +44,31 @@ export default function LocaleHomePage() {
 
   return (
     <>
-      {/* Navbar global sudah dirender oleh app/layout.tsx */}
-
       {/* Hero minimal */}
       <section className="relative">
         <div className="mx-auto max-w-7xl px-6">
-          {/* padding bawah diperkecil supaya showcase bisa lebih dekat */}
           <div className="mx-auto max-w-4xl text-center pt-24 md:pt-32 pb-8 md:pb-10">
             <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </h1>
-
-            {/* Scroll hint animasi halus */}
             <ScrollHint />
           </div>
         </div>
       </section>
 
-      {/* Showcase: dinaikkan dengan negative margin agar mendekati hero */}
-      <AboutShowcase className="-mt-6 sm:-mt-8 md:-mt-12 lg:-mt-16" />
+      {/* Showcase sedikit lebih jauh dari hero */}
+      <AboutShowcase className="-mt-2 sm:-mt-4 md:-mt-6 lg:-mt-8" />
 
       {/* Features */}
       <section id="features" className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-medium md:text-3xl">Why {name}</h2>
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard
-              title="AI Autoreply"
-              desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API."
-            />
-            <FeatureCard
-              title="Multi-tenant"
-              desc="Cocok untuk klinik, hospitality, furniture—kelola banyak unit bisnis."
-            />
-            <FeatureCard
-              title="Realtime Analytics"
-              desc="Pantau metrik penting: SLA, waktu respon, topik percakapan."
-            />
+            <FeatureCard title="AI Autoreply" desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API." />
+            <FeatureCard title="Multi-tenant" desc="Cocok untuk klinik, hospitality, furniture—kelola banyak unit bisnis." />
+            <FeatureCard title="Realtime Analytics" desc="Pantau metrik penting: SLA, waktu respon, topik percakapan." />
           </div>
 
           <ul className="mt-8 list-disc pl-5 text-black/75">
