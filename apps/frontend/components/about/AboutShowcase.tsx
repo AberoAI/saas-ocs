@@ -12,13 +12,14 @@ export default function AboutShowcase({ className = "", children }: Props) {
   return (
     <section
       className={[
-        "relative mx-auto w-full max-w-[1440px] overflow-hidden",
-        "h-[85vh]", // tinggi relatif ke viewport
+        "relative w-full overflow-hidden",
+        "h-[85vh] px-[8px]", // tinggi 85% layar, jarak kiri-kanan 8px
         className,
       ].join(" ")}
     >
+      {/* SVG background */}
       <svg
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full rounded-[45px] object-cover"
         viewBox="0 0 1882 1032"
         preserveAspectRatio="xMidYMid meet"
         shapeRendering="geometricPrecision"
@@ -47,8 +48,8 @@ export default function AboutShowcase({ className = "", children }: Props) {
         />
       </svg>
 
-      {/* Konten showcase */}
-      <div className="relative z-10 flex h-full w-full items-center justify-center">
+      {/* Konten showcase di atas background */}
+      <div className="relative z-10 flex h-full w-full items-center justify-center rounded-[45px]">
         {children}
       </div>
     </section>
