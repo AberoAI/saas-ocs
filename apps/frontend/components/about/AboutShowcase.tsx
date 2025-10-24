@@ -4,14 +4,12 @@ import React from "react";
 export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
-      {/* Lebar dekat tepi layar, tanpa max-w yang menyempitkan.
-         W = min(1800px, 100vw - 48px); geser angka 48px kalau mau lebih mepet */}
-      <div className="mx-auto w-[min(1800px,100vw-48px)] px-0 py-12 md:py-16">
-        {/* HANYA tinggi yang diperkecil; lebar tetap 100% dari wrapper di atas */}
+      <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
+        {/* SVG persis sesuai Figma; responsive via viewBox + w-full; tinggi DIKURANGI via max-h */}
         <svg
           viewBox="0 0 1882 1032"
           preserveAspectRatio="xMidYMid meet"
-          className="block w-full h-[440px] md:h-[520px] lg:h-[560px]" // ← ubah angka ini kalau mau
+          className="w-full h-auto max-h-[560px]"   // ⬅️ hanya ini yang ditambahkan
           aria-hidden="true"
         >
           <defs>
