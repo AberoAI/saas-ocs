@@ -5,11 +5,11 @@ export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        {/* SVG persis sesuai Figma; responsive via viewBox + w-full; tinggi DIKURANGI via max-h */}
+        {/* SVG persis sesuai Figma; responsive via viewBox + w-full */}
         <svg
           viewBox="0 0 1882 1032"
           preserveAspectRatio="xMidYMid meet"
-          className="w-full h-auto max-h-[560px]"   // ⬅️ hanya ini yang ditambahkan
+          className="w-full h-auto"
           aria-hidden="true"
         >
           <defs>
