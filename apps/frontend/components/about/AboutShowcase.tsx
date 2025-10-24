@@ -4,16 +4,23 @@ import React from "react";
 export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        {/* SVG persis sesuai Figma; responsive via viewBox + w-full */}
+      <div className="mx-auto max-w-6xl px-6 py-12 md:py-16">
         <svg
           viewBox="0 0 1882 1032"
-          preserveAspectRatio="xMidYMid meet"
           className="w-full h-auto"
+          preserveAspectRatio="xMidYMid meet"
+          style={{ aspectRatio: "1882 / 1032", borderRadius: "2rem" }}
           aria-hidden="true"
         >
           <defs>
-            <linearGradient id="about-gradient" x1="941" y1="-16.7023" x2="941" y2="1032" gradientUnits="userSpaceOnUse">
+            <linearGradient
+              id="about-gradient"
+              x1="941"
+              y1="-16.7023"
+              x2="941"
+              y2="1032"
+              gradientUnits="userSpaceOnUse"
+            >
               <stop offset="0.043258" stopColor="#C1EEFF" />
               <stop offset="0.670535" stopColor="#DBF8EF" stopOpacity="0.5" />
               <stop offset="1" stopColor="#EDF6FF" stopOpacity="0.5" />
