@@ -8,7 +8,7 @@ export default function AboutShowcase() {
         <svg
           viewBox="0 0 1882 1032"
           preserveAspectRatio="xMidYMid slice"
-          className="w-full h-[590px] md:h-[670px] lg:h-[710px]"
+          className="w-full h-[575px] md:h-[655px] lg:h-[695px]"
           aria-hidden="true"
         >
           <defs>
