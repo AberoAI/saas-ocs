@@ -1,4 +1,3 @@
-// apps/frontend/app/[locale]/page.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -53,10 +52,11 @@ export default function LocaleHomePage() {
     <>
       {/* Navbar global sudah dirender oleh app/layout.tsx */}
 
-      {/* Hero minimal (sesuai foto kedua) */}
+      {/* Hero minimal */}
       <section className="relative">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-4xl text-center py-24 md:py-32">
+          {/* padding bawah diperkecil supaya showcase bisa lebih dekat */}
+          <div className="mx-auto max-w-4xl text-center pt-24 md:pt-32 pb-8 md:pb-10">
             <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
@@ -69,13 +69,8 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* About lama DINONAKTIFKAN */}
-      {/*
-      <section id="about" className="border-t border-black/10 bg-white"> ... </section>
-      */}
-
-      {/* Layer berwarna di atas background putih */}
-      <AboutShowcase />
+      {/* Showcase: dinaikkan dengan negative margin agar mendekati hero */}
+      <AboutShowcase className="-mt-6 sm:-mt-8 md:-mt-12 lg:-mt-16" />
 
       {/* Features */}
       <section id="features" className="border-t border-black/10 bg-white">
