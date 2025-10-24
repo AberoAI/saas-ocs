@@ -6,15 +6,10 @@ import * as React from "react";
 type Props = {
   className?: string;
   children?: React.ReactNode;
-  radius?: number; // default 45px
 };
 
-export default function AboutShowcase({
-  className = "",
-  children,
-  radius = 45,
-}: Props) {
-  const gradId = React.useId(); // mencegah duplikasi id gradient
+export default function AboutShowcase({ className = "", children }: Props) {
+  const gradId = React.useId(); // supaya id gradient unik di setiap instance
 
   return (
     <section
@@ -22,7 +17,6 @@ export default function AboutShowcase({
         "relative mx-auto w-full max-w-[1440px] overflow-hidden",
         className,
       ].join(" ")}
-      style={{ borderRadius: `${radius}px` }}
     >
       <div className="aspect-[1882/1032]">
         <svg
@@ -48,13 +42,13 @@ export default function AboutShowcase({
           </defs>
 
           <path
-            d="M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V758.5C1882 801.026 1847.53 835.5 1805 835.5H1519C1476.47 835.5 1442 869.974 1442 912.5V955C1442 997.526 1407.53 1032 1365 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z"
+            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V987C1442 1011.85 1421.85 1032 1397 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
           />
         </svg>
       </div>
 
-      {/* Tempatkan konten showcase di atas background */}
+      {/* Konten showcase di atas background */}
       <div className="pointer-events-none absolute inset-0">{children}</div>
     </section>
   );
