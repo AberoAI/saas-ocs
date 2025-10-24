@@ -4,9 +4,10 @@ import React from "react";
 export default function AboutShowcase() {
   return (
     <section id="about" className="bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-        {/* Tinggi showcase dikurangi 20% tanpa mengubah proporsi lainnya */}
-        <div className="relative w-full h-[460px] md:h-[525px] lg:h-[555px]">
+      {/* WAS: max-w-7xl px-6 → biar lebar tidak “menyusut”, pakai w-full dan px-0 */}
+      <div className="w-full px-0 py-12 md:py-16">
+        {/* Tinggi dikurangi ~20% (575→460, 655→524, 695→556) */}
+        <div className="relative w-full h-[460px] md:h-[524px] lg:h-[556px]">
           <svg
             viewBox="0 0 1882 1032"
             preserveAspectRatio="xMidYMid meet"
@@ -25,19 +26,11 @@ export default function AboutShowcase() {
               </linearGradient>
             </defs>
 
-            <rect
-              x="0"
-              y="0"
-              width="1882"
-              height="1032"
-              fill="url(#about-gradient)"
-              clipPath="url(#about-clip)"
-            />
+            <rect x="0" y="0" width="1882" height="1032" fill="url(#about-gradient)" clipPath="url(#about-clip)" />
           </svg>
 
           <div className="absolute bottom-4 left-5 text-[12px] text-black/60">
-            Live chat powered by{" "}
-            <span className="font-semibold text-[#26658C]">AberoAI</span>
+            Live chat powered by <span className="font-semibold text-[#26658C]">AberoAI</span>
           </div>
         </div>
       </div>
