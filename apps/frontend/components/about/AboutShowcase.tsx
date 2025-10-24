@@ -9,9 +9,15 @@ function makeMaskDataURI(path: string) {
 
 type Props = {
   className?: string;
+  showLabel?: boolean;
+  label?: string;
 };
 
-export default function AboutShowcase({ className = "" }: Props) {
+export default function AboutShowcase({
+  className = "",
+  showLabel: _showLabel = true, // dibiarkan tapi tidak dipakai
+  label: _label = "Live chat powered by", // dibiarkan tapi tidak dipakai
+}: Props) {
   const maskURI = makeMaskDataURI(PATH_D);
 
   return (
@@ -28,7 +34,7 @@ export default function AboutShowcase({ className = "" }: Props) {
         <div
           className="
             relative block w-full
-            h-[clamp(360px,54vh,720px)]  /* 1.5× lebih tinggi */
+            h-[clamp(480px,72vh,960px)]  /* tetap: 2x lebih tinggi sesuai code semula */
             rounded-[22px] md:rounded-[26px] lg:rounded-[28px]
             overflow-hidden
             !max-w-none !mx-0
