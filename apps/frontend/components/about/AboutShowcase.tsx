@@ -1,30 +1,27 @@
 import React from "react";
 
-/** Rounded-rect 45px, inset 2px agar tidak ke-clip di tepi viewBox */
-function makeMaskDataURI() {
-  const inset = 2; // naikkan jika di device tertentu masih “terkikis”
-  const vbW = 1882, vbH = 1032;
-  const rx = 45;
-  const w = vbW - inset * 2;
-  const h = vbH - inset * 2;
+const PATH_D = `M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V820.5C1882 863.026 1847.53 897.5 1805 897.5H1598.25C1561.11 897.5 1531 927.609 1531 964.75C1531 1001.89 1500.89 1032 1463.75 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z`;
 
-  // rapikan menjadi satu baris untuk menghindari parsing aneh pada beberapa engine
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${vbW} ${vbH}' preserveAspectRatio='none' shape-rendering='geometricPrecision'><rect x='${inset}' y='${inset}' width='${w}' height='${h}' rx='${rx}' ry='${rx}' fill='white'/></svg>`;
+// Tambah shape-rendering agar anti-aliasing kurva lebih halus
+function makeMaskDataURI(path: string) {
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
+    `<path d='${path}' fill='white'/></svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
 type Props = {
   className?: string;
-  showLabel?: boolean; // kept for API compatibility
-  label?: string;      // kept for API compatibility
+  showLabel?: boolean;
+  label?: string;
 };
 
 export default function AboutShowcase({
   className = "",
-  showLabel: _showLabel = true, // unused
-  label: _label = "Live chat powered by", // unused
+  showLabel: _showLabel = true,   // kept but unused
+  label: _label = "Live chat powered by", // kept but unused
 }: Props) {
-  const maskURI = makeMaskDataURI();
+  const maskURI = makeMaskDataURI(PATH_D);
 
   return (
     <section
@@ -41,16 +38,19 @@ export default function AboutShowcase({
           className="
             relative block w-full
             h-[clamp(490px,72vh,970px)]
+            rounded-none               /* ⬅️ Hapus border-radius: biarkan mask yang membentuk kurva */
             overflow-hidden
             !max-w-none !mx-0
             bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
             dark:bg-[linear-gradient(180deg,#9ED8F0_4%,#CFEDE680_67%,#DDE9F780_100%)]
-            rounded-[45px]  /* fallback jika mask gagal dibaca */
           "
           style={{
-            // Shorthand lebih kompatibel di Chromium/WebKit
-            WebkitMask: `${maskURI} no-repeat 0 0 / 100% 100%`,
-            mask: `${maskURI} no-repeat 0 0 / 100% 100%`,
+            WebkitMaskImage: maskURI,
+            maskImage: maskURI,
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskSize: "100% 100%",
+            maskSize: "100% 100%",
           }}
         />
       </div>
