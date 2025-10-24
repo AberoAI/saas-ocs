@@ -1,34 +1,32 @@
 import React from "react";
 
-// Semua sudut 45px (tanpa notch kanan bawah)
-const PATH_D = `
-  M45 0H1837
-  C1862.6 0 1882 19.4 1882 45V987
-  C1882 1012.6 1862.6 1032 1837 1032H45
-  C19.4 1032 0 1012.6 0 987V45
-  C0 19.4 19.4 0 45 0Z
-`;
+// SVG mask: rounded-rect 45px, di-inset 1px agar tidak ter-clipping di sisi kanan/bawah
+function makeMaskDataURI() {
+  const inset = 1;                // naikkan ke 2 jika di beberapa device masih tampak terkikis
+  const vbW = 1882, vbH = 1032;   // ukuran viewBox referensi (ikut desain awal)
+  const rx = 45;                  // corner radius seragam 45px
+  const w = vbW - inset * 2;
+  const h = vbH - inset * 2;
 
-// Tambah shape-rendering agar anti-aliasing kurva lebih halus
-function makeMaskDataURI(path: string) {
   const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
-    `<path d='${path}' fill='white'/></svg>`;
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${vbW} ${vbH}' preserveAspectRatio='none' shape-rendering='geometricPrecision'>` +
+      `<rect x='${inset}' y='${inset}' width='${w}' height='${h}' rx='${rx}' ry='${rx}' fill='white'/>` +
+    `</svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
 type Props = {
   className?: string;
-  showLabel?: boolean;
-  label?: string;
+  showLabel?: boolean; // kept for API compatibility
+  label?: string;      // kept for API compatibility
 };
 
 export default function AboutShowcase({
   className = "",
-  showLabel: _showLabel = true, // kept but unused
-  label: _label = "Live chat powered by", // kept but unused
+  showLabel: _showLabel = true,   // unused
+  label: _label = "Live chat powered by", // unused
 }: Props) {
-  const maskURI = makeMaskDataURI(PATH_D);
+  const maskURI = makeMaskDataURI();
 
   return (
     <section
@@ -39,6 +37,7 @@ export default function AboutShowcase({
         ${className}
       `}
     >
+      {/* Full-bleed aman scrollbar */}
       <div className="relative mx-[calc(50%-50vw)] w-[100vw] px-[var(--gutter)] py-10 md:py-14 col-span-full self-stretch !max-w-none !mx-0">
         <div
           className="
