@@ -1,35 +1,43 @@
-// apps/frontend/components/about/AboutShowcase.tsx
 import React from "react";
 
 const PATH_D = `M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V820.5C1882 863.026 1847.53 897.5 1805 897.5H1598.25C1561.11 897.5 1531 927.609 1531 964.75C1531 1001.89 1500.89 1032 1463.75 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z`;
 
 function makeMaskDataURI(path: string) {
-  // SVG putih = bagian terlihat; transparan = tersembunyi
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1882 1032' preserveAspectRatio='none'><path d='${path}' fill='white'/></svg>`;
-  // encode minimal agar aman di CSS
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 
-export default function AboutShowcase() {
+type Props = {
+  className?: string;
+  showLabel?: boolean;
+  label?: string;
+};
+
+export default function AboutShowcase({
+  className = "",
+  showLabel = true,
+  label = "Live chat powered by",
+}: Props) {
   const maskURI = makeMaskDataURI(PATH_D);
 
   return (
     <section
       id="about"
-      className="
+      className={`
         bg-white overflow-x-clip w-full !max-w-none !mx-0
         [--gutter:12px] sm:[--gutter:16px] md:[--gutter:20px] lg:[--gutter:24px]
-      "
+        ${className}
+      `}
     >
       {/* Full-bleed aman scrollbar */}
-      <div className="relative mx-[calc(50%-50vw)] w-[100vw] px-[var(--gutter)] py-10 md:py-14">
+      <div className="relative mx-[calc(50%-50vw)] w-[100vw] px-[var(--gutter)] py-10 md:py-14 col-span-full self-stretch !max-w-none !mx-0">
         <div
           className="
             relative block w-full
-            h-[clamp(240px,36vh,480px)]
+            h-[clamp(480px,72vh,960px)]  /* 2x lebih tinggi */
             rounded-[22px] md:rounded-[26px] lg:rounded-[28px]
             overflow-hidden
-            col-span-full self-stretch !max-w-none !mx-0
+            !max-w-none !mx-0
             bg-[linear-gradient(180deg,#C1EEFF_4.3%,#DBF8EF80_67%,#EDF6FF80_100%)]
             dark:bg-[linear-gradient(180deg,#9ED8F0_4%,#CFEDE680_67%,#DDE9F780_100%)]
           "
@@ -42,13 +50,14 @@ export default function AboutShowcase() {
             maskSize: "100% 100%",
           }}
         >
-          {/* Label opsional */}
-          <div className="absolute bottom-3 left-4 text-[12px] text-black/60 dark:text-black/70">
-            Live chat powered by{" "}
-            <span className="font-semibold" style={{ color: "var(--brand,#26658C)" }}>
-              AberoAI
-            </span>
-          </div>
+          {showLabel && (
+            <div className="absolute bottom-3 left-4 text-[12px] text-black/60 dark:text-black/70">
+              {label}{" "}
+              <span className="font-semibold" style={{ color: "var(--brand,#26658C)" }}>
+                AberoAI
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </section>
