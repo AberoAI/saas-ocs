@@ -3,13 +3,13 @@ import React from "react";
 
 export default function AboutShowcase() {
   return (
-    <section id="about" className="bg-white">
-      {/* Lebar sangat dekat ke tepi layar, tapi tetap aman */}
-      <div className="mx-auto w-[94vw] md:w-[96vw] xl:w-[97vw] max-w-[1920px] py-8 md:py-12">
+    <section id="about" className="relative w-full overflow-hidden bg-white">
+      {/* Full width card sesuai layar desktop */}
+      <div className="mx-auto w-[98vw] h-[72vh] md:h-[75vh]">
         <svg
           viewBox="0 0 1882 1032"
           preserveAspectRatio="xMidYMid meet"
-          className="w-full h-[60vh] lg:h-[66vh] rounded-[2rem]"
+          className="w-full h-full"
           aria-hidden="true"
         >
           <defs>
@@ -26,8 +26,6 @@ export default function AboutShowcase() {
               <stop offset="1" stopColor="#EDF6FF" stopOpacity="0.5" />
             </linearGradient>
           </defs>
-
-          {/* Path asli dari Figma – tidak diubah */}
           <path
             d="M0 77C0 34.4741 34.4741 0 77 0H1805C1847.53 0 1882 34.4741 1882 77V820.5C1882 863.026 1847.53 897.5 1805 897.5H1598.25C1561.11 897.5 1531 927.609 1531 964.75C1531 1001.89 1500.89 1032 1463.75 1032H923H77C34.4741 1032 0 997.526 0 955V501.575V77Z"
             fill="url(#about-gradient)"
