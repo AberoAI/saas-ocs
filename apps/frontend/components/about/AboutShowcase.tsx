@@ -6,22 +6,27 @@ import * as React from "react";
 type Props = {
   className?: string;
   children?: React.ReactNode;
+  radius?: number; // default 45px
 };
 
-export default function AboutShowcase({ className = "", children }: Props) {
-  const gradId = React.useId(); // agar id gradient unik
+export default function AboutShowcase({
+  className = "",
+  children,
+  radius = 45,
+}: Props) {
+  const gradId = React.useId(); // mencegah duplikasi id gradient
 
   return (
     <section
       className={[
-        "relative mx-auto w-full max-w-[1440px] rounded-[48px] overflow-hidden",
-        "shadow-[0_12px_40px_rgba(0,0,0,0.12)]",
+        "relative mx-auto w-full max-w-[1440px] overflow-hidden",
         className,
       ].join(" ")}
+      style={{ borderRadius: `${radius}px` }}
     >
       <div className="aspect-[1882/1032]">
         <svg
-          className="h-full w-full block"
+          className="block h-full w-full"
           viewBox="0 0 1882 1032"
           preserveAspectRatio="xMidYMid slice"
           shapeRendering="geometricPrecision"
@@ -49,10 +54,8 @@ export default function AboutShowcase({ className = "", children }: Props) {
         </svg>
       </div>
 
-      {/* Tempatkan showcase content di atas background */}
-      <div className="pointer-events-none absolute inset-0">
-        {children}
-      </div>
+      {/* Tempatkan konten showcase di atas background */}
+      <div className="pointer-events-none absolute inset-0">{children}</div>
     </section>
   );
 }
