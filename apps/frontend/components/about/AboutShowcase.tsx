@@ -1,28 +1,34 @@
 // apps/frontend/components/about/AboutShowcase.tsx
 import * as React from "react";
 
-type Props = { className?: string; children?: React.ReactNode };
+type Props = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
 
-export default function AboutShowcase({ className = "", children }: Props) {
+export default function AboutShowcase({ className = "", children, ...rest }: Props) {
   const gradId = React.useId();
 
   return (
     <section
+      {...rest}
       className={[
-        // ---- FULL-BLEED W/ 8PX GUTTERS ----
-        "relative h-[85vh] max-w-none",
-        "w-[calc(100vw-16px)]",                 // lebar = viewport - (8px*2)
-        "ml-[calc(50%-50vw+8px)]",              // geser keluar container ke kiri + sisakan 8px
-        "mr-[calc(50%-50vw+8px)]",              // geser keluar container ke kanan + sisakan 8px
-        // -----------------------------------
+        "relative max-w-none",
+        "h-[clamp(420px,85vh,920px)]", // tinggi fleksibel
+        "w-[calc(100vw-16px)]",
+        "ml-[calc(50%-50vw+8px)]",
+        "mr-[calc(50%-50vw+8px)]",
         className,
       ].join(" ")}
     >
-      <div className="relative h-full w-full overflow-hidden rounded-[45px]">
+      <div
+        className={[
+          "relative h-full w-full overflow-hidden rounded-[45px]",
+          "bg-[rgb(var(--surface-bg,255_255_255))]",
+          "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
+        ].join(" ")}
+      >
         <svg
-          className="absolute inset-0 h-full w-full"
+          className="pointer-events-none absolute inset-0 h-full w-full"
           viewBox="0 0 1882 1032"
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio="none"
           shapeRendering="geometricPrecision"
           aria-hidden="true"
           focusable="false"
@@ -30,9 +36,9 @@ export default function AboutShowcase({ className = "", children }: Props) {
         >
           <defs>
             <linearGradient id={gradId} x1="937" y1="-16.7023" x2="937" y2="1032" gradientUnits="userSpaceOnUse">
-              <stop offset="0.043258" stopColor="#C1EEFF" />
-              <stop offset="0.670535" stopColor="#DBF8EF" stopOpacity="0.5" />
-              <stop offset="1" stopColor="#EDF6FF" stopOpacity="0.5" />
+              <stop offset="0.04" stopColor="var(--about-grad-1, #C1EEFF)" />
+              <stop offset="0.67" stopColor="var(--about-grad-2, #DBF8EF)" stopOpacity="var(--about-grad-2-op, 0.5)" />
+              <stop offset="1" stopColor="var(--about-grad-3, #EDF6FF)" stopOpacity="var(--about-grad-3-op, 0.5)" />
             </linearGradient>
           </defs>
 
