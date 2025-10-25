@@ -42,9 +42,9 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
             </linearGradient>
           </defs>
 
-          {/* ✅ Notch kanan-bawah: tinggi sama, tapi kedalaman horizontal dipangkas (lebih “ke kanan”) */}
+          {/* Notch kanan-bawah: sangat pendek & dangkal (sesuai mock) */}
           <path
-            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V963C1442 1002 1434 1032 1430 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
+            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V970C1442 1008 1441 1032 1440 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
           />
         </svg>
