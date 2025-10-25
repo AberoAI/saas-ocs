@@ -27,7 +27,6 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
         ].join(" ")}
       >
         <svg
-          // bleed 2px ke bawah untuk menghilangkan hairline
           className="pointer-events-none absolute left-0 right-0 top-0 -bottom-[2px] h-[calc(100%+2px)] w-full"
           viewBox="0 0 1882 1032"
           preserveAspectRatio="none"
@@ -44,9 +43,9 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
             </linearGradient>
           </defs>
 
-          {/* Notch kanan-bawah dimajukan ke kiri agar corner luar terlihat */}
+          {/* Notch dimundurkan dari corner agar corner convex terlihat jelas */}
           <path
-            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V970C1442 1008 1432 1032 1424 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
+            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V976C1442 1009 1428 1032 1418 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
           />
         </svg>
