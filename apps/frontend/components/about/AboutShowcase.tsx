@@ -11,7 +11,7 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
       {...rest}
       className={[
         "relative max-w-none",
-        "h-[clamp(420px,85vh,920px)]", // tinggi fleksibel
+        "h-[clamp(420px,85vh,920px)]",
         "w-[calc(100vw-16px)]",
         "ml-[calc(50%-50vw+8px)]",
         "mr-[calc(50%-50vw+8px)]",
@@ -42,9 +42,9 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
             </linearGradient>
           </defs>
 
-          {/* ✅ Notch kanan bawah diperkecil 40%, tetap halus */}
+          {/* ✅ Notch kanan-bawah: tinggi sama, tapi kedalaman horizontal dipangkas (lebih “ke kanan”) */}
           <path
-            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V963C1442 1002 1426 1032 1415 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
+            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V963C1442 1002 1434 1032 1430 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
           />
         </svg>
