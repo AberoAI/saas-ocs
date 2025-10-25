@@ -21,7 +21,8 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
       <div
         className={[
           "relative h-full w-full overflow-hidden",
-          "rounded-t-[28px] rounded-b-[38px]",
+          // Semua sudut 28px: kiri-atas, kanan-atas, kiri-bawah, (kanan-bawah tetap dipengaruhi notch SVG)
+          "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
         ].join(" ")}
@@ -43,7 +44,7 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
             </linearGradient>
           </defs>
 
-          {/* Notch kanan-bawah: lebih smooth */}
+          {/* Notch kanan-bawah: versi smooth terakhir */}
           <path
             d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V988C1442 1016 1416 1032 1404 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
