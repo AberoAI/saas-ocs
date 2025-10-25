@@ -63,18 +63,16 @@ export default function LocaleHomePage() {
 
       {/* ───────────────────────────────
           PAGE 2: Showcase
-          (negative margin kecil agar rapat ke Hero, tanpa “nabrak” section berikutnya)
+          (Jarak nyaman antar section, tanpa negative margin)
       ─────────────────────────────── */}
-      <AboutShowcase className="-mt-2 sm:-mt-4 md:-mt-6 lg:-mt-8" />
+      <AboutShowcase className="mt-16 sm:mt-20 md:mt-24 lg:mt-28" />
 
       {/* ───────────────────────────────
           PAGE 3: Why AberoAI
-          (SECTION INI ADALAH "WHY ABEROAI")
-          Tambahkan gap eksplisit dari Showcase untuk cegah dempet/terpotong
       ─────────────────────────────── */}
       <section
         id="page-3-why-aberoai"
-        className="page border-t border-black/10 bg-white mt-16 md:mt-24"
+        className="page border-t border-black/10 bg-white mt-24 md:mt-32"
         aria-labelledby="why-aberoai-heading"
       >
         <div className="mx-auto max-w-6xl px-6 py-16">
@@ -107,9 +105,8 @@ export default function LocaleHomePage() {
 
       {/* ───────────────────────────────
           PAGE 4: FAQ
-          Tambahkan gap agar tidak dempet dengan Why
       ─────────────────────────────── */}
-      <section id="page-4-faq" className="page border-t border-black/10 bg-white mt-12 md:mt-16">
+      <section id="page-4-faq" className="page border-t border-black/10 bg-white mt-20 md:mt-28">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -122,7 +119,7 @@ export default function LocaleHomePage() {
       </section>
 
       {/* ───────────────────────────────
-          Footer
+          FOOTER
       ─────────────────────────────── */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
