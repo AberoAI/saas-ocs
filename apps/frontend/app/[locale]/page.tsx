@@ -63,9 +63,9 @@ export default function LocaleHomePage() {
 
       {/* ───────────────────────────────
           PAGE 2: Showcase
-          (Jarak nyaman antar section, tanpa negative margin)
+          (jarak ideal seperti mockup: 32–40 px)
       ─────────────────────────────── */}
-      <AboutShowcase className="mt-16 sm:mt-20 md:mt-24 lg:mt-28" />
+      <AboutShowcase className="mt-10 sm:mt-12 md:mt-14 lg:mt-16" />
 
       {/* ───────────────────────────────
           PAGE 3: Why AberoAI
@@ -87,7 +87,7 @@ export default function LocaleHomePage() {
             />
             <FeatureCard
               title="Multi-tenant"
-              desc="Cocok untuk klinik, hospitality, furniture—kelola banyak unit bisnis."
+              desc="Cocok untuk klinik, hospitality, furniture — kelola banyak unit bisnis."
             />
             <FeatureCard
               title="Realtime Analytics"
@@ -98,7 +98,7 @@ export default function LocaleHomePage() {
           <ul className="mt-8 list-disc pl-5 text-black/75">
             <li>WhatsApp Cloud API + AI untuk balasan otomatis</li>
             <li>Multi-tenant: cocok untuk klinik, hospitality, furniture</li>
-            <li>Realtime dashboard &amp; analytics</li>
+            <li>Realtime dashboard & analytics</li>
           </ul>
         </div>
       </section>
@@ -123,10 +123,17 @@ export default function LocaleHomePage() {
       ─────────────────────────────── */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <p className="text-sm text-black/60">© {new Date().getFullYear()} {name}</p>
+          <p className="text-sm text-black/60">
+            © {new Date().getFullYear()} {name}
+          </p>
           <div className="text-sm text-neutral-500">
-            <Link href="/privacy" className="underline">Privacy Policy</Link> ·{" "}
-            <Link href="/terms" className="underline">Terms of Service</Link>
+            <Link href="/privacy" className="underline">
+              Privacy Policy
+            </Link>{" "}
+            ·{" "}
+            <Link href="/terms" className="underline">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </footer>
