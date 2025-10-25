@@ -1,3 +1,4 @@
+// apps/frontend/app/[locale]/page.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -44,8 +45,10 @@ export default function LocaleHomePage() {
 
   return (
     <>
-      {/* Hero minimal */}
-      <section className="relative">
+      {/* ───────────────────────────────
+          PAGE 1: Hero
+      ─────────────────────────────── */}
+      <section id="page-1-hero" className="relative page">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-4xl text-center pt-24 md:pt-32 pb-8 md:pb-10">
             <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
@@ -58,17 +61,40 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* Showcase sedikit lebih jauh dari hero */}
+      {/* ───────────────────────────────
+          PAGE 2: Showcase
+          (negative margin kecil agar rapat ke Hero, tanpa “nabrak” section berikutnya)
+      ─────────────────────────────── */}
       <AboutShowcase className="-mt-2 sm:-mt-4 md:-mt-6 lg:-mt-8" />
 
-      {/* Features */}
-      <section id="features" className="border-t border-black/10 bg-white">
+      {/* ───────────────────────────────
+          PAGE 3: Why AberoAI
+          (SECTION INI ADALAH "WHY ABEROAI")
+          Tambahkan gap eksplisit dari Showcase untuk cegah dempet/terpotong
+      ─────────────────────────────── */}
+      <section
+        id="page-3-why-aberoai"
+        className="page border-t border-black/10 bg-white mt-16 md:mt-24"
+        aria-labelledby="why-aberoai-heading"
+      >
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <h2 className="text-2xl font-medium md:text-3xl">Why {name}</h2>
+          <h2 id="why-aberoai-heading" className="text-2xl font-medium md:text-3xl">
+            Why {name}
+          </h2>
+
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard title="AI Autoreply" desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API." />
-            <FeatureCard title="Multi-tenant" desc="Cocok untuk klinik, hospitality, furniture—kelola banyak unit bisnis." />
-            <FeatureCard title="Realtime Analytics" desc="Pantau metrik penting: SLA, waktu respon, topik percakapan." />
+            <FeatureCard
+              title="AI Autoreply"
+              desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API."
+            />
+            <FeatureCard
+              title="Multi-tenant"
+              desc="Cocok untuk klinik, hospitality, furniture—kelola banyak unit bisnis."
+            />
+            <FeatureCard
+              title="Realtime Analytics"
+              desc="Pantau metrik penting: SLA, waktu respon, topik percakapan."
+            />
           </div>
 
           <ul className="mt-8 list-disc pl-5 text-black/75">
@@ -79,8 +105,11 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="border-t border-black/10 bg-white">
+      {/* ───────────────────────────────
+          PAGE 4: FAQ
+          Tambahkan gap agar tidak dempet dengan Why
+      ─────────────────────────────── */}
+      <section id="page-4-faq" className="page border-t border-black/10 bg-white mt-12 md:mt-16">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -92,7 +121,9 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ───────────────────────────────
+          Footer
+      ─────────────────────────────── */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
           <p className="text-sm text-black/60">© {new Date().getFullYear()} {name}</p>
