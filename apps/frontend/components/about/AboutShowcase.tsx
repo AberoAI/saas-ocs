@@ -21,18 +21,13 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
       <div
         className={[
           "relative h-full w-full overflow-hidden",
-          // sudut: atas sedikit lebih tegas, bawah lebih lembut
           "rounded-t-[28px] rounded-b-[38px]",
-          // beri kontras tipis agar radius bawah-kanan tetap terbaca walau area sudut tidak diisi SVG
-          "ring-1 ring-black/[0.06]",
-          // opsional: lembutkan tepi keseluruhan
-          "shadow-[0_2px_24px_rgba(0,0,0,0.03)]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
-          "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))] dark:ring-white/[0.08]",
+          "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
         ].join(" ")}
       >
         <svg
-          // Bleed 2px ke bawah supaya tidak muncul garis/hairline saat scaling
+          // bleed 2px ke bawah untuk menghilangkan hairline
           className="pointer-events-none absolute left-0 right-0 top-0 -bottom-[2px] h-[calc(100%+2px)] w-full"
           viewBox="0 0 1882 1032"
           preserveAspectRatio="none"
@@ -49,9 +44,9 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
             </linearGradient>
           </defs>
 
-          {/* Notch kanan-bawah tetap pendek & dangkal */}
+          {/* Notch kanan-bawah dimajukan ke kiri agar corner luar terlihat */}
           <path
-            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V970C1442 1008 1441 1032 1440 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
+            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V970C1442 1008 1432 1032 1424 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
           />
         </svg>
