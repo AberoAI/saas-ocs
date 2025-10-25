@@ -21,16 +21,16 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
       <div
         className={[
           "relative h-full w-full overflow-hidden",
-          // 📐 Samakan persepsi radius: atas > tegas, bawah > lembut
           "rounded-t-[28px] rounded-b-[38px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
         ].join(" ")}
       >
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
+          // ⬇️ Bleed 2px ke bawah untuk hilangkan hairline/“terpotong”
+          className="pointer-events-none absolute left-0 right-0 top-0 -bottom-[2px] h-[calc(100%+2px)] w-full"
           viewBox="0 0 1882 1032"
-          preserveAspectRatio="none"               // full-cover tanpa gap
+          preserveAspectRatio="none"
           shapeRendering="geometricPrecision"
           aria-hidden="true"
           focusable="false"
@@ -44,7 +44,6 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
             </linearGradient>
           </defs>
 
-          {/* Notch kanan-bawah: pendek & dangkal (match mock) */}
           <path
             d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V970C1442 1008 1441 1032 1440 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
