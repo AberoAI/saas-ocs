@@ -9,15 +9,16 @@ export default function AboutShowcase({ className = "", children }: Props) {
   return (
     <section
       className={[
-        "relative h-[85vh] w-full",              // tinggi ~1 layar dashboard
-        "ml-[calc(50%-50vw)]",                   // keluar dari container (full-bleed)
-        "w-[calc(100vw-16px)]",                  // lebar = viewport - 16px
-        "px-[8px]",                              // jarak kiri-kanan 8px
+        // ---- FULL-BLEED W/ 8PX GUTTERS ----
+        "relative h-[85vh] max-w-none",
+        "w-[calc(100vw-16px)]",                 // lebar = viewport - (8px*2)
+        "ml-[calc(50%-50vw+8px)]",              // geser keluar container ke kiri + sisakan 8px
+        "mr-[calc(50%-50vw+8px)]",              // geser keluar container ke kanan + sisakan 8px
+        // -----------------------------------
         className,
       ].join(" ")}
     >
-      {/* wrapper supaya radius & overflow rapi */}
-      <div className="relative h-full w-full rounded-[45px] overflow-hidden">
+      <div className="relative h-full w-full overflow-hidden rounded-[45px]">
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox="0 0 1882 1032"
@@ -41,7 +42,6 @@ export default function AboutShowcase({ className = "", children }: Props) {
           />
         </svg>
 
-        {/* konten showcase */}
         <div className="relative z-10 flex h-full w-full items-center justify-center">
           {children}
         </div>
