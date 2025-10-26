@@ -60,7 +60,7 @@ export default function LocaleHomePage() {
 
         {/* hero text block */}
         <div className="max-w-6xl pr-6">
-          <div className="max-w-3xl text-left">
+          <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
               className={`${poppins.className} font-medium text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-snug tracking-[-0.01em] text-[#585858]`}
