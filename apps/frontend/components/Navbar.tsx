@@ -14,6 +14,7 @@ export default function Navbar() {
 
   const t = useTranslations();
   const BRAND = "#26658C";
+  const CTA_LOGIN_BG = "#F7F7F7";
   const name = "AberoAI";
 
   // Deteksi prefix locale dari path (mis. /tr, /en)
@@ -27,7 +28,6 @@ export default function Navbar() {
   const withLocale = (href: string) => {
     // eksternal / protokol / anchor tidak diubah
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
-
     // Jika sudah ber-prefix locale yang sama, biarkan
     if (localePrefix && href.startsWith(`${localePrefix}/`)) return href;
 
@@ -38,17 +38,12 @@ export default function Navbar() {
       else if (href === "/features") localized = "/ozellikler";
       else if (href === "/solutions") localized = "/cozumler";
     }
-
-    // Prefix-kan locale
     return `${localePrefix}${localized}` || localePrefix || "/";
   };
 
-  // ganti prefix locale pada path saat ini (untuk switcher EN)
+  // ganti prefix locale pada path saat ini (untuk switcher EN sederhana)
   const switchLocaleHref = (target: string) => {
-    if (localePrefix) {
-      return pathname.replace(new RegExp(`^${localePrefix}`), `/${target}`);
-    }
-    // jika belum ber-locale, tambahkan di depan
+    if (localePrefix) return pathname.replace(new RegExp(`^${localePrefix}`), `/${target}`);
     return `/${target}${pathname === "/" ? "" : pathname}`;
   };
 
@@ -62,7 +57,6 @@ export default function Navbar() {
   const isActive = (href: string) => {
     const target = norm(href.startsWith("/") ? href : `/${href}`);
     const current = norm(pathname);
-
     if (target === "/" || target === localePrefix) {
       return current === "/" || current === localePrefix;
     }
@@ -71,8 +65,6 @@ export default function Navbar() {
 
   // State dropdown Product
   const [openProduct, setOpenProduct] = useState(false);
-
-  // Delay kecil agar tidak kedip saat pindah ke menu
   const leaveTimer = useRef<number | null>(null);
   const handleEnter = () => {
     if (leaveTimer.current) {
@@ -90,8 +82,8 @@ export default function Navbar() {
   const menuId = "nav-product-menu";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+    <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2">
         {/* KIRI: Brand + Nav */}
         <div className="flex items-center gap-8">
           {/* Brand */}
@@ -99,11 +91,11 @@ export default function Navbar() {
             <Image
               src="/icon.svg"
               alt={name}
-              width={28}
-              height={28}
+              width={32}
+              height={32}
               className="object-contain"
               priority
-              sizes="28px"
+              sizes="32px"
             />
             <span className="text-2xl font-semibold" style={{ color: BRAND }}>
               {name}
@@ -124,7 +116,6 @@ export default function Navbar() {
                     onFocus={handleEnter}
                     onBlur={handleLeave}
                   >
-                    {/* Trigger dropdown sebagai button (aksesibel) */}
                     <button
                       type="button"
                       aria-haspopup="menu"
@@ -147,7 +138,6 @@ export default function Navbar() {
                       ].join(" ")}
                     >
                       {t("nav.product")}
-                      {/* caret */}
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
@@ -222,31 +212,32 @@ export default function Navbar() {
         </div>
 
         {/* KANAN: Locale + Auth */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Locale badge sederhana (contoh: EN) */}
           <Link
             href={switchLocaleHref("en")}
-            className="hidden md:inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase rounded-md text-foreground/60 hover:text-foreground transition-colors"
+            className="hidden md:inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
             aria-label="Switch to English"
           >
             EN
           </Link>
 
-          {/* Log in (ringan) */}
+          {/* Log in (BG #F7F7F7 – tanpa shadow, flat) */}
           <Link
             href={withLocale("/login")}
-            className="inline-flex items-center rounded-full border border-black/10 bg-white px-3.5 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:shadow-sm transition"
+            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition"
+            style={{ backgroundColor: CTA_LOGIN_BG }}
           >
-            {t("nav.signin") /* Log in */}
+            {t("nav.signin")}
           </Link>
 
-          {/* Sign in (solid brand) */}
+          {/* Sign in (BG #26658C – solid) */}
           <Link
             href={withLocale("/login")}
-            className="inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium text-white shadow-md transition"
+            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition"
             style={{ backgroundColor: BRAND }}
           >
-            {t("cta.signin") /* Sign in */}
+            {t("cta.signin")}
           </Link>
         </div>
       </div>
