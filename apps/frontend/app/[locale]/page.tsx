@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import ScrollHint from "@/components/hero/ScrollHint";
 import AboutShowcase from "@/components/about/AboutShowcase";
-import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
+import { motion, useReducedMotion } from "framer-motion";
 
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
@@ -52,17 +52,17 @@ export default function LocaleHomePage() {
       ─────────────────────────────── */}
       <section
         id="page-1-hero"
-        className="relative page flex min-h-screen items-center"
+        className="relative page flex min-h-screen items-center justify-center overflow-hidden"
         aria-labelledby="hero-hook"
       >
-        {/* Ambient identity animation (kanan) */}
+        {/* background animasi rings */}
         <HeroRings />
 
-        <div className="mx-auto w-full max-w-7xl px-6">
-          <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-4xl text-center">
             <motion.h1
               id="hero-hook"
-              className="text-left text-4xl font-semibold leading-tight tracking-tight md:text-6xl"
+              className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight"
               initial={reduceMotion ? false : { opacity: 0, y: 36 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
@@ -73,7 +73,7 @@ export default function LocaleHomePage() {
             </motion.h1>
 
             {/* Scroll → page-2 */}
-            <div className="text-left">
+            <div className="w-full flex justify-center">
               <ScrollHint targetId="page-2-showcase" className="mt-14" />
             </div>
           </div>
