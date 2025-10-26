@@ -66,7 +66,8 @@ export default function LocaleHomePage() {
         <HeroRings />
 
         <div className="mx-auto max-w-7xl px-6 sm:px-8">
-          <div className="max-w-4xl ml-[4vw] md:ml-[8vw]"> {/* ⬅️ kiri sejajar logo */}
+          {/* Rata kiri sejajar logo */}
+          <div className="max-w-4xl text-left">
             <motion.h1
               id="hero-hook"
               className={`${poppins.className} font-medium text-5xl md:text-6xl leading-[1.15] tracking-[-0.01em] text-[#585858] max-w-[60ch]`}
@@ -79,7 +80,7 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* Scroll hint di tengah bawah */}
+            {/* Scroll hint di tengah */}
             <div className="flex justify-center mt-20 sm:mt-24 md:mt-28">
               <ScrollHint targetId="page-2-showcase" />
             </div>
