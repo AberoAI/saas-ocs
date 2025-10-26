@@ -1,4 +1,3 @@
-// apps/frontend/app/[locale]/page.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -73,12 +72,6 @@ export default function LocaleHomePage() {
             <ScrollHint targetId="page-2-showcase" className="mt-14" />
           </div>
         </div>
-
-        {/* Bridge gradient ke section berikutnya (subtle) */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[16vh] bg-gradient-to-t from-[#E8F6FF] to-transparent"
-        />
       </section>
 
       {/* ───────────────────────────────
