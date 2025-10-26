@@ -77,11 +77,13 @@ export default function Navbar() {
     isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
   const menuId = "nav-product-menu";
 
-  // ✅ Helper untuk seragamkan style item nav (Link & Product)
+  // ✅ Helper: seragamkan style item nav (Link & Product)
   const navItemClass = (active: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
-      active ? "text-foreground font-medium" : "text-foreground/70 hover:text-foreground",
+      active
+        ? "text-foreground font-medium"
+        : "text-foreground/70 hover:text-foreground font-normal",
     ].join(" ");
 
   return (
@@ -92,7 +94,6 @@ export default function Navbar() {
       >
         {/* LEFT: Brand + Nav */}
         <div className="flex items-center gap-8">
-          {/* Brand */}
           <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
@@ -134,7 +135,11 @@ export default function Navbar() {
                         first?.focus();
                       }
                     }}
-                    className={navItemClass(productActive || openProduct)}
+                    // 🔒 Reset UA styles pada button + seragamkan weight
+                    className={[
+                      "appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none",
+                      navItemClass(productActive || openProduct),
+                    ].join(" ")}
                   >
                     <span className="inline-flex items-center gap-1">
                       {t("nav.product")}
