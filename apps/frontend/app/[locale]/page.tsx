@@ -8,10 +8,10 @@ import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
 
-// Poppins Medium (500)
+// Font Poppins Medium
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["500"], // medium only
+  weight: ["500"],
 });
 
 function getBizName(): string {
@@ -45,7 +45,6 @@ export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
-  // remove trailing dot to match design
   const cleaned = t("hero.headline").replace(/\.$/, "");
 
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
@@ -56,18 +55,18 @@ export default function LocaleHomePage() {
   return (
     <>
       {/* ───────────────────────────────
-          PAGE 1: Hero (Hook)
+          PAGE 1: HERO
       ─────────────────────────────── */}
       <section
         id="page-1-hero"
-        className="relative page min-h-screen flex flex-col justify-start pt-36 sm:pt-44 md:pt-52 overflow-hidden"
+        className="relative page flex min-h-screen items-center justify-start overflow-hidden"
         aria-labelledby="hero-hook"
       >
-        {/* ambient rings */}
+        {/* Ambient rings kanan */}
         <HeroRings />
 
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8">
+          <div className="max-w-4xl ml-[4vw] md:ml-[8vw]"> {/* ⬅️ kiri sejajar logo */}
             <motion.h1
               id="hero-hook"
               className={`${poppins.className} font-medium text-5xl md:text-6xl leading-[1.15] tracking-[-0.01em] text-[#585858] max-w-[60ch]`}
@@ -80,8 +79,8 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* Scroll → page-2 */}
-            <div className="w-full flex justify-center mt-20 sm:mt-24 md:mt-28">
+            {/* Scroll hint di tengah bawah */}
+            <div className="flex justify-center mt-20 sm:mt-24 md:mt-28">
               <ScrollHint targetId="page-2-showcase" />
             </div>
           </div>
