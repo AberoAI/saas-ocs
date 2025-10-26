@@ -53,7 +53,7 @@ export default function LocaleHomePage() {
       {/* HERO */}
       <section
         id="page-1-hero"
-        className="relative flex min-h-[80vh] items-center justify-start overflow-hidden pl-[83px] pt-8"
+        className="relative flex min-h-[70vh] items-center justify-start overflow-hidden pl-[83px] pt-12"
         aria-labelledby="hero-hook"
       >
         <HeroRings />
