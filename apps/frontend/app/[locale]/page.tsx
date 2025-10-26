@@ -8,11 +8,7 @@ import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
 
-// Font Poppins Medium
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["500"],
-});
+const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
@@ -45,8 +41,9 @@ export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
-  const cleaned = t("hero.headline").replace(/\.$/, "");
 
+  // Hilangkan titik di akhir agar match desain
+  const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
   const highlight = hlMatch ? hlMatch[0] : "";
@@ -54,19 +51,16 @@ export default function LocaleHomePage() {
 
   return (
     <>
-      {/* ───────────────────────────────
-          PAGE 1: HERO
-      ─────────────────────────────── */}
+      {/* HERO */}
       <section
         id="page-1-hero"
         className="relative page flex min-h-screen items-center justify-start overflow-hidden"
         aria-labelledby="hero-hook"
       >
-        {/* Ambient rings kanan */}
         <HeroRings />
 
-        <div className="mx-auto max-w-7xl px-6 sm:px-8">
-          {/* Rata kiri sejajar logo */}
+        {/* ⬇️ Sama persis dengan Navbar: max-w-6xl + px-6 */}
+        <div className="mx-auto max-w-6xl px-6">
           <div className="max-w-4xl text-left">
             <motion.h1
               id="hero-hook"
@@ -80,7 +74,6 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* Scroll hint di tengah */}
             <div className="flex justify-center mt-20 sm:mt-24 md:mt-28">
               <ScrollHint targetId="page-2-showcase" />
             </div>
@@ -88,19 +81,15 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* ───────────────────────────────
-          PAGE 2: Showcase
-      ─────────────────────────────── */}
+      {/* SHOWCASE */}
       <section id="page-2-showcase">
         <AboutShowcase className="mt-10 sm:mt-12 md:mt-14 lg:mt-16" />
       </section>
 
-      {/* ───────────────────────────────
-          PAGE 3: Why AberoAI
-      ─────────────────────────────── */}
+      {/* WHY ABEROAI */}
       <section
         id="page-3-why-aberoai"
-        className="page border-t border-black/10 bg-white mt-24 md:mt-32"
+        className="page border-top border-black/10 bg-white mt-24 md:mt-32"
         aria-labelledby="why-aberoai-heading"
       >
         <div className="mx-auto max-w-6xl px-6 py-16">
@@ -122,9 +111,7 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* ───────────────────────────────
-          PAGE 4: FAQ
-      ─────────────────────────────── */}
+      {/* FAQ */}
       <section id="page-4-faq" className="page border-t border-black/10 bg-white mt-20 md:mt-28">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
@@ -137,12 +124,10 @@ export default function LocaleHomePage() {
         </div>
       </section>
 
-      {/* ───────────────────────────────
-          FOOTER
-      ─────────────────────────────── */}
+      {/* FOOTER */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <p className="text-sm text-black/60">© {new Date().getFullYear()} {name}</p>
+          <p className="text-sm text-black/60">© {new Date().getFullYear()} {getBizName()}</p>
           <div className="text-sm text-neutral-500">
             <Link href="/privacy" className="underline">Privacy Policy</Link> ·{" "}
             <Link href="/terms" className="underline">Terms of Service</Link>
