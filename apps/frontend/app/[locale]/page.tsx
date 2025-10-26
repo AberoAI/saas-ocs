@@ -42,6 +42,7 @@ export default function LocaleHomePage() {
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
 
+  // Headline & highlight
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
@@ -58,7 +59,7 @@ export default function LocaleHomePage() {
       >
         <HeroRings />
 
-        {/* ✅ anchored left, fixed 30px gap */}
+        {/* Anchored left: left gap 30px (no centering) */}
         <div className="max-w-6xl pr-6">
           <div className="max-w-4xl text-left">
             <motion.h1
@@ -72,10 +73,13 @@ export default function LocaleHomePage() {
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </motion.h1>
+          </div>
+        </div>
 
-            <div className="flex justify-center mt-20 sm:mt-24 md:mt-28">
-              <ScrollHint targetId="page-2-showcase" />
-            </div>
+        {/* ScrollHint selalu center terhadap viewport */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center">
+          <div className="pointer-events-auto">
+            <ScrollHint targetId="page-2-showcase" />
           </div>
         </div>
       </section>
