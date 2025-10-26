@@ -53,13 +53,13 @@ export default function LocaleHomePage() {
       {/* HERO */}
       <section
         id="page-1-hero"
-        // 👇 gunakan padding kiri & kanan yang sama dengan navbar (misal px-8 → 32px)
-        className="relative page flex min-h-screen items-center justify-start overflow-hidden px-8"
+        className="relative page flex min-h-screen items-center justify-start overflow-hidden pl-[80px]"
         aria-labelledby="hero-hook"
       >
         <HeroRings />
 
-        <div className="max-w-6xl">
+        {/* anchored left with 80px gap */}
+        <div className="max-w-6xl pr-6">
           <div className="max-w-4xl text-left">
             <motion.h1
               id="hero-hook"
