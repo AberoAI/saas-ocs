@@ -85,7 +85,7 @@ export default function Navbar() {
         ? "text-foreground font-medium"
         : [
             "text-foreground/70 font-normal",
-            hoverable ? "hover:text-foreground" : "", // ❗ Product: non-hoverable
+            hoverable ? "hover:text-foreground" : "",
           ].join(" "),
     ].join(" ");
 
@@ -119,7 +119,7 @@ export default function Navbar() {
               l.key === "product" ? (
                 <div
                   key="product-dropdown"
-                  className="relative inline-flex items-center group"
+                  className="relative inline-flex items-center"
                   onMouseEnter={handleEnter}
                   onMouseLeave={handleLeave}
                   onFocus={handleEnter}
@@ -139,39 +139,42 @@ export default function Navbar() {
                         first?.focus();
                       }
                     }}
-                    className={[
-                      "appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none",
-                      navItemClass(productActive, false), // ❗ no hover color change
-                    ].join(" ")}
+                    // Reset UA styles pada button
+                    className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center"
                   >
-                    <span className="inline-flex items-center gap-1">
+                    {/* ⭐ Styling teks DIPASANG DI SINI dgn !important supaya tidak bisa ditimpa */}
+                    <span
+                      className={[
+                        "text-sm leading-none",
+                        productActive ? "!text-foreground !font-medium" : "!text-foreground/70 !font-normal",
+                      ].join(" ")}
+                    >
                       {t("nav.product")}
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 20 20"
-                        className={[
-                          "h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
-                          "transition-transform duration-150",
-                          // ❗ caret mengikuti hanya productActive (bukan openProduct)
-                          productActive ? "text-current" : "text-foreground/70",
-                          openProduct ? "rotate-180" : "",
-                        ].join(" ")}
-                        focusable="false"
-                      >
-                        <path
-                          d="M5.5 7.5L10 12l4.5-4.5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
                     </span>
-                  </button>
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 20 20"
+                      className={[
+                        "ml-1 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
+                        "transition-transform duration-150",
+                        productActive ? "text-current" : "text-foreground/70",
+                        openProduct ? "rotate-180" : "",
+                      ].join(" ")}
+                      focusable="false"
+                    >
+                      <path
+                        d="M5.5 7.5L10 12l4.5-4.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
 
-                  {/* Hover bridge */}
-                  <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
+                    {/* Hover bridge */}
+                    <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
+                  </button>
 
                   {openProduct && (
                     <div
@@ -190,7 +193,7 @@ export default function Navbar() {
                       <Link
                         role="menuitem"
                         href={withLocale("/solutions")}
-                        className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:outline-none"
+                        className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
                       >
                         {t("nav.solutions")}
                       </Link>
