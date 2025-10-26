@@ -78,12 +78,15 @@ export default function Navbar() {
   const menuId = "nav-product-menu";
 
   // Helper: seragamkan styling item nav
-  const navItemClass = (active: boolean) =>
+  const navItemClass = (active: boolean, hoverable: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
       active
         ? "text-foreground font-medium"
-        : "text-foreground/70 hover:text-foreground font-normal",
+        : [
+            "text-foreground/70 font-normal",
+            hoverable ? "hover:text-foreground" : "", // ❗ Product: non-hoverable
+          ].join(" "),
     ].join(" ");
 
   return (
@@ -136,11 +139,9 @@ export default function Navbar() {
                         first?.focus();
                       }
                     }}
-                    // Reset UA styles pada button
                     className={[
                       "appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none",
-                      // ❗ HANYA pakai productActive (tanpa openProduct) agar berat font tidak naik ketika menu dibuka
-                      navItemClass(productActive),
+                      navItemClass(productActive, false), // ❗ no hover color change
                     ].join(" ")}
                   >
                     <span className="inline-flex items-center gap-1">
@@ -151,10 +152,8 @@ export default function Navbar() {
                         className={[
                           "h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
                           "transition-transform duration-150",
-                          // caret mengikuti warna teks; redup saat idle
-                          productActive || openProduct
-                            ? "text-current"
-                            : "text-foreground/70 group-hover:text-foreground",
+                          // ❗ caret mengikuti hanya productActive (bukan openProduct)
+                          productActive ? "text-current" : "text-foreground/70",
                           openProduct ? "rotate-180" : "",
                         ].join(" ")}
                         focusable="false"
@@ -163,7 +162,6 @@ export default function Navbar() {
                           d="M5.5 7.5L10 12l4.5-4.5"
                           fill="none"
                           stroke="currentColor"
-                          // ❗ Samakan ketebalan caret, jangan menebal saat terbuka
                           strokeWidth={1.5}
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -204,7 +202,7 @@ export default function Navbar() {
                   key={`${l.href}-${l.label}`}
                   href={l.href}
                   aria-current={isActive(l.href) ? "page" : undefined}
-                  className={navItemClass(isActive(l.href))}
+                  className={navItemClass(isActive(l.href), true)}
                 >
                   {l.label}
                 </Link>
