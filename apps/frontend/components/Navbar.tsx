@@ -17,18 +17,14 @@ export default function Navbar() {
   const CTA_LOGIN_BG = "#F7F7F7";
   const name = "AberoAI";
 
-  // Deteksi prefix locale dari path (mis. /tr, /en)
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
-  // Normalisasi trailing slash
   const norm = (p: string) => (p.replace(/\/+$/, "") || "/");
 
-  // withLocale aman: hindari double prefix & dukung slug TR (sementara)
   const withLocale = (href: string) => {
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
     if (localePrefix && href.startsWith(`${localePrefix}/`)) return href;
-
     let localized = href;
     if (localePrefix === "/tr") {
       if (href === "/about") localized = "/hakkinda";
@@ -38,19 +34,16 @@ export default function Navbar() {
     return `${localePrefix}${localized}` || localePrefix || "/";
   };
 
-  // ganti prefix locale pada path saat ini (untuk switcher EN sederhana)
   const switchLocaleHref = (target: string) => {
     if (localePrefix) return pathname.replace(new RegExp(`^${localePrefix}`), `/${target}`);
     return `/${target}${pathname === "/" ? "" : pathname}`;
   };
 
-  // Label i18n untuk nav
   const links = NAV_LINKS.map((l) => {
     const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
     return { key: l.key, label, href: withLocale(l.href) };
   });
 
-  // Active state aman untuk / dan /tr
   const isActive = (href: string) => {
     const target = norm(href.startsWith("/") ? href : `/${href}`);
     const current = norm(pathname);
@@ -60,7 +53,6 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  // State dropdown Product
   const [openProduct, setOpenProduct] = useState(false);
   const leaveTimer = useRef<number | null>(null);
   const handleEnter = () => {
@@ -81,12 +73,11 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white">
       <div
-        className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2"
+        className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* KIRI: Brand + Nav */}
+        {/* LEFT: Brand + Nav */}
         <div className="flex items-center gap-8">
-          {/* Brand */}
           <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
@@ -102,10 +93,8 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Nav links */}
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
             {links.map((l) => {
-              // "Product" sebagai dropdown (Features + Solutions)
               if (l.key === "product") {
                 return (
                   <div
@@ -159,9 +148,7 @@ export default function Navbar() {
                       </svg>
                     </button>
 
-                    {/* Hover-bridge transparan */}
                     <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
-
                     {openProduct && (
                       <div
                         id={menuId}
@@ -191,7 +178,6 @@ export default function Navbar() {
                 );
               }
 
-              // Default link (About, Pricing, Contact, dll.)
               return (
                 <Link
                   key={`${l.href}-${l.label}`}
@@ -211,9 +197,8 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* KANAN: Locale + Auth */}
+        {/* RIGHT: Locale + Auth */}
         <div className="flex items-center gap-2">
-          {/* Locale badge sederhana (contoh: EN) */}
           <Link
             href={switchLocaleHref("en")}
             className="hidden md:inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
@@ -222,7 +207,6 @@ export default function Navbar() {
             EN
           </Link>
 
-          {/* Log in (BG #F7F7F7 – tanpa shadow, flat) */}
           <Link
             href={withLocale("/login")}
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition"
@@ -231,7 +215,6 @@ export default function Navbar() {
             {t("nav.signin")}
           </Link>
 
-          {/* Sign in (BG #26658C – solid) */}
           <Link
             href={withLocale("/login")}
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition"
