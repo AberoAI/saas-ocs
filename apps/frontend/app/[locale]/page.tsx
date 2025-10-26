@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import ScrollHint from "@/components/hero/ScrollHint";
 import AboutShowcase from "@/components/about/AboutShowcase";
+import { motion, useReducedMotion } from "framer-motion";
 
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
@@ -36,6 +37,7 @@ function Faq({ q, a }: { q: string; a: string }) {
 export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
+  const reduceMotion = useReducedMotion();
   const rawHeadline = t("hero.headline");
 
   const hlMatch = rawHeadline.match(/Over 65%|%?\d+[.,]?\d*%?/);
@@ -46,26 +48,45 @@ export default function LocaleHomePage() {
   return (
     <>
       {/* ───────────────────────────────
-          PAGE 1: Hero
+          PAGE 1: Hero (Hook)
       ─────────────────────────────── */}
-      <section id="page-1-hero" className="relative page">
+      <section
+        id="page-1-hero"
+        className="relative page flex min-h-screen items-center justify-center"
+        aria-labelledby="hero-hook"
+      >
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-4xl text-center pt-24 md:pt-32 pb-8 md:pb-10">
-            <h1 className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight">
+          <div className="mx-auto max-w-4xl text-center">
+            <motion.h1
+              id="hero-hook"
+              className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight"
+              initial={reduceMotion ? false : { opacity: 0, y: 36 }}
+              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+            >
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
-            </h1>
-            <ScrollHint />
+            </motion.h1>
+
+            {/* Scroll → page-2 */}
+            <ScrollHint targetId="page-2-showcase" className="mt-14" />
           </div>
         </div>
+
+        {/* Bridge gradient ke section berikutnya (subtle) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[16vh] bg-gradient-to-t from-[#E8F6FF] to-transparent"
+        />
       </section>
 
       {/* ───────────────────────────────
           PAGE 2: Showcase
-          (jarak ideal seperti mockup: 32–40 px)
       ─────────────────────────────── */}
-      <AboutShowcase className="mt-10 sm:mt-12 md:mt-14 lg:mt-16" />
+      <section id="page-2-showcase">
+        <AboutShowcase className="mt-10 sm:mt-12 md:mt-14 lg:mt-16" />
+      </section>
 
       {/* ───────────────────────────────
           PAGE 3: Why AberoAI
