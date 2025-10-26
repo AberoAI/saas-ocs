@@ -8,9 +8,10 @@ import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
 
+// Poppins Medium (500)
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500"], // medium only
 });
 
 function getBizName(): string {
@@ -44,12 +45,13 @@ export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
-  const rawHeadline = t("hero.headline");
+  // remove trailing dot to match design
+  const cleaned = t("hero.headline").replace(/\.$/, "");
 
-  const hlMatch = rawHeadline.match(/Over 65%|%?\d+[.,]?\d*%?/);
-  const before = hlMatch ? rawHeadline.slice(0, hlMatch.index!) : rawHeadline;
+  const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
+  const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
   const highlight = hlMatch ? hlMatch[0] : "";
-  const after = hlMatch ? rawHeadline.slice(hlMatch.index! + hlMatch[0].length) : "";
+  const after = hlMatch ? cleaned.slice(hlMatch.index! + hlMatch[0].length) : "";
 
   return (
     <>
@@ -61,14 +63,14 @@ export default function LocaleHomePage() {
         className="relative page min-h-screen flex flex-col justify-start pt-36 sm:pt-44 md:pt-52 overflow-hidden"
         aria-labelledby="hero-hook"
       >
-        {/* Ambient rings di kanan */}
+        {/* ambient rings */}
         <HeroRings />
 
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-4xl">
             <motion.h1
               id="hero-hook"
-              className={`${poppins.className} text-4xl md:text-6xl font-semibold leading-tight tracking-tight text-neutral-700`}
+              className={`${poppins.className} font-medium text-5xl md:text-6xl leading-[1.15] tracking-[-0.01em] text-[#585858] max-w-[60ch]`}
               initial={reduceMotion ? false : { opacity: 0, y: 36 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
@@ -78,7 +80,7 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* Scroll → page-2 (center) */}
+            {/* Scroll → page-2 */}
             <div className="w-full flex justify-center mt-20 sm:mt-24 md:mt-28">
               <ScrollHint targetId="page-2-showcase" />
             </div>
