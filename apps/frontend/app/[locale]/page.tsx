@@ -8,7 +8,7 @@ import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
 
-const poppins = Poppins({ subsets: ["latin"], weight: ["500"] });
+const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
@@ -53,20 +53,20 @@ export default function LocaleHomePage() {
       {/* HERO */}
       <section
         id="page-1-hero"
-        className="relative page flex min-h-screen items-center justify-start overflow-hidden pl-[83px]"
+        className="relative flex min-h-[80vh] items-center justify-start overflow-hidden pl-[83px] pt-8"
         aria-labelledby="hero-hook"
       >
         <HeroRings />
 
-        {/* anchored left with 83px gap */}
+        {/* hero text block */}
         <div className="max-w-6xl pr-6">
-          <div className="max-w-4xl text-left">
+          <div className="max-w-3xl text-left">
             <motion.h1
               id="hero-hook"
-              className={`${poppins.className} font-medium text-5xl md:text-6xl leading-[1.15] tracking-[-0.01em] text-[#585858] max-w-[60ch]`}
-              initial={reduceMotion ? false : { opacity: 0, y: 36 }}
+              className={`${poppins.className} font-medium text-3xl sm:text-4xl md:text-5xl leading-tight tracking-[-0.01em] text-[#585858]`}
+              initial={reduceMotion ? false : { opacity: 0, y: 32 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {before}
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
@@ -75,7 +75,7 @@ export default function LocaleHomePage() {
           </div>
         </div>
 
-        {/* ScrollHint tetap center terhadap viewport */}
+        {/* centered scroll hint */}
         <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center">
           <div className="pointer-events-auto">
             <ScrollHint targetId="page-2-showcase" />
