@@ -8,7 +8,7 @@ import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
 
-const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
+const poppins = Poppins({ subsets: ["latin"], weight: ["500"] });
 
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
@@ -42,7 +42,6 @@ export default function LocaleHomePage() {
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
 
-  // Headline & highlight
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
@@ -54,13 +53,13 @@ export default function LocaleHomePage() {
       {/* HERO */}
       <section
         id="page-1-hero"
-        className="relative page flex min-h-screen items-center justify-start overflow-hidden pl-[30px]"
+        // 👇 gunakan padding kiri & kanan yang sama dengan navbar (misal px-8 → 32px)
+        className="relative page flex min-h-screen items-center justify-start overflow-hidden px-8"
         aria-labelledby="hero-hook"
       >
         <HeroRings />
 
-        {/* Anchored left: left gap 30px (no centering) */}
-        <div className="max-w-6xl pr-6">
+        <div className="max-w-6xl">
           <div className="max-w-4xl text-left">
             <motion.h1
               id="hero-hook"
@@ -76,7 +75,7 @@ export default function LocaleHomePage() {
           </div>
         </div>
 
-        {/* ScrollHint selalu center terhadap viewport */}
+        {/* ScrollHint tetap center terhadap viewport */}
         <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center">
           <div className="pointer-events-auto">
             <ScrollHint targetId="page-2-showcase" />
@@ -95,7 +94,7 @@ export default function LocaleHomePage() {
         className="page border-top border-black/10 bg-white mt-24 md:mt-32"
         aria-labelledby="why-aberoai-heading"
       >
-        <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mx-auto max-w-6xl px-8 py-16">
           <h2 id="why-aberoai-heading" className="text-2xl font-medium md:text-3xl">
             Why {name}
           </h2>
@@ -116,7 +115,7 @@ export default function LocaleHomePage() {
 
       {/* FAQ */}
       <section id="page-4-faq" className="page border-t border-black/10 bg-white mt-20 md:mt-28">
-        <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mx-auto max-w-6xl px-8 py-16">
           <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
@@ -129,7 +128,7 @@ export default function LocaleHomePage() {
 
       {/* FOOTER */}
       <footer className="border-t border-black/10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-8 py-8 md:flex-row">
           <p className="text-sm text-black/60">
             © {new Date().getFullYear()} {getBizName()}
           </p>
