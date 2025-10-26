@@ -77,7 +77,7 @@ export default function Navbar() {
     isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
   const menuId = "nav-product-menu";
 
-  // ✅ Helper: seragamkan style item nav (Link & Product)
+  // Helper: seragamkan styling item nav
   const navItemClass = (active: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
@@ -94,6 +94,7 @@ export default function Navbar() {
       >
         {/* LEFT: Brand + Nav */}
         <div className="flex items-center gap-8">
+          {/* Brand */}
           <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
@@ -135,10 +136,11 @@ export default function Navbar() {
                         first?.focus();
                       }
                     }}
-                    // 🔒 Reset UA styles pada button + seragamkan weight
+                    // Reset UA styles pada button
                     className={[
                       "appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none",
-                      navItemClass(productActive || openProduct),
+                      // ❗ HANYA pakai productActive (tanpa openProduct) agar berat font tidak naik ketika menu dibuka
+                      navItemClass(productActive),
                     ].join(" ")}
                   >
                     <span className="inline-flex items-center gap-1">
@@ -149,7 +151,7 @@ export default function Navbar() {
                         className={[
                           "h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
                           "transition-transform duration-150",
-                          // caret mengikuti warna teks (redup saat idle)
+                          // caret mengikuti warna teks; redup saat idle
                           productActive || openProduct
                             ? "text-current"
                             : "text-foreground/70 group-hover:text-foreground",
@@ -161,7 +163,8 @@ export default function Navbar() {
                           d="M5.5 7.5L10 12l4.5-4.5"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth={openProduct ? 2 : 1.5}
+                          // ❗ Samakan ketebalan caret, jangan menebal saat terbuka
+                          strokeWidth={1.5}
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
