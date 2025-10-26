@@ -17,14 +17,17 @@ export default function Navbar() {
   const CTA_LOGIN_BG = "#F7F7F7";
   const name = "AberoAI";
 
+  // Locale detection
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
 
   const norm = (p: string) => (p.replace(/\/+$/, "") || "/");
 
+  // Locale-safe href builder
   const withLocale = (href: string) => {
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
     if (localePrefix && href.startsWith(`${localePrefix}/`)) return href;
+
     let localized = href;
     if (localePrefix === "/tr") {
       if (href === "/about") localized = "/hakkinda";
@@ -39,6 +42,7 @@ export default function Navbar() {
     return `/${target}${pathname === "/" ? "" : pathname}`;
   };
 
+  // Navigation links
   const links = NAV_LINKS.map((l) => {
     const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
     return { key: l.key, label, href: withLocale(l.href) };
@@ -53,6 +57,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
+  // Product dropdown
   const [openProduct, setOpenProduct] = useState(false);
   const leaveTimer = useRef<number | null>(null);
   const handleEnter = () => {
@@ -71,7 +76,7 @@ export default function Navbar() {
   const menuId = "nav-product-menu";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white">
+    <header className="sticky top-0 z-50 w-full bg-white">
       <div
         className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5"
         style={{ fontFamily: "Inter, sans-serif" }}
@@ -93,6 +98,7 @@ export default function Navbar() {
             </span>
           </Link>
 
+          {/* Nav links */}
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
             {links.map((l) => {
               if (l.key === "product") {
@@ -148,6 +154,7 @@ export default function Navbar() {
                       </svg>
                     </button>
 
+                    {/* Dropdown menu */}
                     <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
                     {openProduct && (
                       <div
