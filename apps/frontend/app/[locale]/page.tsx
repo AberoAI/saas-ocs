@@ -6,6 +6,12 @@ import ScrollHint from "@/components/hero/ScrollHint";
 import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
+import { Poppins } from "next/font/google"; // ⬅️ tambah Poppins
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"], // semibold = 600
+});
 
 function getBizName(): string {
   return process.env.BIZ_NAME || process.env.NEXT_PUBLIC_BIZ_NAME || "AberoAI";
@@ -55,14 +61,14 @@ export default function LocaleHomePage() {
         className="relative page flex min-h-screen items-center justify-center overflow-hidden"
         aria-labelledby="hero-hook"
       >
-        {/* background animasi rings */}
+        {/* Ambient rings di kanan */}
         <HeroRings />
 
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-4xl text-center">
             <motion.h1
               id="hero-hook"
-              className="text-4xl md:text-6xl font-semibold leading-tight tracking-tight"
+              className={`${poppins.className} text-4xl md:text-6xl font-semibold leading-tight tracking-tight text-neutral-700`}
               initial={reduceMotion ? false : { opacity: 0, y: 36 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
@@ -72,7 +78,7 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* Scroll → page-2 */}
+            {/* Scroll → page-2 (center) */}
             <div className="w-full flex justify-center">
               <ScrollHint targetId="page-2-showcase" className="mt-14" />
             </div>
