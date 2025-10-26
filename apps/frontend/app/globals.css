@@ -1,4 +1,3 @@
-/* apps/frontend/app/globals.css */
 @import "tailwindcss";
 
 /* ===== Root tokens (light by default) ===== */
@@ -64,8 +63,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-input, button, textarea, select { font: inherit; color: inherit; }
+/* ✅ FIX: Hapus color: inherit dari button agar Tailwind bisa mengatur warna */
+input, textarea, select { font: inherit; color: inherit; }
+button { font: inherit; } /* biarkan utilitas Tailwind mengatur warna */
 
+/* ======================================================
+   Focus & Accessibility
+   ====================================================== */
 a { text-decoration: none; }
 a:focus-visible,
 button:focus-visible,
