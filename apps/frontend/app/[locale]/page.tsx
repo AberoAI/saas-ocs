@@ -53,12 +53,12 @@ export default function LocaleHomePage() {
       {/* HERO */}
       <section
         id="page-1-hero"
-        className="relative page flex min-h-screen items-center justify-start overflow-hidden pl-[80px]"
+        className="relative page flex min-h-screen items-center justify-start overflow-hidden pl-[83px]"
         aria-labelledby="hero-hook"
       >
         <HeroRings />
 
-        {/* anchored left with 80px gap */}
+        {/* anchored left with 83px gap */}
         <div className="max-w-6xl pr-6">
           <div className="max-w-4xl text-left">
             <motion.h1
