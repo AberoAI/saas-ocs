@@ -53,13 +53,13 @@ export default function LocaleHomePage() {
       {/* HERO */}
       <section
         id="page-1-hero"
-        className="relative page flex min-h-screen items-center justify-start overflow-hidden"
+        className="relative page flex min-h-screen items-center justify-start overflow-hidden pl-[30px]"
         aria-labelledby="hero-hook"
       >
         <HeroRings />
 
-        {/* ✅ Hero container — 30px dari kiri, tetap 24px dari kanan */}
-        <div className="mx-auto max-w-6xl pr-6 pl-[30px]">
+        {/* ✅ anchored left, fixed 30px gap */}
+        <div className="max-w-6xl pr-6">
           <div className="max-w-4xl text-left">
             <motion.h1
               id="hero-hook"
