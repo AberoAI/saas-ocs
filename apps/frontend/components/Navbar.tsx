@@ -26,12 +26,9 @@ export default function Navbar() {
 
   // withLocale aman: hindari double prefix & dukung slug TR (sementara)
   const withLocale = (href: string) => {
-    // eksternal / protokol / anchor tidak diubah
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
-    // Jika sudah ber-prefix locale yang sama, biarkan
     if (localePrefix && href.startsWith(`${localePrefix}/`)) return href;
 
-    // Mapping slug per-locale (sementara di sini; idealnya satu sumber kebenaran)
     let localized = href;
     if (localePrefix === "/tr") {
       if (href === "/about") localized = "/hakkinda";
@@ -83,7 +80,10 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2">
+      <div
+        className="mx-auto flex max-w-6xl items-center justify-between px-6 py-2"
+        style={{ fontFamily: "Inter, sans-serif" }}
+      >
         {/* KIRI: Brand + Nav */}
         <div className="flex items-center gap-8">
           {/* Brand */}
@@ -97,7 +97,7 @@ export default function Navbar() {
               priority
               sizes="32px"
             />
-            <span className="text-2xl font-semibold" style={{ color: BRAND }}>
+            <span className="text-2xl font-medium" style={{ color: BRAND }}>
               {name}
             </span>
           </Link>
@@ -159,7 +159,7 @@ export default function Navbar() {
                       </svg>
                     </button>
 
-                    {/* Hover-bridge transparan: cocokkan dengan jarak dropdown (mt-3) */}
+                    {/* Hover-bridge transparan */}
                     <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
 
                     {openProduct && (
