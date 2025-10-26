@@ -6,11 +6,11 @@ import ScrollHint from "@/components/hero/ScrollHint";
 import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
-import { Poppins } from "next/font/google"; // ⬅️ tambah Poppins
+import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // semibold = 600
+  weight: ["400", "500", "600", "700"],
 });
 
 function getBizName(): string {
@@ -58,14 +58,14 @@ export default function LocaleHomePage() {
       ─────────────────────────────── */}
       <section
         id="page-1-hero"
-        className="relative page flex min-h-screen items-center justify-center overflow-hidden"
+        className="relative page min-h-screen flex flex-col justify-start pt-36 sm:pt-44 md:pt-52 overflow-hidden"
         aria-labelledby="hero-hook"
       >
         {/* Ambient rings di kanan */}
         <HeroRings />
 
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="mx-auto max-w-4xl">
             <motion.h1
               id="hero-hook"
               className={`${poppins.className} text-4xl md:text-6xl font-semibold leading-tight tracking-tight text-neutral-700`}
@@ -79,8 +79,8 @@ export default function LocaleHomePage() {
             </motion.h1>
 
             {/* Scroll → page-2 (center) */}
-            <div className="w-full flex justify-center">
-              <ScrollHint targetId="page-2-showcase" className="mt-14" />
+            <div className="w-full flex justify-center mt-20 sm:mt-24 md:mt-28">
+              <ScrollHint targetId="page-2-showcase" />
             </div>
           </div>
         </div>
@@ -107,18 +107,9 @@ export default function LocaleHomePage() {
           </h2>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard
-              title="AI Autoreply"
-              desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API."
-            />
-            <FeatureCard
-              title="Multi-tenant"
-              desc="Cocok untuk klinik, hospitality, furniture — kelola banyak unit bisnis."
-            />
-            <FeatureCard
-              title="Realtime Analytics"
-              desc="Pantau metrik penting: SLA, waktu respon, topik percakapan."
-            />
+            <FeatureCard title="AI Autoreply" desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API." />
+            <FeatureCard title="Multi-tenant" desc="Cocok untuk klinik, hospitality, furniture — kelola banyak unit bisnis." />
+            <FeatureCard title="Realtime Analytics" desc="Pantau metrik penting: SLA, waktu respon, topik percakapan." />
           </div>
 
           <ul className="mt-8 list-disc pl-5 text-black/75">
@@ -149,17 +140,10 @@ export default function LocaleHomePage() {
       ─────────────────────────────── */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <p className="text-sm text-black/60">
-            © {new Date().getFullYear()} {name}
-          </p>
+          <p className="text-sm text-black/60">© {new Date().getFullYear()} {name}</p>
           <div className="text-sm text-neutral-500">
-            <Link href="/privacy" className="underline">
-              Privacy Policy
-            </Link>{" "}
-            ·{" "}
-            <Link href="/terms" className="underline">
-              Terms of Service
-            </Link>
+            <Link href="/privacy" className="underline">Privacy Policy</Link> ·{" "}
+            <Link href="/terms" className="underline">Terms of Service</Link>
           </div>
         </div>
       </footer>
