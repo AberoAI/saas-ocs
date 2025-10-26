@@ -42,12 +42,13 @@ export default function Navbar() {
     return `/${target}${pathname === "/" ? "" : pathname}`;
   };
 
-  // Navigation links
+  // Build links
   const links = NAV_LINKS.map((l) => {
     const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
     return { key: l.key, label, href: withLocale(l.href) };
   });
 
+  // Active state
   const isActive = (href: string) => {
     const target = norm(href.startsWith("/") ? href : `/${href}`);
     const current = norm(pathname);
@@ -57,7 +58,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  // Product dropdown
+  // Dropdown state
   const [openProduct, setOpenProduct] = useState(false);
   const leaveTimer = useRef<number | null>(null);
   const handleEnter = () => {
@@ -72,8 +73,16 @@ export default function Navbar() {
     leaveTimer.current = window.setTimeout(() => setOpenProduct(false), 120);
   };
 
-  const productActive = isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
+  const productActive =
+    isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
   const menuId = "nav-product-menu";
+
+  // ✅ Helper untuk seragamkan style item nav (Link & Product)
+  const navItemClass = (active: boolean) =>
+    [
+      "inline-flex items-center text-sm leading-none transition-colors",
+      active ? "text-foreground font-medium" : "text-foreground/70 hover:text-foreground",
+    ].join(" ");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
@@ -83,6 +92,7 @@ export default function Navbar() {
       >
         {/* LEFT: Brand + Nav */}
         <div className="flex items-center gap-8">
+          {/* Brand */}
           <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
@@ -100,45 +110,44 @@ export default function Navbar() {
 
           {/* Nav links */}
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
-            {links.map((l) => {
-              if (l.key === "product") {
-                return (
-                  <div
-                    key="product-dropdown"
-                    className="relative inline-flex items-center"
-                    onMouseEnter={handleEnter}
-                    onMouseLeave={handleLeave}
-                    onFocus={handleEnter}
-                    onBlur={handleLeave}
+            {links.map((l) =>
+              l.key === "product" ? (
+                <div
+                  key="product-dropdown"
+                  className="relative inline-flex items-center group"
+                  onMouseEnter={handleEnter}
+                  onMouseLeave={handleLeave}
+                  onFocus={handleEnter}
+                  onBlur={handleLeave}
+                >
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={openProduct}
+                    aria-controls={menuId}
+                    onClick={() => setOpenProduct((v) => !v)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setOpenProduct(false);
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        const first = document.querySelector<HTMLAnchorElement>(`#${menuId} a`);
+                        first?.focus();
+                      }
+                    }}
+                    className={navItemClass(productActive || openProduct)}
                   >
-                    <button
-                      type="button"
-                      aria-haspopup="menu"
-                      aria-expanded={openProduct}
-                      aria-controls={menuId}
-                      onClick={() => setOpenProduct((v) => !v)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") setOpenProduct(false);
-                        if (e.key === "ArrowDown") {
-                          e.preventDefault();
-                          const first = document.querySelector<HTMLAnchorElement>(`#${menuId} a`);
-                          first?.focus();
-                        }
-                      }}
-                      className={[
-                        "inline-flex items-center gap-1 text-sm leading-none transition-colors cursor-pointer select-none",
-                        productActive || openProduct
-                          ? "text-foreground font-medium"
-                          : "text-foreground/70 font-normal hover:text-foreground",
-                      ].join(" ")}
-                    >
+                    <span className="inline-flex items-center gap-1">
                       {t("nav.product")}
                       <svg
                         aria-hidden="true"
                         viewBox="0 0 20 20"
                         className={[
-                          "ml-0 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
+                          "h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
                           "transition-transform duration-150",
+                          // caret mengikuti warna teks (redup saat idle)
+                          productActive || openProduct
+                            ? "text-current"
+                            : "text-foreground/70 group-hover:text-foreground",
                           openProduct ? "rotate-180" : "",
                         ].join(" ")}
                         focusable="false"
@@ -152,55 +161,47 @@ export default function Navbar() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                    </button>
+                    </span>
+                  </button>
 
-                    {/* Dropdown menu */}
-                    <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
-                    {openProduct && (
-                      <div
-                        id={menuId}
-                        role="menu"
-                        className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") setOpenProduct(false);
-                        }}
+                  {/* Hover bridge */}
+                  <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
+
+                  {openProduct && (
+                    <div
+                      id={menuId}
+                      role="menu"
+                      className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
+                      onKeyDown={(e) => e.key === "Escape" && setOpenProduct(false)}
+                    >
+                      <Link
+                        role="menuitem"
+                        href={withLocale("/features")}
+                        className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
                       >
-                        <Link
-                          role="menuitem"
-                          href={withLocale("/features")}
-                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
-                        >
-                          {t("nav.features")}
-                        </Link>
-                        <Link
-                          role="menuitem"
-                          href={withLocale("/solutions")}
-                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
-                        >
-                          {t("nav.solutions")}
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              return (
+                        {t("nav.features")}
+                      </Link>
+                      <Link
+                        role="menuitem"
+                        href={withLocale("/solutions")}
+                        className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:outline-none"
+                      >
+                        {t("nav.solutions")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              ) : (
                 <Link
                   key={`${l.href}-${l.label}`}
                   href={l.href}
                   aria-current={isActive(l.href) ? "page" : undefined}
-                  className={[
-                    "inline-flex items-center text-sm leading-none transition-colors",
-                    isActive(l.href)
-                      ? "text-foreground font-medium"
-                      : "text-foreground/70 hover:text-foreground",
-                  ].join(" ")}
+                  className={navItemClass(isActive(l.href))}
                 >
                   {l.label}
                 </Link>
-              );
-            })}
+              )
+            )}
           </nav>
         </div>
 
