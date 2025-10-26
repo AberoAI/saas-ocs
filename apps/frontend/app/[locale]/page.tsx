@@ -63,7 +63,7 @@ export default function LocaleHomePage() {
           <div className="max-w-3xl text-left">
             <motion.h1
               id="hero-hook"
-              className={`${poppins.className} font-medium text-3xl sm:text-4xl md:text-5xl leading-tight tracking-[-0.01em] text-[#585858]`}
+              className={`${poppins.className} font-medium text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-snug tracking-[-0.01em] text-[#585858]`}
               initial={reduceMotion ? false : { opacity: 0, y: 32 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
