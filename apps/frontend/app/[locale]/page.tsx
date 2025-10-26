@@ -42,7 +42,6 @@ export default function LocaleHomePage() {
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
 
-  // Hilangkan titik di akhir agar match desain
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
@@ -59,8 +58,8 @@ export default function LocaleHomePage() {
       >
         <HeroRings />
 
-        {/* ⬇️ Sama persis dengan Navbar: max-w-6xl + px-6 */}
-        <div className="mx-auto max-w-6xl px-6">
+        {/* ✅ Hero container — 30px dari kiri, tetap 24px dari kanan */}
+        <div className="mx-auto max-w-6xl pr-6 pl-[30px]">
           <div className="max-w-4xl text-left">
             <motion.h1
               id="hero-hook"
@@ -127,10 +126,17 @@ export default function LocaleHomePage() {
       {/* FOOTER */}
       <footer className="border-t border-black/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 md:flex-row">
-          <p className="text-sm text-black/60">© {new Date().getFullYear()} {getBizName()}</p>
+          <p className="text-sm text-black/60">
+            © {new Date().getFullYear()} {getBizName()}
+          </p>
           <div className="text-sm text-neutral-500">
-            <Link href="/privacy" className="underline">Privacy Policy</Link> ·{" "}
-            <Link href="/terms" className="underline">Terms of Service</Link>
+            <Link href="/privacy" className="underline">
+              Privacy Policy
+            </Link>{" "}
+            ·{" "}
+            <Link href="/terms" className="underline">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </footer>
