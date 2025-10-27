@@ -3,12 +3,12 @@
 import { motion, useReducedMotion, type Transition } from "framer-motion";
 
 /**
- * HeroRings (refined to match reference)
- * - Ring besar lebih tinggi & sedikit lebih ke dalam (tidak terlalu kanan)
- * - Skala diperkecil, opacity diringankan, gradient tetap sesuai brand
- * - Ring kecil didekatkan & disejajarkan
- * - Fade-out di bagian bawah agar menyatu ke white background
- * - Animasi subtle + hormati prefers-reduced-motion
+ * HeroRings — rebuilt from scratch using the provided SVG reference
+ * - Persis mengikuti path & gradient dari SVG referensi
+ * - Satu <svg> berisi ring besar (path) + ring kecil (circle)
+ * - Animasi halus (scale + opacity) + ring kecil punya denyut ringan
+ * - Posisi responsif di kanan-atas hero
+ * - Fade-out di bagian bawah agar menyatu dengan background putih
  */
 export default function HeroRings() {
   const reduce = useReducedMotion();
@@ -24,7 +24,7 @@ export default function HeroRings() {
     <div
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 overflow-hidden"
-      // Fade ke putih di bagian bawah agar ring menyatu (seperti mock)
+      // Fade ke putih di bawah agar ring menyatu (seperti mock)
       style={{
         WebkitMaskImage:
           "linear-gradient(to bottom, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%)",
@@ -32,91 +32,88 @@ export default function HeroRings() {
           "linear-gradient(to bottom, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%)",
       }}
     >
-      {/* RING BESAR */}
       <motion.svg
         viewBox="0 0 576 560"
         role="presentation"
-        /* Lebih tinggi, sedikit lebih ke dalam layar, dan lebih kecil */
-        className="absolute right-[-2vw] top-[6vh] h-[54vh] w-auto min-h-[360px] min-w-[440px] xl:right-[-1vw] xl:top-[5vh] xl:h-[56vh]"
+        className="
+          absolute right-[-2vw] top-[6vh]
+          h-[56vh] w-auto
+          min-h-[360px] min-w-[480px]
+          xl:right-[-1vw] xl:top-[5vh] xl:h-[58vh]
+        "
         style={{ willChange: "transform, opacity" }}
-        initial={reduce ? { opacity: 0.28 } : { opacity: 0.28, scale: 0.985 }}
+        initial={
+          reduce ? { opacity: 0.3 } : { opacity: 0.28, scale: 0.985 }
+        }
         animate={
           reduce
-            ? { opacity: 0.28 }
+            ? { opacity: 0.3 }
             : {
-                opacity: [0.24, 0.36, 0.28],
-                scale: [0.985, 1.005, 0.985], // sangat halus
+                opacity: [0.25, 0.36, 0.28], // lebih ringan agar tidak dominan
+                scale: [0.985, 1.005, 0.985], // subtle breathing
               }
         }
         transition={base}
       >
         <defs>
+          {/* Gradient persis dari SVG referensi (id disesuaikan agar unik di dokumen) */}
           <linearGradient
-            id="abero-ring-lg"
+            id="abero-ring-lg-grad"
             x1="238.5"
             y1="18"
             x2="238.5"
             y2="560"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0" stopColor="#64A4ED" stopOpacity="0.85" />
+            <stop stopColor="#64A4ED" stopOpacity="0.85" />
             <stop offset="0.466346" stopColor="#37477C" stopOpacity="0.39" />
             <stop offset="0.725962" stopColor="#2E3C69" stopOpacity="0.10" />
             <stop offset="0.923077" stopColor="#1F2846" stopOpacity="0.00" />
           </linearGradient>
-        </defs>
-
-        <path
-          d="M238.5 40.5C355.179 40.5 454.5 148.97 454.5 289C454.5 429.03 355.179 537.5 238.5 537.5C121.821 537.5 22.5 429.03 22.5 289C22.5 148.97 121.821 40.5 238.5 40.5Z"
-          stroke="url(#abero-ring-lg)"
-          strokeOpacity={0.28}   // lebih ringan dari sebelumnya
-          strokeWidth={40}       // sedikit lebih tipis agar tidak berat
-          fill="none"
-        />
-      </motion.svg>
-
-      {/* RING KECIL (ACCENT) */}
-      <motion.svg
-        viewBox="0 0 576 560"
-        role="presentation"
-        /* Didekatkan & disejajarkan dengan ring besar */
-        className="absolute right-[9vw] top-[8vh] h-[11vh] w-auto min-h-[84px] min-w-[84px] xl:right-[10vw] xl:top-[9vh]"
-        style={{ willChange: "transform, opacity" }}
-        initial={reduce ? { opacity: 0.34 } : { opacity: 0.34, scale: 0.99 }}
-        animate={
-          reduce
-            ? { opacity: 0.34 }
-            : {
-                opacity: [0.30, 0.44, 0.34],
-                scale: [0.99, 1.035, 0.99],
-              }
-        }
-        transition={{ ...base, duration: 5.4, delay: 0.3 }}
-      >
-        <defs>
           <linearGradient
-            id="abero-ring-sm"
+            id="abero-ring-sm-grad"
             x1="513"
             y1="0"
             x2="513"
             y2="126"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0" stopColor="#64A4ED" stopOpacity="0.85" />
+            <stop stopColor="#64A4ED" stopOpacity="0.85" />
             <stop offset="0.466346" stopColor="#37477C" stopOpacity="0.39" />
             <stop offset="0.807692" stopColor="#2E3C69" stopOpacity="0.10" />
             <stop offset="1" stopColor="#1F2846" stopOpacity="0.00" />
           </linearGradient>
         </defs>
 
-        <circle
+        {/* RING BESAR — path persis dari referensi */}
+        <path
+          d="M238.5 40.5C355.179 40.5 454.5 148.97 454.5 289C454.5 429.03 355.179 537.5 238.5 537.5C121.821 537.5 22.5 429.03 22.5 289C22.5 148.97 121.821 40.5 238.5 40.5Z"
+          stroke="url(#abero-ring-lg-grad)"
+          strokeOpacity={0.4}
+          strokeWidth={45}
+          fill="none"
+        />
+
+        {/* RING KECIL — circle persis dari referensi, dengan animasi denyut ringan */}
+        <motion.circle
           cx="513"
           cy="63"
           r="53"
-          stroke="url(#abero-ring-sm)"
-          strokeOpacity={0.34}
-          strokeWidth={18}
+          stroke="url(#abero-ring-sm-grad)"
+          strokeOpacity={0.4}
+          strokeWidth={20}
           fill="none"
+          style={{ transformOrigin: "513px 63px", willChange: "transform, opacity" }}
+          initial={reduce ? { opacity: 0.4 } : { opacity: 0.36, scale: 0.99 }}
+          animate={
+            reduce
+              ? { opacity: 0.4 }
+              : {
+                  opacity: [0.32, 0.48, 0.36],
+                  scale: [0.99, 1.035, 0.99],
+                }
+          }
+          transition={{ ...base, duration: 5.4, delay: 0.3 }}
         />
       </motion.svg>
     </div>
