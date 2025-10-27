@@ -5,7 +5,7 @@ export default function HeroRings() {
     <div
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 overflow-hidden"
-      // Fade bawah diperhalus (multi-stop) agar transisinya panjang & natural
+      // Fade bawah yang halus (multi-stop) agar menyatu dengan background
       style={{
         WebkitMaskImage:
           "linear-gradient(to bottom," +
@@ -29,6 +29,7 @@ export default function HeroRings() {
         className="absolute right-[-2vw] top-[6vh] h-[56vh] w-auto min-h-[360px] min-w-[480px] xl:right-[-1vw] xl:top-[5vh] xl:h-[58vh]"
       >
         <defs>
+          {/* GRADIENT BESAR — dari screenshot #1 */}
           <linearGradient
             id="abero-ring-lg-grad"
             x1="238.5"
@@ -37,12 +38,13 @@ export default function HeroRings() {
             y2="560"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#5EA0EE" stopOpacity="0.95" />
-            <stop offset="0.466346" stopColor="#3A4A80" stopOpacity="0.55" />
-            <stop offset="0.725962" stopColor="#2E3C69" stopOpacity="0.25" />
-            <stop offset="0.923077" stopColor="#1F2846" stopOpacity="0.08" />
+            <stop offset="0" stopColor="#64A4ED" stopOpacity="0.85" />
+            <stop offset="0.47" stopColor="#37477C" stopOpacity="0.39" />
+            <stop offset="0.73" stopColor="#2E3C69" stopOpacity="0.10" />
+            <stop offset="0.92" stopColor="#1F2846" stopOpacity="0.0" />
           </linearGradient>
 
+          {/* GRADIENT KECIL — dari screenshot #2 */}
           <linearGradient
             id="abero-ring-sm-grad"
             x1="513"
@@ -51,10 +53,10 @@ export default function HeroRings() {
             y2="126"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stopColor="#5EA0EE" stopOpacity="0.95" />
-            <stop offset="0.466346" stopColor="#3A4A80" stopOpacity="0.55" />
-            <stop offset="0.807692" stopColor="#2E3C69" stopOpacity="0.25" />
-            <stop offset="1" stopColor="#1F2846" stopOpacity="0.08" />
+            <stop offset="0" stopColor="#64A4ED" stopOpacity="0.85" />
+            <stop offset="0.47" stopColor="#37477C" stopOpacity="0.39" />
+            <stop offset="0.81" stopColor="#2E3C69" stopOpacity="0.10" />
+            <stop offset="1" stopColor="#1F2846" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 
