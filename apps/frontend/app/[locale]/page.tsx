@@ -42,7 +42,6 @@ export default function LocaleHomePage() {
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
 
-  // Hilangkan titik di akhir agar match desain
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
@@ -64,7 +63,7 @@ export default function LocaleHomePage() {
           <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
-              className={`${poppins.className} font-medium text-xl sm:text-2xl md:text-3xl lg:text-[2.5rem] leading-snug tracking-[-0.015em] text-[#585858]`}
+              className={`${poppins.className} font-medium text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-snug tracking-[-0.01em] text-[#585858]`}
               initial={reduceMotion ? false : { opacity: 0, y: 32 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
@@ -73,10 +72,13 @@ export default function LocaleHomePage() {
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </motion.h1>
+          </div>
+        </div>
 
-            <div className="flex justify-center mt-20 sm:mt-24 md:mt-28">
-              <ScrollHint targetId="page-2-showcase" />
-            </div>
+        {/* centered scroll hint */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-10 flex justify-center">
+          <div className="pointer-events-auto">
+            <ScrollHint targetId="page-2-showcase" />
           </div>
         </div>
       </section>
@@ -131,8 +133,13 @@ export default function LocaleHomePage() {
             © {new Date().getFullYear()} {getBizName()}
           </p>
           <div className="text-sm text-neutral-500">
-            <Link href="/privacy" className="underline">Privacy Policy</Link> ·{" "}
-            <Link href="/terms" className="underline">Terms of Service</Link>
+            <Link href="/privacy" className="underline">
+              Privacy Policy
+            </Link>{" "}
+            ·{" "}
+            <Link href="/terms" className="underline">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </footer>
