@@ -1,24 +1,26 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-
-/**
- * HeroRings — Static Version (no breathing animation)
- * - Semua animasi dihapus, hanya tampilan statis.
- * - Gradien, opacity, dan masking tetap sama.
- */
 export default function HeroRings() {
-  const reduce = useReducedMotion();
-
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 overflow-hidden"
+      // Fade bawah diperhalus (multi-stop) agar transisinya panjang & natural
       style={{
         WebkitMaskImage:
-          "linear-gradient(to bottom, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%)",
+          "linear-gradient(to bottom," +
+          "rgba(0,0,0,1) 0%," +
+          "rgba(0,0,0,1) 68%," +
+          "rgba(0,0,0,0.35) 86%," +
+          "rgba(0,0,0,0.08) 94%," +
+          "rgba(0,0,0,0) 100%)",
         maskImage:
-          "linear-gradient(to bottom, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%)",
+          "linear-gradient(to bottom," +
+          "rgba(0,0,0,1) 0%," +
+          "rgba(0,0,0,1) 68%," +
+          "rgba(0,0,0,0.35) 86%," +
+          "rgba(0,0,0,0.08) 94%," +
+          "rgba(0,0,0,0) 100%)",
       }}
     >
       <svg
