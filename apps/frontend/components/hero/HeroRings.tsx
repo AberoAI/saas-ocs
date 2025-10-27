@@ -3,11 +3,12 @@
 import { motion, useReducedMotion, type Transition } from "framer-motion";
 
 /**
- * HeroRings (AberoAI) — refined
- * - Posisi ring besar lebih tinggi & sedikit ke kiri
- * - Skala & opacity lebih ringan (tidak mendominasi)
- * - Ring kecil didekatkan ke ring besar
- * - Animasi subtle, GPU-friendly, respects prefers-reduced-motion
+ * HeroRings (refined to match reference)
+ * - Ring besar lebih tinggi & sedikit lebih ke dalam (tidak terlalu kanan)
+ * - Skala diperkecil, opacity diringankan, gradient tetap sesuai brand
+ * - Ring kecil didekatkan & disejajarkan
+ * - Fade-out di bagian bawah agar menyatu ke white background
+ * - Animasi subtle + hormati prefers-reduced-motion
  */
 export default function HeroRings() {
   const reduce = useReducedMotion();
@@ -20,22 +21,31 @@ export default function HeroRings() {
   };
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+      // Fade ke putih di bagian bawah agar ring menyatu (seperti mock)
+      style={{
+        WebkitMaskImage:
+          "linear-gradient(to bottom, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%)",
+        maskImage:
+          "linear-gradient(to bottom, rgba(0,0,0,1) 72%, rgba(0,0,0,0) 100%)",
+      }}
+    >
       {/* RING BESAR */}
       <motion.svg
         viewBox="0 0 576 560"
         role="presentation"
-        // naikkan (top 8vh), geser kiri (right -4vw), perkecil skala visual (60vh)
-        className="absolute right-[-4vw] top-[8vh] h-[60vh] w-auto min-h-[400px] min-w-[480px]"
+        /* Lebih tinggi, sedikit lebih ke dalam layar, dan lebih kecil */
+        className="absolute right-[-2vw] top-[6vh] h-[54vh] w-auto min-h-[360px] min-w-[440px] xl:right-[-1vw] xl:top-[5vh] xl:h-[56vh]"
         style={{ willChange: "transform, opacity" }}
-        initial={reduce ? { opacity: 0.32 } : { opacity: 0.30, scale: 0.98 }}
+        initial={reduce ? { opacity: 0.28 } : { opacity: 0.28, scale: 0.985 }}
         animate={
           reduce
-            ? { opacity: 0.32 }
+            ? { opacity: 0.28 }
             : {
-                // lebih ringan dari sebelumnya
-                opacity: [0.25, 0.38, 0.30],
-                scale: [0.98, 1.01, 0.98],
+                opacity: [0.24, 0.36, 0.28],
+                scale: [0.985, 1.005, 0.985], // sangat halus
               }
         }
         transition={base}
@@ -59,8 +69,8 @@ export default function HeroRings() {
         <path
           d="M238.5 40.5C355.179 40.5 454.5 148.97 454.5 289C454.5 429.03 355.179 537.5 238.5 537.5C121.821 537.5 22.5 429.03 22.5 289C22.5 148.97 121.821 40.5 238.5 40.5Z"
           stroke="url(#abero-ring-lg)"
-          strokeOpacity={0.3}   // ↓ dari 0.4 agar tidak terlalu berat
-          strokeWidth={45}
+          strokeOpacity={0.28}   // lebih ringan dari sebelumnya
+          strokeWidth={40}       // sedikit lebih tipis agar tidak berat
           fill="none"
         />
       </motion.svg>
@@ -69,19 +79,19 @@ export default function HeroRings() {
       <motion.svg
         viewBox="0 0 576 560"
         role="presentation"
-        // didekatkan & sedikit lebih rendah agar "nyambung" dengan ring besar
-        className="absolute right-[5vw] top-[9vh] h-[14vh] w-auto min-h-[96px] min-w-[96px]"
+        /* Didekatkan & disejajarkan dengan ring besar */
+        className="absolute right-[9vw] top-[8vh] h-[11vh] w-auto min-h-[84px] min-w-[84px] xl:right-[10vw] xl:top-[9vh]"
         style={{ willChange: "transform, opacity" }}
-        initial={reduce ? { opacity: 0.34 } : { opacity: 0.34, scale: 0.98 }}
+        initial={reduce ? { opacity: 0.34 } : { opacity: 0.34, scale: 0.99 }}
         animate={
           reduce
             ? { opacity: 0.34 }
             : {
-                opacity: [0.30, 0.46, 0.34],
-                scale: [0.98, 1.04, 0.98],
+                opacity: [0.30, 0.44, 0.34],
+                scale: [0.99, 1.035, 0.99],
               }
         }
-        transition={{ ...base, duration: 5.5, delay: 0.4 }}
+        transition={{ ...base, duration: 5.4, delay: 0.3 }}
       >
         <defs>
           <linearGradient
@@ -104,8 +114,8 @@ export default function HeroRings() {
           cy="63"
           r="53"
           stroke="url(#abero-ring-sm)"
-          strokeOpacity={0.35}   // sedikit lebih ringan
-          strokeWidth={20}
+          strokeOpacity={0.34}
+          strokeWidth={18}
           fill="none"
         />
       </motion.svg>
