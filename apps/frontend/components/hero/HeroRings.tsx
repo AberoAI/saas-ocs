@@ -3,19 +3,20 @@
 import { motion, useReducedMotion, type Transition } from "framer-motion";
 
 /**
- * HeroRings
- * - Dua cincin (besar & kecil) di kanan hero.
- * - Animasi subtle "breathing": opacity & scale sangat kecil.
- * - GPU-friendly & accessible.
+ * HeroRings (AberoAI)
+ * - Menggunakan SVG ring sesuai spesifikasi (gradien #64A4ED → #37477C → transparan).
+ * - Dua elemen: ring besar (path oval) & ring kecil (circle).
+ * - Animasi halus (opacity+scale) dan menghormati prefers-reduced-motion.
+ * - Posisi absolute di kanan hero, responsif.
  */
 export default function HeroRings() {
   const reduce = useReducedMotion();
 
-  const transition: Transition = {
-    duration: 6,
-    repeat: Infinity,          // ← tanpa 'as const'
-    repeatType: "mirror",      // ← literal string valid
-    ease: "easeInOut",         // ← kompatibel dengan motion-dom typings
+  const base: Transition = {
+    duration: 7,
+    repeat: Infinity,
+    repeatType: "mirror",
+    ease: "easeInOut",
   };
 
   return (
@@ -23,73 +24,91 @@ export default function HeroRings() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
-      {/* Ring besar (kanan) */}
-      <motion.div
-        initial={reduce ? { opacity: 0.35 } : { opacity: 0.28, scale: 0.995 }}
+      {/* Ring besar */}
+      <motion.svg
+        viewBox="0 0 576 560"
+        role="presentation"
+        className="absolute right-[-7vw] top-[12vh] h-[68vh] w-auto min-h-[420px] min-w-[520px]"
+        style={{ willChange: "transform, opacity" }}
+        initial={reduce ? { opacity: 0.4 } : { opacity: 0.34, scale: 0.995 }}
         animate={
           reduce
-            ? { opacity: 0.35 }
-            : { opacity: [0.24, 0.36, 0.28], scale: [0.995, 1.01, 0.995] }
+            ? { opacity: 0.4 }
+            : {
+                opacity: [0.30, 0.42, 0.34],
+                scale: [0.995, 1.012, 0.995],
+              }
         }
-        transition={transition}
-        className="absolute right-[-6vw] top-[14vh] h-[68vh] w-[68vh] min-w-[420px] min-h-[420px]"
-        style={{ willChange: "transform, opacity" }}
+        transition={base}
       >
-        <svg viewBox="0 0 100 100" className="h-full w-full" role="presentation">
-          <defs>
-            <linearGradient id="abero-ring" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#84C5E8" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="#EDEFF3" stopOpacity="0.55" />
-            </linearGradient>
-            <filter id="abero-blur" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="0.6" />
-            </filter>
-          </defs>
-          <circle
-            cx="50"
-            cy="50"
-            r="43"
-            fill="none"
-            stroke="url(#abero-ring)"
-            strokeWidth="6"
-            filter="url(#abero-blur)"
-          />
-        </svg>
-      </motion.div>
+        <defs>
+          <linearGradient
+            id="abero-ring-lg"
+            x1="238.5"
+            y1="18"
+            x2="238.5"
+            y2="560"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0" stopColor="#64A4ED" stopOpacity="0.85" />
+            <stop offset="0.466346" stopColor="#37477C" stopOpacity="0.39" />
+            <stop offset="0.725962" stopColor="#2E3C69" stopOpacity="0.10" />
+            <stop offset="0.923077" stopColor="#1F2846" stopOpacity="0.00" />
+          </linearGradient>
+        </defs>
 
-      {/* Ring kecil (kanan-atas) */}
-      <motion.div
+        <path
+          d="M238.5 40.5C355.179 40.5 454.5 148.97 454.5 289C454.5 429.03 355.179 537.5 238.5 537.5C121.821 537.5 22.5 429.03 22.5 289C22.5 148.97 121.821 40.5 238.5 40.5Z"
+          stroke="url(#abero-ring-lg)"
+          strokeOpacity="0.4"
+          strokeWidth="45"
+          fill="none"
+        />
+      </motion.svg>
+
+      {/* Ring kecil (accent) */}
+      <motion.svg
+        viewBox="0 0 576 560"
+        role="presentation"
+        className="absolute right-[6vw] top-[6vh] h-[16vh] w-auto min-h-[96px] min-w-[96px]"
+        style={{ willChange: "transform, opacity" }}
         initial={reduce ? { opacity: 0.4 } : { opacity: 0.36, scale: 1 }}
         animate={
           reduce
             ? { opacity: 0.4 }
-            : { opacity: [0.32, 0.44, 0.36], scale: [1, 1.04, 1] }
+            : {
+                opacity: [0.32, 0.48, 0.36],
+                scale: [1, 1.05, 1],
+              }
         }
-        transition={{ ...transition, duration: 5.2 }}
-        className="absolute right-[10vw] top-[10vh] h-[12vh] w-[12vh] min-w-[96px] min-h-[96px]"
-        style={{ willChange: "transform, opacity" }}
+        transition={{ ...base, duration: 5.5, delay: 0.4 }}
       >
-        <svg viewBox="0 0 100 100" className="h-full w-full" role="presentation">
-          <defs>
-            <linearGradient id="abero-ring-sm" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#84C5E8" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#EEF1F5" stopOpacity="0.5" />
-            </linearGradient>
-            <filter id="abero-blur-sm" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
-            </filter>
-          </defs>
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            fill="none"
-            stroke="url(#abero-ring-sm)"
-            strokeWidth="8"
-            filter="url(#abero-blur-sm)"
-          />
-        </svg>
-      </motion.div>
+        <defs>
+          <linearGradient
+            id="abero-ring-sm"
+            x1="513"
+            y1="0"
+            x2="513"
+            y2="126"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0" stopColor="#64A4ED" stopOpacity="0.85" />
+            <stop offset="0.466346" stopColor="#37477C" stopOpacity="0.39" />
+            <stop offset="0.807692" stopColor="#2E3C69" stopOpacity="0.10" />
+            <stop offset="1" stopColor="#1F2846" stopOpacity="0.00" />
+          </linearGradient>
+        </defs>
+
+        <circle
+          cx="513"
+          cy="63"
+          r="53"
+          stroke="url(#abero-ring-sm)"
+          strokeOpacity="0.4"
+          strokeWidth="20"
+          fill="none"
+        />
+      </motion.svg>
     </div>
   );
 }
