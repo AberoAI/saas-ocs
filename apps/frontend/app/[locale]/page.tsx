@@ -63,8 +63,7 @@ export default function LocaleHomePage() {
           <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
-              // ↓ hanya ukuran font dikurangi 2px per breakpoint
-              className={`${poppins.className} font-medium text-[22px] sm:text-[28px] md:text-[34px] lg:text-[46px] leading-snug tracking-[-0.01em] text-[#585858]`}
+              className={`${poppins.className} font-medium text-[22px] sm:text-[28px] md:text-[34px] lg:text-[48px] leading-[1.1] tracking-[-0.01em] text-[#585858]`}
               initial={reduceMotion ? false : { opacity: 0, y: 32 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
