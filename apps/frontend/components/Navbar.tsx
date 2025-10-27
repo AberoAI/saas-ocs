@@ -11,23 +11,18 @@ import { useState, useRef } from "react";
 export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = pathnameRaw.replace(/\/+$/, "") || "/";
-
   const t = useTranslations();
   const BRAND = "#26658C";
   const CTA_LOGIN_BG = "#F7F7F7";
   const name = "AberoAI";
 
-  // Locale detection
+  // Locale
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const localePrefix = m?.[1] ? `/${m[1]}` : "";
-
   const norm = (p: string) => (p.replace(/\/+$/, "") || "/");
-
-  // Locale-safe href builder
   const withLocale = (href: string) => {
     if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
     if (localePrefix && href.startsWith(`${localePrefix}/`)) return href;
-
     let localized = href;
     if (localePrefix === "/tr") {
       if (href === "/about") localized = "/hakkinda";
@@ -36,19 +31,17 @@ export default function Navbar() {
     }
     return `${localePrefix}${localized}` || localePrefix || "/";
   };
-
   const switchLocaleHref = (target: string) => {
     if (localePrefix) return pathname.replace(new RegExp(`^${localePrefix}`), `/${target}`);
     return `/${target}${pathname === "/" ? "" : pathname}`;
   };
 
-  // Build links
-  const links = NAV_LINKS.map((l) => {
-    const label = l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`);
-    return { key: l.key, label, href: withLocale(l.href) };
-  });
+  const links = NAV_LINKS.map((l) => ({
+    key: l.key,
+    label: l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`),
+    href: withLocale(l.href),
+  }));
 
-  // Active state
   const isActive = (href: string) => {
     const target = norm(href.startsWith("/") ? href : `/${href}`);
     const current = norm(pathname);
@@ -58,7 +51,6 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  // Dropdown state
   const [openProduct, setOpenProduct] = useState(false);
   const leaveTimer = useRef<number | null>(null);
   const handleEnter = () => {
@@ -77,7 +69,6 @@ export default function Navbar() {
     isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
   const menuId = "nav-product-menu";
 
-  // Helper: seragamkan styling item nav
   const navItemClass = (active: boolean, hoverable: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
@@ -91,13 +82,13 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
+      {/* Aligned paddings to hero section (83px left & right) */}
       <div
-        className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5"
+        className="flex items-center justify-between px-[83px] py-3.5"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
         {/* LEFT: Brand + Nav */}
         <div className="flex items-center gap-8">
-          {/* Brand */}
           <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
@@ -113,7 +104,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Nav links */}
           <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
             {links.map((l) =>
               l.key === "product" ? (
@@ -131,18 +121,8 @@ export default function Navbar() {
                     aria-expanded={openProduct}
                     aria-controls={menuId}
                     onClick={() => setOpenProduct((v) => !v)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") setOpenProduct(false);
-                      if (e.key === "ArrowDown") {
-                        e.preventDefault();
-                        const first = document.querySelector<HTMLAnchorElement>(`#${menuId} a`);
-                        first?.focus();
-                      }
-                    }}
-                    // Reset UA styles pada button
                     className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center"
                   >
-                    {/* ⭐ Styling teks DIPASANG DI SINI dgn !important supaya tidak bisa ditimpa */}
                     <span
                       className={[
                         "text-sm leading-none",
@@ -171,8 +151,6 @@ export default function Navbar() {
                         strokeLinejoin="round"
                       />
                     </svg>
-
-                    {/* Hover bridge */}
                     <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
                   </button>
 
@@ -181,7 +159,6 @@ export default function Navbar() {
                       id={menuId}
                       role="menu"
                       className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
-                      onKeyDown={(e) => e.key === "Escape" && setOpenProduct(false)}
                     >
                       <Link
                         role="menuitem"
