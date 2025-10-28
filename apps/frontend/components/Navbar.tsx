@@ -1,4 +1,3 @@
-// apps/frontend/components/Navbar.tsx
 "use client";
 
 import Image from "next/image";
@@ -19,12 +18,10 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  // Locale detection (/en, /tr)
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const locale = m?.[1] || "en";
   const localePrefix = `/${locale}`;
 
-  // Build links
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -46,7 +43,6 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  // --- Product dropdown (desktop) ---
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,8 +66,7 @@ export default function Navbar() {
     };
   }, [openProduct]);
 
-  const productActive =
-    isActive("/features") || isActive("/solutions");
+  const productActive = isActive("/features") || isActive("/solutions");
 
   const navItemClass = (active: boolean, hoverable: boolean) =>
     [
@@ -80,7 +75,6 @@ export default function Navbar() {
       hoverable ? "hover:text-foreground" : "",
     ].join(" ");
 
-  // --- Mobile menu ---
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -144,9 +138,7 @@ export default function Navbar() {
                   <span
                     className={[
                       "text-sm leading-none",
-                      productActive
-                        ? "!text-foreground !font-medium"
-                        : "!text-foreground/70 !font-normal",
+                      productActive ? "!text-foreground !font-medium" : "!text-foreground/70 !font-normal",
                     ].join(" ")}
                   >
                     {t("nav.product")}
@@ -213,8 +205,10 @@ export default function Navbar() {
 
         {/* RIGHT: Locale + Auth (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
+          {/* ✅ Type-safe locale switch */}
           <Link
-            href={{ pathname, locale: "en" } as any}
+            href="/"
+            locale="en"
             className="inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
             aria-label="Switch to English"
           >
@@ -234,7 +228,95 @@ export default function Navbar() {
             {t("cta.signin")}
           </Link>
         </div>
+
+        {/* Mobile toggle */}
+        <button
+          type="button"
+          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground"
+          aria-label="Open menu"
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
+
+      {/* Mobile panel */}
+      {mobileOpen && (
+        <div ref={mobileRef} className="md:hidden border-t border-black/10 bg-white">
+          <div className="mx-auto max-w-screen-xl px-6 py-3 md:px-8 lg:px-10">
+            <nav className="flex flex-col gap-1">
+              {links.map((l) =>
+                l.key === "product" ? (
+                  <details key="m-product" className="group">
+                    <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-black/5">
+                      <span>{t("nav.product")}</span>
+                      <span className="transition-transform group-open:rotate-180">
+                        <svg viewBox="0 0 20 20" width="16" height="16">
+                          <path d="M5.5 7.5L10 12l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </span>
+                    </summary>
+                    <div className="ml-2 mt-1 flex flex-col gap-1">
+                      <Link
+                        href="/features"
+                        className="rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {t("nav.features")}
+                      </Link>
+                      <Link
+                        href="/solutions"
+                        className="rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {t("nav.solutions")}
+                      </Link>
+                    </div>
+                  </details>
+                ) : (
+                  <Link
+                    key={`m-${l.href}-${l.label}`}
+                    href={l.href}
+                    className={navItemClass(isActive(l.href), false) + " rounded-lg px-3 py-2"}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {l.label}
+                  </Link>
+                )
+              )}
+            </nav>
+
+            <div className="mt-3 flex items-center gap-2">
+              <Link
+                href="/"
+                locale="en"
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
+                aria-label="Switch to English"
+              >
+                EN
+              </Link>
+              <div className="ml-auto flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {t("nav.signin")}
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {t("cta.signin")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
