@@ -11,9 +11,11 @@ import { useDismissable } from "@/hooks/useDismissable";
 /** Path normalizer (decode + trim trailing slash) */
 function normalizePath(p: string) {
   try {
-    const raw = decodeURI(p.split("#")[0].split("?")[0] || "/");
-    const url = raw.length > 1 && raw.endsWith("/") ? raw.slice(0, -1) : raw;
-    return url || "/";
+    const withoutHash = (p || "/").split("#")[0] ?? "/";
+    const withoutQuery = (withoutHash || "/").split("?")[0] ?? "/";
+    const raw = decodeURI(withoutQuery || "/");
+    if (raw.length > 1 && raw.endsWith("/")) return raw.slice(0, -1);
+    return raw || "/";
   } catch {
     return "/";
   }
@@ -226,7 +228,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* RIGHT: Locale + Auth (desktop) */}
+        {/* RIGHT: Locale + Auth/CTA (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
           {/* Locale switch: preserve current path via typed Link href (tanpa any) */}
           <Link
@@ -238,7 +240,14 @@ export default function Navbar() {
             {switchLocale.toUpperCase()}
           </Link>
 
-          {/* Primary CTA: Sign in */}
+          <Link
+            href="/login"
+            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
+          >
+            {t("nav.signin")}
+          </Link>
+
+          {/* Biru: ganti dari cta.demo → Sign in (hanya ini yang diubah) */}
           <Link
             href="/login"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
@@ -316,7 +325,14 @@ export default function Navbar() {
                 {switchLocale.toUpperCase()}
               </Link>
               <div className="ml-auto flex items-center gap-2">
-                {/* Primary CTA: Sign in */}
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {t("nav.signin")}
+                </Link>
+                {/* Biru: ganti dari cta.demo → Sign in (hanya ini yang diubah) */}
                 <Link
                   href="/login"
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
