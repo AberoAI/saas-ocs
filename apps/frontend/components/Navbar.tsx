@@ -96,6 +96,9 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
+  /** Helper type for typed Link href (tanpa any) */
+  type LinkHref = React.ComponentProps<typeof Link>["href"];
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div
@@ -225,9 +228,9 @@ export default function Navbar() {
 
         {/* RIGHT: Locale + Auth/CTA (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
-          {/* Locale switch: preserve current path via locale prop (cast to any to satisfy Href union) */}
+          {/* Locale switch: preserve current path via typed Link href (tanpa any) */}
           <Link
-            href={pathname as any}
+            href={pathname as LinkHref}
             locale={switchLocale}
             className="inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
             aria-label={`Switch to ${switchLocale.toUpperCase()}`}
@@ -312,7 +315,7 @@ export default function Navbar() {
 
             <div className="mt-3 flex items-center gap-2">
               <Link
-                href={pathname as any}
+                href={pathname as LinkHref}
                 locale={switchLocale}
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
                 aria-label={`Switch to ${switchLocale.toUpperCase()}`}
