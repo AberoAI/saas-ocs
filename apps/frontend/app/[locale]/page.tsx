@@ -5,10 +5,9 @@ import { Link } from "@/i18n/routing";
 import ScrollHint from "@/components/hero/ScrollHint";
 import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
-import { motion, useReducedMotion, useInView } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
-import { usePathname } from "next/navigation";
-import { useRef } from "react";
+import { usePathname } from "next/navigation"; // ✅
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
@@ -46,15 +45,13 @@ export default function LocaleHomePage() {
   const pathnameRaw = usePathname() || "/";
   const locale = (pathnameRaw.split("/")[1] || "en").toLowerCase();
 
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-10%" });
-
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
   const highlight = hlMatch ? hlMatch[0] : "";
   const after = hlMatch ? cleaned.slice(hlMatch.index! + hlMatch[0].length) : "";
 
+  // ✅ Subheadline final (transformational framing; EN/TR)
   const subHeadline =
     locale === "tr"
       ? "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan."
@@ -64,7 +61,6 @@ export default function LocaleHomePage() {
     <>
       {/* HERO */}
       <section
-        ref={ref}
         id="page-1-hero"
         className="relative flex min-h-[80vh] items-center justify-start overflow-hidden pl-[83px] pt-8"
         aria-labelledby="hero-hook"
@@ -76,13 +72,9 @@ export default function LocaleHomePage() {
           <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
-              className={`${poppins.className} font-medium text-[20px] sm:text-[26px] md:text-[32px] lg:text-[48px] leading-[1.1] tracking-[-0.01em] text-[#585858]`}
+              className={`${poppins.className} font-medium text-[22px] sm:text-[28px] md:text-[34px] lg:text-[48px] leading-[1.1] tracking-[-0.01em] text-[#585858]`}
               initial={reduceMotion ? false : { opacity: 0, y: 32 }}
-              animate={
-                isInView
-                  ? { opacity: 1, y: 0 }
-                  : { opacity: 0, y: 32 }
-              }
+              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {before}
@@ -90,21 +82,12 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* Subheadline + micro motion */}
+            {/* Anchor weight — subheadline fade-in setelah hook */}
             <motion.p
-              className="mt-3 max-w-xl text-[15px] leading-[1.5] text-black/70"
+              className="mt-3 max-w-xl text-[15px] leading-[1.5] text-black/60"
               initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-              animate={
-                isInView
-                  ? { opacity: 1, y: 0, scale: [1, 1.02, 1] }
-                  : { opacity: 0, y: 8 }
-              }
-              transition={{
-                duration: 0.8,
-                delay: 1.2,
-                ease: [0.25, 0.1, 0.25, 1],
-                scale: { duration: 1.2, delay: 1.8 },
-              }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {subHeadline}
             </motion.p>

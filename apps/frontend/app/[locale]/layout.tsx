@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
+// ⬇️ tetap pakai relatif seperti versi kamu
 import { domain, locales, defaultLocale } from "../../i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
@@ -30,13 +31,15 @@ function getAbsoluteSiteUrl(): string {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-// === loader yang merge root + per-namespace (features, dst.)
+// === NEW: loader yang merge root + per-namespace (features, dst.)
 async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
+  // root messages (nav, hero, dsb)
   const base =
     (await import(`../../messages/${loc}.json`)
       .then((m) => m.default)
       .catch(() => ({}))) as AbstractIntlMessages;
 
+  // daftar namespace per-halaman yang mau kamu split (bisa ditambah sewaktu-waktu)
   const namespaces = ["features"] as const;
 
   const extraPairs = await Promise.all(
@@ -50,6 +53,7 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
     })
   );
 
+  // merge menjadi satu objek messages
   return Object.assign({}, base, ...extraPairs);
 }
 
@@ -59,52 +63,20 @@ export async function generateMetadata(
   const loc: Locale = isLocale(locale) ? locale : defaultLocale;
   const site = getAbsoluteSiteUrl();
 
-  const title =
-    loc === "tr"
-      ? "AberoAI – WhatsApp AI Müşteri Hizmetleri Otomasyonu"
-      : "AberoAI – AI-Powered WhatsApp Customer Service Automation";
-
-  const description =
-    loc === "tr"
-      ? "7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
-      : "Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.";
-
-  const url = `${site}/${loc}`;
-  // Siapkan gambar OG per-locale bila tersedia; fallback aman.
-  const image = `${site}/og-${loc}.png`;
-
   return {
     metadataBase: new URL(site),
     alternates: {
       canonical: `/${loc}`,
       languages: { "x-default": "/", en: "/en", tr: "/tr" },
     },
-    title,
-    description,
-    // ✅ Open Graph dinamis per locale
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "AberoAI",
-      locale: loc,
-      type: "website",
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt: "AberoAI Hero",
-        },
-      ],
-    },
-    // ✅ Twitter Card dinamis per locale
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [image],
-    },
+    title:
+      loc === "tr"
+        ? "AberoAI – WhatsApp AI Müşteri Hizmetleri Otomasyonu"
+        : "AberoAI – AI-Powered WhatsApp Customer Service Automation",
+    description:
+      loc === "tr"
+        ? "7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
+        : "Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.",
   };
 }
 
