@@ -2,6 +2,9 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"], weight: ["400"] }); // Inter Regular (khusus Scroll)
 
 export default function ScrollHint({
   targetId,
@@ -28,8 +31,16 @@ export default function ScrollHint({
       transition={{ duration: 2.8, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }}
       aria-label={targetId ? "Scroll to next section" : "Scroll"}
     >
-      <span>Scroll</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="opacity-80" aria-hidden="true">
+      {/* Inter Regular khusus untuk teks "Scroll" */}
+      <span className={`${inter.className} text-[14px] font-normal tracking-wide`}>Scroll</span>
+
+      {/* Ikon panah pakai ukuran proporsional ke teks, tanpa inline width/height */}
+      <svg
+        className="w-[15px] h-[15px] opacity-80"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+      >
         <path
           d="M12 5v14M12 19l-5-5M12 19l5-5"
           stroke="currentColor"
