@@ -7,7 +7,7 @@ import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
-import { usePathname } from "next/navigation"; // ✅
+import { usePathname } from "next/navigation";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
@@ -44,6 +44,7 @@ export default function LocaleHomePage() {
   const reduceMotion = useReducedMotion();
   const pathnameRaw = usePathname() || "/";
   const locale = (pathnameRaw.split("/")[1] || "en").toLowerCase();
+  const isTR = locale === "tr"; // ✅ locale flag
 
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
@@ -52,10 +53,9 @@ export default function LocaleHomePage() {
   const after = hlMatch ? cleaned.slice(hlMatch.index! + hlMatch[0].length) : "";
 
   // ✅ Subheadline final (transformational framing; EN/TR)
-  const subHeadline =
-    locale === "tr"
-      ? "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan."
-      : "Turn slow conversations into instant connections — without hiring more agents.";
+  const subHeadline = isTR
+    ? "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan."
+    : "Turn slow conversations into instant connections — without hiring more agents.";
 
   return (
     <>
@@ -72,7 +72,15 @@ export default function LocaleHomePage() {
           <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
-              className={`${poppins.className} font-medium text-[22px] sm:text-[28px] md:text-[34px] lg:text-[48px] leading-[1.1] tracking-[-0.01em] text-[#585858]`}
+              /* ✅ Turkish-only micro-typography:
+                   - Sedikit naikkan line-height (1.18) agar baris terakhir bernafas
+                   - Kurangi ketatnya tracking (dari -0.01em → -0.005em)
+                   - break-keep untuk mencegah pecah kata aneh di mobile  */
+              className={`${poppins.className} break-keep font-medium ${
+                isTR
+                  ? "leading-[1.18] tracking-[-0.005em]"
+                  : "leading-[1.1] tracking-[-0.01em]"
+              } text-[22px] sm:text-[28px] md:text-[34px] lg:text-[48px] text-[#585858]`}
               initial={reduceMotion ? false : { opacity: 0, y: 32 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
