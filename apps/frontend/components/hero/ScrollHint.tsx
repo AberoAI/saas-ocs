@@ -32,11 +32,11 @@ export default function ScrollHint({
       aria-label={targetId ? "Scroll to next section" : "Scroll"}
     >
       {/* Inter Regular khusus untuk teks "Scroll" */}
-      <span className={`${inter.className} text-[14px] font-normal tracking-wide`}>Scroll</span>
+      <span className={`${inter.className} text-[12px] font-normal tracking-wide`}>Scroll</span>
 
-      {/* Ikon panah pakai ukuran proporsional ke teks, tanpa inline width/height */}
+      {/* Ikon panah proporsional (lebih kecil 2px dari versi sebelumnya) */}
       <svg
-        className="w-[15px] h-[15px] opacity-80"
+        className="w-[13px] h-[13px] opacity-80"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
