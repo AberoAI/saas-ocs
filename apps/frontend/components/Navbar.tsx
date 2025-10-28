@@ -18,10 +18,12 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
+  // Detect locale prefix (/en, /tr, ...)
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const locale = m?.[1] || "en";
   const localePrefix = `/${locale}`;
 
+  // Build links via locale-aware Link
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -32,7 +34,7 @@ export default function Navbar() {
     [t]
   );
 
-  const current = pathname;
+  const current = pathname; // normalized
   const isActive = (href: string) => {
     const target = normalizePath(
       href.startsWith("/") ? `${localePrefix}${href}` : href
@@ -43,6 +45,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
+  // --- Product dropdown (desktop) ---
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -75,6 +78,7 @@ export default function Navbar() {
       hoverable ? "hover:text-foreground" : "",
     ].join(" ");
 
+  // --- Mobile menu ---
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -94,8 +98,56 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
+  /* =========================
+     Adaptive show/hide on scroll
+     ========================= */
+  const [showNav, setShowNav] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const y = window.scrollY;
+
+      // Scroll down & sudah lewat header → hide
+      if (y > lastScrollY.current && y > 80) {
+        setShowNav(false);
+      }
+      // Scroll up → show (dengan auto-hide jika bukan home)
+      else if (y < lastScrollY.current) {
+        setShowNav(true);
+        if (pathname !== "/") {
+          if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+          scrollTimeout.current = setTimeout(() => setShowNav(false), 2500);
+        }
+      }
+      lastScrollY.current = y;
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    };
+  }, [pathname]);
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-white">
+    <header
+      className={`sticky top-0 z-50 w-full bg-white transition-transform duration-500 ${
+        showNav ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <div
         className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
@@ -205,7 +257,7 @@ export default function Navbar() {
 
         {/* RIGHT: Locale + Auth (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
-          {/* ✅ Type-safe locale switch */}
+          {/* Type-safe locale switch */}
           <Link
             href="/"
             locale="en"
