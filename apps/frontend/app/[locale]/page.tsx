@@ -82,12 +82,12 @@ export default function LocaleHomePage() {
               {after}
             </motion.h1>
 
-            {/* ✅ NEW: Anchor weight — subheadline ringan dengan fade-in terlambat */}
+            {/* ✅ Anchor weight — subheadline fade-in setelah hook */}
             <motion.p
               className="mt-3 max-w-xl text-[15px] leading-[1.5] text-black/60"
               initial={reduceMotion ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: 0.8, delay: 1.2, ease: [0.25, 0.1, 0.25, 1] }} // ⬅️ delay disesuaikan
             >
               {subHeadline}
             </motion.p>

@@ -28,13 +28,10 @@ export default function ScrollHint({
       className={`inline-flex items-center justify-center gap-2 text-sm text-black/60 focus:outline-none focus:ring-2 focus:ring-black/20 rounded-md ${className}`}
       initial={{ opacity: 0.7, y: 0 }}
       animate={reduceMotion ? { opacity: 0.85 } : { opacity: [0.5, 1, 0.5], y: [0, 6, 0] }}
-      transition={{ duration: 2.8, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }}
+      transition={{ duration: 2.8, delay: 2.8, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }} // ⬅️ sinkron dengan teks
       aria-label={targetId ? "Scroll to next section" : "Scroll"}
     >
-      {/* Inter Regular khusus untuk teks "Scroll" */}
       <span className={`${inter.className} text-[12px] font-normal tracking-wide`}>Scroll</span>
-
-      {/* Ikon panah proporsional (lebih kecil 2px dari versi sebelumnya) */}
       <svg
         className="w-[13px] h-[13px] opacity-80"
         viewBox="0 0 24 24"
