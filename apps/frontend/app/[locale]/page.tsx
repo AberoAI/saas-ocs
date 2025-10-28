@@ -7,6 +7,7 @@ import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
+import { usePathname } from "next/navigation"; // ✅ NEW
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
@@ -41,12 +42,20 @@ export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
+  const pathnameRaw = usePathname() || "/"; // ✅ NEW
+  const locale = (pathnameRaw.split("/")[1] || "en").toLowerCase(); // ✅ NEW
 
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
   const highlight = hlMatch ? hlMatch[0] : "";
   const after = hlMatch ? cleaned.slice(hlMatch.index! + hlMatch[0].length) : "";
+
+  // ✅ NEW: subheadline sebagai "anchor weight" (fallback lokal, tanpa ubah i18n files)
+  const subHeadline =
+    locale === "tr"
+      ? "AberoAI, konuşmaları otomatikleştirir: aynı anda binlerce mesaj için 7/24 anında yanıt."
+      : "AberoAI automates conversations with 24/7 instant replies that handle thousands at once.";
 
   return (
     <>
@@ -72,6 +81,16 @@ export default function LocaleHomePage() {
               {highlight && <span style={{ color: "#26658C" }}>{highlight}</span>}
               {after}
             </motion.h1>
+
+            {/* ✅ NEW: Anchor weight — subheadline ringan dengan fade-in terlambat */}
+            <motion.p
+              className="mt-3 max-w-xl text-[15px] leading-[1.5] text-black/60"
+              initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              {subHeadline}
+            </motion.p>
           </div>
         </div>
 
