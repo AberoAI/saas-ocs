@@ -226,7 +226,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* RIGHT: Locale + Auth/CTA (desktop) */}
+        {/* RIGHT: Locale + Auth (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
           {/* Locale switch: preserve current path via typed Link href (tanpa any) */}
           <Link
@@ -238,19 +238,12 @@ export default function Navbar() {
             {switchLocale.toUpperCase()}
           </Link>
 
+          {/* Primary CTA: Sign in */}
           <Link
             href="/login"
-            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
-          >
-            {t("nav.signin")}
-          </Link>
-
-          {/* Primary CTA (B2B): Get a Demo */}
-          <Link
-            href="/demo"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
           >
-            {t("cta.demo")}
+            {t("nav.signin")}
           </Link>
         </div>
 
@@ -323,19 +316,13 @@ export default function Navbar() {
                 {switchLocale.toUpperCase()}
               </Link>
               <div className="ml-auto flex items-center gap-2">
+                {/* Primary CTA: Sign in */}
                 <Link
                   href="/login"
-                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {t("nav.signin")}
-                </Link>
-                <Link
-                  href="/demo"
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {t("cta.demo")}
+                  {t("nav.signin")}
                 </Link>
               </div>
             </div>
