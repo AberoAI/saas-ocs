@@ -1,39 +1,41 @@
 // apps/frontend/i18n/routing.ts
-import {createLocalizedPathnamesNavigation} from 'next-intl/navigation';
+import {
+  createLocalizedPathnamesNavigation,
+  type Pathnames
+} from "next-intl/navigation";
 
-export const locales = ['en', 'tr'] as const;
-/**
- * Karena kamu sudah pakai segmen app/[locale], prefix sebaiknya 'always'
- * supaya URL selalu diawali /en atau /tr.
- */
-export const localePrefix = 'always' as const;
+export const locales = ["en", "tr"] as const;
 
-/**
- * Deklarasi peta path lintas-locale.
- * Kunci di kiri = "pathname netral", nilai = mapping per-locale.
- */
+/** Prefix selalu muncul (karena kamu pakai app/[locale]) */
+export const localePrefix = "always" as const;
+
+/** Centralized route mapping untuk semua locale */
 export const pathnames = {
-  '/': {
-    en: '/',
-    tr: '/'
-  },
-  '/about': {
-    en: '/about',
-    tr: '/hakkinda'
-  },
-  '/demo': {
-    en: '/demo',
-    tr: '/demo'
-  },
-  '/privacy': {
-    en: '/privacy',
-    tr: '/gizlilik'
-  },
-  '/terms': {
-    en: '/terms',
-    tr: '/kosullar'
-  }
-} as const;
+  "/": { en: "/", tr: "/" },
+  "/about": { en: "/about", tr: "/hakkinda" },
+  "/demo": { en: "/demo", tr: "/demo" },
+  "/privacy": { en: "/privacy", tr: "/gizlilik" },
+  "/terms": { en: "/terms", tr: "/kosullar" },
 
-export const {Link, useRouter, usePathname, redirect, getPathname} =
-  createLocalizedPathnamesNavigation({locales, localePrefix, pathnames});
+  // ✅ Tambahan agar Navbar & sistem kamu tidak error TS
+  "/features": { en: "/features", tr: "/ozellikler" },
+  "/solutions": { en: "/solutions", tr: "/cozumler" },
+  "/login": { en: "/login", tr: "/giris" },
+  "/contact": { en: "/contact", tr: "/iletisim" },
+  "/pricing": { en: "/pricing", tr: "/fiyatlar" },
+  "/product": { en: "/product", tr: "/urun" },
+} satisfies Pathnames<typeof locales>;
+
+export type AppPath = keyof typeof pathnames;
+
+export const {
+  Link,
+  useRouter,
+  usePathname,
+  redirect,
+  getPathname,
+} = createLocalizedPathnamesNavigation({
+  locales,
+  localePrefix,
+  pathnames,
+});

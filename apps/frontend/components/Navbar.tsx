@@ -1,218 +1,235 @@
 // apps/frontend/components/Navbar.tsx
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/nav";
 import { useTranslations } from "next-intl";
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "@/i18n/routing";
+
+function normalizePath(p: string) {
+  const url = p.split("#")[0].split("?")[0] || "/";
+  if (url.length > 1 && url.endsWith("/")) return url.slice(0, -1);
+  return url || "/";
+}
 
 export default function Navbar() {
-  const pathnameRaw = usePathname() || "/";
-  const pathname = pathnameRaw.replace(/\/+$/, "") || "/";
   const t = useTranslations();
-  const BRAND = "#26658C";
-  const CTA_LOGIN_BG = "#F7F7F7";
-  const name = "AberoAI";
+  const pathnameRaw = usePathname() || "/";
+  const pathname = normalizePath(pathnameRaw);
 
-  // Locale
+  // Locale detection (/en, /tr)
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
-  const localePrefix = m?.[1] ? `/${m[1]}` : "";
-  const norm = (p: string) => (p.replace(/\/+$/, "") || "/");
-  const withLocale = (href: string) => {
-    if (!href.startsWith("/") || href.startsWith("//") || href.startsWith("/#")) return href;
-    if (localePrefix && href.startsWith(`${localePrefix}/`)) return href;
-    let localized = href;
-    if (localePrefix === "/tr") {
-      if (href === "/about") localized = "/hakkinda";
-      else if (href === "/features") localized = "/ozellikler";
-      else if (href === "/solutions") localized = "/cozumler";
-    }
-    return `${localePrefix}${localized}` || localePrefix || "/";
-  };
-  const switchLocaleHref = (target: string) => {
-    if (localePrefix) return pathname.replace(new RegExp(`^${localePrefix}`), `/${target}`);
-    return `/${target}${pathname === "/" ? "" : pathname}`;
-  };
+  const locale = m?.[1] || "en";
+  const localePrefix = `/${locale}`;
 
-  const links = NAV_LINKS.map((l) => ({
-    key: l.key,
-    label: l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`),
-    href: withLocale(l.href),
-  }));
+  // Build links
+  const links = useMemo(
+    () =>
+      NAV_LINKS.map((l) => ({
+        key: l.key,
+        label: l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`),
+        href: l.href,
+      })),
+    [t]
+  );
 
+  const current = pathname;
   const isActive = (href: string) => {
-    const target = norm(href.startsWith("/") ? href : `/${href}`);
-    const current = norm(pathname);
+    const target = normalizePath(
+      href.startsWith("/") ? `${localePrefix}${href}` : href
+    );
     if (target === "/" || target === localePrefix) {
       return current === "/" || current === localePrefix;
     }
     return current === target || current.startsWith(`${target}/`);
   };
 
+  // --- Product dropdown (desktop) ---
   const [openProduct, setOpenProduct] = useState(false);
-  const leaveTimer = useRef<number | null>(null);
-  const handleEnter = () => {
-    if (leaveTimer.current) {
-      window.clearTimeout(leaveTimer.current);
-      leaveTimer.current = null;
-    }
-    setOpenProduct(true);
-  };
-  const handleLeave = () => {
-    if (leaveTimer.current) window.clearTimeout(leaveTimer.current);
-    leaveTimer.current = window.setTimeout(() => setOpenProduct(false), 120);
-  };
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const handleEnter = () => setOpenProduct(true);
+  const handleLeave = () => setOpenProduct(false);
+
+  useEffect(() => {
+    if (!openProduct) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target as Node)) setOpenProduct(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenProduct(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openProduct]);
 
   const productActive =
-    isActive(withLocale("/features")) || isActive(withLocale("/solutions"));
-  const menuId = "nav-product-menu";
+    isActive("/features") || isActive("/solutions");
 
   const navItemClass = (active: boolean, hoverable: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
-      active
-        ? "text-foreground font-medium"
-        : [
-            "text-foreground/70 font-normal",
-            hoverable ? "hover:text-foreground" : "",
-          ].join(" "),
+      active ? "text-foreground font-medium" : "text-foreground/70 font-normal",
+      hoverable ? "hover:text-foreground" : "",
     ].join(" ");
+
+  // --- Mobile menu ---
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (!mobileRef.current) return;
+      if (!mobileRef.current.contains(e.target as Node)) setMobileOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
-      {/* Aligned paddings to hero section (83px left & right) */}
       <div
-        className="flex items-center justify-between px-[83px] py-3.5"
+        className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* LEFT: Brand + Nav */}
-        <div className="flex items-center gap-8">
-          <Link href={localePrefix || "/"} className="flex items-center gap-1" aria-label="AberoAI home">
+        {/* LEFT: Brand */}
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
-              alt={name}
+              alt="AberoAI"
               width={32}
               height={32}
               className="object-contain"
-              priority
+              priority={pathname === "/" || pathname === `/${locale}`}
               sizes="32px"
             />
-            <span className="text-2xl font-medium" style={{ color: BRAND }}>
-              {name}
+            <span className="text-2xl font-medium text-navbar">
+              AberoAI
             </span>
           </Link>
-
-          <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
-            {links.map((l) =>
-              l.key === "product" ? (
-                <div
-                  key="product-dropdown"
-                  className="relative inline-flex items-center"
-                  onMouseEnter={handleEnter}
-                  onMouseLeave={handleLeave}
-                  onFocus={handleEnter}
-                  onBlur={handleLeave}
-                >
-                  <button
-                    type="button"
-                    aria-haspopup="menu"
-                    aria-expanded={openProduct}
-                    aria-controls={menuId}
-                    onClick={() => setOpenProduct((v) => !v)}
-                    className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center"
-                  >
-                    <span
-                      className={[
-                        "text-sm leading-none",
-                        productActive ? "!text-foreground !font-medium" : "!text-foreground/70 !font-normal",
-                      ].join(" ")}
-                    >
-                      {t("nav.product")}
-                    </span>
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 20 20"
-                      className={[
-                        "ml-1 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
-                        "transition-transform duration-150",
-                        productActive ? "text-current" : "text-foreground/70",
-                        openProduct ? "rotate-180" : "",
-                      ].join(" ")}
-                      focusable="false"
-                    >
-                      <path
-                        d="M5.5 7.5L10 12l4.5-4.5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <div className="absolute left-0 right-0 top-full h-3" aria-hidden="true" />
-                  </button>
-
-                  {openProduct && (
-                    <div
-                      id={menuId}
-                      role="menu"
-                      className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
-                    >
-                      <Link
-                        role="menuitem"
-                        href={withLocale("/features")}
-                        className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
-                      >
-                        {t("nav.features")}
-                      </Link>
-                      <Link
-                        role="menuitem"
-                        href={withLocale("/solutions")}
-                        className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
-                      >
-                        {t("nav.solutions")}
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  key={`${l.href}-${l.label}`}
-                  href={l.href}
-                  aria-current={isActive(l.href) ? "page" : undefined}
-                  className={navItemClass(isActive(l.href), true)}
-                >
-                  {l.label}
-                </Link>
-              )
-            )}
-          </nav>
         </div>
 
-        {/* RIGHT: Locale + Auth */}
-        <div className="flex items-center gap-2">
+        {/* CENTER: Nav (desktop) */}
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
+          {links.map((l) =>
+            l.key === "product" ? (
+              <div
+                key="product-dropdown"
+                className="relative inline-flex items-center"
+                onPointerEnter={handleEnter}
+                onPointerLeave={handleLeave}
+                ref={menuRef}
+              >
+                <button
+                  type="button"
+                  aria-expanded={openProduct}
+                  onClick={() => setOpenProduct((v) => !v)}
+                  className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center"
+                >
+                  <span
+                    className={[
+                      "text-sm leading-none",
+                      productActive
+                        ? "!text-foreground !font-medium"
+                        : "!text-foreground/70 !font-normal",
+                    ].join(" ")}
+                  >
+                    {t("nav.product")}
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    className={[
+                      "ml-1 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
+                      "transition-transform duration-150",
+                      productActive ? "text-current" : "text-foreground/70",
+                      openProduct ? "rotate-180" : "",
+                    ].join(" ")}
+                    focusable="false"
+                  >
+                    <path
+                      d="M5.5 7.5L10 12l4.5-4.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+
+                {openProduct && (
+                  <div className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10">
+                    <ul className="flex flex-col">
+                      <li>
+                        <Link
+                          href="/features"
+                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
+                          onClick={() => setOpenProduct(false)}
+                        >
+                          {t("nav.features")}
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/solutions"
+                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
+                          onClick={() => setOpenProduct(false)}
+                        >
+                          {t("nav.solutions")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                key={`${l.href}-${l.label}`}
+                href={l.href}
+                aria-current={isActive(l.href) ? "page" : undefined}
+                className={navItemClass(isActive(l.href), true)}
+              >
+                {l.label}
+              </Link>
+            )
+          )}
+        </nav>
+
+        {/* RIGHT: Locale + Auth (desktop) */}
+        <div className="hidden items-center gap-2 md:flex">
           <Link
-            href={switchLocaleHref("en")}
-            className="hidden md:inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
+            href={{ pathname, locale: "en" } as any}
+            className="inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
             aria-label="Switch to English"
           >
             EN
           </Link>
 
           <Link
-            href={withLocale("/login")}
-            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition"
-            style={{ backgroundColor: CTA_LOGIN_BG }}
+            href="/login"
+            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
           >
             {t("nav.signin")}
           </Link>
-
           <Link
-            href={withLocale("/login")}
-            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition"
-            style={{ backgroundColor: BRAND }}
+            href="/login"
+            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
           >
             {t("cta.signin")}
           </Link>
