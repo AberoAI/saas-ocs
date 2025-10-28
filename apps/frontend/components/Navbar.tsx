@@ -3,27 +3,35 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/nav";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
+import { useDismissable } from "@/hooks/useDismissable";
 
+/** Path normalizer (decode + trim trailing slash) */
 function normalizePath(p: string) {
-  const url = p.split("#")[0].split("?")[0] || "/";
-  if (url.length > 1 && url.endsWith("/")) return url.slice(0, -1);
-  return url || "/";
+  try {
+    const raw = decodeURI(p.split("#")[0].split("?")[0] || "/");
+    const url = raw.length > 1 && raw.endsWith("/") ? raw.slice(0, -1) : raw;
+    return url || "/";
+  } catch {
+    return "/";
+  }
 }
 
 export default function Navbar() {
   const t = useTranslations();
+  const currentLocale = useLocale();
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  // Detect locale prefix (/en, /tr, ...)
+  /** Locale & prefix */
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const locale = m?.[1] || "en";
   const localePrefix = `/${locale}`;
+  const switchLocale = currentLocale === "en" ? "tr" : "en";
 
-  // Build links (label via i18n, href tetap netral → Link akan prefix otomatis)
+  /** Links (label via i18n) */
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -34,7 +42,8 @@ export default function Navbar() {
     [t]
   );
 
-  const current = pathname; // normalized
+  /** Active state checker (locale-aware) */
+  const current = pathname;
   const isActive = (href: string) => {
     const target = normalizePath(
       href.startsWith("/") ? `${localePrefix}${href}` : href
@@ -45,29 +54,26 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  // --- Product dropdown (desktop) ---
+  /** Desktop Product dropdown */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const productButtonRef = useRef<HTMLButtonElement | null>(null);
+  const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
+  const menuId = "product-menu";
 
   const handleEnter = () => setOpenProduct(true);
   const handleLeave = () => setOpenProduct(false);
+  const openMenu = () => {
+    setOpenProduct(true);
+    queueMicrotask(() => firstMenuItemRef.current?.focus());
+  };
+  const closeMenu = () => {
+    setOpenProduct(false);
+    productButtonRef.current?.focus();
+  };
 
-  useEffect(() => {
-    if (!openProduct) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target as Node)) setOpenProduct(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenProduct(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [openProduct]);
+  // DRY: dismiss handling via hook (generic T)
+  useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), menuRef);
 
   const productActive = isActive("/features") || isActive("/solutions");
 
@@ -76,86 +82,22 @@ export default function Navbar() {
       "inline-flex items-center text-sm leading-none transition-colors",
       active ? "text-foreground font-medium" : "text-foreground/70 font-normal",
       hoverable ? "hover:text-foreground" : "",
+      "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
 
-  // --- Mobile menu ---
+  /** Mobile menu */
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
+  useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
+
+  /** Close any menu on route change */
   useEffect(() => {
-    if (!mobileOpen) return;
-    const onDocClick = (e: MouseEvent) => {
-      if (!mobileRef.current) return;
-      if (!mobileRef.current.contains(e.target as Node)) setMobileOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [mobileOpen]);
-
-  /* =========================
-     Adaptive show/hide on scroll (refined)
-     ========================= */
-  const [showNav, setShowNav] = useState(true);
-
-  useEffect(() => {
-    let lastY = window.scrollY;
-    let ticking = false;
-    let hideTimeout: ReturnType<typeof setTimeout> | null = null;
-
-    // Home dianggap "/", "/en", atau "/tr"
-    const isHomePage = pathname === "/" || pathname === "/en" || pathname === "/tr";
-
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      const diff = currentY - lastY;
-
-      // Scroll down signifikan → sembunyikan
-      if (diff > 5 && currentY > 50) {
-        setShowNav(false);
-      }
-      // Scroll up signifikan → munculkan
-      else if (diff < -5) {
-        setShowNav(true);
-
-        // Auto-hide hanya untuk non-home
-        if (!isHomePage) {
-          if (hideTimeout) clearTimeout(hideTimeout);
-          hideTimeout = setTimeout(() => setShowNav(false), 2500);
-        }
-      }
-
-      lastY = currentY;
-    };
-
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (hideTimeout) clearTimeout(hideTimeout);
-    };
+    setOpenProduct(false);
+    setMobileOpen(false);
   }, [pathname]);
 
   return (
-    <header
-      className={`sticky top-0 z-50 w-full bg-white transition-transform duration-500 ${
-        showNav ? "translate-y-0" : "-translate-y-full"
-      }`}
-    >
+    <header className="sticky top-0 z-50 w-full bg-white">
       <div
         className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
@@ -183,15 +125,23 @@ export default function Navbar() {
               <div
                 key="product-dropdown"
                 className="relative inline-flex items-center"
-                onPointerEnter={() => setOpenProduct(true)}
-                onPointerLeave={() => setOpenProduct(false)}
+                onPointerEnter={handleEnter}
+                onPointerLeave={handleLeave}
                 ref={menuRef}
               >
                 <button
+                  ref={productButtonRef}
                   type="button"
+                  aria-haspopup="menu"
                   aria-expanded={openProduct}
-                  onClick={() => setOpenProduct((v) => !v)}
-                  className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center"
+                  aria-controls={menuId}
+                  onClick={() => (openProduct ? closeMenu() : openMenu())}
+                  onFocus={handleEnter}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown") openMenu();
+                    if (e.key === "Escape") closeMenu();
+                  }}
+                  className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
                 >
                   <span
                     className={[
@@ -224,10 +174,21 @@ export default function Navbar() {
                 </button>
 
                 {openProduct && (
-                  <div className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10">
+                  <div
+                    id={menuId}
+                    role="menu"
+                    aria-labelledby={menuId}
+                    className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") closeMenu();
+                      if (e.key === "Tab") setOpenProduct(false);
+                    }}
+                  >
                     <ul className="flex flex-col">
-                      <li>
+                      <li role="none">
                         <Link
+                          ref={firstMenuItemRef}
+                          role="menuitem"
                           href="/features"
                           className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
                           onClick={() => setOpenProduct(false)}
@@ -235,8 +196,9 @@ export default function Navbar() {
                           {t("nav.features")}
                         </Link>
                       </li>
-                      <li>
+                      <li role="none">
                         <Link
+                          role="menuitem"
                           href="/solutions"
                           className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
                           onClick={() => setOpenProduct(false)}
@@ -261,15 +223,16 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* RIGHT: Locale + Auth (desktop) */}
+        {/* RIGHT: Locale + Auth/CTA (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
+          {/* Locale switch: preserve current path via locale prop (cast to any to satisfy Href union) */}
           <Link
-            href="/"
-            locale="en"
+            href={pathname as any}
+            locale={switchLocale}
             className="inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
-            aria-label="Switch to English"
+            aria-label={`Switch to ${switchLocale.toUpperCase()}`}
           >
-            EN
+            {switchLocale.toUpperCase()}
           </Link>
 
           <Link
@@ -278,30 +241,104 @@ export default function Navbar() {
           >
             {t("nav.signin")}
           </Link>
+
+          {/* Primary CTA (B2B): Get a Demo */}
           <Link
-            href="/login"
+            href="/demo"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
           >
-            {t("cta.signin")}
+            {t("cta.demo")}
           </Link>
         </div>
 
         {/* Mobile toggle */}
         <button
           type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground"
+          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
           aria-label="Open menu"
           onClick={() => setMobileOpen((v) => !v)}
         >
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
             <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
       </div>
 
       {/* Mobile panel */}
-      {/* (tetap seperti sebelumnya) */}
-      {/* ... */}
+      {mobileOpen && (
+        <div ref={mobileRef} className="md:hidden border-t border-black/10 bg-white">
+          <div className="mx-auto max-w-screen-xl px-6 py-3 md:px-8 lg:px-10">
+            <nav className="flex flex-col gap-1">
+              {links.map((l) =>
+                l.key === "product" ? (
+                  <details key="m-product" className="group">
+                    <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-black/5">
+                      <span>{t("nav.product")}</span>
+                      <span className="transition-transform group-open:rotate-180">
+                        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">
+                          <path d="M5.5 7.5L10 12l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </span>
+                    </summary>
+                    <div className="ml-2 mt-1 flex flex-col gap-1">
+                      <Link
+                        href="/features"
+                        className="rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {t("nav.features")}
+                      </Link>
+                      <Link
+                        href="/solutions"
+                        className="rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {t("nav.solutions")}
+                      </Link>
+                    </div>
+                  </details>
+                ) : (
+                  <Link
+                    key={`m-${l.href}-${l.label}`}
+                    href={l.href}
+                    className={navItemClass(isActive(l.href), false) + " rounded-lg px-3 py-2"}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {l.label}
+                  </Link>
+                )
+              )}
+            </nav>
+
+            <div className="mt-3 flex items-center gap-2">
+              <Link
+                href={pathname as any}
+                locale={switchLocale}
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
+                aria-label={`Switch to ${switchLocale.toUpperCase()}`}
+              >
+                {switchLocale.toUpperCase()}
+              </Link>
+              <div className="ml-auto flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {t("nav.signin")}
+                </Link>
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {t("cta.demo")}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
