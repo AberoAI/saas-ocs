@@ -21,6 +21,71 @@ function normalizePath(p: string) {
   }
 }
 
+type LinkHref = React.ComponentProps<typeof Link>["href"];
+
+/** Locale dropdown: trigger tampil persis seperti teks "EN/TR" sebelumnya */
+function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
+  const cur = (useLocale() || "en").toUpperCase(); // "EN" | "TR"
+  const next = cur === "EN" ? "tr" : "en";
+  const nextLabel = next.toUpperCase();
+
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const firstItemRef = useRef<HTMLAnchorElement | null>(null);
+
+  // Tutup saat klik di luar / tekan ESC
+  useDismissable<HTMLDivElement>(open, () => setOpen(false), menuRef);
+
+  const openMenu = () => {
+    setOpen(true);
+    queueMicrotask(() => firstItemRef.current?.focus());
+  };
+  const closeMenu = () => {
+    setOpen(false);
+    btnRef.current?.focus();
+  };
+
+  // Kelas trigger dipertahankan agar bentuk/ukuran/warna tidak berubah
+  const triggerClass =
+    "text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md";
+
+  return (
+    <div className="relative inline-flex" ref={menuRef}>
+      <button
+        ref={btnRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => (open ? closeMenu() : openMenu())}
+        className={triggerClass}
+      >
+        {cur}
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Change language"
+          className="absolute right-0 top-full mt-2 min-w-[64px] rounded-md border border-black/10 bg-white p-1 shadow-md z-20"
+        >
+          <Link
+            ref={firstItemRef}
+            href={pathname}
+            locale={next}
+            prefetch={false}
+            role="menuitem"
+            className="block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none"
+            onClick={() => setOpen(false)}
+          >
+            {nextLabel}
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const t = useTranslations();
   const locale = useLocale() || "en";
@@ -59,7 +124,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Dropdown */
+  /** Product dropdown (sudah ada) */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -99,8 +164,6 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  type LinkHref = React.ComponentProps<typeof Link>["href"];
-
   /** Auth Buttons */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
     return (
@@ -120,22 +183,6 @@ export default function Navbar() {
           {SIGNIN_LABEL}
         </Link>
       </>
-    );
-  }
-
-  /** Flat Language Text (no bubble) */
-  function LocaleText({ pathname }: { pathname: LinkHref }) {
-    const cur = (useLocale() || "en").toUpperCase();
-    const next = cur === "EN" ? "tr" : "en";
-    return (
-      <Link
-        href={pathname}
-        locale={next}
-        prefetch={false}
-        className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
-      >
-        {cur}
-      </Link>
     );
   }
 
@@ -248,7 +295,7 @@ export default function Navbar() {
 
         {/* Right (kanan) */}
         <div className="hidden md:flex items-center justify-self-end">
-          <LocaleText pathname={pathname as LinkHref} />
+          <LocaleDropdown pathname={pathname as LinkHref} />
           <div className="ml-[18px] flex items-center gap-3">
             <AuthButtons />
           </div>
