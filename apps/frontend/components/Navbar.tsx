@@ -27,9 +27,6 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  /** Locale toggle (tidak mengubah server route, hanya bahasa UI) */
-  const switchLocale = locale === "en" ? "tr" : "en";
-
   /** Auth labels */
   const isTR = locale.toLowerCase().startsWith("tr");
   const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
@@ -59,7 +56,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Dropdown */
+  /** Product dropdown (desktop) */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -97,6 +94,7 @@ export default function Navbar() {
   useEffect(() => {
     setOpenProduct(false);
     setMobileOpen(false);
+    setOpenLang(false);
   }, [pathname]);
 
   type LinkHref = React.ComponentProps<typeof Link>["href"];
@@ -123,19 +121,90 @@ export default function Navbar() {
     );
   }
 
-  /** Flat Language Text (no bubble) */
-  function LocaleText({ pathname }: { pathname: LinkHref }) {
-    const cur = (useLocale() || "en").toUpperCase();
-    const next = cur === "EN" ? "tr" : "en";
+  /** =========================
+   *  Language Dropdown (EN/TR)
+   *  ========================= */
+  const [openLang, setOpenLang] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement | null>(null);
+  const langButtonRef = useRef<HTMLButtonElement | null>(null);
+  const firstLangItemRef = useRef<HTMLAnchorElement | null>(null);
+  const langMenuId = "lang-menu";
+
+  const curLang = (locale || "en").toLowerCase().startsWith("tr") ? "TR" : "EN";
+  const nextLocale = curLang === "EN" ? "tr" : "en";
+  const nextLabel = nextLocale.toUpperCase();
+
+  const openLangMenu = () => {
+    setOpenLang(true);
+    queueMicrotask(() => firstLangItemRef.current?.focus());
+  };
+  const closeLangMenu = () => {
+    setOpenLang(false);
+    langButtonRef.current?.focus();
+  };
+
+  useDismissable<HTMLDivElement>(openLang, () => setOpenLang(false), langMenuRef);
+
+  function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
     return (
-      <Link
-        href={pathname}
-        locale={next}
-        prefetch={false}
-        className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
+      <div
+        className="relative inline-flex items-center"
+        ref={langMenuRef}
+        onPointerLeave={() => setOpenLang(false)}
       >
-        {cur}
-      </Link>
+        <button
+          ref={langButtonRef}
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={openLang}
+          aria-controls={langMenuId}
+          onClick={() => (openLang ? closeLangMenu() : openLangMenu())}
+          onPointerEnter={() => setOpenLang(true)}
+          className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+        >
+          {curLang}
+          <svg
+            viewBox="0 0 20 20"
+            className={[
+              "ml-1 h-[1em] w-[1em] transition-transform duration-150",
+              openLang ? "rotate-180" : "",
+            ].join(" ")}
+          >
+            <path
+              d="M5.5 7.5L10 12l4.5-4.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        {openLang && (
+          <div
+            id={langMenuId}
+            role="menu"
+            className="absolute right-0 top-full mt-2 min-w-[120px] rounded-xl border border-black/10 bg-white p-1 shadow-xl z-20"
+          >
+            <ul className="flex flex-col">
+              <li role="none">
+                <Link
+                  ref={firstLangItemRef}
+                  href={pathname}
+                  locale={nextLocale}
+                  prefetch={false}
+                  role="menuitem"
+                  className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
+                  onClick={() => setOpenLang(false)}
+                >
+                  {nextLabel}
+                </Link>
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -248,7 +317,8 @@ export default function Navbar() {
 
         {/* Right (kanan) */}
         <div className="hidden md:flex items-center justify-self-end">
-          <LocaleText pathname={pathname as LinkHref} />
+          {/* Language Dropdown */}
+          <LocaleDropdown pathname={pathname as LinkHref} />
           <div className="ml-[18px] flex items-center gap-3">
             <AuthButtons />
           </div>
