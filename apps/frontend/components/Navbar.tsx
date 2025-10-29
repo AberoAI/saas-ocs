@@ -27,7 +27,7 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  /** Locale toggle */
+  /** Locale toggle (tidak mengubah server route, hanya bahasa UI) */
   const switchLocale = locale === "en" ? "tr" : "en";
 
   /** Auth labels */
@@ -246,10 +246,13 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right */}
-        <div className="hidden items-center gap-3 md:flex">
+        {/* Right: HANYA ubah jarak EN/TR → Log in = 18px, tidak mengubah Log in ↔ Sign in */}
+        <div className="hidden items-center md:flex">
           <LocaleText pathname={pathname as LinkHref} />
-          <AuthButtons />
+          {/* wrapper tombol: ml-[18px] untuk jarak dari LocaleText, internal gap tetap 12px (gap-3) */}
+          <div className="ml-[18px] flex items-center gap-3">
+            <AuthButtons />
+          </div>
         </div>
 
         {/* Mobile toggle */}
