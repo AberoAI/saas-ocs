@@ -246,8 +246,8 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right — updated spacing */}
-        <div className="hidden items-center md:flex gap-[18px]">
+        {/* Right */}
+        <div className="hidden items-center gap-3 md:flex">
           <LocaleText pathname={pathname as LinkHref} />
           <AuthButtons />
         </div>
