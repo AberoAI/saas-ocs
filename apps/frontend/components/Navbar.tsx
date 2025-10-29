@@ -142,11 +142,11 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div
-        className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-3.5 md:px-8 lg:px-10"
+        className="mx-auto grid max-w-screen-xl grid-cols-[1fr_auto_1fr] items-center px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* Brand */}
-        <div className="flex items-center gap-3">
+        {/* Brand (kiri) */}
+        <div className="flex items-center gap-3 justify-self-start">
           <Link href="/" className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
               src="/icon.svg"
@@ -161,8 +161,8 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Nav */}
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
+        {/* Nav (tengah) */}
+        <nav className="hidden md:flex items-center justify-center gap-6 justify-self-center" aria-label="Main">
           {links.map((l) =>
             l.key === "product" ? (
               <div
@@ -246,19 +246,18 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right: HANYA ubah jarak EN/TR → Log in = 18px, tidak mengubah Log in ↔ Sign in */}
-        <div className="hidden items-center md:flex">
+        {/* Right (kanan) */}
+        <div className="hidden md:flex items-center justify-self-end">
           <LocaleText pathname={pathname as LinkHref} />
-          {/* wrapper tombol: ml-[18px] untuk jarak dari LocaleText, internal gap tetap 12px (gap-3) */}
           <div className="ml-[18px] flex items-center gap-3">
             <AuthButtons />
           </div>
         </div>
 
-        {/* Mobile toggle */}
+        {/* Mobile toggle (kanan) */}
         <button
           type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
+          className="md:hidden inline-flex items-center justify-center justify-self-end rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
           onClick={() => setMobileOpen((v) => !v)}
         >
           <svg viewBox="0 0 24 24" width="24" height="24">
