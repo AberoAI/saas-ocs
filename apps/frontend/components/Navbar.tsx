@@ -21,14 +21,86 @@ function normalizePath(p: string) {
   }
 }
 
+type LinkHref = React.ComponentProps<typeof Link>["href"];
+
+/** Locale dropdown: identik ukuran/posisi dengan teks "EN/TR" lama */
+function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
+  const cur = (useLocale() || "en").toLowerCase() as "en" | "tr";
+  const LOCALES = ["en", "tr"] as const;
+  const choices = LOCALES.filter((lc) => lc !== cur);
+  const label = cur.toUpperCase() as "EN" | "TR";
+
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const firstItemRef = useRef<HTMLAnchorElement | null>(null);
+
+  useDismissable<HTMLDivElement>(open, () => setOpen(false), menuRef);
+
+  const openMenu = () => {
+    setOpen(true);
+    queueMicrotask(() => firstItemRef.current?.focus());
+  };
+  const closeMenu = () => {
+    setOpen(false);
+    btnRef.current?.focus();
+  };
+
+  return (
+    <div className="relative inline-block align-middle" ref={menuRef}>
+      <button
+        ref={btnRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => (open ? closeMenu() : openMenu())}
+        className="bg-transparent border-0 p-0 m-0 align-middle focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-[3px]"
+        style={{ lineHeight: "inherit", verticalAlign: "baseline" }}
+      >
+        <span className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors align-middle">
+          {label}
+        </span>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Change language"
+          className="absolute left-0 top-full mt-2 min-w-[64px] rounded-md border border-black/10 bg-white p-1 shadow-md z-20"
+        >
+          <ul>
+            {choices.map((lc, idx) => {
+              const up = lc.toUpperCase() as "EN" | "TR";
+              const itemCls =
+                "block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none";
+              return (
+                <li key={lc}>
+                  <Link
+                    ref={idx === 0 ? firstItemRef : undefined}
+                    href={pathname}
+                    locale={lc}
+                    prefetch={false}
+                    role="menuitem"
+                    className={itemCls}
+                    onClick={() => setOpen(false)}
+                  >
+                    {up}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const t = useTranslations();
   const locale = useLocale() || "en";
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
-
-  /** Locale toggle (tidak mengubah server route, hanya bahasa UI) */
-  const switchLocale = locale === "en" ? "tr" : "en";
 
   /** Auth labels */
   const isTR = locale.toLowerCase().startsWith("tr");
@@ -59,9 +131,9 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Dropdown */
+  /** Product dropdown */
   const [openProduct, setOpenProduct] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const productMenuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
   const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
   const menuId = "product-menu";
@@ -77,7 +149,7 @@ export default function Navbar() {
     productButtonRef.current?.focus();
   };
 
-  useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), menuRef);
+  useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), productMenuRef);
 
   const productActive = isActive("/features") || isActive("/solutions");
 
@@ -99,8 +171,6 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  type LinkHref = React.ComponentProps<typeof Link>["href"];
-
   /** Auth Buttons */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
     return (
@@ -120,22 +190,6 @@ export default function Navbar() {
           {SIGNIN_LABEL}
         </Link>
       </>
-    );
-  }
-
-  /** Flat Language Text (no bubble) */
-  function LocaleText({ pathname }: { pathname: LinkHref }) {
-    const cur = (useLocale() || "en").toUpperCase();
-    const next = cur === "EN" ? "tr" : "en";
-    return (
-      <Link
-        href={pathname}
-        locale={next}
-        prefetch={false}
-        className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
-      >
-        {cur}
-      </Link>
     );
   }
 
@@ -170,7 +224,7 @@ export default function Navbar() {
                 className="relative inline-flex items-center"
                 onPointerEnter={handleEnter}
                 onPointerLeave={handleLeave}
-                ref={menuRef}
+                ref={productMenuRef}
               >
                 <button
                   ref={productButtonRef}
@@ -248,13 +302,13 @@ export default function Navbar() {
 
         {/* Right (kanan) */}
         <div className="hidden md:flex items-center justify-self-end">
-          <LocaleText pathname={pathname as LinkHref} />
+          <LocaleDropdown pathname={pathname as LinkHref} />
           <div className="ml-[18px] flex items-center gap-3">
             <AuthButtons />
           </div>
         </div>
 
-        {/* Mobile toggle (kanan) */}
+        {/* Mobile toggle */}
         <button
           type="button"
           className="md:hidden inline-flex items-center justify-center justify-self-end rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
