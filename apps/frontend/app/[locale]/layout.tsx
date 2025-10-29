@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
-// ⬇️ tetap pakai relatif seperti versi kamu
 import { domain, locales, defaultLocale } from "../../i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
+import getUiRequestConfig from "@/i18n/getUiRequestConfig"; // ✅ tambahkan ini
 
 export const dynamic = "force-static";
 
@@ -31,17 +31,14 @@ function getAbsoluteSiteUrl(): string {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-// === NEW: loader yang merge root + per-namespace (features, dst.)
+// === Loader namespace tetap (tidak diubah)
 async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
-  // root messages (nav, hero, dsb)
   const base =
     (await import(`../../messages/${loc}.json`)
       .then((m) => m.default)
       .catch(() => ({}))) as AbstractIntlMessages;
 
-  // daftar namespace per-halaman yang mau kamu split (bisa ditambah sewaktu-waktu)
   const namespaces = ["features"] as const;
-
   const extraPairs = await Promise.all(
     namespaces.map(async (ns) => {
       try {
@@ -53,7 +50,6 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
     })
   );
 
-  // merge menjadi satu objek messages
   return Object.assign({}, base, ...extraPairs);
 }
 
@@ -89,16 +85,19 @@ export default async function LocaleLayout({
 
   setRequestLocale(loc);
 
-  const messages = (await loadMessages(loc)) as AbstractIntlMessages;
+  // ✅ Ambil UI-locale dari cookie (via getUiRequestConfig)
+  const { locale: uiLocale, messages } = await getUiRequestConfig({} as any);
   const site = getAbsoluteSiteUrl();
 
   return (
     <>
-      <NextIntlClientProvider locale={loc} messages={messages}>
+      {/* Gunakan uiLocale agar teks UI mengikuti cookie, bukan prefix */}
+      <NextIntlClientProvider locale={uiLocale} messages={messages}>
         <Navbar />
         {children}
       </NextIntlClientProvider>
 
+      {/* JSON-LD */}
       <Script
         id="ld-softwareapp"
         type="application/ld+json"
@@ -109,10 +108,10 @@ export default async function LocaleLayout({
             name: "AberoAI",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
-            inLanguage: loc,
+            inLanguage: uiLocale, // 🔄 gunakan UI locale
             url: `${site}/${loc}`,
             description:
-              loc === "tr"
+              uiLocale === "tr"
                 ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
                 : "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
           }),
