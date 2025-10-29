@@ -246,8 +246,8 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right — increased gap between language and CTA */}
-        <div className="hidden items-center md:flex" style={{ gap: "0.75rem" }}>
+        {/* Right — updated spacing */}
+        <div className="hidden items-center md:flex gap-[18px]">
           <LocaleText pathname={pathname as LinkHref} />
           <AuthButtons />
         </div>
