@@ -30,7 +30,7 @@ export default function Navbar() {
   /** Locale toggle */
   const switchLocale = locale === "en" ? "tr" : "en";
 
-  /** Auth labels per locale */
+  /** Auth labels */
   const isTR = locale.toLowerCase().startsWith("tr");
   const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
   const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
@@ -59,7 +59,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Dropdown state */
+  /** Dropdown */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -123,8 +123,8 @@ export default function Navbar() {
     );
   }
 
-  /** Single Language Badge */
-  function LocaleBadge({ pathname }: { pathname: LinkHref }) {
+  /** Flat Language Text (no bubble) */
+  function LocaleText({ pathname }: { pathname: LinkHref }) {
     const cur = (useLocale() || "en").toUpperCase();
     const next = cur === "EN" ? "tr" : "en";
     return (
@@ -132,7 +132,7 @@ export default function Navbar() {
         href={pathname}
         locale={next}
         prefetch={false}
-        className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium uppercase text-foreground/80 hover:text-foreground transition-colors bg-[#F7F7F7]/80"
+        className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
       >
         {cur}
       </Link>
@@ -161,7 +161,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Nav desktop */}
+        {/* Nav */}
         <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
           {links.map((l) =>
             l.key === "product" ? (
@@ -179,27 +179,20 @@ export default function Navbar() {
                   aria-expanded={openProduct}
                   aria-controls={menuId}
                   onClick={() => (openProduct ? closeMenu() : openMenu())}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowDown") openMenu();
-                    if (e.key === "Escape") closeMenu();
-                  }}
-                  className="appearance-none bg-transparent p-0 border-0 outline-none cursor-pointer select-none inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
+                  className="inline-flex items-center focus:outline-none"
                 >
                   <span
                     className={[
                       "text-sm leading-none",
-                      productActive ? "!text-foreground !font-medium" : "!text-foreground/70 !font-normal",
+                      productActive ? "text-foreground font-medium" : "text-foreground/70 font-normal",
                     ].join(" ")}
                   >
                     {t("nav.product")}
                   </span>
                   <svg
-                    aria-hidden="true"
                     viewBox="0 0 20 20"
                     className={[
-                      "ml-1 h-[1em] w-[1em] shrink-0 align-middle relative top-[0.075em]",
-                      "transition-transform duration-150",
-                      productActive ? "text-current" : "text-foreground/70",
+                      "ml-1 h-[1em] w-[1em] transition-transform duration-150",
                       openProduct ? "rotate-180" : "",
                     ].join(" ")}
                   >
@@ -215,12 +208,7 @@ export default function Navbar() {
                 </button>
 
                 {openProduct && (
-                  <div
-                    id={menuId}
-                    role="menu"
-                    aria-labelledby={menuId}
-                    className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
-                  >
+                  <div className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10">
                     <ul className="flex flex-col">
                       <li>
                         <Link
@@ -258,16 +246,16 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right side */}
-        <div className="hidden items-center gap-2 md:flex">
-          <LocaleBadge pathname={pathname as LinkHref} />
+        {/* Right */}
+        <div className="hidden items-center gap-3 md:flex">
+          <LocaleText pathname={pathname as LinkHref} />
           <AuthButtons />
         </div>
 
         {/* Mobile toggle */}
         <button
           type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
           onClick={() => setMobileOpen((v) => !v)}
         >
           <svg viewBox="0 0 24 24" width="24" height="24">
@@ -275,33 +263,6 @@ export default function Navbar() {
           </svg>
         </button>
       </div>
-
-      {/* Mobile panel */}
-      {mobileOpen && (
-        <div ref={mobileRef} className="md:hidden border-t border-black/10 bg-white">
-          <div className="mx-auto max-w-screen-xl px-6 py-3 md:px-8 lg:px-10">
-            <nav className="flex flex-col gap-1">
-              {links.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={navItemClass(isActive(l.href), false) + " rounded-lg px-3 py-2"}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="mt-3 flex items-center gap-2">
-              <LocaleBadge pathname={pathname as LinkHref} />
-              <div className="ml-auto flex items-center gap-2">
-                <AuthButtons onClick={() => setMobileOpen(false)} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
