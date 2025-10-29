@@ -74,7 +74,6 @@ export default function Navbar() {
     productButtonRef.current?.focus();
   };
 
-  // DRY: dismiss handling via hook (generic T)
   useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), menuRef);
 
   const productActive = isActive("/features") || isActive("/solutions");
@@ -92,13 +91,11 @@ export default function Navbar() {
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
 
-  /** Close any menu on route change */
   useEffect(() => {
     setOpenProduct(false);
     setMobileOpen(false);
   }, [pathname]);
 
-  /** Helper type for typed Link href (tanpa any) */
   type LinkHref = React.ComponentProps<typeof Link>["href"];
 
   return (
@@ -230,7 +227,6 @@ export default function Navbar() {
 
         {/* RIGHT: Locale + Auth/CTA (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
-          {/* Locale switch: preserve current path via typed Link href (tanpa any) */}
           <Link
             href={pathname as LinkHref}
             locale={switchLocale}
@@ -240,19 +236,20 @@ export default function Navbar() {
             {switchLocale.toUpperCase()}
           </Link>
 
+          {/* Abu-abu: Log in */}
           <Link
             href="/login"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
           >
-            {t("nav.signin")}
+            Log in
           </Link>
 
-          {/* Biru: ganti dari cta.demo → Sign in (hanya ini yang diubah) */}
+          {/* Biru: Sign in */}
           <Link
             href="/login"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
           >
-            {t("nav.signin")}
+            Sign in
           </Link>
         </div>
 
@@ -330,15 +327,14 @@ export default function Navbar() {
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {t("nav.signin")}
+                  Log in
                 </Link>
-                {/* Biru: ganti dari cta.demo → Sign in (hanya ini yang diubah) */}
                 <Link
                   href="/login"
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {t("nav.signin")}
+                  Sign in
                 </Link>
               </div>
             </div>
