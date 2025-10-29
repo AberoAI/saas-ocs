@@ -23,20 +23,13 @@ function normalizePath(p: string) {
 
 export default function Navbar() {
   const t = useTranslations();
-  const currentLocale = useLocale();
+  const currentLocale = useLocale() || "en";
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
   /** Locale */
-  const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
-  const locale = m?.[1] || "en";
-  const localePrefix = `/${locale}`;
-  const switchLocale = currentLocale === "en" ? "tr" : "en";
-
-  /** Auth labels per-locale */
-  const isTR = currentLocale?.toLowerCase().startsWith("tr");
-  const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
-  const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
+  const localePrefix = `/${currentLocale}`;
+  const switchLocale = currentLocale.toLowerCase() === "en" ? "tr" : "en";
 
   /** Links (label via i18n) */
   const links = useMemo(
@@ -105,6 +98,31 @@ export default function Navbar() {
   /** Typed href helper */
   type LinkHref = React.ComponentProps<typeof Link>["href"];
 
+  /** DRY: tombol auth (dipakai desktop & mobile) */
+  function AuthButtons({ onClick }: { onClick?: () => void }) {
+    const isTR = currentLocale.toLowerCase().startsWith("tr");
+    const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
+    const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
+    return (
+      <>
+        <Link
+          href="/login"
+          className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
+          onClick={onClick}
+        >
+          {LOGIN_LABEL}
+        </Link>
+        <Link
+          href="/login"
+          className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
+          onClick={onClick}
+        >
+          {SIGNIN_LABEL}
+        </Link>
+      </>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div
@@ -120,7 +138,7 @@ export default function Navbar() {
               width={32}
               height={32}
               className="object-contain"
-              priority={pathname === "/" || pathname === `/${locale}`}
+              priority={pathname === "/" || pathname === `/${currentLocale}`}
               sizes="32px"
             />
             <span className="text-2xl font-medium text-navbar">AberoAI</span>
@@ -237,27 +255,14 @@ export default function Navbar() {
           <Link
             href={pathname as LinkHref}
             locale={switchLocale}
+            prefetch={false}
             className="inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
             aria-label={`Switch to ${switchLocale.toUpperCase()}`}
           >
             {switchLocale.toUpperCase()}
           </Link>
 
-          {/* Abu-abu: Log in / Giriş */}
-          <Link
-            href="/login"
-            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
-          >
-            {LOGIN_LABEL}
-          </Link>
-
-          {/* Biru: Sign in / Giriş yap */}
-          <Link
-            href="/login"
-            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
-          >
-            {SIGNIN_LABEL}
-          </Link>
+          <AuthButtons />
         </div>
 
         {/* Mobile toggle */}
@@ -323,28 +328,14 @@ export default function Navbar() {
               <Link
                 href={pathname as LinkHref}
                 locale={switchLocale}
+                prefetch={false}
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
                 aria-label={`Switch to ${switchLocale.toUpperCase()}`}
               >
                 {switchLocale.toUpperCase()}
               </Link>
               <div className="ml-auto flex items-center gap-2">
-                {/* Abu-abu: Log in / Giriş */}
-                <Link
-                  href="/login"
-                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {LOGIN_LABEL}
-                </Link>
-                {/* Biru: Sign in / Giriş yap */}
-                <Link
-                  href="/login"
-                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {SIGNIN_LABEL}
-                </Link>
+                <AuthButtons onClick={() => setMobileOpen(false)} />
               </div>
             </div>
           </div>
