@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
 
+/** Path normalizer (decode + trim trailing slash) */
 function normalizePath(p: string) {
   try {
     const withoutHash = (p || "/").split("#")[0] ?? "/";
@@ -26,11 +27,18 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
+  /** Locale */
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const locale = m?.[1] || "en";
   const localePrefix = `/${locale}`;
   const switchLocale = currentLocale === "en" ? "tr" : "en";
 
+  /** Auth labels per-locale */
+  const isTR = currentLocale?.toLowerCase().startsWith("tr");
+  const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
+  const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
+
+  /** Links (label via i18n) */
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -41,6 +49,7 @@ export default function Navbar() {
     [t]
   );
 
+  /** Active checker (locale-aware) */
   const current = pathname;
   const isActive = (href: string) => {
     const target = normalizePath(
@@ -52,6 +61,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
+  /** Desktop Product dropdown */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -81,15 +91,18 @@ export default function Navbar() {
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
 
+  /** Mobile menu */
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
 
+  /** Close menus on route change */
   useEffect(() => {
     setOpenProduct(false);
     setMobileOpen(false);
   }, [pathname]);
 
+  /** Typed href helper */
   type LinkHref = React.ComponentProps<typeof Link>["href"];
 
   return (
@@ -230,20 +243,20 @@ export default function Navbar() {
             {switchLocale.toUpperCase()}
           </Link>
 
-          {/* Abu muda: Log in */}
+          {/* Abu-abu: Log in / Giriş */}
           <Link
             href="/login"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
           >
-            Log in
+            {LOGIN_LABEL}
           </Link>
 
-          {/* Biru: Sign in */}
+          {/* Biru: Sign in / Giriş yap */}
           <Link
             href="/login"
             className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
           >
-            Sign in
+            {SIGNIN_LABEL}
           </Link>
         </div>
 
@@ -316,21 +329,21 @@ export default function Navbar() {
                 {switchLocale.toUpperCase()}
               </Link>
               <div className="ml-auto flex items-center gap-2">
-                {/* Abu muda */}
+                {/* Abu-abu: Log in / Giriş */}
                 <Link
                   href="/login"
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Log in
+                  {LOGIN_LABEL}
                 </Link>
-                {/* Biru */}
+                {/* Biru: Sign in / Giriş yap */}
                 <Link
                   href="/login"
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Sign in
+                  {SIGNIN_LABEL}
                 </Link>
               </div>
             </div>
