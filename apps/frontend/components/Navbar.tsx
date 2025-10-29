@@ -23,18 +23,19 @@ function normalizePath(p: string) {
 
 type LinkHref = React.ComponentProps<typeof Link>["href"];
 
-/** Locale dropdown: trigger tampil persis seperti teks "EN/TR" sebelumnya */
+/** Locale dropdown: trigger 100% sama seperti teks "EN/TR" sebelumnya */
 function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
-  const cur = (useLocale() || "en").toUpperCase(); // "EN" | "TR"
-  const next = cur === "EN" ? "tr" : "en";
-  const nextLabel = next.toUpperCase();
+  const cur = (useLocale() || "en").toLowerCase() as "en" | "tr";
+  const LOCALES = ["en", "tr"] as const;               // sesuai tipe Link
+  const choices = LOCALES.filter((lc) => lc !== cur);  // tampilkan selain yang aktif
+  const label = (cur.toUpperCase() as "EN" | "TR");
 
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const firstItemRef = useRef<HTMLAnchorElement | null>(null);
 
-  // Tutup saat klik di luar / tekan ESC
+  // Tutup saat klik luar / ESC
   useDismissable<HTMLDivElement>(open, () => setOpen(false), menuRef);
 
   const openMenu = () => {
@@ -46,10 +47,7 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
     btnRef.current?.focus();
   };
 
-  // Kelas trigger dipertahankan agar bentuk/ukuran/warna tidak berubah
-  const triggerClass =
-    "text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md";
-
+  // Button di-reset total agar ukuran/line-height tidak berubah
   return (
     <div className="relative inline-flex" ref={menuRef}>
       <button
@@ -58,28 +56,42 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => (open ? closeMenu() : openMenu())}
-        className={triggerClass}
+        className="m-0 inline bg-transparent p-0 border-0 appearance-none leading-none align-baseline focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-[3px]"
       >
-        {cur}
+        {/* kelas teks PERSIS seperti versi teks datar sebelumnya */}
+        <span className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors">
+          {label}
+        </span>
       </button>
 
       {open && (
         <div
           role="menu"
           aria-label="Change language"
-          className="absolute right-0 top-full mt-2 min-w-[64px] rounded-md border border-black/10 bg-white p-1 shadow-md z-20"
+          className="absolute left-0 top-full mt-2 min-w-[64px] rounded-md border border-black/10 bg-white p-1 shadow-md z-20"
         >
-          <Link
-            ref={firstItemRef}
-            href={pathname}
-            locale={next}
-            prefetch={false}
-            role="menuitem"
-            className="block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none"
-            onClick={() => setOpen(false)}
-          >
-            {nextLabel}
-          </Link>
+          <ul>
+            {choices.map((lc, idx) => {
+              const up = (lc.toUpperCase() as "EN" | "TR");
+              const itemCls =
+                "block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none";
+              return (
+                <li key={lc}>
+                  <Link
+                    ref={idx === 0 ? firstItemRef : undefined}
+                    href={pathname}
+                    locale={lc} // bertipe "en" | "tr"
+                    prefetch={false}
+                    role="menuitem"
+                    className={itemCls}
+                    onClick={() => setOpen(false)}
+                  >
+                    {up}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
     </div>
@@ -91,9 +103,6 @@ export default function Navbar() {
   const locale = useLocale() || "en";
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
-
-  /** Locale toggle (tidak mengubah server route, hanya bahasa UI) */
-  const switchLocale = locale === "en" ? "tr" : "en";
 
   /** Auth labels */
   const isTR = locale.toLowerCase().startsWith("tr");
@@ -126,7 +135,7 @@ export default function Navbar() {
 
   /** Product dropdown (sudah ada) */
   const [openProduct, setOpenProduct] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const productMenuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
   const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
   const menuId = "product-menu";
@@ -142,7 +151,7 @@ export default function Navbar() {
     productButtonRef.current?.focus();
   };
 
-  useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), menuRef);
+  useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), productMenuRef);
 
   const productActive = isActive("/features") || isActive("/solutions");
 
@@ -217,7 +226,7 @@ export default function Navbar() {
                 className="relative inline-flex items-center"
                 onPointerEnter={handleEnter}
                 onPointerLeave={handleLeave}
-                ref={menuRef}
+                ref={productMenuRef}
               >
                 <button
                   ref={productButtonRef}
