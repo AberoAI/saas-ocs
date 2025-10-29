@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
 
-/** Path normalizer (decode + trim trailing slash) */
+/** Path normalizer */
 function normalizePath(p: string) {
   try {
     const withoutHash = (p || "/").split("#")[0] ?? "/";
@@ -23,11 +23,19 @@ function normalizePath(p: string) {
 
 export default function Navbar() {
   const t = useTranslations();
-  const currentLocale = useLocale() || "en";
+  const locale = useLocale() || "en";
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  /** Links (label via i18n) */
+  /** Locale toggle */
+  const switchLocale = locale === "en" ? "tr" : "en";
+
+  /** Auth labels per locale */
+  const isTR = locale.toLowerCase().startsWith("tr");
+  const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
+  const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
+
+  /** Links */
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -38,8 +46,8 @@ export default function Navbar() {
     [t]
   );
 
-  /** Active checker (locale-aware) */
-  const localePrefix = `/${currentLocale}`;
+  /** Active link */
+  const localePrefix = `/${locale}`;
   const current = pathname;
   const isActive = (href: string) => {
     const target = normalizePath(
@@ -51,7 +59,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Desktop Product dropdown */
+  /** Dropdown state */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -86,20 +94,15 @@ export default function Navbar() {
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
 
-  /** Close menus on route change */
   useEffect(() => {
     setOpenProduct(false);
     setMobileOpen(false);
   }, [pathname]);
 
-  /** Typed href helper */
   type LinkHref = React.ComponentProps<typeof Link>["href"];
 
-  /** DRY: tombol auth (dipakai desktop & mobile) */
+  /** Auth Buttons */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
-    const isTR = (useLocale() || "en").toLowerCase().startsWith("tr");
-    const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
-    const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
     return (
       <>
         <Link
@@ -120,9 +123,9 @@ export default function Navbar() {
     );
   }
 
-  /** SINGLE badge: tampilkan bahasa aktif (EN/TR). Klik = toggle locale. */
-  function SingleLocaleBadge({ pathname }: { pathname: LinkHref }) {
-    const cur = (useLocale() || "en").toUpperCase(); // EN | TR
+  /** Single Language Badge */
+  function LocaleBadge({ pathname }: { pathname: LinkHref }) {
+    const cur = (useLocale() || "en").toUpperCase();
     const next = cur === "EN" ? "tr" : "en";
     return (
       <Link
@@ -130,7 +133,6 @@ export default function Navbar() {
         locale={next}
         prefetch={false}
         className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium uppercase text-foreground/80 hover:text-foreground transition-colors bg-[#F7F7F7]/80"
-        aria-label="Change language"
       >
         {cur}
       </Link>
@@ -143,7 +145,7 @@ export default function Navbar() {
         className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* LEFT: Brand */}
+        {/* Brand */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
@@ -152,14 +154,14 @@ export default function Navbar() {
               width={32}
               height={32}
               className="object-contain"
-              priority={pathname === "/" || pathname === `/${useLocale() || "en"}`}
+              priority={pathname === "/" || pathname === `/${locale}`}
               sizes="32px"
             />
             <span className="text-2xl font-medium text-navbar">AberoAI</span>
           </Link>
         </div>
 
-        {/* CENTER: Nav (desktop) */}
+        {/* Nav desktop */}
         <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
           {links.map((l) =>
             l.key === "product" ? (
@@ -177,7 +179,6 @@ export default function Navbar() {
                   aria-expanded={openProduct}
                   aria-controls={menuId}
                   onClick={() => (openProduct ? closeMenu() : openMenu())}
-                  onFocus={handleEnter}
                   onKeyDown={(e) => {
                     if (e.key === "ArrowDown") openMenu();
                     if (e.key === "Escape") closeMenu();
@@ -201,7 +202,6 @@ export default function Navbar() {
                       productActive ? "text-current" : "text-foreground/70",
                       openProduct ? "rotate-180" : "",
                     ].join(" ")}
-                    focusable="false"
                   >
                     <path
                       d="M5.5 7.5L10 12l4.5-4.5"
@@ -220,28 +220,22 @@ export default function Navbar() {
                     role="menu"
                     aria-labelledby={menuId}
                     className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10"
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") closeMenu();
-                      if (e.key === "Tab") setOpenProduct(false);
-                    }}
                   >
                     <ul className="flex flex-col">
-                      <li role="none">
+                      <li>
                         <Link
                           ref={firstMenuItemRef}
-                          role="menuitem"
                           href="/features"
-                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
+                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
                           onClick={() => setOpenProduct(false)}
                         >
                           {t("nav.features")}
                         </Link>
                       </li>
-                      <li role="none">
+                      <li>
                         <Link
-                          role="menuitem"
                           href="/solutions"
-                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground focus:bg-black/5 focus:outline-none"
+                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
                           onClick={() => setOpenProduct(false)}
                         >
                           {t("nav.solutions")}
@@ -253,7 +247,7 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                key={`${l.href}-${l.label}`}
+                key={l.href}
                 href={l.href}
                 aria-current={isActive(l.href) ? "page" : undefined}
                 className={navItemClass(isActive(l.href), true)}
@@ -264,9 +258,9 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* RIGHT: Locale + Auth (desktop) */}
+        {/* Right side */}
         <div className="hidden items-center gap-2 md:flex">
-          <SingleLocaleBadge pathname={pathname as LinkHref} />
+          <LocaleBadge pathname={pathname as LinkHref} />
           <AuthButtons />
         </div>
 
@@ -274,10 +268,9 @@ export default function Navbar() {
         <button
           type="button"
           className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
-          aria-label="Open menu"
           onClick={() => setMobileOpen((v) => !v)}
         >
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+          <svg viewBox="0 0 24 24" width="24" height="24">
             <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
@@ -288,49 +281,20 @@ export default function Navbar() {
         <div ref={mobileRef} className="md:hidden border-t border-black/10 bg-white">
           <div className="mx-auto max-w-screen-xl px-6 py-3 md:px-8 lg:px-10">
             <nav className="flex flex-col gap-1">
-              {links.map((l) =>
-                l.key === "product" ? (
-                  <details key="m-product" className="group">
-                    <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-black/5">
-                      <span>{t("nav.product")}</span>
-                      <span className="transition-transform group-open:rotate-180">
-                        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false">
-                          <path d="M5.5 7.5L10 12l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
-                      </span>
-                    </summary>
-                    <div className="ml-2 mt-1 flex flex-col gap-1">
-                      <Link
-                        href="/features"
-                        className="rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {t("nav.features")}
-                      </Link>
-                      <Link
-                        href="/solutions"
-                        className="rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {t("nav.solutions")}
-                      </Link>
-                    </div>
-                  </details>
-                ) : (
-                  <Link
-                    key={`m-${l.href}-${l.label}`}
-                    href={l.href}
-                    className={navItemClass(isActive(l.href), false) + " rounded-lg px-3 py-2"}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {l.label}
-                  </Link>
-                )
-              )}
+              {links.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={navItemClass(isActive(l.href), false) + " rounded-lg px-3 py-2"}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {l.label}
+                </Link>
+              ))}
             </nav>
 
             <div className="mt-3 flex items-center gap-2">
-              <SingleLocaleBadge pathname={pathname as LinkHref} />
+              <LocaleBadge pathname={pathname as LinkHref} />
               <div className="ml-auto flex items-center gap-2">
                 <AuthButtons onClick={() => setMobileOpen(false)} />
               </div>
