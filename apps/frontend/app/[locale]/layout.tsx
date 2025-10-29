@@ -1,12 +1,12 @@
+// apps/frontend/app/[locale]/layout.tsx
 import { notFound } from "next/navigation";
-import { NextIntlClientProvider } from "next-intl";
+import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
+// ⬇️ tetap pakai relatif seperti versi kamu
 import { domain, locales, defaultLocale } from "../../i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
-import getUiRequestConfig from "@/i18n/getUiRequestConfig";
-import type { GetRequestConfigParams } from "next-intl/server";
 
 export const dynamic = "force-static";
 
@@ -18,7 +18,7 @@ function isLocale(val: string): val is Locale {
 }
 
 export function generateStaticParams() {
-  return locales.map((l) => ({ locale: l }));
+  return (locales as ReadonlyArray<Locale>).map((l: Locale) => ({ locale: l }));
 }
 
 function getAbsoluteSiteUrl(): string {
@@ -29,6 +29,32 @@ function getAbsoluteSiteUrl(): string {
     "";
   const raw = fromConfig || fromEnv || "https://aberoai.com";
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
+
+// === NEW: loader yang merge root + per-namespace (features, dst.)
+async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
+  // root messages (nav, hero, dsb)
+  const base =
+    (await import(`../../messages/${loc}.json`)
+      .then((m) => m.default)
+      .catch(() => ({}))) as AbstractIntlMessages;
+
+  // daftar namespace per-halaman yang mau kamu split (bisa ditambah sewaktu-waktu)
+  const namespaces = ["features"] as const;
+
+  const extraPairs = await Promise.all(
+    namespaces.map(async (ns) => {
+      try {
+        const mod = (await import(`@/messages/${loc}/${ns}.json`)).default;
+        return { [ns]: mod } as AbstractIntlMessages;
+      } catch {
+        return {} as AbstractIntlMessages;
+      }
+    })
+  );
+
+  // merge menjadi satu objek messages
+  return Object.assign({}, base, ...extraPairs);
 }
 
 export async function generateMetadata(
@@ -63,18 +89,12 @@ export default async function LocaleLayout({
 
   setRequestLocale(loc);
 
-  // ✅ Type-correct object for next-intl 3.26.5
-  const params: GetRequestConfigParams = {
-    locale: loc,
-    requestLocale: Promise.resolve(loc),
-  };
-
-  const { locale: uiLocale, messages } = await getUiRequestConfig(params);
+  const messages = (await loadMessages(loc)) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
 
   return (
     <>
-      <NextIntlClientProvider locale={uiLocale} messages={messages}>
+      <NextIntlClientProvider locale={loc} messages={messages}>
         <Navbar />
         {children}
       </NextIntlClientProvider>
@@ -89,10 +109,10 @@ export default async function LocaleLayout({
             name: "AberoAI",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
-            inLanguage: uiLocale,
+            inLanguage: loc,
             url: `${site}/${loc}`,
             description:
-              uiLocale === "tr"
+              loc === "tr"
                 ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
                 : "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
           }),

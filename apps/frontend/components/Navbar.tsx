@@ -1,4 +1,3 @@
-// apps/frontend/components/Navbar.tsx
 "use client";
 
 import Image from "next/image";
@@ -8,8 +7,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
-import LocaleDropdown from "@/components/LocaleDropdown"; // ✅ gunakan versi baru
 
+/** Path normalizer */
 function normalizePath(p: string) {
   try {
     const withoutHash = (p || "/").split("#")[0] ?? "/";
@@ -22,16 +21,93 @@ function normalizePath(p: string) {
   }
 }
 
+type LinkHref = React.ComponentProps<typeof Link>["href"];
+
+/** Locale dropdown: identik ukuran/posisi dengan teks "EN/TR" lama */
+function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
+  const cur = (useLocale() || "en").toLowerCase() as "en" | "tr";
+  const LOCALES = ["en", "tr"] as const;
+  const choices = LOCALES.filter((lc) => lc !== cur);
+  const label = cur.toUpperCase() as "EN" | "TR";
+
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const firstItemRef = useRef<HTMLAnchorElement | null>(null);
+
+  useDismissable<HTMLDivElement>(open, () => setOpen(false), menuRef);
+
+  const openMenu = () => {
+    setOpen(true);
+    queueMicrotask(() => firstItemRef.current?.focus());
+  };
+  const closeMenu = () => {
+    setOpen(false);
+    btnRef.current?.focus();
+  };
+
+  return (
+    <div className="relative inline-block align-middle" ref={menuRef}>
+      <button
+        ref={btnRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => (open ? closeMenu() : openMenu())}
+        className="bg-transparent border-0 p-0 m-0 align-middle focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-[3px]"
+        style={{ lineHeight: "inherit", verticalAlign: "baseline" }}
+      >
+        <span className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors align-middle">
+          {label}
+        </span>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Change language"
+          className="absolute left-0 top-full mt-2 min-w-[64px] rounded-md border border-black/10 bg-white p-1 shadow-md z-20"
+        >
+          <ul>
+            {choices.map((lc, idx) => {
+              const up = lc.toUpperCase() as "EN" | "TR";
+              const itemCls =
+                "block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none";
+              return (
+                <li key={lc}>
+                  <Link
+                    ref={idx === 0 ? firstItemRef : undefined}
+                    href={pathname}
+                    locale={lc}
+                    prefetch={false}
+                    role="menuitem"
+                    className={itemCls}
+                    onClick={() => setOpen(false)}
+                  >
+                    {up}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const t = useTranslations();
   const locale = useLocale() || "en";
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
+  /** Auth labels */
   const isTR = locale.toLowerCase().startsWith("tr");
   const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
   const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
 
+  /** Links */
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -42,6 +118,7 @@ export default function Navbar() {
     [t]
   );
 
+  /** Active link */
   const localePrefix = `/${locale}`;
   const current = pathname;
   const isActive = (href: string) => {
@@ -54,6 +131,7 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
+  /** Product dropdown */
   const [openProduct, setOpenProduct] = useState(false);
   const productMenuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -83,6 +161,7 @@ export default function Navbar() {
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
 
+  /** Mobile menu */
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
@@ -92,6 +171,7 @@ export default function Navbar() {
     setMobileOpen(false);
   }, [pathname]);
 
+  /** Auth Buttons */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
     return (
       <>
@@ -119,7 +199,7 @@ export default function Navbar() {
         className="mx-auto grid max-w-screen-xl grid-cols-[1fr_auto_1fr] items-center px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* Brand */}
+        {/* Brand (kiri) */}
         <div className="flex items-center gap-3 justify-self-start">
           <Link href="/" className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
@@ -135,7 +215,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Nav tengah */}
+        {/* Nav (tengah) */}
         <nav className="hidden md:flex items-center justify-center gap-6 justify-self-center" aria-label="Main">
           {links.map((l) =>
             l.key === "product" ? (
@@ -220,9 +300,9 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Bagian kanan */}
+        {/* Right (kanan) */}
         <div className="hidden md:flex items-center justify-self-end">
-          <LocaleDropdown /> {/* ✅ versi cookie-based */}
+          <LocaleDropdown pathname={pathname as LinkHref} />
           <div className="ml-[18px] flex items-center gap-3">
             <AuthButtons />
           </div>
