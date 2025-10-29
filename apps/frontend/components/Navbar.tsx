@@ -29,7 +29,6 @@ export default function Navbar() {
 
   /** Locale */
   const localePrefix = `/${currentLocale}`;
-  const switchLocale = currentLocale.toLowerCase() === "en" ? "tr" : "en";
 
   /** Links (label via i18n) */
   const links = useMemo(
@@ -100,7 +99,7 @@ export default function Navbar() {
 
   /** DRY: tombol auth (dipakai desktop & mobile) */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
-    const isTR = currentLocale.toLowerCase().startsWith("tr");
+    const isTR = (useLocale() || "en").toLowerCase().startsWith("tr");
     const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
     const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
     return (
@@ -120,6 +119,52 @@ export default function Navbar() {
           {SIGNIN_LABEL}
         </Link>
       </>
+    );
+  }
+
+  /** Locale chips: indikator aktif + switcher */
+  function LocaleChips({ pathname }: { pathname: LinkHref }) {
+    const locale = useLocale() || "en";
+    const isEN = locale.toLowerCase() === "en";
+    const base =
+      "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-medium uppercase transition-colors";
+    const active = "text-foreground bg-[#F7F7F7]/80";
+    const inactive = "text-foreground/60 hover:text-foreground";
+
+    return (
+      <div className="inline-flex items-center gap-1">
+        {isEN ? (
+          <>
+            <span className={`${base} ${active}`} aria-current="true">
+              EN
+            </span>
+            <Link
+              href={pathname}
+              locale="tr"
+              prefetch={false}
+              className={`${base} ${inactive}`}
+              aria-label="Switch to Turkish"
+            >
+              TR
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              href={pathname}
+              locale="en"
+              prefetch={false}
+              className={`${base} ${inactive}`}
+              aria-label="Switch to English"
+            >
+              EN
+            </Link>
+            <span className={`${base} ${active}`} aria-current="true">
+              TR
+            </span>
+          </>
+        )}
+      </div>
     );
   }
 
@@ -252,16 +297,7 @@ export default function Navbar() {
 
         {/* RIGHT: Locale + Auth/CTA (desktop) */}
         <div className="hidden items-center gap-2 md:flex">
-          <Link
-            href={pathname as LinkHref}
-            locale={switchLocale}
-            prefetch={false}
-            className="inline-flex items-center px-2.5 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
-            aria-label={`Switch to ${switchLocale.toUpperCase()}`}
-          >
-            {switchLocale.toUpperCase()}
-          </Link>
-
+          <LocaleChips pathname={pathname as LinkHref} />
           <AuthButtons />
         </div>
 
@@ -325,15 +361,7 @@ export default function Navbar() {
             </nav>
 
             <div className="mt-3 flex items-center gap-2">
-              <Link
-                href={pathname as LinkHref}
-                locale={switchLocale}
-                prefetch={false}
-                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
-                aria-label={`Switch to ${switchLocale.toUpperCase()}`}
-              >
-                {switchLocale.toUpperCase()}
-              </Link>
+              <LocaleChips pathname={pathname as LinkHref} />
               <div className="ml-auto flex items-center gap-2">
                 <AuthButtons onClick={() => setMobileOpen(false)} />
               </div>
