@@ -8,7 +8,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
 
-/** Path normalizer (decode + trim trailing slash) */
 function normalizePath(p: string) {
   try {
     const withoutHash = (p || "/").split("#")[0] ?? "/";
@@ -27,13 +26,11 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  /** Locale & prefix */
   const m = pathname.match(/^\/([A-Za-z-]{2,5})(?:\/|$)/);
   const locale = m?.[1] || "en";
   const localePrefix = `/${locale}`;
   const switchLocale = currentLocale === "en" ? "tr" : "en";
 
-  /** Links (label via i18n) */
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
@@ -44,7 +41,6 @@ export default function Navbar() {
     [t]
   );
 
-  /** Active state checker (locale-aware) */
   const current = pathname;
   const isActive = (href: string) => {
     const target = normalizePath(
@@ -56,7 +52,6 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Desktop Product dropdown */
   const [openProduct, setOpenProduct] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -86,7 +81,6 @@ export default function Navbar() {
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
 
-  /** Mobile menu */
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
   useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
@@ -236,10 +230,10 @@ export default function Navbar() {
             {switchLocale.toUpperCase()}
           </Link>
 
-          {/* Abu-abu: Log in */}
+          {/* Abu muda: Log in */}
           <Link
             href="/login"
-            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
+            className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
           >
             Log in
           </Link>
@@ -322,13 +316,15 @@ export default function Navbar() {
                 {switchLocale.toUpperCase()}
               </Link>
               <div className="ml-auto flex items-center gap-2">
+                {/* Abu muda */}
                 <Link
                   href="/login"
-                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-cta-login-bg"
+                  className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Log in
                 </Link>
+                {/* Biru */}
                 <Link
                   href="/login"
                   className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
