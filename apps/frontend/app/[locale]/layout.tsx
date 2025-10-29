@@ -1,12 +1,12 @@
 // apps/frontend/app/[locale]/layout.tsx
 import { notFound } from "next/navigation";
-import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
+import { NextIntlClientProvider } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { domain, locales, defaultLocale } from "../../i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
-import getUiRequestConfig from "@/i18n/getUiRequestConfig"; // ✅ tambahkan ini
+import getUiRequestConfig from "@/i18n/getUiRequestConfig";
 
 export const dynamic = "force-static";
 
@@ -18,7 +18,7 @@ function isLocale(val: string): val is Locale {
 }
 
 export function generateStaticParams() {
-  return (locales as ReadonlyArray<Locale>).map((l: Locale) => ({ locale: l }));
+  return locales.map((l) => ({ locale: l }));
 }
 
 function getAbsoluteSiteUrl(): string {
@@ -29,28 +29,6 @@ function getAbsoluteSiteUrl(): string {
     "";
   const raw = fromConfig || fromEnv || "https://aberoai.com";
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
-}
-
-// === Loader namespace tetap (tidak diubah)
-async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
-  const base =
-    (await import(`../../messages/${loc}.json`)
-      .then((m) => m.default)
-      .catch(() => ({}))) as AbstractIntlMessages;
-
-  const namespaces = ["features"] as const;
-  const extraPairs = await Promise.all(
-    namespaces.map(async (ns) => {
-      try {
-        const mod = (await import(`@/messages/${loc}/${ns}.json`)).default;
-        return { [ns]: mod } as AbstractIntlMessages;
-      } catch {
-        return {} as AbstractIntlMessages;
-      }
-    })
-  );
-
-  return Object.assign({}, base, ...extraPairs);
 }
 
 export async function generateMetadata(
@@ -85,19 +63,21 @@ export default async function LocaleLayout({
 
   setRequestLocale(loc);
 
-  // ✅ Ambil UI-locale dari cookie (via getUiRequestConfig)
-  const { locale: uiLocale, messages } = await getUiRequestConfig({} as any);
+  // ✅ panggil dengan argumen minimal yang memenuhi tipe GetRequestConfigParams
+  const { locale: uiLocale, messages } = await getUiRequestConfig({
+    locale: loc,
+    requestLocale: loc,
+  } as any);
+
   const site = getAbsoluteSiteUrl();
 
   return (
     <>
-      {/* Gunakan uiLocale agar teks UI mengikuti cookie, bukan prefix */}
       <NextIntlClientProvider locale={uiLocale} messages={messages}>
         <Navbar />
         {children}
       </NextIntlClientProvider>
 
-      {/* JSON-LD */}
       <Script
         id="ld-softwareapp"
         type="application/ld+json"
@@ -108,7 +88,7 @@ export default async function LocaleLayout({
             name: "AberoAI",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
-            inLanguage: uiLocale, // 🔄 gunakan UI locale
+            inLanguage: uiLocale,
             url: `${site}/${loc}`,
             description:
               uiLocale === "tr"
