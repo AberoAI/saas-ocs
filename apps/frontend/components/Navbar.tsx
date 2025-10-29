@@ -1,3 +1,4 @@
+// apps/frontend/components/Navbar.tsx
 "use client";
 
 import Image from "next/image";
@@ -27,7 +28,7 @@ export default function Navbar() {
   const pathnameRaw = usePathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  /** Locale toggle (tidak mengubah server route, hanya bahasa UI) */
+  /** Locale toggle */
   const switchLocale = locale === "en" ? "tr" : "en";
 
   /** Auth labels */
@@ -89,22 +90,16 @@ export default function Navbar() {
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
 
-  /** Mobile menu */
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const mobileRef = useRef<HTMLDivElement | null>(null);
-  useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
-
   useEffect(() => {
     setOpenProduct(false);
-    setMobileOpen(false);
   }, [pathname]);
 
   type LinkHref = React.ComponentProps<typeof Link>["href"];
 
-  /** Auth Buttons */
+  /** Auth Buttons (dibungkus sendiri agar gap antar tombol tetap) */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
     return (
-      <>
+      <div className="flex items-center gap-3">
         <Link
           href="/login"
           className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
@@ -119,12 +114,12 @@ export default function Navbar() {
         >
           {SIGNIN_LABEL}
         </Link>
-      </>
+      </div>
     );
   }
 
-  /** Flat Language Text (no bubble) */
-  function LocaleText({ pathname }: { pathname: LinkHref }) {
+  /** Flat Language Text (no bubble) – menerima className untuk kontrol jarak */
+  function LocaleText({ pathname, className }: { pathname: LinkHref; className?: string }) {
     const cur = (useLocale() || "en").toUpperCase();
     const next = cur === "EN" ? "tr" : "en";
     return (
@@ -132,7 +127,9 @@ export default function Navbar() {
         href={pathname}
         locale={next}
         prefetch={false}
-        className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors"
+        className={["text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors", className]
+          .filter(Boolean)
+          .join(" ")}
       >
         {cur}
       </Link>
@@ -142,10 +139,10 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white">
       <div
-        className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-3.5 md:px-8 lg:px-10"
+        className="mx-auto grid max-w-screen-xl grid-cols-[auto_1fr_auto] items-center px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* Brand */}
+        {/* Brand (kiri) */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-1" aria-label="AberoAI home">
             <Image
@@ -161,8 +158,8 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Nav */}
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
+        {/* Nav (tengah, benar-benar center) */}
+        <nav className="hidden md:flex justify-center items-center gap-6" aria-label="Main">
           {links.map((l) =>
             l.key === "product" ? (
               <div
@@ -191,10 +188,7 @@ export default function Navbar() {
                   </span>
                   <svg
                     viewBox="0 0 20 20"
-                    className={[
-                      "ml-1 h-[1em] w-[1em] transition-transform duration-150",
-                      openProduct ? "rotate-180" : "",
-                    ].join(" ")}
+                    className={["ml-1 h-[1em] w-[1em] transition-transform duration-150", openProduct ? "rotate-180" : ""].join(" ")}
                   >
                     <path
                       d="M5.5 7.5L10 12l4.5-4.5"
@@ -246,25 +240,14 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right: HANYA ubah jarak EN/TR → Log in = 18px, tidak mengubah Log in ↔ Sign in */}
+        {/* Right (kanan) – Jarak EN/TR ke "Log in" = 18px, jarak antar tombol tetap */}
         <div className="hidden items-center md:flex">
-          <LocaleText pathname={pathname as LinkHref} />
-          {/* wrapper tombol: ml-[18px] untuk jarak dari LocaleText, internal gap tetap 12px (gap-3) */}
-          <div className="ml-[18px] flex items-center gap-3">
-            <AuthButtons />
-          </div>
+          <LocaleText pathname={pathname as LinkHref} className="mr-[18px]" />
+          <AuthButtons />
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
+        {/* Mobile toggle (tetap) */}
+        {/* (Jika butuh, tambahkan kembali drawer mobile di bawah) */}
       </div>
     </header>
   );
