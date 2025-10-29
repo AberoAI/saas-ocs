@@ -1,4 +1,3 @@
-// apps/frontend/app/[locale]/layout.tsx
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import type { Metadata } from "next";
@@ -7,6 +6,7 @@ import { domain, locales, defaultLocale } from "../../i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
 import getUiRequestConfig from "@/i18n/getUiRequestConfig";
+import type { GetRequestConfigParams } from "next-intl/server";
 
 export const dynamic = "force-static";
 
@@ -63,12 +63,13 @@ export default async function LocaleLayout({
 
   setRequestLocale(loc);
 
-  // ✅ panggil dengan argumen minimal yang memenuhi tipe GetRequestConfigParams
-  const { locale: uiLocale, messages } = await getUiRequestConfig({
+  // ✅ Type-correct object for next-intl 3.26.5
+  const params: GetRequestConfigParams = {
     locale: loc,
-    requestLocale: loc,
-  } as any);
+    requestLocale: Promise.resolve(loc),
+  };
 
+  const { locale: uiLocale, messages } = await getUiRequestConfig(params);
   const site = getAbsoluteSiteUrl();
 
   return (
