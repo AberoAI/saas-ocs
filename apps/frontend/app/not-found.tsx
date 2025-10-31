@@ -1,3 +1,6 @@
+// apps/frontend/app/not-found.tsx
+export const dynamic = 'force-static';
+
 import Link from "next/link";
 
 export default function NotFound() {
