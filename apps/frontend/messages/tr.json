@@ -53,5 +53,33 @@
       "text2": "Resmî WhatsApp Cloud API ile entegre çalışarak işletmelere anında, çok dilli ve 7/24 iletişim sunar — rezervasyonları artırır, iptalleri azaltır ve operasyonel maliyetleri düşürür.",
       "cta": "Daha fazla bilgi →"
     }
+  },
+  "home": {
+    "subHeadline": "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan.",
+    "whyTitle": "Neden {name}",
+    "features": {
+      "autoReplyTitle": "YZ Otomatik Yanıt",
+      "autoReplyDesc": "Sık sorulan sorulara hızlı ve tutarlı yanıtlar, WhatsApp Cloud API ile entegre.",
+      "multiTenantTitle": "Multi-tenant",
+      "multiTenantDesc": "Klinikler, turizm, mobilya için ideal — birden çok birimi yönetin.",
+      "realtimeTitle": "Gerçek Zamanlı Analitik",
+      "realtimeDesc": "Temel metrikleri izleyin: SLA, yanıt süresi, sohbet konuları."
+    },
+    "bullets": [
+      "WhatsApp Cloud API + YZ ile otomatik yanıtlar",
+      "Multi-tenant: klinikler, turizm, mobilya için ideal",
+      "Gerçek zamanlı gösterge paneli ve analitik"
+    ],
+    "faqTitle": "SSS",
+    "faq": [
+      { "q": "Kendi sunucuma ihtiyaç var mı?", "a": "Hayır. Her şey bulutta çalışır. Siz sadece WhatsApp Cloud API’yi bağlarsınız." },
+      { "q": "Birden çok şubeyi yönetebilir miyim?", "a": "Evet. Multi-tenant, çok sayıda birimi tek hesapta yönetmeyi kolaylaştırır." },
+      { "q": "Ücretsiz deneme var mı?", "a": "Evet. Kredi kartı gerekmeden hemen denemeye başlayın." },
+      { "q": "İç sistemlerle entegrasyon mümkün mü?", "a": "Evet. Özelleştirilmiş entegrasyonlar (CRM, ticketing, vb.) için bizimle görüşün." }
+    ],
+    "footer": {
+      "privacy": "Gizlilik Politikası",
+      "terms": "Kullanım Koşulları"
+    }
   }
 }

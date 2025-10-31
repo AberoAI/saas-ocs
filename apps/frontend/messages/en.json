@@ -53,5 +53,33 @@
       "text2": "By integrating the official WhatsApp Cloud API, we help businesses deliver instant, multilingual, and 24/7 engagement — boosting bookings, reducing no-shows, and lowering operational costs.",
       "cta": "Learn more →"
     }
+  },
+  "home": {
+    "subHeadline": "Turn slow conversations into instant connections — without hiring more agents.",
+    "whyTitle": "Why {name}",
+    "features": {
+      "autoReplyTitle": "AI Autoreply",
+      "autoReplyDesc": "Fast & consistent replies for common questions, integrated with WhatsApp Cloud API.",
+      "multiTenantTitle": "Multi-tenant",
+      "multiTenantDesc": "Ideal for clinics, hospitality, furniture — manage multiple business units.",
+      "realtimeTitle": "Realtime Analytics",
+      "realtimeDesc": "Track key metrics: SLA, response time, conversation topics."
+    },
+    "bullets": [
+      "WhatsApp Cloud API + AI for automated replies",
+      "Multi-tenant: perfect for clinics, hospitality, furniture",
+      "Realtime dashboard & analytics"
+    ],
+    "faqTitle": "FAQ",
+    "faq": [
+      { "q": "Do I need my own server?", "a": "No. Everything runs in the cloud. You just connect the WhatsApp Cloud API." },
+      { "q": "Can I manage multiple branches?", "a": "Yes. Multi-tenant makes it easy to manage many units in one account." },
+      { "q": "Is there a free trial?", "a": "Yes. Sign up and start a trial immediately without a credit card." },
+      { "q": "Can you integrate with internal systems?", "a": "Yes. Talk to us for custom integrations (CRM, ticketing, etc.)." }
+    ],
+    "footer": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
   }
 }

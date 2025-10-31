@@ -1,13 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import ScrollHint from "@/components/hero/ScrollHint";
 import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
-import { usePathname } from "next/navigation";
+// ❌ HAPUS: import { usePathname } from "next/navigation";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
@@ -42,20 +42,18 @@ export default function LocaleHomePage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
-  const pathnameRaw = usePathname() || "/";
-  const locale = (pathnameRaw.split("/")[1] || "en").toLowerCase();
-  const isTR = locale === "tr"; // ✅ locale flag
+  const locale = (useLocale() || "en").toLowerCase();
+  const isTR = locale === "tr";
 
+  // Headline highlight tetap ambil dari hero.headline (punyamu)
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
   const highlight = hlMatch ? hlMatch[0] : "";
   const after = hlMatch ? cleaned.slice(hlMatch.index! + hlMatch[0].length) : "";
 
-  // ✅ Subheadline final (transformational framing; EN/TR)
-  const subHeadline = isTR
-    ? "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan."
-    : "Turn slow conversations into instant connections — without hiring more agents.";
+  // ✅ Subheadline dari messages (tidak hard-coded)
+  const subHeadline = t("home.subHeadline");
 
   return (
     <>
@@ -72,10 +70,7 @@ export default function LocaleHomePage() {
           <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
-              /* ✅ Turkish-only micro-typography:
-                   - Sedikit naikkan line-height (1.18) agar baris terakhir bernafas
-                   - Kurangi ketatnya tracking (dari -0.01em → -0.005em)
-                   - break-keep untuk mencegah pecah kata aneh di mobile  */
+              /* Micro-typography locale-aware (tetap milikmu) */
               className={`${poppins.className} break-keep font-medium ${
                 isTR
                   ? "leading-[1.18] tracking-[-0.005em]"
@@ -123,19 +118,28 @@ export default function LocaleHomePage() {
       >
         <div className="mx-auto max-w-6xl px-8 py-16">
           <h2 id="why-aberoai-heading" className="text-2xl font-medium md:text-3xl">
-            Why {name}
+            {t("home.whyTitle", { name })}
           </h2>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard title="AI Autoreply" desc="Balasan cepat & konsisten untuk pertanyaan umum, terhubung WhatsApp Cloud API." />
-            <FeatureCard title="Multi-tenant" desc="Cocok untuk klinik, hospitality, furniture — kelola banyak unit bisnis." />
-            <FeatureCard title="Realtime Analytics" desc="Pantau metrik penting: SLA, waktu respon, topik percakapan." />
+            <FeatureCard
+              title={t("home.features.autoReplyTitle")}
+              desc={t("home.features.autoReplyDesc")}
+            />
+            <FeatureCard
+              title={t("home.features.multiTenantTitle")}
+              desc={t("home.features.multiTenantDesc")}
+            />
+            <FeatureCard
+              title={t("home.features.realtimeTitle")}
+              desc={t("home.features.realtimeDesc")}
+            />
           </div>
 
           <ul className="mt-8 list-disc pl-5 text-black/75">
-            <li>WhatsApp Cloud API + AI untuk balasan otomatis</li>
-            <li>Multi-tenant: cocok untuk klinik, hospitality, furniture</li>
-            <li>Realtime dashboard & analytics</li>
+            {t.raw("home.bullets").map((item: string, i: number) => (
+              <li key={i}>{item}</li>
+            ))}
           </ul>
         </div>
       </section>
@@ -143,12 +147,11 @@ export default function LocaleHomePage() {
       {/* FAQ */}
       <section id="page-4-faq" className="page border-t border-black/10 bg-white mt-20 md:mt-28">
         <div className="mx-auto max-w-6xl px-8 py-16">
-          <h2 className="text-2xl font-semibold md:text-3xl">FAQ</h2>
+          <h2 className="text-2xl font-semibold md:text-3xl">{t("home.faqTitle")}</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Faq q="Apakah butuh server sendiri?" a="Tidak. Semuanya dikelola di cloud. Kamu cukup menghubungkan WhatsApp Cloud API." />
-            <Faq q="Bisakah pakai banyak cabang?" a="Bisa. Fitur multi-tenant memudahkan kelola banyak unit bisnis dalam satu akun." />
-            <Faq q="Ada free trial?" a="Ada. Daftar dan mulai uji coba langsung tanpa kartu kredit." />
-            <Faq q="Bisa integrasi sistem internal?" a="Bisa. Hubungi kami untuk integrasi custom (CRM, ticketing, dsb.)." />
+            {t.raw("home.faq").map((it: { q: string; a: string }, i: number) => (
+              <Faq key={i} q={it.q} a={it.a} />
+            ))}
           </div>
         </div>
       </section>
@@ -161,11 +164,11 @@ export default function LocaleHomePage() {
           </p>
           <div className="text-sm text-neutral-500">
             <Link href="/privacy" className="underline">
-              Privacy Policy
+              {t("home.footer.privacy")}
             </Link>{" "}
             ·{" "}
             <Link href="/terms" className="underline">
-              Terms of Service
+              {t("home.footer.terms")}
             </Link>
           </div>
         </div>

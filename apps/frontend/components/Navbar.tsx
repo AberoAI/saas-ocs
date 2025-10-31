@@ -1,11 +1,14 @@
+// apps/frontend/components/Navbar.tsx
 "use client";
 
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+// ⛔️ DIHAPUS: import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/nav";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@/i18n/routing";
+// ✅ GUNAKAN versi dari i18n/routing untuk konsistensi next-intl
+import { Link, usePathname as useIntlPathname } from "@/i18n/routing";
+import { toRouteKey } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
 
 /** Path normalizer */
@@ -73,11 +76,13 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
               const up = lc.toUpperCase() as "EN" | "TR";
               const itemCls =
                 "block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none";
+
               return (
                 <li key={lc}>
                   <Link
                     ref={idx === 0 ? firstItemRef : undefined}
-                    href={pathname}
+                    // ✅ Pakai route-key agar /tr/ozellikler ⇄ /en/features (bukan /en/ozellikler)
+                    href={toRouteKey(String(pathname || "/"))}
                     locale={lc}
                     prefetch={false}
                     role="menuitem"
@@ -99,7 +104,8 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
 export default function Navbar() {
   const t = useTranslations();
   const locale = useLocale() || "en";
-  const pathnameRaw = usePathname() || "/";
+  // ✅ Ambil pathname dari i18n/routing (bukan next/navigation)
+  const pathnameRaw = useIntlPathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
   /** Auth labels */
