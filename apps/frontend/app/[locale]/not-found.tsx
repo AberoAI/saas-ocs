@@ -1,7 +1,13 @@
 // apps/frontend/app/[locale]/not-found.tsx
-// NOTE: Biarkan halaman ini statik. Jangan pakai next-intl atau headers di sini.
+// NOTE: Halaman ini tetap 100% statik, tidak menggunakan headers atau hooks.
+// Tambahkan setRequestLocale(locale) agar Next.js tidak salah mendeteksi dynamic usage.
 
-export default function NotFoundPage() {
+import { setRequestLocale } from "next-intl/server";
+
+export default function NotFoundPage({ params }: { params: { locale: string } }) {
+  // 👇 Baris penting agar route /_not-found bisa di-prerender secara statik
+  setRequestLocale(params.locale);
+
   return (
     <main className="mx-auto grid min-h-[50vh] max-w-3xl place-items-center px-6 py-16 text-center">
       <div>
