@@ -81,5 +81,8 @@
       "privacy": "Gizlilik Politikası",
       "terms": "Kullanım Koşulları"
     }
+  },
+  "login": {
+    "subtitle": "Panelinize erişin ve konuşmaları yönetin."
   }
 }

@@ -1,3 +1,4 @@
+// apps/frontend/app/[locale]/about/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
@@ -7,7 +8,6 @@ import AboutShowcase from "@/components/about/AboutShowcase";
 import HeroRings from "@/components/hero/HeroRings";
 import { motion, useReducedMotion } from "framer-motion";
 import { Poppins } from "next/font/google";
-// ❌ HAPUS: import { usePathname } from "next/navigation";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["500"] }); // Medium
 
@@ -38,7 +38,7 @@ function Faq({ q, a }: { q: string; a: string }) {
   );
 }
 
-export default function LocaleHomePage() {
+export default function AboutPage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
@@ -72,9 +72,7 @@ export default function LocaleHomePage() {
               id="hero-hook"
               /* Micro-typography locale-aware (tetap milikmu) */
               className={`${poppins.className} break-keep font-medium ${
-                isTR
-                  ? "leading-[1.18] tracking-[-0.005em]"
-                  : "leading-[1.1] tracking-[-0.01em]"
+                isTR ? "leading-[1.18] tracking-[-0.005em]" : "leading-[1.1] tracking-[-0.01em]"
               } text-[22px] sm:text-[28px] md:text-[34px] lg:text-[48px] text-[#585858]`}
               initial={reduceMotion ? false : { opacity: 0, y: 32 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -122,18 +120,9 @@ export default function LocaleHomePage() {
           </h2>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard
-              title={t("home.features.autoReplyTitle")}
-              desc={t("home.features.autoReplyDesc")}
-            />
-            <FeatureCard
-              title={t("home.features.multiTenantTitle")}
-              desc={t("home.features.multiTenantDesc")}
-            />
-            <FeatureCard
-              title={t("home.features.realtimeTitle")}
-              desc={t("home.features.realtimeDesc")}
-            />
+            <FeatureCard title={t("home.features.autoReplyTitle")} desc={t("home.features.autoReplyDesc")} />
+            <FeatureCard title={t("home.features.multiTenantTitle")} desc={t("home.features.multiTenantDesc")} />
+            <FeatureCard title={t("home.features.realtimeTitle")} desc={t("home.features.realtimeDesc")} />
           </div>
 
           <ul className="mt-8 list-disc pl-5 text-black/75">
