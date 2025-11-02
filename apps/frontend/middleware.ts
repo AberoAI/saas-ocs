@@ -1,4 +1,3 @@
-// apps/frontend/middleware.ts
 import {NextRequest} from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import {locales} from './i18n/routing';
