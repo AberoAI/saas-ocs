@@ -57,10 +57,7 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      // root → /en
       { source: "/", destination: "/en", permanent: false },
-
-      // static pages → /en/*
       { source: "/about", destination: "/en/about", permanent: false },
       { source: "/contact", destination: "/en/contact", permanent: false },
       { source: "/pricing", destination: "/en/pricing", permanent: false },
@@ -76,9 +73,11 @@ const nextConfig: NextConfig = {
       // ✅ legacy → i18n
       { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
       { source: "/terms-of-service", destination: "/en/terms", permanent: false },
-      { source: "/verify", destination: "/en/verify", permanent: false }, // ← ditambahkan
 
-      // Canonical TR (dipertahankan)
+      // ✅ fix build: root /verify redirect to /en/verify
+      { source: "/verify", destination: "/en/verify", permanent: false },
+
+      // Canonical Turkish
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
       { source: "/tr/hakkında", destination: "/tr/hakkinda", permanent: true },
     ];
