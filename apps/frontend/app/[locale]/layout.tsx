@@ -3,45 +3,44 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
-// ⬇️ tetap pakai relatif seperti versi kamu
-import { domain, locales, defaultLocale } from "../../i18n";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
 
+// Pakai locales dari routing
+import { locales as supportedLocales } from "../../i18n/routing";
+
 export const dynamic = "force-static";
 
-type Locale = (typeof locales)[number];
+type Locale = (typeof supportedLocales)[number];
 type Props = { children: React.ReactNode; params: { locale: string } };
 
+const defaultLocale: Locale = "en";
+
 function isLocale(val: string): val is Locale {
-  return (locales as readonly string[]).includes(val);
+  return (supportedLocales as readonly string[]).includes(val);
 }
 
 export function generateStaticParams() {
-  return (locales as ReadonlyArray<Locale>).map((l: Locale) => ({ locale: l }));
+  return (supportedLocales as ReadonlyArray<Locale>).map((l) => ({ locale: l }));
 }
 
 function getAbsoluteSiteUrl(): string {
-  const fromConfig = (domain ?? "").trim();
   const fromEnv =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     process.env.SITE_URL?.trim() ||
     "";
-  const raw = fromConfig || fromEnv || "https://aberoai.com";
+  const raw = fromEnv || "https://aberoai.com";
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-// === NEW: loader yang merge root + per-namespace (features, dst.)
+// Merge root messages + namespace opsional (mis. "features")
 async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
-  // root messages (nav, hero, dsb)
   const base =
     (await import(`../../messages/${loc}.json`)
       .then((m) => m.default)
       .catch(() => ({}))) as AbstractIntlMessages;
 
-  // daftar namespace per-halaman yang mau kamu split (bisa ditambah sewaktu-waktu)
   const namespaces = ["features"] as const;
-
   const extraPairs = await Promise.all(
     namespaces.map(async (ns) => {
       try {
@@ -53,14 +52,13 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
     })
   );
 
-  // merge menjadi satu objek messages
   return Object.assign({}, base, ...extraPairs);
 }
 
 export async function generateMetadata(
   { params: { locale } }: Props
 ): Promise<Metadata> {
-  const loc: Locale = isLocale(locale) ? locale : defaultLocale;
+  const loc: Locale = isLocale(locale) ? (locale as Locale) : defaultLocale;
   const site = getAbsoluteSiteUrl();
 
   return {
@@ -84,7 +82,7 @@ export default async function LocaleLayout({
   children,
   params: { locale },
 }: Props) {
-  const loc: Locale | undefined = isLocale(locale) ? locale : undefined;
+  const loc: Locale | undefined = isLocale(locale) ? (locale as Locale) : undefined;
   if (!loc) notFound();
 
   setRequestLocale(loc);
