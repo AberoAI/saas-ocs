@@ -84,8 +84,9 @@ const nextConfig: NextConfig = {
       { source: "/terms", destination: "/en/terms", permanent: false },
       { source: "/faq", destination: "/en/faq", permanent: false },
 
-      // ✅ Tambahan khusus: map root privacy-policy ke versi ber-prefix
+      // ✅ Tambahan: root slugs lama → versi ber-prefix
       { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
+      { source: "/terms-of-service", destination: "/en/terms", permanent: false },
 
       // Canonicalisasi TR yang sudah ada (dipertahankan)
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
