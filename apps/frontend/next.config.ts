@@ -73,11 +73,11 @@ const nextConfig: NextConfig = {
       { source: "/terms", destination: "/en/terms", permanent: false },
       { source: "/faq", destination: "/en/faq", permanent: false },
 
-      // ✅ new: redirect old root paths to i18n versions
+      // ✅ legacy → i18n
       { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
       { source: "/terms-of-service", destination: "/en/terms", permanent: false },
 
-      // canonical Turkish redirects
+      // Canonical TR (dipertahankan)
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
       { source: "/tr/hakkında", destination: "/tr/hakkinda", permanent: true },
     ];
@@ -85,10 +85,7 @@ const nextConfig: NextConfig = {
 
   async rewrites() {
     return [
-      {
-        source: "/_trpc/:path*",
-        destination: `${TRPC_BACKEND.replace(/\/$/, "")}/:path*`,
-      },
+      { source: "/_trpc/:path*", destination: `${TRPC_BACKEND.replace(/\/$/, "")}/:path*` },
       { source: "/_healthz", destination: `${BACKEND_HTTP}/healthz` },
     ];
   },
