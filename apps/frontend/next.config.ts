@@ -76,6 +76,7 @@ const nextConfig: NextConfig = {
       // ✅ legacy → i18n
       { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
       { source: "/terms-of-service", destination: "/en/terms", permanent: false },
+      { source: "/verify", destination: "/en/verify", permanent: false }, // ← ditambahkan
 
       // Canonical TR (dipertahankan)
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
