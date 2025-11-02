@@ -38,21 +38,21 @@ function Faq({ q, a }: { q: string; a: string }) {
   );
 }
 
-export default function AboutPage() {
+export default function LocaleAboutPage() {
   const name = getBizName();
   const t = useTranslations();
   const reduceMotion = useReducedMotion();
   const locale = (useLocale() || "en").toLowerCase();
   const isTR = locale === "tr";
 
-  // Headline highlight tetap ambil dari hero.headline (punyamu)
+  // Headline highlight tetap ambil dari hero.headline
   const cleaned = t("hero.headline").replace(/\.$/, "");
   const hlMatch = cleaned.match(/Over 65%|%?\d+[.,]?\d*%?/);
   const before = hlMatch ? cleaned.slice(0, hlMatch.index!) : cleaned;
   const highlight = hlMatch ? hlMatch[0] : "";
   const after = hlMatch ? cleaned.slice(hlMatch.index! + hlMatch[0].length) : "";
 
-  // ✅ Subheadline dari messages (tidak hard-coded)
+  // Subheadline dari messages (tidak hard-coded)
   const subHeadline = t("home.subHeadline");
 
   return (
@@ -70,7 +70,6 @@ export default function AboutPage() {
           <div className="max-w-3xl text-left -mt-6 sm:-mt-8 md:-mt-12">
             <motion.h1
               id="hero-hook"
-              /* Micro-typography locale-aware (tetap milikmu) */
               className={`${poppins.className} break-keep font-medium ${
                 isTR ? "leading-[1.18] tracking-[-0.005em]" : "leading-[1.1] tracking-[-0.01em]"
               } text-[22px] sm:text-[28px] md:text-[34px] lg:text-[48px] text-[#585858]`}
@@ -83,7 +82,6 @@ export default function AboutPage() {
               {after}
             </motion.h1>
 
-            {/* Anchor weight — subheadline fade-in setelah hook */}
             <motion.p
               className="mt-3 max-w-xl text-[15px] leading-[1.5] text-black/60"
               initial={reduceMotion ? false : { opacity: 0, y: 8 }}
@@ -120,9 +118,18 @@ export default function AboutPage() {
           </h2>
 
           <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-            <FeatureCard title={t("home.features.autoReplyTitle")} desc={t("home.features.autoReplyDesc")} />
-            <FeatureCard title={t("home.features.multiTenantTitle")} desc={t("home.features.multiTenantDesc")} />
-            <FeatureCard title={t("home.features.realtimeTitle")} desc={t("home.features.realtimeDesc")} />
+            <FeatureCard
+              title={t("home.features.autoReplyTitle")}
+              desc={t("home.features.autoReplyDesc")}
+            />
+            <FeatureCard
+              title={t("home.features.multiTenantTitle")}
+              desc={t("home.features.multiTenantDesc")}
+            />
+            <FeatureCard
+              title={t("home.features.realtimeTitle")}
+              desc={t("home.features.realtimeDesc")}
+            />
           </div>
 
           <ul className="mt-8 list-disc pl-5 text-black/75">
