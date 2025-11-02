@@ -82,9 +82,10 @@ const nextConfig: NextConfig = {
       { source: "/demo", destination: "/en/demo", permanent: false },
       { source: "/privacy", destination: "/en/privacy", permanent: false },
       { source: "/terms", destination: "/en/terms", permanent: false },
-
-      // ✅ Tambahan: root FAQ → /en/faq
       { source: "/faq", destination: "/en/faq", permanent: false },
+
+      // ✅ Tambahan khusus: map root privacy-policy ke versi ber-prefix
+      { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
 
       // Canonicalisasi TR yang sudah ada (dipertahankan)
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
