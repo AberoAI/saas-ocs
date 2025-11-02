@@ -1,32 +1,43 @@
-// apps/frontend/app/[locale]/page.tsx
-// Halaman minimal agar /en & /tr tidak blank.
-// SSG aman; tanpa hook client/animasi supaya jika ada error lain, cepat kelihatan.
+"use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-
-export const dynamic = "force-static";
+import HeroRings from "@/components/hero/HeroRings";
+import ScrollHint from "@/components/hero/ScrollHint";
 
 export default function LocaleHomePage() {
-  return (
-    <main className="mx-auto max-w-6xl px-8 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">AberoAI</h1>
-      <p className="mt-3 text-foreground/70">
-        Automate WhatsApp customer service with 24/7 instant replies.
-      </p>
+  const t = useTranslations();
 
-      <div className="mt-6 flex gap-3">
-        <Link
-          href="/about"
-          className="inline-flex items-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
-        >
-          About
-        </Link>
-        <Link
-          href="/features"
-          className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-medium hover:bg-black/5"
-        >
-          Features
-        </Link>
+  return (
+    <main className="relative min-h-screen overflow-hidden">
+      <HeroRings />
+
+      <section className="relative z-10 mx-auto max-w-6xl px-8 pt-28 pb-20 text-center">
+        <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
+          {t("hero.headline")}
+        </h1>
+        <p className="mt-4 text-lg text-black/70 max-w-2xl mx-auto">
+          {t("home.subHeadline")}
+        </p>
+
+        <div className="mt-8 flex justify-center gap-4">
+          <Link
+            href="/about"
+            className="rounded-full bg-[#26658C] px-6 py-3 text-white font-medium hover:opacity-90"
+          >
+            {t("cta.primary")}
+          </Link>
+          <Link
+            href="/demo"
+            className="rounded-full border border-[#26658C] px-6 py-3 text-[#26658C] font-medium hover:bg-[#26658C]/10"
+          >
+            {t("cta.secondary")}
+          </Link>
+        </div>
+      </section>
+
+      <div className="absolute bottom-10 inset-x-0 flex justify-center">
+        <ScrollHint targetId="page-2" />
       </div>
     </main>
   );
