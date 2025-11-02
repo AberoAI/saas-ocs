@@ -1,19 +1,7 @@
 // apps/frontend/app/[locale]/verify/page.tsx
 'use client';
 
-import type { Metadata } from 'next';
 import { Link } from '@/i18n/routing';
-
-export const dynamic = 'force-static';
-
-export const metadata: Metadata = {
-  alternates: {
-    languages: {
-      en: '/en/verify',
-      tr: '/tr/verify',
-    },
-  },
-};
 
 type PageProps = { params: { locale: string } };
 
