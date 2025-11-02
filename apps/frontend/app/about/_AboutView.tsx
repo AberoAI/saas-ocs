@@ -1,54 +1,48 @@
-"use client";
-import Link from "next/link";
+// apps/frontend/app/about/_AboutView.tsx
+// Presentational-only (tanpa next-intl), aman untuk SSG.
+// Menerima props { copy, localePrefix } sesuai kontrak halaman ber-locale.
+
+import AboutShowcase from "@/components/about/AboutShowcase";
 import type { AboutCopy } from "./types";
 
 export default function AboutView({
   copy,
-  localePrefix = "",
-}: { copy: AboutCopy; localePrefix?: string }) {
+  localePrefix,
+}: {
+  copy: AboutCopy;
+  localePrefix: string;
+}) {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="text-3xl font-bold mb-6">{copy.title}</h1>
+    <main className="mx-auto max-w-6xl px-8 py-16">
+      <header className="mb-10">
+        <p className="text-xs uppercase text-black/40 tracking-wide">
+          {localePrefix === "/tr" ? "Hakkında" : "About"}
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold">{copy.title}</h1>
+      </header>
 
-      <h2 className="text-xl font-semibold mb-3">🎯 {copy.mission.title}</h2>
-      {copy.mission.ps.map((p: string, i: number) => (
-        <p key={i} className="mb-3 text-black/70">{p}</p>
-      ))}
+      {copy.paragraphs?.length ? (
+        <section className="prose prose-neutral max-w-none">
+          {copy.paragraphs.map((p, i) => (
+            <p key={i} className="text-black/75">
+              {p}
+            </p>
+          ))}
+        </section>
+      ) : null}
 
-      <h2 className="text-xl font-semibold mb-3">⚙️ {copy.what.title}</h2>
-      <p className="mb-3 text-black/70">{copy.what.p1}</p>
+      <AboutShowcase className="mt-10 sm:mt-12 md:mt-14 lg:mt-16" />
 
-      <h3 className="mt-4 font-semibold">{copy.features.title}</h3>
-      <ul className="list-disc list-inside mb-6 text-black/70 space-y-1">
-        {copy.features.items.map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-
-      <h3 className="mt-4 font-semibold">{copy.value.title}</h3>
-      <ul className="list-disc list-inside mb-8 text-black/70 space-y-1">
-        {copy.value.items.map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-
-      <h2 className="text-xl font-semibold mb-3">💡 {copy.how.title}</h2>
-      <p className="mb-3 text-black/70">{copy.how.p1}</p>
-
-      <h3 className="mt-2 font-semibold">{copy.principles.title}</h3>
-      <ul className="list-disc list-inside mb-6 text-black/70 space-y-1">
-        {copy.principles.items.map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-
-      <h3 className="mt-2 font-semibold">{copy.outcomes.title}</h3>
-      <ul className="list-disc list-inside mb-6 text-black/70 space-y-1">
-        {copy.outcomes.items.map((x: string, i: number) => <li key={i}>{x}</li>)}
-      </ul>
-
-      <p className="mb-8 text-black/70">{copy.outcomes.closer}</p>
-
-      <p className="text-black/70">
-        {copy.contact.prefix}{" "}
-        <Link href={`${localePrefix}/contact`} className="text-blue-600 hover:underline">
-          {copy.contact.link}
-        </Link>.
-      </p>
+      {copy.ctaHref && copy.ctaLabel ? (
+        <div className="mt-10">
+          <a
+            href={copy.ctaHref}
+            className="inline-flex items-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-medium text-white hover:opacity-90"
+          >
+            {copy.ctaLabel}
+          </a>
+        </div>
+      ) : null}
     </main>
   );
 }

@@ -39,3 +39,28 @@ export const {
   localePrefix,
   pathnames,
 });
+
+// --- helpers: strip & ensure locale prefix ---
+export function stripLocalePrefix(pathname: string): string {
+  if (!pathname) return "/";
+  const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return p.replace(/^\/(en|tr)(?=\/|$)/, "") || "/";
+}
+
+/**
+ * Map path terlokalisasi → "key route" di pathnames.
+ * Contoh: "/ozellikler" -> "/features", "/hakkinda" -> "/about".
+ * Pastikan switch locale selalu pakai key, bukan path lokal mentah.
+ */
+export function toRouteKey(localizedPath: string): keyof typeof pathnames | "/" {
+  const base = stripLocalePrefix(localizedPath);
+  if (base === "/" || base === "") return "/";
+  for (const key in pathnames) {
+    const entry = (pathnames as any)[key];
+    if (entry && typeof entry === "object") {
+      if (entry.en === base || entry.tr === base) return key as keyof typeof pathnames;
+    }
+  }
+  // Fallback aman untuk rute yang belum dipetakan
+  return base as any;
+}

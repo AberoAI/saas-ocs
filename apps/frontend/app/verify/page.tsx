@@ -1,14 +1,9 @@
 // apps/frontend/app/verify/page.tsx
-import type { Metadata } from "next";
-import VerificationLanding from "../_components/VerificationLanding";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Business Verification – AberoAI",
-  description:
-    "Public verification page for AberoAI (WhatsApp Cloud API + AI customer service).",
-  alternates: { canonical: "/verify" },
-};
+// Static-safe: tidak pakai next-intl / headers / cookies
+export const dynamic = "force-static";
 
-export default function VerifyPage() {
-  return <VerificationLanding />;
+export default function Page() {
+  redirect("/en/verify");
 }

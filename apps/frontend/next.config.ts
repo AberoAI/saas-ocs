@@ -2,17 +2,11 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
-// ✅ Tanpa argumen: plugin aktif tapi TIDAK mencari ./i18n/request.ts
+// ✅ Minimal config, no request.ts lookup
 const withNextIntl = createNextIntlPlugin();
 
 /**
  * URL backend ABSOLUTE untuk rewrite (harus mengarah ke endpoint /trpc).
- * Contoh: https://api.aberoai.com/trpc
- *
- * Prioritas:
- * 1) TRPC_BACKEND_URL (disarankan)
- * 2) TRPC_ORIGIN + "/trpc" (fallback)
- * 3) onrender fallback (terakhir)
  */
 const TRPC_BACKEND: string =
   (process.env.TRPC_BACKEND_URL
@@ -21,21 +15,17 @@ const TRPC_BACKEND: string =
       ? `${process.env.TRPC_ORIGIN.replace(/\/$/, "")}/trpc`
       : "https://saas-ocs-backend.onrender.com/trpc");
 
-/** Ekstrak origin http(s) & ws(s) dari TRPC_BACKEND untuk CSP & /_healthz */
 let BACKEND_HTTP = "https://saas-ocs-backend.onrender.com";
 let BACKEND_WS = "wss://saas-ocs-backend.onrender.com";
 try {
-  const u = new URL(TRPC_BACKEND); // harus absolute
+  const u = new URL(TRPC_BACKEND);
   const isHttps = u.protocol === "https:";
   BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
   BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
-} catch {
-  // biarkan fallback default
-}
+} catch {}
 
 const isDev = process.env.NODE_ENV !== "production";
 
-/** CSP: izinkan koneksi ke origin backend & (opsional) origin lokal saat dev */
 const CONNECT_TARGETS = [
   `'self'`,
   BACKEND_HTTP,
@@ -65,26 +55,41 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: false },
   transpilePackages: ["@repo/backend"],
 
-  // ➜ redirects untuk kanonik TR & dukung diakritik
   async redirects() {
     return [
-      { source: "/about", destination: "/en/about", permanent: true },
+      // root → /en
+      { source: "/", destination: "/en", permanent: false },
+
+      // static pages → /en/*
+      { source: "/about", destination: "/en/about", permanent: false },
+      { source: "/contact", destination: "/en/contact", permanent: false },
+      { source: "/pricing", destination: "/en/pricing", permanent: false },
+      { source: "/features", destination: "/en/features", permanent: false },
+      { source: "/solutions", destination: "/en/solutions", permanent: false },
+      { source: "/login", destination: "/en/login", permanent: false },
+      { source: "/product", destination: "/en/product", permanent: false },
+      { source: "/demo", destination: "/en/demo", permanent: false },
+      { source: "/privacy", destination: "/en/privacy", permanent: false },
+      { source: "/terms", destination: "/en/terms", permanent: false },
+      { source: "/faq", destination: "/en/faq", permanent: false },
+
+      // ✅ legacy → i18n
+      { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
+      { source: "/terms-of-service", destination: "/en/terms", permanent: false },
+
+      // ✅ NEW: stabilize /verify root
+      { source: "/verify", destination: "/en/verify", permanent: false },
+
+      // Canonical TR (dipertahankan)
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
       { source: "/tr/hakkında", destination: "/tr/hakkinda", permanent: true },
     ];
   },
 
-  // FE memanggil /_trpc/:path* → proxy ke TRPC_BACKEND/:path*
   async rewrites() {
     return [
-      {
-        source: "/_trpc/:path*",
-        destination: `${TRPC_BACKEND.replace(/\/$/, "")}/:path*`,
-      },
-      {
-        source: "/_healthz",
-        destination: `${BACKEND_HTTP}/healthz`,
-      },
+      { source: "/_trpc/:path*", destination: `${TRPC_BACKEND.replace(/\/$/, "")}/:path*` },
+      { source: "/_healthz", destination: `${BACKEND_HTTP}/healthz` },
     ];
   },
 

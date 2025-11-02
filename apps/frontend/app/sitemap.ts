@@ -1,7 +1,7 @@
 // apps/frontend/app/sitemap.ts
 import type { MetadataRoute } from "next";
 
-/** URL dasar situs, env-aware untuk Production & Preview (tetap dari kerangka kamu) */
+/** URL dasar situs, env-aware */
 function getBaseUrl(): string {
   const site = process.env.SITE_URL?.trim();
   if (site) return site.replace(/\/+$/, "");
@@ -10,7 +10,7 @@ function getBaseUrl(): string {
   return "https://aberoai.com"; // fallback aman
 }
 
-/** Tanggal terakhir diperbarui; bisa dikunci via ENV agar stabil (tetap dari kerangka kamu) */
+/** Tanggal last-modified (boleh dikunci via ENV) */
 function getLastModified(): string {
   return (
     process.env.SITEMAP_LAST_MODIFIED?.trim() ||
@@ -18,32 +18,24 @@ function getLastModified(): string {
   );
 }
 
-/**
- * LOCALES untuk halaman berprefix (i18n).
- * Kita akan mengeluarkan entri /en/... & /tr/... plus hreflang cross-links.
- */
+/** Locales yang aktif */
 const LOCALES = ["en", "tr"] as const;
 type Locale = (typeof LOCALES)[number];
 
 /**
- * Daftar path yang DILOKALISASI (muncul sebagai /en, /tr, /en/pricing, /tr/pricing, dst.)
- * Gunakan string kosong "" untuk halaman root per-locale (/en dan /tr).
- * Tambahkan halaman publik lain yang memang berlokalisasi: 'pricing', 'about', dll.
+ * Halaman berlokalisasi (akan jadi /en/... & /tr/...)
+ * "" artinya root per-locale: /en dan /tr
  */
 const LOCALIZED_PATHS = [
-  "", // → /en dan /tr
-  // "pricing",
-  // "about",
+  "",          // /en, /tr
+  "verify",    // /en/verify, /tr/verify
+  "privacy",   // /en/privacy, /tr/privacy (aman walau TR belum ada)
+  "terms",     // /en/terms,   /tr/terms   (aman walau TR belum ada)
 ] as const;
 
-/**
- * Daftar path yang TIDAK dilokalisasi (single URL saja, tanpa prefix locale).
- * CATATAN: Jangan cantumkan "/" di sini; root tanpa prefix akan redirect.
- */
+/** Halaman non-lokal (single URL tanpa prefix) */
 const NON_LOCALIZED_PATHS = [
   "/login",
-  "/privacy-policy",
-  "/terms-of-service",
   "/contact",
 ] as const;
 
@@ -53,9 +45,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const items: MetadataRoute.Sitemap = [];
 
-  // ── (1) Entri BERLOKALISASI (/en/... & /tr/...) dengan hreflang cross-links
+  // (1) Entri berlokalisasi + hreflang
   for (const seg of LOCALIZED_PATHS) {
-    // Bangun URL per-locale (typed tanpa any)
     const urlsByLocale = LOCALES.reduce<Record<Locale, string>>((acc, loc) => {
       const path = seg ? `/${loc}/${seg}` : `/${loc}`;
       acc[loc] = `${base}${path}`;
@@ -78,7 +69,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  // ── (2) Entri NON-LOKALISASI (1 URL saja)
+  // (2) Entri non-lokal
   for (const p of NON_LOCALIZED_PATHS) {
     items.push({
       url: `${base}${p}`,

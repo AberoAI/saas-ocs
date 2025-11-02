@@ -71,14 +71,17 @@ export default function FeaturesPage() {
     { key: "booking", icon: "📅" },
   ];
 
-  const sectionContainer = useMemo((): Variants => ({
-    hidden: { opacity: 0, y: prefersReduced ? 0 : 12 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.38, ease: EASE }
-    }
-  }), [prefersReduced]);
+  const sectionContainer = useMemo(
+    (): Variants => ({
+      hidden: { opacity: 0, y: prefersReduced ? 0 : 12 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.38, ease: EASE },
+      },
+    }),
+    [prefersReduced]
+  );
 
   const contentStagger = useMemo((): { container: Variants; item: Variants } => {
     return {
@@ -105,7 +108,6 @@ export default function FeaturesPage() {
   const BRAND_BG_12 = `${BRAND}1F`;
 
   const featureTitleRef = useRef<HTMLHeadingElement>(null);
-
   const shouldAnimateHeroRef = useRef<boolean>(isFeaturesRoute && !prefersReduced);
   const shouldAnimateHero = shouldAnimateHeroRef.current;
 
@@ -124,24 +126,20 @@ export default function FeaturesPage() {
     setTimeout(() => setHeadlineDone(true), 60);
   }, []);
 
-  // === PUSATKAN HERO SECARA SEMPURNA ===
-  const heroNudgeClass = "";
-  const NAV_H = 72; // tinggi navbar (px)
-  const heroSectionMinH = ""; // gunakan calc untuk center vertikal
+  // Tinggi navbar (px)
+  const NAV_H = 72;
 
   return (
     <div className="relative min-h-screen">
       <AnimatedBackgroundFeatures debug />
 
       <main className="mx-auto max-w-6xl px-6">
-        {/* ===== HERO (continuous flow) ===== */}
+        {/* ===== HERO ===== */}
         <section
           className="grid place-items-center text-center"
           style={{ minHeight: `calc(100dvh - ${NAV_H}px)` }}
         >
-          {/* Bungkus untuk memastikan center horizontal */}
           <div className="w-full flex flex-col items-center">
-            {/* Headline */}
             <div
               ref={headlineWrapRef}
               style={headlineMinH ? { minHeight: headlineMinH } : undefined}
@@ -185,7 +183,9 @@ export default function FeaturesPage() {
                   {subtitleDone ? (
                     <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                       <span className="text-sm">Scroll</span>
-                      <span className="animate-bounce" aria-hidden>↓</span>
+                      <span className="animate-bounce" aria-hidden>
+                        ↓
+                      </span>
                     </div>
                   ) : (
                     <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 justify-center invisible">
@@ -212,7 +212,9 @@ export default function FeaturesPage() {
                 </p>
                 <div className="mt-6 sm:mt-7 inline-flex items-center gap-2 text-foreground/60 justify-center">
                   <span className="text-sm">Scroll</span>
-                  <span className="animate-bounce" aria-hidden>↓</span>
+                  <span className="animate-bounce" aria-hidden>
+                    ↓
+                  </span>
                 </div>
               </>
             )}
@@ -230,13 +232,13 @@ export default function FeaturesPage() {
               viewport={{ once: true, amount: 0.35 }}
               className="w-full"
             >
-              <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center md:items-center">
+              <div className="grid md:grid-cols-[minmax(19rem,32rem)_minmax(0,1fr)] gap-5 md:gap-6 items-center">
                 <motion.div
                   variants={contentStagger.container}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.4 }}
-                  className="w-full max-w-3xl md:max-w-none text-center md:text-left self-center md:self-center"
+                  className="w-full max-w-3xl md:max-w-none text-center md:text-left"
                 >
                   <div className="grid grid-cols-[40px_minmax(0,1fr)] md:grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 md:gap-x-4 items-start">
                     <motion.div
@@ -287,11 +289,7 @@ export default function FeaturesPage() {
                 </motion.div>
 
                 <div className="hidden md:flex self-center justify-center w-full">
-                  <FeatureStage
-                    stepKey={it.key}
-                    prefersReduced={!!prefersReduced}
-                    locale={locale}
-                  />
+                  <FeatureStage stepKey={it.key} prefersReduced={!!prefersReduced} locale={locale} />
                 </div>
               </div>
             </motion.section>
@@ -306,9 +304,7 @@ export default function FeaturesPage() {
           className="text-center py-20 md:py-24"
         >
           <h2 className="text-2xl font-semibold tracking-tight">{t("title")}</h2>
-          <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">
-            {t("subtitle")}
-          </p>
+          <p className="mt-2 max-w-2xl mx-auto text-foreground/70 leading-snug">{t("subtitle")}</p>
 
           <div className="mt-7 flex justify-center gap-3">
             <a
@@ -360,7 +356,12 @@ function FeatureStage({
     <motion.div
       key={stepKey}
       initial={{ opacity: 0, scale: 0.985, y: 6 }}
-      whileInView={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: EASE } }}
+      whileInView={{
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: { duration: 0.3, ease: EASE },
+      }}
       viewport={{ once: true, amount: 0.3 }}
       exit={{ opacity: 0, y: -6 }}
       className="aspect-square w-[64vw] max-w-[420px] rounded-2xl"
