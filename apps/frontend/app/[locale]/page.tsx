@@ -1,4 +1,5 @@
 // apps/frontend/app/[locale]/page.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 
