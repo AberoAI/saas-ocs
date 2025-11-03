@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
-// ✅ Minimal config, no request.ts lookup
+// ✅ next-intl plugin
 const withNextIntl = createNextIntlPlugin();
 
 /**
@@ -39,15 +39,17 @@ const CONNECT_TARGETS = [
     : []),
 ].join(" ");
 
-/** ✅ FIX: tambahkan blob: agar JS Next.js tidak diblokir CSP */
+/** ✅ FIX: tambahkan blob: & worker-src agar Next.js runtime tidak diblokir */
 const CSP = [
   `default-src 'self'`,
   `connect-src ${CONNECT_TARGETS}`,
   `img-src 'self' data: blob:`,
+  `font-src 'self' data:`,
   `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:`,
   `worker-src 'self' blob:`,
   `style-src 'self' 'unsafe-inline'`,
-  `font-src 'self' data:`,
+  `base-uri 'self'`,
+  `form-action 'self'`,
   `frame-ancestors 'self'`,
 ].join("; ");
 
