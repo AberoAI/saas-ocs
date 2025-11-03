@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
-// ✅ next-intl plugin
 const withNextIntl = createNextIntlPlugin();
 
 /**
@@ -22,36 +21,6 @@ try {
   BACKEND_HTTP = `${isHttps ? "https" : "http"}://${u.host}`;
   BACKEND_WS = `${isHttps ? "wss" : "ws"}://${u.host}`;
 } catch {}
-
-const isDev = process.env.NODE_ENV !== "production";
-
-const CONNECT_TARGETS = [
-  `'self'`,
-  BACKEND_HTTP,
-  BACKEND_WS,
-  ...(isDev
-    ? [
-        "http://127.0.0.1:4000",
-        "ws://127.0.0.1:4000",
-        "http://localhost:4000",
-        "ws://localhost:4000",
-      ]
-    : []),
-].join(" ");
-
-/** ✅ FIX: tambahkan blob: & worker-src agar Next.js runtime tidak diblokir */
-const CSP = [
-  `default-src 'self'`,
-  `connect-src ${CONNECT_TARGETS}`,
-  `img-src 'self' data: blob:`,
-  `font-src 'self' data:`,
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:`,
-  `worker-src 'self' blob:`,
-  `style-src 'self' 'unsafe-inline'`,
-  `base-uri 'self'`,
-  `form-action 'self'`,
-  `frame-ancestors 'self'`,
-].join("; ");
 
 const nextConfig: NextConfig = {
   eslint: { ignoreDuringBuilds: false },
@@ -88,12 +57,8 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [{ key: "Content-Security-Policy", value: CSP }],
-      },
-    ];
+    // 🔴 Kill-switch: nonaktifkan semua header dari app (termasuk CSP)
+    return [];
   },
 };
 

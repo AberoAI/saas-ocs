@@ -1,0 +1,11 @@
+{
+  "headers": [
+    {
+      "source": "/(en|tr)(/.*)?",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Debug-Next", "value": "1" }
+      ]
+    }
+  ]
+}
