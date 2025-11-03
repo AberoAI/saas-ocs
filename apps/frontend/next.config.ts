@@ -1,4 +1,3 @@
-// apps/frontend/next.config.ts
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -40,11 +39,13 @@ const CONNECT_TARGETS = [
     : []),
 ].join(" ");
 
+/** ✅ FIX: tambahkan blob: agar JS Next.js tidak diblokir CSP */
 const CSP = [
   `default-src 'self'`,
   `connect-src ${CONNECT_TARGETS}`,
   `img-src 'self' data: blob:`,
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:`,
+  `worker-src 'self' blob:`,
   `style-src 'self' 'unsafe-inline'`,
   `font-src 'self' data:`,
   `frame-ancestors 'self'`,
@@ -57,10 +58,7 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      // root → /en
       { source: "/", destination: "/en", permanent: false },
-
-      // static pages → /en/*
       { source: "/about", destination: "/en/about", permanent: false },
       { source: "/contact", destination: "/en/contact", permanent: false },
       { source: "/pricing", destination: "/en/pricing", permanent: false },
@@ -72,15 +70,9 @@ const nextConfig: NextConfig = {
       { source: "/privacy", destination: "/en/privacy", permanent: false },
       { source: "/terms", destination: "/en/terms", permanent: false },
       { source: "/faq", destination: "/en/faq", permanent: false },
-
-      // ✅ legacy → i18n
       { source: "/privacy-policy", destination: "/en/privacy", permanent: false },
       { source: "/terms-of-service", destination: "/en/terms", permanent: false },
-
-      // ✅ NEW: stabilize /verify root
       { source: "/verify", destination: "/en/verify", permanent: false },
-
-      // Canonical TR (dipertahankan)
       { source: "/tr/about", destination: "/tr/hakkinda", permanent: true },
       { source: "/tr/hakkında", destination: "/tr/hakkinda", permanent: true },
     ];
