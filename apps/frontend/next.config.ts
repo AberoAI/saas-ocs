@@ -57,8 +57,16 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    // 🔴 Kill-switch: nonaktifkan semua header dari app (termasuk CSP)
-    return [];
+    // 🚑 Diagnostic: paksa HTML untuk /en dan /tr tidak di-cache di edge CDN
+    return [
+      {
+        source: "/(en|tr)(/.*)?",
+        headers: [
+          { key: "Cache-Control", value: "no-store" },
+          { key: "X-Debug-Next", value: "1" }
+        ]
+      }
+    ];
   },
 };
 

@@ -1,4 +1,7 @@
 "use client";
+export const dynamic = "force-dynamic";
+export const revalidate = 0 as const;
+export const fetchCache = "force-no-store";
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
