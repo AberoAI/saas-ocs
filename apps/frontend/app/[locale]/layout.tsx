@@ -9,7 +9,10 @@ import { setRequestLocale } from "next-intl/server";
 // Pakai locales dari routing
 import { locales as supportedLocales } from "../../i18n/routing";
 
-export const dynamic = "force-static";
+/** ⛳️ Segment config DIPINDAH ke layout (server component) */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 type Locale = (typeof supportedLocales)[number];
 type Props = { children: React.ReactNode; params: { locale: string } };
