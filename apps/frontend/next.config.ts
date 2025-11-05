@@ -57,12 +57,13 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    // 🚑 Diagnostic: paksa HTML untuk /en dan /tr tidak di-cache di edge CDN
+    // 🚑 Diagnostic/Protection: jangan izinkan HTML /en dan /tr di-cache oleh edge/CDN
     return [
       {
         source: "/(en|tr)(/.*)?",
         headers: [
           { key: "Cache-Control", value: "no-store" },
+          { key: "Vary", value: "Cookie" },              // ⬅️ Tambahan penting
           { key: "X-Debug-Next", value: "1" }
         ]
       }

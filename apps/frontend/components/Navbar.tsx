@@ -2,14 +2,14 @@
 "use client";
 
 import Image from "next/image";
-// ⛔️ DIHAPUS: import { usePathname } from "next/navigation";
 import { NAV_LINKS } from "@/lib/nav";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
-// ✅ GUNAKAN versi dari i18n/routing untuk konsistensi next-intl
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Link, usePathname as useIntlPathname } from "@/i18n/routing";
-import { toRouteKey } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
+import { useRouter } from "next/navigation";
+// ✅ IMPORT FIX: file kamu ada di apps/frontend/actions/setUiLocale.ts
+import { setUiLocale } from "../actions/setUiLocale";
 
 /** Path normalizer */
 function normalizePath(p: string) {
@@ -26,7 +26,7 @@ function normalizePath(p: string) {
 
 type LinkHref = React.ComponentProps<typeof Link>["href"];
 
-/** Locale dropdown: identik ukuran/posisi dengan teks "EN/TR" lama */
+/** Locale dropdown: ukuran/posisi tetap; sekarang set cookie + refresh (URL tidak berubah) */
 function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
   const cur = (useLocale() || "en").toLowerCase() as "en" | "tr";
   const LOCALES = ["en", "tr"] as const;
@@ -37,6 +37,8 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const firstItemRef = useRef<HTMLAnchorElement | null>(null);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   useDismissable<HTMLDivElement>(open, () => setOpen(false), menuRef);
 
@@ -49,6 +51,18 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
     btnRef.current?.focus();
   };
 
+  async function onPick(lc: "en" | "tr") {
+    if (lc === cur) {
+      setOpen(false);
+      return;
+    }
+    startTransition(async () => {
+      await setUiLocale(lc); // tulis cookie via server action (URL tetap)
+      setOpen(false);
+      router.refresh(); // refresh RSC agar UI berganti bahasa
+    });
+  }
+
   return (
     <div className="relative inline-block align-middle" ref={menuRef}>
       <button
@@ -59,9 +73,10 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
         onClick={() => (open ? closeMenu() : openMenu())}
         className="bg-transparent border-0 p-0 m-0 align-middle focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-[3px]"
         style={{ lineHeight: "inherit", verticalAlign: "baseline" }}
+        disabled={pending}
       >
         <span className="text-xs font-medium uppercase text-foreground/60 hover:text-foreground transition-colors align-middle">
-          {label}
+          {pending ? "…" : label}
         </span>
       </button>
 
@@ -79,18 +94,19 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
 
               return (
                 <li key={lc}>
-                  <Link
+                  {/* Anchor dummy: tidak navigasi; set cookie + refresh */}
+                  <a
                     ref={idx === 0 ? firstItemRef : undefined}
-                    // ✅ Pakai route-key agar /tr/ozellikler ⇄ /en/features (bukan /en/ozellikler)
-                    href={toRouteKey(String(pathname || "/"))}
-                    locale={lc}
-                    prefetch={false}
+                    href="#"
                     role="menuitem"
                     className={itemCls}
-                    onClick={() => setOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onPick(lc);
+                    }}
                   >
                     {up}
-                  </Link>
+                  </a>
                 </li>
               );
             })}

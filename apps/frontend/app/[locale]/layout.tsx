@@ -5,11 +5,10 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
+import { cookies } from "next/headers"; // ✅
 
-// Pakai locales dari routing
 import { locales as supportedLocales } from "../../i18n/routing";
 
-/** ⛳️ Segment config DIPINDAH ke layout (server component) */
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
@@ -18,10 +17,8 @@ type Locale = (typeof supportedLocales)[number];
 type Props = { children: React.ReactNode; params: { locale: string } };
 
 const defaultLocale: Locale = "en";
-
-function isLocale(val: string): val is Locale {
-  return (supportedLocales as readonly string[]).includes(val);
-}
+const isLocale = (v: string): v is Locale =>
+  (supportedLocales as readonly string[]).includes(v);
 
 export function generateStaticParams() {
   return (supportedLocales as ReadonlyArray<Locale>).map((l) => ({ locale: l }));
@@ -36,7 +33,6 @@ function getAbsoluteSiteUrl(): string {
   return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 }
 
-// Merge root messages + namespace opsional (mis. "features")
 async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
   const base =
     (await import(`../../messages/${loc}.json`)
@@ -61,21 +57,21 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
 export async function generateMetadata(
   { params: { locale } }: Props
 ): Promise<Metadata> {
-  const loc: Locale = isLocale(locale) ? (locale as Locale) : defaultLocale;
+  const routeLocale: Locale = isLocale(locale) ? locale : defaultLocale;
   const site = getAbsoluteSiteUrl();
 
   return {
     metadataBase: new URL(site),
     alternates: {
-      canonical: `/${loc}`,
+      canonical: `/${routeLocale}`,
       languages: { "x-default": "/", en: "/en", tr: "/tr" },
     },
     title:
-      loc === "tr"
+      routeLocale === "tr"
         ? "AberoAI – WhatsApp AI Müşteri Hizmetleri Otomasyonu"
         : "AberoAI – AI-Powered WhatsApp Customer Service Automation",
     description:
-      loc === "tr"
+      routeLocale === "tr"
         ? "7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
         : "Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.",
   };
@@ -85,17 +81,24 @@ export default async function LocaleLayout({
   children,
   params: { locale },
 }: Props) {
-  const loc: Locale | undefined = isLocale(locale) ? (locale as Locale) : undefined;
-  if (!loc) notFound();
+  const routeLocale: Locale | undefined = isLocale(locale) ? locale : undefined;
+  if (!routeLocale) notFound();
 
-  setRequestLocale(loc);
+  setRequestLocale(routeLocale);
 
-  const messages = (await loadMessages(loc)) as AbstractIntlMessages;
+  // ✅ Next 15: cookies() is async
+  const flagOn = process.env.NEXT_PUBLIC_UI_LOCALE_COOKIE === "true";
+  const cookieStore = await cookies();
+  const rawCookie = cookieStore.get("ui-locale")?.value;
+  const uiLocale: Locale =
+    flagOn && rawCookie && isLocale(rawCookie) ? rawCookie : routeLocale;
+
+  const messages = (await loadMessages(uiLocale)) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
 
   return (
     <>
-      <NextIntlClientProvider locale={loc} messages={messages}>
+      <NextIntlClientProvider locale={uiLocale} messages={messages}>
         <Navbar />
         {children}
       </NextIntlClientProvider>
@@ -110,10 +113,10 @@ export default async function LocaleLayout({
             name: "AberoAI",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
-            inLanguage: loc,
-            url: `${site}/${loc}`,
+            inLanguage: routeLocale,
+            url: `${site}/${routeLocale}`,
             description:
-              loc === "tr"
+              routeLocale === "tr"
                 ? "AberoAI, 7/24 anında yanıt ve aynı anda binlerce mesajı karşılayabilen yapay zekâ ile müşteri hizmetlerini otomatikleştirir."
                 : "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
           }),
