@@ -10,8 +10,8 @@
   },
   "hero": {
     "headline": "Over 65% of customers cancel due to slow responses",
-    "headlineTop": "Over 65% of customers cancel",
-    "headlineBottom": "due to slow responses",
+    "headlineLine1": "Over 65% of customers cancel",
+    "headlineLine2": "due to slow responses",
     "sub": "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
     "badge": "Now live • Automate WhatsApp Customer Service"
   },
