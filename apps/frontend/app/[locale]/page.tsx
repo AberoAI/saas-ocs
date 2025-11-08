@@ -52,7 +52,7 @@ export default function LocaleHomePage() {
 
       {/* Hero section */}
       <section className="relative z-10 mx-auto flex min-h-[calc(100vh-6rem)] items-center max-w-6xl px-4 lg:px-6">
-        <div className="max-w-3xl">
+        <div className="max-w-3xl -mt-[2px]">
           <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
             {renderHeadline()}
           </h1>
