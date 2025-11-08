@@ -1,12 +1,13 @@
-// apps/frontend/app/[locale]/page.tsx
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
 
 export default function LocaleHomePage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const isEn = locale === "en";
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white">
@@ -18,7 +19,15 @@ export default function LocaleHomePage() {
         {/* Kiri: teks */}
         <div className="max-w-3xl">
           <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
-            {t("hero.headline")}
+            {isEn ? (
+              <>
+                {t("hero.headlineLine1")}
+                <br />
+                {t("hero.headlineLine2")}
+              </>
+            ) : (
+              t("hero.headline")
+            )}
           </h1>
 
           <p className="mt-4 text-lg text-black/70">
