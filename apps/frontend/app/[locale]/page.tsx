@@ -10,34 +10,44 @@ export default function LocaleHomePage() {
   const t = useTranslations();
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen overflow-hidden bg-white">
+      {/* Dekorasi lingkaran di kanan */}
       <HeroRings />
 
-      <section className="relative z-10 mx-auto max-w-6xl px-8 pt-28 pb-20 text-center">
-        <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
-          {t("hero.headline")}
-        </h1>
-        <p className="mt-4 text-lg text-black/70 max-w-2xl mx-auto">
-          {t("home.subHeadline")}
-        </p>
+      {/* Hero */}
+      <section className="relative z-10 mx-auto flex max-w-6xl items-center px-6 pt-24 pb-20 lg:px-8">
+        {/* Kiri: teks */}
+        <div className="max-w-3xl">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-tight text-[#585858]">
+            {t("hero.headline")}
+          </h1>
 
-        <div className="mt-8 flex justify-center gap-4">
-          <Link
-            href="/about"
-            className="rounded-full bg-[#26658C] px-6 py-3 text-white font-medium hover:opacity-90"
-          >
-            {t("cta.primary")}
-          </Link>
-          <Link
-            href="/demo"
-            className="rounded-full border border-[#26658C] px-6 py-3 text-[#26658C] font-medium hover:bg-[#26658C]/10"
-          >
-            {t("cta.secondary")}
-          </Link>
+          <p className="mt-4 text-lg md:text-xl text-black/70">
+            {t("home.subHeadline")}
+          </p>
+
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              href="/about"
+              className="rounded-full bg-[#26658C] px-7 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition"
+            >
+              {t("cta.primary")}
+            </Link>
+            <Link
+              href="/demo"
+              className="rounded-full border border-[#26658C] px-7 py-3 text-sm md:text-base font-medium text-[#26658C] hover:bg-[#26658C]/5 transition"
+            >
+              {t("cta.secondary")}
+            </Link>
+          </div>
         </div>
+
+        {/* Kanan: ruang kosong agar HeroRings kelihatan seperti di desain */}
+        <div className="hidden flex-1 lg:block" />
       </section>
 
-      <div className="absolute bottom-10 inset-x-0 flex justify-center">
+      {/* Scroll hint di bawah tengah */}
+      <div className="absolute inset-x-0 bottom-10 flex justify-center">
         <ScrollHint targetId="page-2" />
       </div>
     </main>
