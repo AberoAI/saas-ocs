@@ -13,20 +13,21 @@ export default function LocaleHomePage() {
       {/* Dekorasi lingkaran di kanan */}
       <HeroRings />
 
-      {/* Hero */}
+      {/* Hero: teks kiri, ring kanan, SIZE DIPERTAHANKAN */}
       <section className="relative z-10 mx-auto flex max-w-6xl items-center px-6 pt-24 pb-20 lg:px-8">
-        {/* Kiri: teks */}
         <div className="max-w-3xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight tracking-tight text-[#585858]">
+          {/* EXACT: text-4xl + md:text-5xl */}
+          <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
             {t("hero.headline")}
           </h1>
 
-          <p className="mt-4 text-lg md:text-xl text-black/70">
+          {/* EXACT: text-lg */}
+          <p className="mt-4 text-lg text-black/70">
             {t("home.subHeadline")}
           </p>
         </div>
 
-        {/* Kanan: ruang kosong agar HeroRings kelihatan seperti di desain */}
+        {/* Ruang kosong agar HeroRings tetap komposisi kanan */}
         <div className="hidden flex-1 lg:block" />
       </section>
 
