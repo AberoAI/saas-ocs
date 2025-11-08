@@ -52,12 +52,13 @@ export default function LocaleHomePage() {
 
       {/* Hero section */}
       <section className="relative z-10 mx-auto flex min-h-[calc(100vh-6rem)] items-center max-w-6xl px-4 lg:px-6">
-        <div className="max-w-3xl -mt-[2px]">
+        {/* Text block shifted 7px upward */}
+        <div className="max-w-3xl -mt-[7px]">
           <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
             {renderHeadline()}
           </h1>
 
-          {/* Subheadline spacing logic */}
+          {/* Subheadline */}
           <p
             className={`${
               isTr
