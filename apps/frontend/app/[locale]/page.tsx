@@ -2,7 +2,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
 
@@ -25,21 +24,6 @@ export default function LocaleHomePage() {
           <p className="mt-4 text-lg md:text-xl text-black/70">
             {t("home.subHeadline")}
           </p>
-
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              href="/about"
-              className="rounded-full bg-[#26658C] px-7 py-3 text-sm md:text-base font-medium text-white hover:opacity-90 transition"
-            >
-              {t("cta.primary")}
-            </Link>
-            <Link
-              href="/demo"
-              className="rounded-full border border-[#26658C] px-7 py-3 text-sm md:text-base font-medium text-[#26658C] hover:bg-[#26658C]/5 transition"
-            >
-              {t("cta.secondary")}
-            </Link>
-          </div>
         </div>
 
         {/* Kanan: ruang kosong agar HeroRings kelihatan seperti di desain */}
