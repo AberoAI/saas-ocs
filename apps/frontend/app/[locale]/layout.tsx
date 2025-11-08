@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
-import { cookies } from "next/headers"; // ✅
+import { cookies } from "next/headers";
+import { I18nProvider } from "@/context/I18nContext";
 
 import { locales as supportedLocales } from "../../i18n/routing";
 
@@ -17,8 +18,9 @@ type Locale = (typeof supportedLocales)[number];
 type Props = { children: React.ReactNode; params: { locale: string } };
 
 const defaultLocale: Locale = "en";
-const isLocale = (v: string): v is Locale =>
-  (supportedLocales as readonly string[]).includes(v);
+
+const isLocale = (v: string | undefined): v is Locale =>
+  !!v && (supportedLocales as readonly string[]).includes(v);
 
 export function generateStaticParams() {
   return (supportedLocales as ReadonlyArray<Locale>).map((l) => ({ locale: l }));
@@ -72,7 +74,7 @@ export async function generateMetadata(
         : "AberoAI – AI-Powered WhatsApp Customer Service Automation",
     description:
       routeLocale === "tr"
-        ? "7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
+        ? "7/24 anında yanıt, tutarlı cevaplar dan ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
         : "Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.",
   };
 }
@@ -86,12 +88,18 @@ export default async function LocaleLayout({
 
   setRequestLocale(routeLocale);
 
-  // ✅ Next 15: cookies() is async
   const flagOn = process.env.NEXT_PUBLIC_UI_LOCALE_COOKIE === "true";
+
   const cookieStore = await cookies();
-  const rawCookie = cookieStore.get("ui-locale")?.value;
+
+  // /en → ui-locale-en, /tr → ui-locale-tr
+  const cookieKey = `ui-locale-${routeLocale}`;
+  const rawCookie = cookieStore.get(cookieKey)?.value;
+
   const uiLocale: Locale =
-    flagOn && rawCookie && isLocale(rawCookie) ? rawCookie : routeLocale;
+    flagOn && rawCookie && isLocale(rawCookie)
+      ? (rawCookie as Locale)
+      : routeLocale;
 
   const messages = (await loadMessages(uiLocale)) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
@@ -99,8 +107,10 @@ export default async function LocaleLayout({
   return (
     <>
       <NextIntlClientProvider locale={uiLocale} messages={messages}>
-        <Navbar />
-        {children}
+        <I18nProvider routeLocale={routeLocale} uiLocale={uiLocale}>
+          <Navbar />
+          {children}
+        </I18nProvider>
       </NextIntlClientProvider>
 
       <Script

@@ -4,17 +4,29 @@ import { createContext, useContext } from "react";
 
 export type Lc = "en" | "tr";
 
-/**
- * Context i18n ringan untuk memberi akses { routeLocale, uiLocale } ke komponen client.
- * (Akan dipakai jika layout kamu nantinya menyuntikkan nilai ini via I18nProvider.)
- */
-export const I18nContext = createContext<{ routeLocale: Lc; uiLocale: Lc } | null>(null);
+type I18nContextValue = {
+  routeLocale: Lc; // dari URL (/en /tr)
+  uiLocale: Lc;    // bahasa UI aktif (cookie / default)
+};
 
-export function useI18nContext() {
+export const I18nContext = createContext<I18nContextValue | null>(null);
+
+export function I18nProvider(props: I18nContextValue & { children: React.ReactNode }) {
+  const { routeLocale, uiLocale, children } = props;
+
+  return (
+    <I18nContext.Provider value={{ routeLocale, uiLocale }}>
+      {children}
+    </I18nContext.Provider>
+  );
+}
+
+export function useI18n() {
   const ctx = useContext(I18nContext);
   if (!ctx) {
-    // Tidak fatal untuk navbar sekarang, tapi lebih aman diberi error agar cepat ketahuan saat di-wire di layout.
-    throw new Error("I18nContext missing. Wrap subtree with <I18nProvider> in the server layout.");
+    throw new Error(
+      "useI18n must be used within an <I18nProvider> (wired in app/[locale]/layout.tsx)."
+    );
   }
   return ctx;
 }

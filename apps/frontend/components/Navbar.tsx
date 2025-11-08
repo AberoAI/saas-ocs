@@ -3,15 +3,23 @@
 
 import Image from "next/image";
 import { NAV_LINKS } from "@/lib/nav";
-import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { Link, usePathname as useIntlPathname } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
 import { useRouter } from "next/navigation";
-// ✅ IMPORT FIX: file kamu ada di apps/frontend/actions/setUiLocale.ts
-import { setUiLocale } from "../actions/setUiLocale";
+// ⬇️ PENTING: gunakan relative path dari /components ke /app/actions
+import { setUiLocale } from "../app/actions/setUiLocale";
+import { useI18n } from "@/context/I18nContext";
 
-/** Path normalizer */
+type LinkHref = React.ComponentProps<typeof Link>["href"];
+
 function normalizePath(p: string) {
   try {
     const withoutHash = (p || "/").split("#")[0] ?? "/";
@@ -24,11 +32,10 @@ function normalizePath(p: string) {
   }
 }
 
-type LinkHref = React.ComponentProps<typeof Link>["href"];
-
-/** Locale dropdown: ukuran/posisi tetap; sekarang set cookie + refresh (URL tidak berubah) */
-function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
-  const cur = (useLocale() || "en").toLowerCase() as "en" | "tr";
+/** Locale dropdown: pakai context (routeLocale + uiLocale), set cookie per prefix tanpa ubah URL */
+function LocaleDropdown() {
+  const { routeLocale, uiLocale } = useI18n();
+  const cur = uiLocale;
   const LOCALES = ["en", "tr"] as const;
   const choices = LOCALES.filter((lc) => lc !== cur);
   const label = cur.toUpperCase() as "EN" | "TR";
@@ -56,10 +63,11 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
       setOpen(false);
       return;
     }
+
     startTransition(async () => {
-      await setUiLocale(lc); // tulis cookie via server action (URL tetap)
+      await setUiLocale(lc, routeLocale); // cookie khusus prefix aktif
       setOpen(false);
-      router.refresh(); // refresh RSC agar UI berganti bahasa
+      router.refresh(); // reload RSC → layout pakai ui-locale-* baru
     });
   }
 
@@ -94,7 +102,6 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
 
               return (
                 <li key={lc}>
-                  {/* Anchor dummy: tidak navigasi; set cookie + refresh */}
                   <a
                     ref={idx === 0 ? firstItemRef : undefined}
                     href="#"
@@ -119,30 +126,32 @@ function LocaleDropdown({ pathname }: { pathname: LinkHref }) {
 
 export default function Navbar() {
   const t = useTranslations();
-  const locale = useLocale() || "en";
-  // ✅ Ambil pathname dari i18n/routing (bukan next/navigation)
+  const { uiLocale } = useI18n();
+  const locale = uiLocale;
+
   const pathnameRaw = useIntlPathname() || "/";
   const pathname = normalizePath(pathnameRaw);
 
-  /** Auth labels */
-  const isTR = locale.toLowerCase().startsWith("tr");
+  const isTR = locale === "tr";
   const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
   const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
 
-  /** Links */
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
         key: l.key,
-        label: l.key === "contact" ? t("cta.contact") : t(`nav.${l.key}`),
+        label:
+          l.key === "contact"
+            ? t("cta.contact")
+            : t(`nav.${l.key}`),
         href: l.href,
       })),
     [t]
   );
 
-  /** Active link */
   const localePrefix = `/${locale}`;
   const current = pathname;
+
   const isActive = (href: string) => {
     const target = normalizePath(
       href.startsWith("/") ? `${localePrefix}${href}` : href
@@ -153,7 +162,6 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  /** Product dropdown */
   const [openProduct, setOpenProduct] = useState(false);
   const productMenuRef = useRef<HTMLDivElement | null>(null);
   const productButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -162,6 +170,7 @@ export default function Navbar() {
 
   const handleEnter = () => setOpenProduct(true);
   const handleLeave = () => setOpenProduct(false);
+
   const openMenu = () => {
     setOpenProduct(true);
     queueMicrotask(() => firstMenuItemRef.current?.focus());
@@ -171,29 +180,38 @@ export default function Navbar() {
     productButtonRef.current?.focus();
   };
 
-  useDismissable<HTMLDivElement>(openProduct, () => setOpenProduct(false), productMenuRef);
+  useDismissable<HTMLDivElement>(
+    openProduct,
+    () => setOpenProduct(false),
+    productMenuRef
+  );
 
   const productActive = isActive("/features") || isActive("/solutions");
 
   const navItemClass = (active: boolean, hoverable: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
-      active ? "text-foreground font-medium" : "text-foreground/70 font-normal",
+      active
+        ? "text-foreground font-medium"
+        : "text-foreground/70 font-normal",
       hoverable ? "hover:text-foreground" : "",
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
 
-  /** Mobile menu */
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileRef = useRef<HTMLDivElement | null>(null);
-  useDismissable<HTMLDivElement>(mobileOpen, () => setMobileOpen(false), mobileRef);
+
+  useDismissable<HTMLDivElement>(
+    mobileOpen,
+    () => setMobileOpen(false),
+    mobileRef
+  );
 
   useEffect(() => {
     setOpenProduct(false);
     setMobileOpen(false);
   }, [pathname]);
 
-  /** Auth Buttons */
   function AuthButtons({ onClick }: { onClick?: () => void }) {
     return (
       <>
@@ -221,24 +239,35 @@ export default function Navbar() {
         className="mx-auto grid max-w-screen-xl grid-cols-[1fr_auto_1fr] items-center px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
       >
-        {/* Brand (kiri) */}
+        {/* Brand */}
         <div className="flex items-center gap-3 justify-self-start">
-          <Link href="/" className="flex items-center gap-1" aria-label="AberoAI home">
+          <Link
+            href="/"
+            className="flex items-center gap-1"
+            aria-label="AberoAI home"
+          >
             <Image
               src="/icon.svg"
               alt="AberoAI"
               width={32}
               height={32}
               className="object-contain"
-              priority={pathname === "/" || pathname === `/${locale}`}
+              priority={
+                pathname === "/" || pathname === `/${locale}`
+              }
               sizes="32px"
             />
-            <span className="text-2xl font-medium text-navbar">AberoAI</span>
+            <span className="text-2xl font-medium text-navbar">
+              AberoAI
+            </span>
           </Link>
         </div>
 
-        {/* Nav (tengah) */}
-        <nav className="hidden md:flex items-center justify-center gap-6 justify-self-center" aria-label="Main">
+        {/* Desktop nav */}
+        <nav
+          className="hidden md:flex items-center justify-center gap-6 justify-self-center"
+          aria-label="Main"
+        >
           {links.map((l) =>
             l.key === "product" ? (
               <div
@@ -254,13 +283,17 @@ export default function Navbar() {
                   aria-haspopup="menu"
                   aria-expanded={openProduct}
                   aria-controls={menuId}
-                  onClick={() => (openProduct ? closeMenu() : openMenu())}
+                  onClick={() =>
+                    openProduct ? closeMenu() : openMenu()
+                  }
                   className="inline-flex items-center focus:outline-none"
                 >
                   <span
                     className={[
                       "text-sm leading-none",
-                      productActive ? "text-foreground font-medium" : "text-foreground/70 font-normal",
+                      productActive
+                        ? "text-foreground font-medium"
+                        : "text-foreground/70 font-normal",
                     ].join(" ")}
                   >
                     {t("nav.product")}
@@ -284,7 +317,7 @@ export default function Navbar() {
                 </button>
 
                 {openProduct && (
-                  <div className="absolute left-0 top-full mt-3 min-w-[220px] rounded-xl border border-black/10 bg-white p-2 shadow-xl z-10">
+                  <div className="absolute left-0 top-full mt-3 min-w-[220px] rounded-md border border-black/10 bg-white p-2 shadow-xl z-10">
                     <ul className="flex flex-col">
                       <li>
                         <Link
@@ -313,8 +346,13 @@ export default function Navbar() {
               <Link
                 key={l.href}
                 href={l.href}
-                aria-current={isActive(l.href) ? "page" : undefined}
-                className={navItemClass(isActive(l.href), true)}
+                aria-current={
+                  isActive(l.href) ? "page" : undefined
+                }
+                className={navItemClass(
+                  isActive(l.href),
+                  true
+                )}
               >
                 {l.label}
               </Link>
@@ -322,9 +360,9 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right (kanan) */}
+        {/* Right */}
         <div className="hidden md:flex items-center justify-self-end">
-          <LocaleDropdown pathname={pathname as LinkHref} />
+          <LocaleDropdown />
           <div className="ml-[18px] flex items-center gap-3">
             <AuthButtons />
           </div>
@@ -336,8 +374,17 @@ export default function Navbar() {
           className="md:hidden inline-flex items-center justify-center justify-self-end rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
           onClick={() => setMobileOpen((v) => !v)}
         >
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+          >
+            <path
+              d="M4 7h16M4 12h16M4 17h16"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>
