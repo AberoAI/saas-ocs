@@ -15,16 +15,17 @@ export async function setUiLocale(lc: Locale, routeLocale: Locale) {
     return;
   }
 
-  // Di environment-mu cookies() bertipe Promise → gunakan await
+  // Di environment kamu cookies() adalah Promise -> pakai await
   const store = await cookies();
 
-  const key = `ui-locale-${routeLocale}`;
+  // Harus SELALU sama dengan key di layout.tsx
+  const key = `ui-locale-v2-${routeLocale}`;
 
   store.set(key, lc, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365, // 1 tahun
     sameSite: "lax",
     secure: true,
-    // domain: ".aberoai.com", // aktifkan kalau nanti pakai subdomain
+    // domain: ".aberoai.com", // aktifkan kalau pakai subdomain
   });
 }

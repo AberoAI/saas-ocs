@@ -74,7 +74,7 @@ export async function generateMetadata(
         : "AberoAI – AI-Powered WhatsApp Customer Service Automation",
     description:
       routeLocale === "tr"
-        ? "7/24 anında yanıt, tutarlı cevaplar dan ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
+        ? "7/24 anında yanıt, tutarlı cevaplar ve ölçeklenebilir AI ile müşteri hizmetlerini otomatikleştirin."
         : "Automate customer service with 24/7 instant replies, consistent answers, and scalable AI.",
   };
 }
@@ -86,16 +86,21 @@ export default async function LocaleLayout({
   const routeLocale: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!routeLocale) notFound();
 
+  // Beritahu next-intl tentang locale dari URL (untuk routing & SEO)
   setRequestLocale(routeLocale);
 
   const flagOn = process.env.NEXT_PUBLIC_UI_LOCALE_COOKIE === "true";
 
+  // Pada setup kamu, cookies() bertipe Promise → pakai await
   const cookieStore = await cookies();
 
-  // /en → ui-locale-en, /tr → ui-locale-tr
-  const cookieKey = `ui-locale-${routeLocale}`;
+  // 🔑 Versi baru: pisah per prefix + versi: ui-locale-v2-en / ui-locale-v2-tr
+  const cookieKey = `ui-locale-v2-${routeLocale}`;
   const rawCookie = cookieStore.get(cookieKey)?.value;
 
+  // RULE:
+  // - tidak ada cookie → default = routeLocale
+  // - ada cookie valid + flag ON → pakai cookie
   const uiLocale: Locale =
     flagOn && rawCookie && isLocale(rawCookie)
       ? (rawCookie as Locale)

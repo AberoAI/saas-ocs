@@ -5,15 +5,14 @@ import { createContext, useContext } from "react";
 export type Lc = "en" | "tr";
 
 type I18nContextValue = {
-  routeLocale: Lc; // dari URL (/en /tr)
-  uiLocale: Lc;    // bahasa UI aktif (cookie / default)
+  routeLocale: Lc;
+  uiLocale: Lc;
 };
 
 export const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function I18nProvider(props: I18nContextValue & { children: React.ReactNode }) {
   const { routeLocale, uiLocale, children } = props;
-
   return (
     <I18nContext.Provider value={{ routeLocale, uiLocale }}>
       {children}
@@ -24,9 +23,7 @@ export function I18nProvider(props: I18nContextValue & { children: React.ReactNo
 export function useI18n() {
   const ctx = useContext(I18nContext);
   if (!ctx) {
-    throw new Error(
-      "useI18n must be used within an <I18nProvider> (wired in app/[locale]/layout.tsx)."
-    );
+    throw new Error("useI18n must be used within <I18nProvider>.");
   }
   return ctx;
 }
