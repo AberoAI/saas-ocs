@@ -55,8 +55,8 @@ export default function LocaleHomePage() {
             {renderHeadline()}
           </h1>
 
-          {/* Subheadline - smaller by 3px */}
-          <p className="mt-4 text-[15px] text-black/70">
+          {/* Subheadline - adjusted to 16px */}
+          <p className="mt-4 text-[16px] text-black/70">
             {t("home.subHeadline")}
           </p>
         </div>
