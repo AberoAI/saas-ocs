@@ -156,7 +156,7 @@ export default function LocaleHomePage() {
       </section>
 
       {/* PAGE 1: About / Trust Section */}
-      <section className="relative flex min-h-screen items-center justify-center">
+      <section className="relative flex min-h-[110vh] items-center justify-center py-[5vh]">
         <AboutShowcase
           id="page-1"
           aria-label={aboutTitle}
