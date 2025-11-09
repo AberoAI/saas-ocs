@@ -1,3 +1,4 @@
+// apps/frontend/components/hero/ScrollHint.tsx
 "use client";
 
 import { memo, useCallback, useMemo } from "react";
@@ -7,7 +8,7 @@ import { useLocale } from "next-intl";
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400"], // clean & consistent typography
+  weight: ["400"],
 });
 
 type ScrollHintProps = {
@@ -20,7 +21,6 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
   const locale = rawLocale.toLowerCase();
   const reduceMotion = useReducedMotion();
 
-  // Centralized label map
   const labelMap: Record<string, string> = {
     en: "Scroll",
     tr: "Aşağı kaydır",
@@ -55,13 +55,13 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
     });
   }, [targetId, reduceMotion]);
 
-  // 🎯 Only bounce loop here — no initial delay/fade (diatur parent)
-  const animate = reduceMotion ? { y: 0 } : { y: [0, -4, 0] };
+  // Bounce lebih jelas tapi tetap subtle (8px)
+  const animate = reduceMotion ? { y: 0 } : { y: [0, -8, 0] };
 
   const transition: Transition = reduceMotion
     ? { duration: 0 }
     : {
-        duration: 1.4,
+        duration: 1.6,
         ease: [0.45, 0, 0.55, 1],
         repeat: Infinity,
         repeatType: "mirror",
