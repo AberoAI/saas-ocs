@@ -1,9 +1,11 @@
+// apps/frontend/app/[locale]/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
+import AboutShowcase from "@/components/about/AboutShowcase";
 
 export default function LocaleHomePage() {
   const t = useTranslations();
@@ -14,7 +16,7 @@ export default function LocaleHomePage() {
 
   const prefersReducedMotion = useReducedMotion();
 
-  // Timing konfigurasi animasi (urutan smooth & stabil)
+  // Timing konfigurasi animasi
   const heroDuration = prefersReducedMotion ? 0 : 0.55;
   const subDuration = prefersReducedMotion ? 0 : 0.45;
 
@@ -56,12 +58,36 @@ export default function LocaleHomePage() {
     return <>{t("hero.headline")}</>;
   };
 
+  // Konten About (B2B / B2C friendly, stable, long-term)
+  const aboutTitle = t("about.title", {
+    defaultMessage: "Engineered for real operations. Built for trust.",
+  });
+
+  const aboutSubtitle = t("about.subtitle", {
+    defaultMessage:
+      "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer designed for clinics, hospitality, and high-touch services that cannot afford chaos.",
+  });
+
+  const aboutPoints = [
+    t("about.point1", {
+      defaultMessage: "24/7 multilingual AI agents with safe human handoff — no leads lost at 2 AM.",
+    }),
+    t("about.point2", {
+      defaultMessage:
+        "Booking, follow-up, and after-care flows structured for real operations, not just chatbot demos.",
+    }),
+    t("about.point3", {
+      defaultMessage:
+        "Enterprise-grade architecture: secure, modular, and ready to scale across locations & teams.",
+    }),
+  ];
+
   return (
     <main className="relative overflow-hidden bg-white">
       {/* Background rings */}
       <HeroRings />
 
-      {/* Hero section */}
+      {/* PAGE 0: Hero section */}
       <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
         <div className="max-w-3xl -mt-[7px]">
           {/* Headline */}
@@ -100,9 +126,9 @@ export default function LocaleHomePage() {
         <div className="hidden flex-1 lg:block" />
       </section>
 
-      {/* ScrollHint: muncul terakhir → lanjut animasi bounce */}
+      {/* ScrollHint → scroll ke PAGE 1 (About) */}
       <motion.div
-        className="absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
+        className="absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center z-20"
         initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
@@ -111,8 +137,38 @@ export default function LocaleHomePage() {
           ease: "easeOut",
         }}
       >
-        <ScrollHint targetId="page-2" />
+        <ScrollHint targetId="page-1" />
       </motion.div>
+
+      {/* PAGE 1: About / Trust Section */}
+      <AboutShowcase
+        id="page-1"
+        aria-label={aboutTitle}
+        className="mt-16 mb-20"
+      >
+        <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
+          <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
+            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
+              {aboutTitle}
+            </h2>
+
+            <p className="text-sm md:text-base leading-relaxed text-slate-700">
+              {aboutSubtitle}
+            </p>
+
+            <ul className="mt-4 grid gap-3 text-sm md:text-[15px] text-slate-800/90 md:grid-cols-3">
+              {aboutPoints.map((point, index) => (
+                <li
+                  key={index}
+                  className="rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm ring-1 ring-slate-200/80 px-3.5 py-2.5 text-left"
+                >
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </AboutShowcase>
     </main>
   );
 }
