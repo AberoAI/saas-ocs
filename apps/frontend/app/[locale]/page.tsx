@@ -1,3 +1,4 @@
+// apps/frontend/app/[locale]/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
@@ -46,13 +47,13 @@ export default function LocaleHomePage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white">
+    <main className="relative min-h-[75vh] md:min-h-[80vh] overflow-hidden bg-white">
       {/* Background rings */}
       <HeroRings />
 
-      {/* Hero section */}
-      <section className="relative z-10 mx-auto flex min-h-[calc(100vh-6rem)] items-center max-w-6xl px-4 lg:px-6">
-        {/* Text block shifted 7px upward */}
+      {/* Hero section: tinggi lebih ringkas & proporsional */}
+      <section className="relative z-10 mx-auto flex min-h-[70vh] md:min-h-[75vh] items-center max-w-6xl px-4 lg:px-6">
+        {/* Text block */}
         <div className="max-w-3xl -mt-[7px]">
           <h1 className="text-4xl md:text-5xl font-semibold text-[#585858]">
             {renderHeadline()}
@@ -60,11 +61,11 @@ export default function LocaleHomePage() {
 
           {/* Subheadline */}
           <p
-            className={`${
+            className={
               isTr
                 ? "mt-6 text-[16px] leading-relaxed text-black/70"
                 : "mt-4 text-[16px] text-black/70"
-            }`}
+            }
           >
             {t("home.subHeadline")}
           </p>
@@ -74,8 +75,8 @@ export default function LocaleHomePage() {
         <div className="hidden flex-1 lg:block" />
       </section>
 
-      {/* Scroll hint */}
-      <div className="absolute inset-x-0 bottom-10 flex justify-center">
+      {/* Scroll hint: sedikit di atas fade bawah */}
+      <div className="absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center">
         <ScrollHint targetId="page-2" />
       </div>
     </main>
