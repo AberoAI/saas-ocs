@@ -1,3 +1,4 @@
+// apps/frontend/components/hero/ScrollHint.tsx
 "use client";
 
 import { memo, useCallback, useMemo } from "react";
@@ -65,8 +66,8 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
       onClick={handleClick}
       className={[
         "inline-flex items-center justify-center gap-2",
-        // ⬇️ Only this line changed: smaller font size (6px mobile, 8px desktop)
-        "text-[6px] md:text-[8px] text-black/60 transition duration-200",
+        // font-size TIDAK di-set di sini agar tidak bentrok dengan global button style
+        "text-black/60 transition duration-200",
         "hover:text-[#26658C] hover:drop-shadow-sm",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#26658C]/30",
         "rounded-md select-none",
@@ -83,7 +84,10 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
       }}
       aria-label={ariaLabel}
     >
-      <span className="tracking-wide">{label}</span>
+      {/* 👉 Ukuran teks dikontrol di sini, lebih kecil ~6px dari sebelumnya */}
+      <span className="tracking-wide text-[8px] md:text-[10px] leading-none">
+        {label}
+      </span>
       <svg
         className="w-[12px] h-[12px] md:w-[14px] md:h-[14px] opacity-80"
         viewBox="0 0 24 24"
