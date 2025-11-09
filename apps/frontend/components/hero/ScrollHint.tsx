@@ -1,3 +1,4 @@
+// apps/frontend/components/hero/ScrollHint.tsx
 "use client";
 
 import { memo, useCallback, useMemo } from "react";
@@ -65,7 +66,7 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
       onClick={handleClick}
       className={[
         "inline-flex items-center justify-center gap-2",
-        "text-xs md:text-sm text-black/60 transition duration-200",
+        "text-[6px] md:text-[8px] text-black/60 transition duration-200",
         "hover:text-[#26658C] hover:drop-shadow-sm",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#26658C]/30",
         "rounded-md select-none",
@@ -102,7 +103,6 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
   );
 }
 
-// 🧱 Memoized for rerender efficiency — only updates if props or locale change
 const ScrollHint = memo(ScrollHintBase);
 ScrollHint.displayName = "ScrollHint";
 
