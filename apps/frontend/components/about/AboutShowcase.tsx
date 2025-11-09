@@ -14,7 +14,9 @@ export default function AboutShowcase({
 
   const sectionClassName = [
     "relative max-w-none",
-    // Panel tinggi, terasa penting, tapi masih menyisakan ruang putih di luar
+    // Tinggi: hampir penuh viewport, tapi masih ada ruang putih di luar card
+    // 520px min (untuk layar kecil), 92vh target (hampir penuh),
+    // 1100px max (agar stabil di layar tinggi)
     "h-[clamp(520px,92vh,1100px)]",
     "w-[calc(100vw-16px)]",
     "ml-[calc(50%-50vw+8px)]",
@@ -32,12 +34,10 @@ export default function AboutShowcase({
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
-          // sedikit shadow untuk efek melayang premium
-          "shadow-[0_24px_80px_rgba(15,23,42,0.14)]",
         ].join(" ")}
       >
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
+          className="pointer-events-none absolute left-0 right-0 top-0 -bottom-[2px] h-[calc(100%+2px)] w-full"
           viewBox="0 0 1882 1032"
           preserveAspectRatio="none"
           shapeRendering="geometricPrecision"
@@ -68,23 +68,8 @@ export default function AboutShowcase({
             </linearGradient>
           </defs>
 
-          {/* Concave bottom-right notch: signature panel AberoAI */}
           <path
-            d="
-              M0 45
-              C0 20.1472 20.1472 0 45 0
-              H1837
-              C1861.85 0 1882 20.1472 1882 45
-
-              V962
-              Q1882 1032 1812 1032
-
-              H45
-              C20.1472 1032 0 1011.85 0 987
-
-              V45
-              Z
-            "
+            d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V988C1442 1016 1416 1032 1404 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
             fill={`url(#${gradId})`}
           />
         </svg>
