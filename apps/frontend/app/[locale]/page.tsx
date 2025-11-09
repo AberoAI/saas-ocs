@@ -156,34 +156,36 @@ export default function LocaleHomePage() {
       </section>
 
       {/* PAGE 1: About / Trust Section */}
-      <AboutShowcase
-        id="page-1"
-        aria-label={aboutTitle}
-        className="mt-20 mb-10"
-      >
-        <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
-          <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
-              {aboutTitle}
-            </h2>
+      <section className="relative flex min-h-screen items-center justify-center">
+        <AboutShowcase
+          id="page-1"
+          aria-label={aboutTitle}
+          className="mt-0 mb-0"
+        >
+          <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
+            <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
+              <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
+                {aboutTitle}
+              </h2>
 
-            <p className="text-sm md:text-base leading-relaxed text-slate-700">
-              {aboutSubtitle}
-            </p>
+              <p className="text-sm md:text-base leading-relaxed text-slate-700">
+                {aboutSubtitle}
+              </p>
 
-            <ul className="mt-4 grid gap-3 text-sm md:text-[15px] text-slate-800/90 md:grid-cols-3">
-              {aboutPoints.map((point, index) => (
-                <li
-                  key={index}
-                  className="rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm ring-1 ring-slate-200/80 px-3.5 py-2.5 text-left"
-                >
-                  {point}
-                </li>
-              ))}
-            </ul>
+              <ul className="mt-4 grid gap-3 text-sm md:text-[15px] text-slate-800/90 md:grid-cols-3">
+                {aboutPoints.map((point, index) => (
+                  <li
+                    key={index}
+                    className="rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm ring-1 ring-slate-200/80 px-3.5 py-2.5 text-left"
+                  >
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
-      </AboutShowcase>
+        </AboutShowcase>
+      </section>
     </main>
   );
 }
