@@ -58,19 +58,22 @@ export default function LocaleHomePage() {
     return <>{t("hero.headline")}</>;
   };
 
-  // Konten About (B2B / B2C friendly, stable, long-term)
-  const aboutTitle = t("about.title", {
-    defaultMessage: "Engineered for real operations. Built for trust.",
-  });
+  const aboutTitle =
+    t("about.title", {
+      defaultMessage: "Engineered for real operations. Built for trust.",
+    }) || "Engineered for real operations. Built for trust.";
 
-  const aboutSubtitle = t("about.subtitle", {
-    defaultMessage:
-      "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer designed for clinics, hospitality, and high-touch services that cannot afford chaos.",
-  });
+  const aboutSubtitle =
+    t("about.subtitle", {
+      defaultMessage:
+        "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer designed for clinics, hospitality, and high-touch services that cannot afford chaos.",
+    }) ||
+    "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer.";
 
   const aboutPoints = [
     t("about.point1", {
-      defaultMessage: "24/7 multilingual AI agents with safe human handoff — no leads lost at 2 AM.",
+      defaultMessage:
+        "24/7 multilingual AI agents with safe human handoff — no leads lost at 2 AM.",
     }),
     t("about.point2", {
       defaultMessage:
@@ -84,7 +87,7 @@ export default function LocaleHomePage() {
 
   return (
     <main className="relative overflow-hidden bg-white">
-      {/* Background rings */}
+      {/* Background rings (decorative) */}
       <HeroRings />
 
       {/* PAGE 0: Hero section */}
@@ -124,21 +127,21 @@ export default function LocaleHomePage() {
         </div>
 
         <div className="hidden flex-1 lg:block" />
-      </section>
 
-      {/* ScrollHint → scroll ke PAGE 1 (About) */}
-      <motion.div
-        className="absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center z-20"
-        initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: prefersReducedMotion ? 0 : 0.5,
-          delay: scrollDelay,
-          ease: "easeOut",
-        }}
-      >
-        <ScrollHint targetId="page-1" />
-      </motion.div>
+        {/* ScrollHint hanya milik hero (PAGE 0) */}
+        <motion.div
+          className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
+          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: prefersReducedMotion ? 0 : 0.5,
+            delay: scrollDelay,
+            ease: "easeOut",
+          }}
+        >
+          <ScrollHint targetId="page-1" />
+        </motion.div>
+      </section>
 
       {/* PAGE 1: About / Trust Section */}
       <AboutShowcase
