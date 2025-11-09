@@ -1,55 +1,99 @@
-// apps/frontend/components/hero/ScrollHint.tsx
 "use client";
 
+import { memo, useCallback, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Inter } from "next/font/google";
-import { usePathname } from "next/navigation"; // ✅ add
+import { useLocale } from "next-intl";
 
-const inter = Inter({ subsets: ["latin"], weight: ["400"] }); // Inter Regular (khusus Scroll)
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400"], // clean & consistent typography
+});
 
-export default function ScrollHint({
-  targetId,
-  className = "",
-}: {
+type ScrollHintProps = {
   targetId?: string;
   className?: string;
-}) {
-  const reduceMotion = useReducedMotion();
-  const pathname = usePathname() || "/";                 // ✅
-  const locale = (pathname.split("/")[1] || "en").toLowerCase(); // ✅
-  const label = locale === "tr" ? "Aşağı kaydır" : "Scroll";      // ✅
+};
 
-  const onClick = () => {
+function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
+  const rawLocale = useLocale() || "en";
+  const locale = rawLocale.toLowerCase();
+  const reduceMotion = useReducedMotion();
+
+  // 🌍 Centralized label map for scalability
+  const labelMap: Record<string, string> = {
+    en: "Scroll",
+    tr: "Aşağı kaydır",
+    fr: "Faites défiler",
+    id: "Gulir ke bawah",
+  };
+
+  const label = useMemo(() => labelMap[locale] ?? labelMap.en, [locale]);
+
+  const ariaLabel = useMemo(() => {
+    if (!targetId) return label;
+    switch (locale) {
+      case "tr":
+        return "Bir sonraki bölüme aşağı kaydır";
+      case "fr":
+        return "Faites défiler jusqu'à la section suivante";
+      case "id":
+        return "Gulir ke bagian berikutnya";
+      default:
+        return "Scroll to next section";
+    }
+  }, [label, locale, targetId]);
+
+  const handleClick = useCallback(() => {
     if (!targetId) return;
     const el = document.getElementById(targetId);
-    if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
-  };
+    if (!el) return;
+
+    el.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [targetId, reduceMotion]);
+
+  const animate = reduceMotion
+    ? { opacity: 0.9, y: 0 }
+    : { opacity: [0.4, 1, 0.4], y: [0, 6, 0] };
 
   return (
     <motion.button
       type="button"
-      onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 text-sm text-black/60 focus:outline-none focus:ring-2 focus:ring-black/20 rounded-md ${className}`}
-      initial={{ opacity: 0.7, y: 0 }}
-      animate={reduceMotion ? { opacity: 0.85 } : { opacity: [0.5, 1, 0.5], y: [0, 6, 0] }}
-      transition={{ duration: 2.8, delay: 2.8, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }}
-      aria-label={
-        targetId
-          ? (locale === "tr" ? "Bir sonraki bölüme kaydır" : "Scroll to next section")
-          : label
-      } // ✅ localized aria
+      onClick={handleClick}
+      className={[
+        "inline-flex items-center justify-center gap-2",
+        "text-xs md:text-sm text-black/60 transition duration-200",
+        "hover:text-[#26658C] hover:drop-shadow-sm",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#26658C]/30",
+        "rounded-md select-none",
+        inter.className,
+        className,
+      ].join(" ")}
+      initial={{ opacity: 0, y: 2 }}
+      animate={animate}
+      transition={{
+        duration: 2.4,
+        delay: 1.4,
+        repeat: reduceMotion ? 0 : Infinity,
+        ease: [0.45, 0, 0.55, 1],
+      }}
+      aria-label={ariaLabel}
     >
-      <span className={`${inter.className} text-[12px] font-normal tracking-wide`}>{label}</span>
+      <span className="tracking-wide">{label}</span>
       <svg
-        className="w-[13px] h-[13px] opacity-80"
+        className="w-[12px] h-[12px] md:w-[14px] md:h-[14px] opacity-80"
         viewBox="0 0 24 24"
         fill="none"
+        role="presentation"
         aria-hidden="true"
       >
         <path
-          d="M12 5v14M12 19l-5-5M12 19l5-5"
+          d="M12 5v12M12 17l-4-4M12 17l4-4"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -57,3 +101,9 @@ export default function ScrollHint({
     </motion.button>
   );
 }
+
+// 🧱 Memoized for rerender efficiency — only updates if props or locale change
+const ScrollHint = memo(ScrollHintBase);
+ScrollHint.displayName = "ScrollHint";
+
+export default ScrollHint;
