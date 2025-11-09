@@ -5,15 +5,23 @@ type Props = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
 };
 
-export default function AboutShowcase({ className = "", children, ...rest }: Props) {
+export default function AboutShowcase({
+  className = "",
+  children,
+  ...rest
+}: Props) {
   const gradId = React.useId();
 
   const sectionClassName = [
-    "relative max-w-none",
-    "h-[clamp(420px,85vh,920px)]",
-    "w-[calc(100vw-16px)]",
-    "ml-[calc(50%-50vw+8px)]",
-    "mr-[calc(50%-50vw+8px)]",
+    "relative",
+    // Lebar terkontrol & center → terasa seperti panel premium, bukan full-bleed
+    "max-w-6xl",
+    "mx-auto",
+    // Whitespace kiri-kanan untuk efek “melayang” dari tepi viewport
+    "px-3 sm:px-4 lg:px-6",
+    // Tinggi: cukup penuh, scalable, tapi tetap menyisakan ruang atas-bawah
+    // clamp(min, preferred, max)
+    "h-[clamp(520px,82vh,1100px)]",
     className,
   ]
     .filter(Boolean)
@@ -24,9 +32,12 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
       <div
         className={[
           "relative h-full w-full overflow-hidden",
+          // Card utama: ini yang menjadi panel “mengambang”
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
+          // (Opsional, tapi relevan dengan konsep floating-card premium & stabil)
+          "shadow-[0_24px_80px_rgba(15,23,42,0.10)]",
         ].join(" ")}
       >
         <svg
@@ -47,7 +58,10 @@ export default function AboutShowcase({ className = "", children, ...rest }: Pro
               y2="1032"
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="0.04" stopColor="var(--about-grad-1, #C1EEFF)" />
+              <stop
+                offset="0.04"
+                stopColor="var(--about-grad-1, #C1EEFF)"
+              />
               <stop
                 offset="0.67"
                 stopColor="var(--about-grad-2, #DBF8EF)"
