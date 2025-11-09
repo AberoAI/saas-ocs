@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useMemo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, type Transition } from "framer-motion";
 import { Inter } from "next/font/google";
 import { useLocale } from "next-intl";
 
@@ -20,7 +20,7 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
   const locale = rawLocale.toLowerCase();
   const reduceMotion = useReducedMotion();
 
-  // 🌍 Centralized label map for scalability
+  // Centralized label map
   const labelMap: Record<string, string> = {
     en: "Scroll",
     tr: "Aşağı kaydır",
@@ -55,9 +55,17 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
     });
   }, [targetId, reduceMotion]);
 
-  const animate = reduceMotion
-    ? { opacity: 0.9, y: 0 }
-    : { opacity: [0.4, 1, 0.4], y: [0, 6, 0] };
+  // 🎯 Only bounce loop here — no initial delay/fade (diatur parent)
+  const animate = reduceMotion ? { y: 0 } : { y: [0, -4, 0] };
+
+  const transition: Transition = reduceMotion
+    ? { duration: 0 }
+    : {
+        duration: 1.4,
+        ease: [0.45, 0, 0.55, 1],
+        repeat: Infinity,
+        repeatType: "mirror",
+      };
 
   return (
     <motion.button
@@ -72,17 +80,11 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
         inter.className,
         className,
       ].join(" ")}
-      initial={{ opacity: 0, y: 2 }}
       animate={animate}
-      transition={{
-        duration: 2.4,
-        delay: 1.4,
-        repeat: reduceMotion ? 0 : Infinity,
-        ease: [0.45, 0, 0.55, 1],
-      }}
+      transition={transition}
       aria-label={ariaLabel}
+      role="button"
     >
-      {/* 🔹 Font size dinaikkan 2px dari sebelumnya */}
       <span className="tracking-wide text-[10px] md:text-[12px] leading-none">
         {label}
       </span>
