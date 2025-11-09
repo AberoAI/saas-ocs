@@ -15,12 +15,15 @@ export default function LocaleHomePage() {
 
   const prefersReducedMotion = useReducedMotion();
 
-  // Animation timing (singkat, elegan, respect reduced motion)
+  // Timing konfigurasi (sekensial, tapi tetap ringan & stabil)
   const heroDuration = prefersReducedMotion ? 0 : 0.55;
   const subDuration = prefersReducedMotion ? 0 : 0.45;
 
   const heroDelay = 0;
   const subDelay = prefersReducedMotion ? 0 : heroDelay + heroDuration + 0.12;
+  const scrollDelay = prefersReducedMotion ? 0 : subDelay + subDuration + 0.18;
+
+  const baseEase = "easeOut";
 
   const renderHeadline = () => {
     if (isEn) {
@@ -57,15 +60,15 @@ export default function LocaleHomePage() {
   };
 
   return (
-    <main className="relative overflow-hidden bg-white">
+    <main className="relative min-h-[75vh] md:min-h-[80vh] overflow-hidden bg-white">
       {/* Background rings */}
       <HeroRings />
 
-      {/* Hero section: compact & proportional */}
-      <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
-        {/* Text block (sedikit naik untuk balance visual) */}
+      {/* Hero section: compact & proporsional */}
+      <section className="relative z-10 mx-auto flex min-h-[70vh] md:min-h-[75vh] items-center max-w-6xl px-4 lg:px-6">
+        {/* Text block */}
         <div className="max-w-3xl -mt-[7px]">
-          {/* Headline */}
+          {/* Headline dengan fade-in + slide-up duluan */}
           <motion.h1
             initial={
               prefersReducedMotion
@@ -76,14 +79,14 @@ export default function LocaleHomePage() {
             transition={{
               duration: heroDuration,
               delay: heroDelay,
-              ease: "easeOut",
+              ease: baseEase,
             }}
             className="text-4xl md:text-5xl font-semibold text-[#585858]"
           >
             {renderHeadline()}
           </motion.h1>
 
-          {/* Subheadline */}
+          {/* Subheadline: muncul setelah headline selesai */}
           <motion.p
             initial={
               prefersReducedMotion
@@ -94,7 +97,7 @@ export default function LocaleHomePage() {
             transition={{
               duration: subDuration,
               delay: subDelay,
-              ease: "easeOut",
+              ease: baseEase,
             }}
             className={
               isTr
@@ -106,14 +109,41 @@ export default function LocaleHomePage() {
           </motion.p>
         </div>
 
-        {/* Space for HeroRings alignment on the right */}
+        {/* Ruang kosong untuk alignment HeroRings di kanan */}
         <div className="hidden flex-1 lg:block" />
       </section>
 
-      {/* Scroll hint: fixed position, animasi ditangani oleh komponennya sendiri */}
-      <div className="absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center">
+      {/* ScrollHint: muncul terakhir, subtle bounce setelah fade-in */}
+      <motion.div
+        className="absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
+        initial={
+          prefersReducedMotion
+            ? { opacity: 1, y: 0 }
+            : { opacity: 0, y: 10 }
+        }
+        animate={
+          prefersReducedMotion
+            ? { opacity: 1, y: 0 }
+            : {
+                opacity: 1,
+                y: [0, -4, 0],
+              }
+        }
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : {
+                delay: scrollDelay,
+                duration: 1.6,
+                ease: baseEase,
+                repeat: Infinity,
+                repeatType: "mirror",
+                repeatDelay: 0.9,
+              }
+        }
+      >
         <ScrollHint targetId="page-2" />
-      </div>
+      </motion.div>
     </main>
   );
 }
