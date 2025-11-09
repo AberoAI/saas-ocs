@@ -1,4 +1,3 @@
-// apps/frontend/components/hero/ScrollHint.tsx
 "use client";
 
 import { memo, useCallback, useMemo } from "react";
@@ -66,6 +65,7 @@ function ScrollHintBase({ targetId, className = "" }: ScrollHintProps) {
       onClick={handleClick}
       className={[
         "inline-flex items-center justify-center gap-2",
+        // ⬇️ Only this line changed: smaller font size (6px mobile, 8px desktop)
         "text-[6px] md:text-[8px] text-black/60 transition duration-200",
         "hover:text-[#26658C] hover:drop-shadow-sm",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#26658C]/30",
