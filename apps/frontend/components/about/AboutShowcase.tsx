@@ -14,10 +14,6 @@ export default function AboutShowcase({
 
   const sectionClassName = [
     "relative max-w-none",
-    // Tinggi: hampir penuh viewport, tapi masih ada ruang putih di luar card
-    // 520px min (untuk layar kecil), 92vh target (hampir penuh),
-    // 1100px max (agar stabil di layar tinggi)
-    "h-[clamp(520px,92vh,1100px)]",
     "w-[calc(100vw-16px)]",
     "ml-[calc(50%-50vw+8px)]",
     "mr-[calc(50%-50vw+8px)]",
@@ -30,7 +26,7 @@ export default function AboutShowcase({
     <section {...rest} className={sectionClassName}>
       <div
         className={[
-          "relative h-full w-full overflow-hidden",
+          "relative w-full overflow-hidden",
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
@@ -74,7 +70,7 @@ export default function AboutShowcase({
           />
         </svg>
 
-        <div className="relative z-10 flex h-full w-full items-center justify-center">
+        <div className="relative z-10 flex w-full items-center justify-center py-10 md:py-12">
           {children}
         </div>
       </div>

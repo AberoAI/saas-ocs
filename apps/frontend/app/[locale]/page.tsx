@@ -156,13 +156,13 @@ export default function LocaleHomePage() {
       </section>
 
       {/* PAGE 1: About / Trust Section */}
-      <section className="relative flex min-h-[110vh] items-start justify-center pt-[10vh] pb-[5vh]">
+      <section className="relative flex min-h-[85vh] items-center justify-center py-[10vh]">
         <AboutShowcase
           id="page-1"
           aria-label={aboutTitle}
           className="mt-0 mb-0"
         >
-          <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
+          <div className="flex w-full flex-col items-center justify-center px-4 lg:px-10">
             <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
               <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
                 {aboutTitle}
