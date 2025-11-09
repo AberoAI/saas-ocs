@@ -5,12 +5,19 @@ type Props = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
 };
 
-export default function AboutShowcase({ className = "", children, ...rest }: Props) {
+export default function AboutShowcase({
+  className = "",
+  children,
+  ...rest
+}: Props) {
   const gradId = React.useId();
 
   const sectionClassName = [
     "relative max-w-none",
-    "h-[clamp(420px,85vh,920px)]",
+    // Tinggi: hampir penuh viewport, tapi masih ada ruang putih di luar card
+    // 520px min (untuk layar kecil), 92vh target (hampir penuh),
+    // 1100px max (agar stabil di layar tinggi)
+    "h-[clamp(520px,92vh,1100px)]",
     "w-[calc(100vw-16px)]",
     "ml-[calc(50%-50vw+8px)]",
     "mr-[calc(50%-50vw+8px)]",

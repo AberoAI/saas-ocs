@@ -95,7 +95,11 @@ export default function LocaleHomePage() {
         <div className="max-w-3xl -mt-[7px]">
           {/* Headline */}
           <motion.h1
-            initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+            initial={
+              prefersReducedMotion
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 18 }
+            }
             animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: heroDuration,
@@ -109,7 +113,11 @@ export default function LocaleHomePage() {
 
           {/* Subheadline */}
           <motion.p
-            initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 14 }}
+            initial={
+              prefersReducedMotion
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 14 }
+            }
             animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: subDuration,
@@ -131,7 +139,11 @@ export default function LocaleHomePage() {
         {/* ScrollHint hanya milik hero (PAGE 0) */}
         <motion.div
           className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
-          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+          initial={
+            prefersReducedMotion
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 6 }
+          }
           animate={{ opacity: 1, y: 0 }}
           transition={{
             duration: prefersReducedMotion ? 0 : 0.5,
@@ -147,7 +159,7 @@ export default function LocaleHomePage() {
       <AboutShowcase
         id="page-1"
         aria-label={aboutTitle}
-        className="mt-16 mb-20"
+        className="mt-20 mb-10"
       >
         <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
           <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
