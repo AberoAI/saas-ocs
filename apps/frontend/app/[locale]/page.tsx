@@ -159,7 +159,10 @@ export default function LocaleHomePage() {
         id="page-1"
         className="relative flex items-center justify-center min-h-[92vh] lg:min-h-[95vh]"
       >
-        <AboutShowcase aria-label={aboutTitle}>
+        <AboutShowcase
+          aria-label={aboutTitle}
+          className="mt-[8vh]" // jarak terkontrol dari hero → breathing space
+        >
           <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
             <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
               <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
