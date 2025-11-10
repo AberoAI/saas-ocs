@@ -4,7 +4,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
-import AboutShowcase from "@/components/about/AboutShowcase";
+import AboutShowcase from "@/components/about/AboutShowcase"; // dibiarkan, jika nanti ingin dipakai di section lain
+import PinnedClusterSection, {
+  type PinnedStep,
+} from "@/components/sections/PinnedClusterSection";
 
 export default function LocaleHomePage() {
   const t = useTranslations();
@@ -83,6 +86,81 @@ export default function LocaleHomePage() {
     }),
   ];
 
+  const pinnedSteps: [PinnedStep, PinnedStep, PinnedStep] = [
+    {
+      id: "ops-layer",
+      label: "01 • OPERATIONAL LAYER",
+      title: t("pinned.step1.title", {
+        defaultMessage: "A single, reliable layer for real operations.",
+      }),
+      body: t("pinned.step1.body", {
+        defaultMessage:
+          "AberoAI sits between WhatsApp, your teams, and your tools to standardize how leads, patients, and guests are handled — no more chaos in shared inboxes or personal numbers.",
+      }),
+      bullets: aboutPoints,
+    },
+    {
+      id: "ai-layer",
+      label: "02 • AI WORKFLOWS",
+      title: t("pinned.step2.title", {
+        defaultMessage: "AI that follows your playbook, not random scripts.",
+      }),
+      body: t("pinned.step2.body", {
+        defaultMessage:
+          "24/7 multilingual AI agents built around real clinic and hospitality workflows: qualification, booking, pre-op, post-op, follow-ups — always with safe human handoff.",
+      }),
+      bullets: [
+        t("pinned.step2.bullet1", {
+          defaultMessage: "Structured lead qualification & booking flows.",
+        }),
+        t("pinned.step2.bullet2", {
+          defaultMessage: "Consistent answers trained on your policies.",
+        }),
+        t("pinned.step2.bullet3", {
+          defaultMessage: "Instant escalation to humans with full context.",
+        }),
+        t("pinned.step2.bullet4", {
+          defaultMessage: "Built on stable AI infra, no fragile hacks.",
+        }),
+      ],
+    },
+    {
+      id: "retention-layer",
+      label: "03 • RETENTION & SCALE",
+      title: t("pinned.step3.title", {
+        defaultMessage:
+          "Retention, performance, and compliance — across locations.",
+      }),
+      body: t("pinned.step3.body", {
+        defaultMessage:
+          "AberoAI turns WhatsApp conversations into structured data: who booked, who converted, who returned, and which flows perform — so you can scale with confidence.",
+      }),
+      bullets: [
+        t("pinned.step3.bullet1", {
+          defaultMessage: "Multi-location & per-clinic visibility.",
+        }),
+        t("pinned.step3.bullet2", {
+          defaultMessage:
+            "Conversion, response time, and follow-up insights in one place.",
+        }),
+        t("pinned.step3.bullet3", {
+          defaultMessage: "Audit-friendly history for regulated industries.",
+        }),
+        t("pinned.step3.bullet4", {
+          defaultMessage:
+            "Foundation for future products on the same data layer.",
+        }),
+      ],
+    },
+  ];
+
+  const pinnedFooterNote =
+    t("pinned.footerNote", {
+      defaultMessage:
+        "Scroll to see how AberoAI connects operations, AI workflows, and long-term retention in one structured system.",
+    }) ||
+    "Scroll to see how AberoAI connects operations, AI workflows, and long-term retention in one structured system.";
+
   return (
     <main className="relative overflow-hidden bg-white">
       <HeroRings />
@@ -152,42 +230,22 @@ export default function LocaleHomePage() {
         </motion.div>
       </section>
 
-      {/* SPACER: memisahkan hero dan about agar page-1 tidak bocor di page-0 */}
-      <div
-        aria-hidden="true"
-        className="h-[6vh] bg-white"
+      {/* SPACER tipis antara Hero & pinned cluster */}
+      <div aria-hidden="true" className="h-[6vh] bg-white" />
+
+      {/* PAGE 1-3: Pinned Cluster Section (Operations → AI → Retention) */}
+      <PinnedClusterSection
+        sectionId="page-1"
+        kicker={t("pinned.kicker", {
+          defaultMessage: "Engineered for real operations. Built for trust.",
+        })}
+        title={aboutTitle}
+        subtitle={aboutSubtitle}
+        steps={pinnedSteps}
+        footerNote={pinnedFooterNote}
       />
 
-      {/* PAGE 1: About / Trust Section */}
-      <section
-        id="page-1"
-        className="relative flex items-center justify-center min-h-[92vh] lg:min-h-[95vh]"
-      >
-        <AboutShowcase aria-label={aboutTitle}>
-          <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
-            <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
-              <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
-                {aboutTitle}
-              </h2>
-
-              <p className="text-sm md:text-base leading-relaxed text-slate-700">
-                {aboutSubtitle}
-              </p>
-
-              <ul className="mt-4 grid gap-3 text-sm md:text-[15px] text-slate-800/90 md:grid-cols-3">
-                {aboutPoints.map((point, index) => (
-                  <li
-                    key={index}
-                    className="rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm ring-1 ring-slate-200/80 px-3.5 py-2.5 text-left"
-                  >
-                    {point}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </AboutShowcase>
-      </section>
+      {/* Setelah ini: lanjut sections lain dengan continuous scroll biasa (Features, Integrations, Pricing, dll) */}
     </main>
   );
 }
