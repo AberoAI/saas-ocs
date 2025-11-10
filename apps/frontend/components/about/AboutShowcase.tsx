@@ -16,7 +16,7 @@ export default function AboutShowcase({
     "w-[calc(100vw-16px)]",
     "ml-[calc(50%-50vw+8px)]",
     "mr-[calc(50%-50vw+8px)]",
-    "h-full", // memastikan isi mengisi tinggi penuh parent
+    "min-h-[inherit]", // ✅ Kunci utama: inherit tinggi dari parent page-1
     className,
   ]
     .filter(Boolean)
@@ -26,7 +26,7 @@ export default function AboutShowcase({
     <section {...rest} className={sectionClassName}>
       <div
         className={[
-          "relative h-full w-full overflow-hidden",
+          "relative min-h-[inherit] w-full overflow-hidden", // ✅ ikut tinggi parent
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
@@ -70,7 +70,7 @@ export default function AboutShowcase({
           />
         </svg>
 
-        <div className="relative z-10 flex h-full w-full items-center justify-center py-12">
+        <div className="relative z-10 flex min-h-[inherit] w-full items-center justify-center py-12">
           {children}
         </div>
       </div>
