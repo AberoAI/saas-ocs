@@ -29,7 +29,7 @@ export default function AboutShowcase({
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
-          // Tinggi case: nilai sebelumnya dinaikkan 8% tanpa mengubah posisi awal
+          // Tinggi case: base + 18px lalu dinaikkan 8% (lebih tinggi, tapi tidak geser ke bawah)
           "min-h-[calc((clamp(420px,70vh,880px)+18px)*1.08)]",
         ].join(" ")}
       >

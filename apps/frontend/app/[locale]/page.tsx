@@ -154,10 +154,8 @@ export default function LocaleHomePage() {
         id="page-1"
         className="relative flex items-center justify-center min-h-[92vh] lg:min-h-[95vh]"
       >
-        <AboutShowcase
-          aria-label={aboutTitle}
-          className="mt-[8vh]" // jarak dari hero (tetap, tidak diubah)
-        >
+        {/* AboutShowcase tanpa margin-top tambahan agar benar-benar ter-center dalam flex container */}
+        <AboutShowcase aria-label={aboutTitle}>
           <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
             <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
               <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">
