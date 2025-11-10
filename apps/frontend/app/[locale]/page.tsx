@@ -1,4 +1,3 @@
-// apps/frontend/app/[locale]/page.tsx
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
@@ -156,12 +155,11 @@ export default function LocaleHomePage() {
       </section>
 
       {/* PAGE 1: About / Trust Section */}
-      <section className="relative flex items-center justify-center">
-        <AboutShowcase
-          id="page-1"
-          aria-label={aboutTitle}
-          className="mt-0 mb-0 h-[clamp(520px,92vh,1100px)]"
-        >
+      <section
+        id="page-1"
+        className="relative flex items-center justify-center min-h-[92vh] lg:min-h-[95vh]"
+      >
+        <AboutShowcase aria-label={aboutTitle}>
           <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
             <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
               <h2 className="text-2xl md:text-3xl font-semibold text-slate-900">

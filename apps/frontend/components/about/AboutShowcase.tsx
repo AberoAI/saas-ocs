@@ -1,4 +1,3 @@
-// apps/frontend/components/about/AboutShowcase.tsx
 import * as React from "react";
 
 type Props = React.HTMLAttributes<HTMLElement> & {
@@ -17,6 +16,7 @@ export default function AboutShowcase({
     "w-[calc(100vw-16px)]",
     "ml-[calc(50%-50vw+8px)]",
     "mr-[calc(50%-50vw+8px)]",
+    "h-full", // memastikan isi mengisi tinggi penuh parent
     className,
   ]
     .filter(Boolean)
@@ -26,14 +26,14 @@ export default function AboutShowcase({
     <section {...rest} className={sectionClassName}>
       <div
         className={[
-          "relative w-full overflow-hidden",
+          "relative h-full w-full overflow-hidden",
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
         ].join(" ")}
       >
         <svg
-          className="pointer-events-none absolute left-0 right-0 top-0 -bottom-[2px] h-[calc(100%+2px)] w-full"
+          className="pointer-events-none absolute left-0 right-0 top-0 -bottom-[2px] h-full w-full"
           viewBox="0 0 1882 1032"
           preserveAspectRatio="none"
           shapeRendering="geometricPrecision"
@@ -70,7 +70,7 @@ export default function AboutShowcase({
           />
         </svg>
 
-        <div className="relative z-10 flex w-full items-center justify-center py-10 md:py-12">
+        <div className="relative z-10 flex h-full w-full items-center justify-center py-12">
           {children}
         </div>
       </div>
