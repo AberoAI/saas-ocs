@@ -8,6 +8,7 @@ import {
   useTransform,
   useReducedMotion,
 } from "framer-motion";
+import AboutShowcase from "@/components/about/AboutShowcase";
 
 export type PinnedStep = {
   id: string;
@@ -22,7 +23,7 @@ type PinnedClusterSectionProps = {
   kicker?: string;
   title: string;
   subtitle?: string;
-  steps: [PinnedStep, PinnedStep, PinnedStep]; // fix: enforce exactly 3 steps
+  steps: [PinnedStep, PinnedStep, PinnedStep]; // wajib 3 step
   footerNote?: string;
 };
 
@@ -30,9 +31,11 @@ type PinnedClusterSectionProps = {
  * PinnedClusterSection
  *
  * - Outer: tinggi multipel viewport → ruang scroll.
- * - Inner: sticky full viewport → layout terasa tetap, konten berubah.
- * - 3 step (operations, AI, retention) cross-fade + slide.
- * - Respek prefers-reduced-motion → fallback statis tanpa pinned agresif.
+ * - Inner: sticky full viewport.
+ * - ABOUT CASE:
+ *   - Seluruh 3 step selalu berada di dalam AboutShowcase (case melengkung yang sama).
+ *   - Pada mode pinned, case tetap, konten di dalamnya berganti.
+ * - Respek prefers-reduced-motion → jatuh ke layout statis di dalam case yang sama.
  */
 export default function PinnedClusterSection({
   sectionId = "page-1",
@@ -44,8 +47,9 @@ export default function PinnedClusterSection({
 }: PinnedClusterSectionProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [step1, step2, step3] = steps;
 
-  // Hooks HARUS selalu dipanggil, tidak boleh hanya di cabang tertentu.
+  // Hooks scroll SELALU dipanggil (tidak conditional)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -61,72 +65,78 @@ export default function PinnedClusterSection({
   const s3Opacity = useTransform(scrollYProgress, [0.5, 0.76, 1.0], [0, 1, 1]);
   const s3Y = useTransform(scrollYProgress, [0.5, 0.76, 1.0], [22, 0, 0]);
 
-  const [step1, step2, step3] = steps;
-
-  // ==== Reduced Motion: versi statis, tanpa pinned animasi ====
+  // ==== MODE REDUCED MOTION: static, tapi case tetap sama ====
   if (prefersReducedMotion) {
     return (
       <section
         id={sectionId}
         className="relative bg-white py-16 md:py-20"
       >
-        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 lg:px-6">
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
           <HeaderBlock kicker={kicker} title={title} subtitle={subtitle} />
-
-          <div className="grid gap-6">
-            <StaticStepBlock step={step1} />
-            <StaticStepBlock step={step2} />
-            <StaticStepBlock step={step3} />
-          </div>
-
-          {footerNote && (
-            <p className="mt-4 text-[10px] md:text-xs text-slate-500">
-              {footerNote}
-            </p>
-          )}
         </div>
+
+        <div className="mt-6 mx-auto max-w-6xl px-4 lg:px-6">
+          <AboutShowcase aria-label={title}>
+            <div className="flex flex-col gap-4 px-4 md:px-8 py-8">
+              <StaticStepBlock step={step1} />
+              <StaticStepBlock step={step2} />
+              <StaticStepBlock step={step3} />
+            </div>
+          </AboutShowcase>
+        </div>
+
+        {footerNote && (
+          <p className="mt-4 mx-auto max-w-6xl px-4 lg:px-6 text-[10px] md:text-xs text-slate-500">
+            {footerNote}
+          </p>
+        )}
       </section>
     );
   }
 
-  // ==== Normal Mode: pinned + scroll-driven transition ====
+  // ==== MODE NORMAL: pinned + konten di dalam AboutShowcase berganti ====
   return (
     <section
       id={sectionId}
       ref={containerRef}
       className="relative bg-white h-[320vh]"
     >
-      {/* Sticky viewport container (navbar offset sudah di-handle di layout dengan pt-[72px]) */}
+      {/* Sticky viewport container (navbar offset sudah di layout pt-[72px]) */}
       <div className="sticky top-0 flex h-screen items-center">
-        <div className="mx-auto flex w-full max-w-6xl flex-col px-4 lg:px-6">
+        <div className="mx-auto w-full max-w-6xl px-4 lg:px-6">
           <HeaderBlock kicker={kicker} title={title} subtitle={subtitle} />
 
-          {/* Layered steps */}
-          <div className="relative mt-6 min-h-[300px] md:min-h-[340px] lg:min-h-[360px]">
-            {/* STEP 1 */}
-            <motion.div
-              style={{ opacity: s1Opacity, y: s1Y }}
-              className="absolute inset-0"
-            >
-              <StepCard step={step1} />
-            </motion.div>
+          <AboutShowcase
+            aria-label={title}
+            className="mt-6"
+          >
+            <div className="relative w-full px-4 md:px-8 py-8 min-h-[260px] md:min-h-[320px] lg:min-h-[360px]">
+              {/* STEP 1 */}
+              <motion.div
+                style={{ opacity: s1Opacity, y: s1Y }}
+                className="absolute inset-0"
+              >
+                <StepCard step={step1} />
+              </motion.div>
 
-            {/* STEP 2 */}
-            <motion.div
-              style={{ opacity: s2Opacity, y: s2Y }}
-              className="absolute inset-0"
-            >
-              <StepCard step={step2} />
-            </motion.div>
+              {/* STEP 2 */}
+              <motion.div
+                style={{ opacity: s2Opacity, y: s2Y }}
+                className="absolute inset-0"
+              >
+                <StepCard step={step2} />
+              </motion.div>
 
-            {/* STEP 3 */}
-            <motion.div
-              style={{ opacity: s3Opacity, y: s3Y }}
-              className="absolute inset-0"
-            >
-              <StepCard step={step3} />
-            </motion.div>
-          </div>
+              {/* STEP 3 */}
+              <motion.div
+                style={{ opacity: s3Opacity, y: s3Y }}
+                className="absolute inset-0"
+              >
+                <StepCard step={step3} />
+              </motion.div>
+            </div>
+          </AboutShowcase>
 
           {footerNote && (
             <div className="mt-6 text-[10px] md:text-xs text-slate-500">
@@ -167,15 +177,7 @@ function HeaderBlock({ kicker, title, subtitle }: HeaderBlockProps) {
 
 function StepCard({ step }: { step: PinnedStep }) {
   return (
-    <div
-      className={[
-        "grid h-full w-full items-start gap-4 md:gap-6",
-        "md:grid-cols-[0.22fr,1fr]",
-        "rounded-3xl bg-white/92 backdrop-blur-sm",
-        "shadow-sm ring-1 ring-slate-200/85",
-        "px-4 py-4 md:px-6 md:py-6",
-      ].join(" ")}
-    >
+    <div className="h-full w-full">
       <div className="flex flex-col gap-1">
         <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.20em] text-slate-500">
           {step.label}
@@ -183,27 +185,26 @@ function StepCard({ step }: { step: PinnedStep }) {
         <div className="h-[2px] w-8 bg-[#26658C]" />
       </div>
 
-      <div>
-        <h3 className="text-sm md:text-lg font-semibold text-slate-900">
-          {step.title}
-        </h3>
-        <p className="mt-2 text-[11px] md:text-[13px] leading-relaxed text-slate-700">
-          {step.body}
-        </p>
+      <h3 className="mt-2 text-sm md:text-lg font-semibold text-slate-900">
+        {step.title}
+      </h3>
 
-        {step.bullets && step.bullets.length > 0 && (
-          <ul className="mt-3 grid gap-2 text-[10px] md:text-[12px] text-slate-800/90 md:grid-cols-2">
-            {step.bullets.map((item, idx) => (
-              <li
-                key={idx}
-                className="rounded-2xl bg-white/96 px-3 py-2 ring-1 ring-slate-200"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <p className="mt-2 text-[11px] md:text-[13px] leading-relaxed text-slate-700">
+        {step.body}
+      </p>
+
+      {step.bullets && step.bullets.length > 0 && (
+        <ul className="mt-3 grid gap-2 text-[10px] md:text-[12px] text-slate-800/90 md:grid-cols-2">
+          {step.bullets.map((item, idx) => (
+            <li
+              key={idx}
+              className="rounded-2xl bg-white/96 px-3 py-2 ring-1 ring-slate-200"
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

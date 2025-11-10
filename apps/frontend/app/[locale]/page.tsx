@@ -4,7 +4,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
-import AboutShowcase from "@/components/about/AboutShowcase"; // dibiarkan, jika nanti ingin dipakai di section lain
 import PinnedClusterSection, {
   type PinnedStep,
 } from "@/components/sections/PinnedClusterSection";
@@ -24,6 +23,13 @@ export default function LocaleHomePage() {
   const heroDelay = 0;
   const subDelay = prefersReducedMotion ? 0 : heroDelay + heroDuration + 0.12;
   const scrollDelay = prefersReducedMotion ? 0 : subDelay + subDuration + 0.18;
+
+  // Helper: paksa fallback jika next-intl mengembalikan key mentah
+  const tt = (key: string, defaultMessage: string): string => {
+    const value = t(key, { defaultMessage });
+    if (!value || value === key) return defaultMessage;
+    return value;
+  };
 
   const renderHeadline = () => {
     if (isEn) {
@@ -59,107 +65,111 @@ export default function LocaleHomePage() {
     return <>{t("hero.headline")}</>;
   };
 
-  const aboutTitle =
-    t("about.title", {
-      defaultMessage: "Engineered for real operations. Built for trust.",
-    }) || "Engineered for real operations. Built for trust.";
+  const aboutTitle = tt(
+    "about.title",
+    "Engineered for real operations. Built for trust."
+  );
 
-  const aboutSubtitle =
-    t("about.subtitle", {
-      defaultMessage:
-        "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer designed for clinics, hospitality, and high-touch services that cannot afford chaos.",
-    }) ||
-    "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer.";
+  const aboutSubtitle = tt(
+    "about.subtitle",
+    "AberoAI centralizes WhatsApp, AI, and your internal workflows into one reliable, scalable layer designed for clinics, hospitality, and high-touch services that cannot afford chaos."
+  );
 
-  const aboutPoints = [
-    t("about.point1", {
-      defaultMessage:
-        "24/7 multilingual AI agents with safe human handoff — no leads lost at 2 AM.",
-    }),
-    t("about.point2", {
-      defaultMessage:
-        "Booking, follow-up, and after-care flows structured for real operations, not just chatbot demos.",
-    }),
-    t("about.point3", {
-      defaultMessage:
-        "Enterprise-grade architecture: secure, modular, and ready to scale across locations & teams.",
-    }),
+  const aboutPoints: string[] = [
+    tt(
+      "about.point1",
+      "24/7 multilingual AI agents with safe human handoff — no leads lost at 2 AM."
+    ),
+    tt(
+      "about.point2",
+      "Booking, follow-up, and after-care flows structured for real operations, not just chatbot demos."
+    ),
+    tt(
+      "about.point3",
+      "Enterprise-grade architecture: secure, modular, and ready to scale across locations & teams."
+    ),
   ];
 
   const pinnedSteps: [PinnedStep, PinnedStep, PinnedStep] = [
     {
       id: "ops-layer",
       label: "01 • OPERATIONAL LAYER",
-      title: t("pinned.step1.title", {
-        defaultMessage: "A single, reliable layer for real operations.",
-      }),
-      body: t("pinned.step1.body", {
-        defaultMessage:
-          "AberoAI sits between WhatsApp, your teams, and your tools to standardize how leads, patients, and guests are handled — no more chaos in shared inboxes or personal numbers.",
-      }),
+      title: tt(
+        "pinned.step1.title",
+        "A single, reliable layer for real operations."
+      ),
+      body: tt(
+        "pinned.step1.body",
+        "AberoAI sits between WhatsApp, your teams, and your tools to standardize how leads, patients, and guests are handled — no more chaos in shared inboxes or personal numbers."
+      ),
       bullets: aboutPoints,
     },
     {
       id: "ai-layer",
       label: "02 • AI WORKFLOWS",
-      title: t("pinned.step2.title", {
-        defaultMessage: "AI that follows your playbook, not random scripts.",
-      }),
-      body: t("pinned.step2.body", {
-        defaultMessage:
-          "24/7 multilingual AI agents built around real clinic and hospitality workflows: qualification, booking, pre-op, post-op, follow-ups — always with safe human handoff.",
-      }),
+      title: tt(
+        "pinned.step2.title",
+        "AI that follows your playbook, not random scripts."
+      ),
+      body: tt(
+        "pinned.step2.body",
+        "24/7 multilingual AI agents built around real clinic and hospitality workflows: qualification, booking, pre-op, post-op, follow-ups — always with safe human handoff."
+      ),
       bullets: [
-        t("pinned.step2.bullet1", {
-          defaultMessage: "Structured lead qualification & booking flows.",
-        }),
-        t("pinned.step2.bullet2", {
-          defaultMessage: "Consistent answers trained on your policies.",
-        }),
-        t("pinned.step2.bullet3", {
-          defaultMessage: "Instant escalation to humans with full context.",
-        }),
-        t("pinned.step2.bullet4", {
-          defaultMessage: "Built on stable AI infra, no fragile hacks.",
-        }),
+        tt(
+          "pinned.step2.bullet1",
+          "Structured lead qualification & booking flows."
+        ),
+        tt(
+          "pinned.step2.bullet2",
+          "Consistent answers trained on your policies."
+        ),
+        tt(
+          "pinned.step2.bullet3",
+          "Instant escalation to humans with full context."
+        ),
+        tt(
+          "pinned.step2.bullet4",
+          "Built on stable AI infrastructure, no fragile hacks."
+        ),
       ],
     },
     {
       id: "retention-layer",
       label: "03 • RETENTION & SCALE",
-      title: t("pinned.step3.title", {
-        defaultMessage:
-          "Retention, performance, and compliance — across locations.",
-      }),
-      body: t("pinned.step3.body", {
-        defaultMessage:
-          "AberoAI turns WhatsApp conversations into structured data: who booked, who converted, who returned, and which flows perform — so you can scale with confidence.",
-      }),
+      title: tt(
+        "pinned.step3.title",
+        "Retention, performance, and compliance — across locations."
+      ),
+      body: tt(
+        "pinned.step3.body",
+        "AberoAI turns WhatsApp conversations into structured data: who booked, who converted, who returned, and which flows perform — so you can scale with confidence."
+      ),
       bullets: [
-        t("pinned.step3.bullet1", {
-          defaultMessage: "Multi-location & per-clinic visibility.",
-        }),
-        t("pinned.step3.bullet2", {
-          defaultMessage:
-            "Conversion, response time, and follow-up insights in one place.",
-        }),
-        t("pinned.step3.bullet3", {
-          defaultMessage: "Audit-friendly history for regulated industries.",
-        }),
-        t("pinned.step3.bullet4", {
-          defaultMessage:
-            "Foundation for future products on the same data layer.",
-        }),
+        tt(
+          "pinned.step3.bullet1",
+          "Multi-location & per-clinic visibility."
+        ),
+        tt(
+          "pinned.step3.bullet2",
+          "Conversion, response time, and follow-up insights in one place."
+        ),
+        tt(
+          "pinned.step3.bullet3",
+          "Audit-friendly history for regulated industries."
+        ),
+        tt(
+          "pinned.step3.bullet4",
+          "Foundation for future products on the same data layer."
+        ),
       ],
     },
   ];
 
-  const pinnedFooterNote =
-    t("pinned.footerNote", {
-      defaultMessage:
-        "Scroll to see how AberoAI connects operations, AI workflows, and long-term retention in one structured system.",
-    }) ||
-    "Scroll to see how AberoAI connects operations, AI workflows, and long-term retention in one structured system.";
+  const pinnedFooterNote = tt(
+    "pinned.footerNote",
+    "Scroll to see how AberoAI connects operations, AI workflows, and long-term retention in one structured system."
+  );
 
   return (
     <main className="relative overflow-hidden bg-white">
@@ -233,19 +243,20 @@ export default function LocaleHomePage() {
       {/* SPACER tipis antara Hero & pinned cluster */}
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
-      {/* PAGE 1-3: Pinned Cluster Section (Operations → AI → Retention) */}
+      {/* PAGE 1-3: Pinned Cluster (case AboutShowcase + 3 step) */}
       <PinnedClusterSection
         sectionId="page-1"
-        kicker={t("pinned.kicker", {
-          defaultMessage: "Engineered for real operations. Built for trust.",
-        })}
+        kicker={tt(
+          "pinned.kicker",
+          "Engineered for real operations. Built for trust."
+        )}
         title={aboutTitle}
         subtitle={aboutSubtitle}
         steps={pinnedSteps}
         footerNote={pinnedFooterNote}
       />
 
-      {/* Setelah ini: lanjut sections lain dengan continuous scroll biasa (Features, Integrations, Pricing, dll) */}
+      {/* Setelah ini: lanjut sections lain dengan continuous scroll biasa */}
     </main>
   );
 }
