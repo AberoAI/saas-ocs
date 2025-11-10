@@ -91,16 +91,11 @@ export default async function LocaleLayout({
 
   const flagOn = process.env.NEXT_PUBLIC_UI_LOCALE_COOKIE === "true";
 
-  // Pada setup kamu, cookies() bertipe Promise → pakai await
   const cookieStore = await cookies();
 
-  // 🔑 Versi baru: pisah per prefix + versi: ui-locale-v2-en / ui-locale-v2-tr
   const cookieKey = `ui-locale-v2-${routeLocale}`;
   const rawCookie = cookieStore.get(cookieKey)?.value;
 
-  // RULE:
-  // - tidak ada cookie → default = routeLocale
-  // - ada cookie valid + flag ON → pakai cookie
   const uiLocale: Locale =
     flagOn && rawCookie && isLocale(rawCookie)
       ? (rawCookie as Locale)
@@ -114,7 +109,10 @@ export default async function LocaleLayout({
       <NextIntlClientProvider locale={uiLocale} messages={messages}>
         <I18nProvider routeLocale={routeLocale} uiLocale={uiLocale}>
           <Navbar />
-          {children}
+          {/* Offset konten agar tidak tertutup navbar fixed */}
+          <div className="pt-[72px]">
+            {children}
+          </div>
         </I18nProvider>
       </NextIntlClientProvider>
 

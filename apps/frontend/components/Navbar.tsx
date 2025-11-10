@@ -234,7 +234,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white">
+    <header className="fixed top-0 left-0 right-0 z-[999] w-full bg-white/95 backdrop-blur">
       <div
         className="mx-auto grid max-w-screen-xl grid-cols-[1fr_auto_1fr] items-center px-6 py-3.5 md:px-8 lg:px-10"
         style={{ fontFamily: "Inter, sans-serif" }}
