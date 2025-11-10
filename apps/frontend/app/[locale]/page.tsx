@@ -128,10 +128,10 @@ export default function LocaleHomePage() {
       {/* SPACER tipis antara Hero & pinned cluster */}
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
-      {/* PAGE 1: hanya case AboutShowcase (sticky), tanpa teks */}
+      {/* PAGE 1–3: Pinned Scroll Transition cluster (AboutShowcase sebagai case tunggal) */}
       <PinnedClusterSection sectionId="page-1" />
 
-      {/* Setelah ini: lanjut sections biasa (Features, Pricing, dsb) */}
+      {/* Setelah ini: lanjut sections lain dengan continuous scroll biasa (Features, Pricing, dsb) */}
     </main>
   );
 }
