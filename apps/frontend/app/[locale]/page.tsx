@@ -15,7 +15,6 @@ export default function LocaleHomePage() {
 
   const prefersReducedMotion = useReducedMotion();
 
-  // Timing konfigurasi animasi
   const heroDuration = prefersReducedMotion ? 0 : 0.55;
   const subDuration = prefersReducedMotion ? 0 : 0.45;
 
@@ -86,13 +85,11 @@ export default function LocaleHomePage() {
 
   return (
     <main className="relative overflow-hidden bg-white">
-      {/* Background rings (decorative) */}
       <HeroRings />
 
       {/* PAGE 0: Hero section */}
       <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
         <div className="max-w-3xl -mt-[7px]">
-          {/* Headline */}
           <motion.h1
             initial={
               prefersReducedMotion
@@ -110,7 +107,6 @@ export default function LocaleHomePage() {
             {renderHeadline()}
           </motion.h1>
 
-          {/* Subheadline */}
           <motion.p
             initial={
               prefersReducedMotion
@@ -135,7 +131,6 @@ export default function LocaleHomePage() {
 
         <div className="hidden flex-1 lg:block" />
 
-        {/* ScrollHint hanya milik hero (PAGE 0) */}
         <motion.div
           className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
           initial={
@@ -161,7 +156,7 @@ export default function LocaleHomePage() {
       >
         <AboutShowcase
           aria-label={aboutTitle}
-          className="mt-[8vh]" // jarak terkontrol dari hero → breathing space
+          className="mt-[8vh]" // jarak dari hero (tetap, tidak diubah)
         >
           <div className="flex h-full w-full flex-col items-center justify-center px-4 lg:px-10">
             <div className="max-w-5xl space-y-4 md:space-y-5 text-center md:text-left">
