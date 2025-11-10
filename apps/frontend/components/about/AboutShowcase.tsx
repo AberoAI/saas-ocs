@@ -29,8 +29,8 @@ export default function AboutShowcase({
           "rounded-[28px]",
           "bg-[rgb(var(--surface-bg,255_255_255))]",
           "dark:bg-[rgb(var(--surface-bg-dark,17_24_39))]",
-          // ⬆️ Tinggi case ditambah total +15px dari base (sebelumnya +11px)
-          "min-h-[calc(clamp(420px,70vh,880px)+15px)]",
+          // ⬆️ Tinggi case ditambah total +18px dari base (sebelumnya +15px)
+          "min-h-[calc(clamp(420px,70vh,880px)+18px)]",
         ].join(" ")}
       >
         <svg
