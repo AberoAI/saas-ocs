@@ -57,14 +57,12 @@ export default function LocaleHomePage() {
   };
 
   return (
-    // PENTING: hanya block horizontal, vertical scroll bebas untuk sticky
     <main className="relative bg-white overflow-x-hidden">
       <HeroRings />
 
-      {/* PAGE 0: Hero section */}
+      {/* PAGE 0: Hero */}
       <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
         <div className="max-w-3xl -mt-[7px]">
-          {/* Headline */}
           <motion.h1
             initial={
               prefersReducedMotion
@@ -82,7 +80,6 @@ export default function LocaleHomePage() {
             {renderHeadline()}
           </motion.h1>
 
-          {/* Subheadline */}
           <motion.p
             initial={
               prefersReducedMotion
@@ -107,7 +104,7 @@ export default function LocaleHomePage() {
 
         <div className="hidden flex-1 lg:block" />
 
-        {/* ScrollHint hanya milik hero (Page 0) → menuju cluster (Page 1–3) */}
+        {/* Scroll hint → cluster */}
         <motion.div
           className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
           initial={
@@ -126,13 +123,13 @@ export default function LocaleHomePage() {
         </motion.div>
       </section>
 
-      {/* Spacer tipis antara Hero & pinned cluster */}
+      {/* Spacer tipis */}
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
-      {/* PAGE 1–3: Pinned Scroll Transition cluster */}
+      {/* PAGE 1–3: pinned cluster */}
       <PinnedClusterSection sectionId="page-1" />
 
-      {/* PAGE 4+: Scroll normal lagi (contoh sederhana, silakan ganti kontennya) */}
+      {/* PAGE 4+: scroll normal */}
       <section
         id="page-4"
         className="bg-white py-24 border-t border-slate-100"
@@ -142,8 +139,7 @@ export default function LocaleHomePage() {
             AberoAI in real operations.
           </h2>
           <p className="mt-4 max-w-2xl text-slate-700">
-            Use this section for proof, metrics, or feature overview. Scroll here
-            is fully normal again after the pinned 3-step cluster.
+            This section scrolls normally again after the pinned 3-step cluster.
           </p>
         </div>
       </section>
