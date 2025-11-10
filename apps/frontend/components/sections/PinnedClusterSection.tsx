@@ -1,4 +1,3 @@
-// apps/frontend/components/sections/PinnedClusterSection.tsx
 "use client";
 
 import { useRef } from "react";
@@ -17,14 +16,13 @@ type PinnedClusterSectionProps = {
 /**
  * PinnedClusterSection
  *
- * - Page 1–3 dalam satu cluster:
- *   - Outer: h-[320vh] → ruang untuk 3 "step".
- *   - Inner: sticky top-0 h-screen → case selalu di posisi yang sama.
- *   - Di dalam AboutShowcase ada 3 layer konten:
- *       Step 1 → Step 2 → Step 3 (scroll turun),
- *       Step 3 → Step 2 → Step 1 (scroll naik).
- * - Page 0 → cluster & keluar cluster tetap scroll native.
- * - Reduced motion: tampilkan ketiga step secara statis di dalam case yang sama.
+ * Page 1–3 dalam satu cluster:
+ * - Outer: h-[320vh] → ruang untuk 3 "step".
+ * - Inner: sticky top-0 h-screen → case selalu di posisi yang sama.
+ * - Step 1 → Step 2 → Step 3 (scroll turun),
+ *   Step 3 → Step 2 → Step 1 (scroll naik).
+ * - Page 0 & Page 4+ tetap scroll native.
+ * - Reduced motion: tampilkan ketiga step secara statis dalam case yang sama.
  */
 export default function PinnedClusterSection({
   sectionId = "page-1",
@@ -32,7 +30,7 @@ export default function PinnedClusterSection({
   const prefersReducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Hooks selalu dipanggil (tidak conditional)
+  // Scroll progress untuk cluster
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -82,6 +80,7 @@ export default function PinnedClusterSection({
       <section
         id={sectionId}
         className="relative bg-white py-16 md:py-20"
+        ref={containerRef}
       >
         <div className="mx-auto max-w-6xl px-4 lg:px-6">
           <AboutShowcase aria-label="AberoAI layers">

@@ -57,7 +57,8 @@ export default function LocaleHomePage() {
   };
 
   return (
-    <main className="relative overflow-hidden bg-white">
+    // PENTING: hanya block horizontal, vertical scroll bebas untuk sticky
+    <main className="relative bg-white overflow-x-hidden">
       <HeroRings />
 
       {/* PAGE 0: Hero section */}
@@ -106,7 +107,7 @@ export default function LocaleHomePage() {
 
         <div className="hidden flex-1 lg:block" />
 
-        {/* ScrollHint hanya milik hero (PAGE 0) */}
+        {/* ScrollHint hanya milik hero (Page 0) → menuju cluster (Page 1–3) */}
         <motion.div
           className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
           initial={
@@ -125,13 +126,27 @@ export default function LocaleHomePage() {
         </motion.div>
       </section>
 
-      {/* SPACER tipis antara Hero & pinned cluster */}
+      {/* Spacer tipis antara Hero & pinned cluster */}
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
       {/* PAGE 1–3: Pinned Scroll Transition cluster */}
       <PinnedClusterSection sectionId="page-1" />
 
-      {/* Setelah ini: tambahkan sections lain (Page 4+) dengan scroll biasa */}
+      {/* PAGE 4+: Scroll normal lagi (contoh sederhana, silakan ganti kontennya) */}
+      <section
+        id="page-4"
+        className="bg-white py-24 border-t border-slate-100"
+      >
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <h2 className="text-3xl font-semibold text-slate-900">
+            AberoAI in real operations.
+          </h2>
+          <p className="mt-4 max-w-2xl text-slate-700">
+            Use this section for proof, metrics, or feature overview. Scroll here
+            is fully normal again after the pinned 3-step cluster.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
