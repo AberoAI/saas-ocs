@@ -22,8 +22,8 @@ type PinnedClusterSectionProps = {
   kicker?: string;
   title: string;
   subtitle?: string;
-  steps: [PinnedStep, PinnedStep, PinnedStep]; // wajib 3 step → lebih ketat & aman
-  footerNote?: string; // untuk hint scroll (pakai i18n dari page)
+  steps: [PinnedStep, PinnedStep, PinnedStep]; // fix: enforce exactly 3 steps
+  footerNote?: string;
 };
 
 /**
@@ -45,9 +45,25 @@ export default function PinnedClusterSection({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
+  // Hooks HARUS selalu dipanggil, tidak boleh hanya di cabang tertentu.
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Mapping progress → opacity + posisi (dipakai di mode non-reduced)
+  const s1Opacity = useTransform(scrollYProgress, [0.0, 0.18, 0.34], [1, 1, 0]);
+  const s1Y = useTransform(scrollYProgress, [0.0, 0.18, 0.34], [0, 0, -22]);
+
+  const s2Opacity = useTransform(scrollYProgress, [0.18, 0.38, 0.66], [0, 1, 0]);
+  const s2Y = useTransform(scrollYProgress, [0.18, 0.38, 0.66], [22, 0, -22]);
+
+  const s3Opacity = useTransform(scrollYProgress, [0.5, 0.76, 1.0], [0, 1, 1]);
+  const s3Y = useTransform(scrollYProgress, [0.5, 0.76, 1.0], [22, 0, 0]);
+
   const [step1, step2, step3] = steps;
 
-  // ==== Reduced Motion: versi statis, tidak pinned ====
+  // ==== Reduced Motion: versi statis, tanpa pinned animasi ====
   if (prefersReducedMotion) {
     return (
       <section
@@ -74,28 +90,13 @@ export default function PinnedClusterSection({
   }
 
   // ==== Normal Mode: pinned + scroll-driven transition ====
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Mapping progress → opacity + posisi
-  const s1Opacity = useTransform(scrollYProgress, [0.0, 0.18, 0.34], [1, 1, 0]);
-  const s1Y = useTransform(scrollYProgress, [0.0, 0.18, 0.34], [0, 0, -22]);
-
-  const s2Opacity = useTransform(scrollYProgress, [0.18, 0.38, 0.66], [0, 1, 0]);
-  const s2Y = useTransform(scrollYProgress, [0.18, 0.38, 0.66], [22, 0, -22]);
-
-  const s3Opacity = useTransform(scrollYProgress, [0.5, 0.76, 1.0], [0, 1, 1]);
-  const s3Y = useTransform(scrollYProgress, [0.5, 0.76, 1.0], [22, 0, 0]);
-
   return (
     <section
       id={sectionId}
       ref={containerRef}
       className="relative bg-white h-[320vh]"
     >
-      {/* Sticky viewport container (navbar sudah di-offset lewat layout pt-[72px]) */}
+      {/* Sticky viewport container (navbar offset sudah di-handle di layout dengan pt-[72px]) */}
       <div className="sticky top-0 flex h-screen items-center">
         <div className="mx-auto flex w-full max-w-6xl flex-col px-4 lg:px-6">
           <HeaderBlock kicker={kicker} title={title} subtitle={subtitle} />
