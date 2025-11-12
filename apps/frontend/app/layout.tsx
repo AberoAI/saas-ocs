@@ -1,15 +1,12 @@
-// apps/frontend/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-// Fallback i18n provider untuk route spesial (/_not-found)
 import { NextIntlClientProvider } from "next-intl";
 import type { AbstractIntlMessages } from "next-intl";
 import enMessages from "../messages/en.json";
 
-// Font configuration (CSS vars dipakai di globals.css)
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,11 +22,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" }
+      { url: "/favicon.ico", sizes: "any" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }]
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
-  manifest: "/manifest.webmanifest"
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -47,15 +44,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={[
           geistSans.variable,
           geistMono.variable,
-          "min-h-screen antialiased",
+          "min-h-screen antialiased overflow-x-hidden",
           "bg-[var(--background)] text-[var(--foreground)]",
         ].join(" ")}
       >
-        {/* Fallback i18n provider agar komponen global tidak crash saat /_not-found */}
-        <NextIntlClientProvider locale={"en"} messages={fallbackMessages}>
-          <Providers>
-            {children}
-          </Providers>
+        <NextIntlClientProvider locale="en" messages={fallbackMessages}>
+          <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>
