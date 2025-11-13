@@ -105,7 +105,7 @@ export default function ScrollCluster() {
       <div
         id="page-1"
         data-step="1"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-center justify-center px-4 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-24 pb-16 md:pt-32 md:pb-24 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Value Promise">
@@ -138,7 +138,7 @@ export default function ScrollCluster() {
       <div
         id="page-2"
         data-step="2"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-center justify-center px-4 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-24 pb-16 md:pt-32 md:pb-24 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Use Cases">
@@ -171,7 +171,7 @@ export default function ScrollCluster() {
       <div
         id="page-3"
         data-step="3"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-center justify-center px-4 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-24 pb-16 md:pt-32 md:pb-24 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Call to Action">
