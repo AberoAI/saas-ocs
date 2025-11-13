@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
-import PinnedClusterSection from "@/components/sections/PinnedClusterSection";
+import ScrollCluster from "@/components/ScrollCluster";
 
 export default function LocaleHomePage() {
   const t = useTranslations();
@@ -57,10 +57,10 @@ export default function LocaleHomePage() {
   };
 
   return (
-    <main className="relative bg-white overflow-x-hidden">
+    <main className="pin-root relative bg-white overflow-x-hidden">
       <HeroRings />
 
-      {/* PAGE 0: Hero */}
+      {/* PAGE 0: Hero (normal scroll) */}
       <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
         <div className="max-w-3xl -mt-[7px]">
           <motion.h1
@@ -104,7 +104,7 @@ export default function LocaleHomePage() {
 
         <div className="hidden flex-1 lg:block" />
 
-        {/* Scroll hint → cluster */}
+        {/* Scroll hint → cluster page-1 */}
         <motion.div
           className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
           initial={
@@ -123,13 +123,13 @@ export default function LocaleHomePage() {
         </motion.div>
       </section>
 
-      {/* Spacer tipis */}
+      {/* Spacer tipis antara Hero (page-0) dan Cluster */}
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
-      {/* PAGE 1–3: pinned cluster */}
-      <PinnedClusterSection sectionId="page-1" />
+      {/* PAGE 1–3: pinned storytelling cluster (desktop only) */}
+      <ScrollCluster />
 
-      {/* PAGE 4+: scroll normal */}
+      {/* PAGE 4+: scroll normal lagi */}
       <section
         id="page-4"
         className="bg-white py-24 border-t border-slate-100"
