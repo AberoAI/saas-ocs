@@ -103,7 +103,7 @@ section {
 }
 
 /* Cluster semantics: children are animation surfaces */
-#cluster > div {
+.scroll-cluster-layer {
   will-change: transform, opacity;
   contain: paint;
 }
@@ -121,11 +121,11 @@ section {
   }
 
   /* Pada desktop, jadikan halaman cluster sebagai tumpukan overlay */
-  #cluster {
+  .scroll-cluster {
     position: relative;
   }
 
-  #cluster > div {
+  .scroll-cluster-layer {
     position: absolute;
     inset: 0;
   }
@@ -134,18 +134,18 @@ section {
 /* Accessibility & data preference */
 @media (prefers-reduced-motion: reduce), (prefers-reduced-data: reduce) {
   .pin-root,
-  #cluster > div {
+  .scroll-cluster-layer {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto;
   }
 
   /* ⬇️ Penting: fallback jadi stacked normal, bukan absolute overlay */
-  #cluster {
+  .scroll-cluster {
     position: relative;
   }
 
-  #cluster > div {
+  .scroll-cluster-layer {
     position: static !important;
     inset: auto !important;
   }
