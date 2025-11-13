@@ -62,9 +62,7 @@ export default function ScrollCluster() {
             ? steps.map((_, i) => i / totalSegments)
             : [0];
 
-        // ✅ FIX TYPESCRIPT:
-        // Kalau stepsCount <= 1, kita set snapConfig = undefined
-        // (bukan false) supaya tipe cocok dengan definisi GSAP.
+        // FIX TYPESCRIPT
         const snapConfig =
           stepsCount > 1
             ? {
@@ -105,7 +103,7 @@ export default function ScrollCluster() {
       <div
         id="page-1"
         data-step="1"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-20 pb-12 md:pt-28 md:pb-20 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-12 pb-10 md:pt-20 md:pb-16 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Value Promise">
@@ -138,7 +136,7 @@ export default function ScrollCluster() {
       <div
         id="page-2"
         data-step="2"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-20 pb-12 md:pt-28 md:pb-20 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-12 pb-10 md:pt-20 md:pb-16 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Use Cases">
@@ -171,7 +169,7 @@ export default function ScrollCluster() {
       <div
         id="page-3"
         data-step="3"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-20 pb-12 md:pt-28 md:pb-20 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-12 pb-10 md:pt-20 md:pb-16 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Call to Action">
