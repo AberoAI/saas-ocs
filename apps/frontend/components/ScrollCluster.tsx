@@ -14,7 +14,6 @@ export default function ScrollCluster() {
 
   useEffect(() => {
     if (prefersReducedMotion) {
-      // Fallback: jika user minta reduced motion, jangan pakai pin / animasi.
       return;
     }
 
@@ -23,9 +22,7 @@ export default function ScrollCluster() {
 
     const mm = gsap.matchMedia();
     const ctx = gsap.context(() => {
-      // Desktop only (min-width: 768px)
       mm.add("(min-width: 768px)", () => {
-        // Ambil semua step berdasarkan atribut deklaratif
         const steps = Array.from(
           cluster.querySelectorAll<HTMLElement>("[data-step]")
         );
@@ -33,7 +30,6 @@ export default function ScrollCluster() {
         const stepsCount = steps.length;
         if (stepsCount === 0) return;
 
-        // State internal
         let currentStep = -1;
 
         const clamp = (value: number, min: number, max: number) =>
@@ -45,31 +41,21 @@ export default function ScrollCluster() {
           currentStep = safeIndex;
 
           steps.forEach((el, i) => {
-            gsap.set(el, {
-              autoAlpha: i === safeIndex ? 1 : 0,
-            });
+            gsap.set(el, { autoAlpha: i === safeIndex ? 1 : 0 });
           });
         };
 
-        // State awal: selalu mulai dari Step 0
         showStep(0);
 
         const totalSegments = Math.max(stepsCount - 1, 1);
         const endValue = `+=${totalSegments * 100}%`;
 
         const snapPoints =
-          stepsCount > 1
-            ? steps.map((_, i) => i / totalSegments)
-            : [0];
+          stepsCount > 1 ? steps.map((_, i) => i / totalSegments) : [0];
 
-        // FIX TYPESCRIPT
         const snapConfig =
           stepsCount > 1
-            ? {
-                snapTo: snapPoints,
-                duration: 0.3,
-                ease: "power1.out",
-              }
+            ? { snapTo: snapPoints, duration: 0.3, ease: "power1.out" }
             : undefined;
 
         ScrollTrigger.create({
@@ -95,15 +81,12 @@ export default function ScrollCluster() {
   }, [prefersReducedMotion]);
 
   return (
-    <section
-      ref={clusterRef}
-      className="scroll-cluster relative bg-white"
-    >
-      {/* PAGE-1: Value Promise / Hook */}
+    <section ref={clusterRef} className="scroll-cluster relative bg-white">
+      {/* PAGE-1 */}
       <div
         id="page-1"
         data-step="1"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-12 pb-10 md:pt-20 md:pb-16 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-10 pb-8 md:pt-16 md:pb-14 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Value Promise">
@@ -124,7 +107,6 @@ export default function ScrollCluster() {
           </AboutShowcase>
         </div>
 
-        {/* Page indicator: 01 / 03 */}
         <div className="pointer-events-none absolute bottom-6 right-6 text-[11px] tracking-[0.28em] uppercase text-slate-500/80 md:bottom-8 md:right-10">
           <span className="font-semibold">01</span>
           <span className="mx-1 text-slate-400/80">/</span>
@@ -132,11 +114,11 @@ export default function ScrollCluster() {
         </div>
       </div>
 
-      {/* PAGE-2: Social Proof / Use Cases */}
+      {/* PAGE-2 */}
       <div
         id="page-2"
         data-step="2"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-12 pb-10 md:pt-20 md:pb-16 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-10 pb-8 md:pt-16 md:pb-14 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Use Cases">
@@ -145,8 +127,7 @@ export default function ScrollCluster() {
                 STEP 02 • USE CASES
               </p>
               <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl">
-                AI that actually follows your playbook — from lead to
-                after-care.
+                AI that actually follows your playbook — from lead to after-care.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">
                 From qualification and booking to reminders and safe human
@@ -157,7 +138,6 @@ export default function ScrollCluster() {
           </AboutShowcase>
         </div>
 
-        {/* Page indicator: 02 / 03 */}
         <div className="pointer-events-none absolute bottom-6 right-6 text-[11px] tracking-[0.28em] uppercase text-slate-500/80 md:bottom-8 md:right-10">
           <span className="font-semibold">02</span>
           <span className="mx-1 text-slate-400/80">/</span>
@@ -165,11 +145,11 @@ export default function ScrollCluster() {
         </div>
       </div>
 
-      {/* PAGE-3: CTA / Action */}
+      {/* PAGE-3 */}
       <div
         id="page-3"
         data-step="3"
-        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-12 pb-10 md:pt-20 md:pb-16 lg:px-6"
+        className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-10 pb-8 md:pt-16 md:pb-14 lg:px-6"
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Call to Action">
@@ -190,7 +170,6 @@ export default function ScrollCluster() {
           </AboutShowcase>
         </div>
 
-        {/* Page indicator: 03 / 03 */}
         <div className="pointer-events-none absolute bottom-6 right-6 text-[11px] tracking-[0.28em] uppercase text-slate-500/80 md:bottom-8 md:right-10">
           <span className="font-semibold">03</span>
           <span className="mx-1 text-slate-400/80">/</span>
