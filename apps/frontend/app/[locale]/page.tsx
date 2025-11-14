@@ -63,8 +63,8 @@ export default function LocaleHomePage() {
       {/* PAGE 0: Hero (normal scroll) */}
       <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
         
-        {/* ⬆️⬆️ SATU-SATUNYA PERUBAHAN: dinaikkan 10% */}
-        <div className="max-w-3xl -mt-[10vh]">
+        {/* === Satu-satunya perubahan: dinaikkan total ~18vh (10% tambahan) === */}
+        <div className="max-w-3xl -mt-[18vh]">
           <motion.h1
             initial={
               prefersReducedMotion
