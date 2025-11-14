@@ -62,8 +62,7 @@ export default function LocaleHomePage() {
 
       {/* PAGE 0: Hero (normal scroll) */}
       <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
-        
-        {/* === Satu-satunya perubahan: dinaikkan ~5% tambahan (22vh total) === */}
+        {/* === Satu-satunya perubahan sebelumnya untuk headline (tetap) === */}
         <div className="max-w-3xl -mt-[22vh]">
           <motion.h1
             initial={
@@ -108,7 +107,7 @@ export default function LocaleHomePage() {
 
         {/* Scroll hint → cluster page-1 */}
         <motion.div
-          className="pointer-events-auto absolute inset-x-0 bottom-6 md:bottom-8 flex justify-center"
+          className="pointer-events-auto absolute inset-x-0 bottom-9 md:bottom-12 flex justify-center"
           initial={
             prefersReducedMotion
               ? { opacity: 1, y: 0 }
