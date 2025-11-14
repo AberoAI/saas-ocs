@@ -132,7 +132,7 @@ export default function LocaleHomePage() {
       {/* PAGE 4+: scroll normal lagi */}
       <section
         id="page-4"
-        className="bg-white py-24 border-t border-slate-100"
+        className="bg-white py-24"
       >
         <div className="mx-auto max-w-6xl px-4 lg:px-6">
           <h2 className="text-3xl font-semibold text-slate-900">
