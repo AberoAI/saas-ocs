@@ -106,7 +106,7 @@ export default function LocaleHomePage() {
 
         {/* Scroll hint → cluster page-1 */}
         <motion.div
-          className="pointer-events-auto absolute inset-x-0 bottom-[16vh] md:bottom-[18vh] flex justify-center"
+          className="pointer-events-auto absolute inset-x-0 bottom-[22vh] md:bottom-[24vh] flex justify-center"
           initial={
             prefersReducedMotion
               ? { opacity: 1, y: 0 }
