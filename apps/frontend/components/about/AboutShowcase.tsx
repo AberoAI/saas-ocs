@@ -42,32 +42,10 @@ export default function AboutShowcase({
           focusable="false"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <defs>
-            <linearGradient
-              id={gradId}
-              x1="937"
-              y1="-16.7023"
-              x2="937"
-              y2="1032"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop offset="0.04" stopColor="var(--about-grad-1, #C1EEFF)" />
-              <stop
-                offset="0.67"
-                stopColor="var(--about-grad-2, #DBF8EF)"
-                stopOpacity="var(--about-grad-2-op, 0.5)"
-              />
-              <stop
-                offset="1"
-                stopColor="var(--about-grad-3, #EDF6FF)"
-                stopOpacity="var(--about-grad-3-op, 0.5)"
-              />
-            </linearGradient>
-          </defs>
-
+          {/* Solid color (F8FAFC) replacing gradient */}
           <path
             d="M0 45C0 20.1472 20.1472 0 45 0H1837C1861.85 0 1882 20.1472 1882 45V836.5C1882 861.353 1861.85 881.5 1837 881.5H1487C1462.15 881.5 1442 901.647 1442 926.5V988C1442 1016 1416 1032 1404 1032H923H45C20.1472 1032 0 1011.85 0 987V501.575V45Z"
-            fill={`url(#${gradId})`}
+            fill="#F8FAFC"
           />
         </svg>
 
