@@ -20,18 +20,15 @@ type PinnedClusterSectionProps = {
  * PinnedClusterSection
  *
  * Framer Motion–based pinned storytelling cluster:
- * - Desktop (md+):
- *   - Pinned 3-step cluster:
+ * - Normal mode (prefersReducedMotion = false):
+ *   - Pinned 3-step cluster di SEMUA breakpoint (mobile & desktop):
  *     01 • Operational Layer  → ShowcaseGrowthInner (operations & growth)
  *     02 • AI Workflow Layer  → AI agents following SOPs
  *     03 • Retention Layer    → Reactivation & multi-location insight
  *
- * - Mobile (base):
- *   - Fallback: stacked static layout (no pin) → lebih nyaman untuk jempol.
- *
  * - Aksesibilitas:
- *   - Kalau prefers-reduced-motion = true → FULLY static stacked layout,
- *     tidak ada scroll-based animation sama sekali (desktop & mobile).
+ *   - Kalau prefers-reduced-motion = true → FULLY static stacked layout
+ *     (tanpa pinned, tanpa scroll-based animation).
  */
 export default function PinnedClusterSection({
   sectionId = "page-1",
@@ -50,17 +47,9 @@ export default function PinnedClusterSection({
     );
   }
 
-  // === NORMAL MODE ===
-  // - Mobile: stacked static (md:hidden)
-  // - Desktop: pinned cluster (Framer Motion scroll) via PinnedClusterDesktop
+  // === NORMAL MODE (pinned aktif di semua breakpoint) ===
   return (
     <section id={sectionId} className="relative bg-white">
-      {/* MOBILE (base): stacked static cluster, no pinned */}
-      <div className="md:hidden py-16">
-        <StaticClusterBody />
-      </div>
-
-      {/* DESKTOP (md+): pinned 3-step cluster */}
       <PinnedClusterDesktop />
     </section>
   );
@@ -69,9 +58,11 @@ export default function PinnedClusterSection({
 /**
  * PinnedClusterDesktop
  *
- * Hanya dipakai saat prefersReducedMotion = false.
- * Semua hook Framer Motion (useScroll/useTransform) aman dipanggil di sini,
- * karena tidak ada early return sebelum hook.
+ * Dipakai saat prefersReducedMotion = false di semua ukuran layar.
+ * Menggunakan:
+ * - containerRef dengan tinggi h-[320vh] sebagai area scroll
+ * - div sticky top-0 h-screen sebagai kartu yang dipin
+ * - Framer Motion useScroll + useTransform untuk transisi antar step.
  */
 function PinnedClusterDesktop() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -120,7 +111,7 @@ function PinnedClusterDesktop() {
   return (
     <div
       ref={containerRef}
-      className="relative hidden h-[320vh] md:block"
+      className="relative h-[320vh]"
     >
       {/* Elemen sticky sepanjang cluster */}
       <div className="sticky top-0 flex h-screen items-center">
@@ -129,7 +120,7 @@ function PinnedClusterDesktop() {
             aria-label="AberoAI layers"
             className="relative flex items-center justify-center"
           >
-            <div className="relative h-[320px] w-full overflow-hidden md:h-[420px] lg:h-[460px]">
+            <div className="relative h-[360px] w-full overflow-hidden sm:h-[400px] md:h-[420px] lg:h-[460px]">
               {/* STEP 1 — Operational Layer (ShowcaseGrowthInner) */}
               <motion.div
                 style={{ opacity: s1Opacity, y: s1Y }}
@@ -211,8 +202,7 @@ function StaticStep({ title, body }: StepContentProps) {
  * StaticClusterBody
  *
  * Dipakai untuk:
- * - Mobile fallback (md:hidden)
- * - prefers-reduced-motion (full static)
+ * - prefers-reduced-motion (full static di semua breakpoint)
  *
  * Urutan:
  * 1) Operational Layer → ShowcaseGrowthInner
