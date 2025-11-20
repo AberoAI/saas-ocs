@@ -8,6 +8,7 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import AboutShowcase from "@/components/about/AboutShowcase";
+import { ShowcaseGrowthInner } from "@/components/showcase/ShowcaseGrowthContent";
 
 type PinnedClusterSectionProps = {
   sectionId?: string;
@@ -127,10 +128,7 @@ export default function PinnedClusterSection({
                   style={{ opacity: s1Opacity, y: s1Y }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
-                  <StepContent
-                    title="01 • Operational Layer"
-                    body="One stable, shared layer for handling every WhatsApp message with the same discipline as your in-clinic operations."
-                  />
+                  <ShowcaseGrowthInner />
                 </motion.div>
 
                 {/* STEP 2 */}

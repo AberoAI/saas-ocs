@@ -1,0 +1,101 @@
+// apps/frontend/components/lab/showcase/ShowcaseGrowthContent.tsx
+
+"use client";
+
+import { motion, useReducedMotion, type Transition } from "framer-motion";
+import LabFloatingForegroundBubbles from "./LabFloatingForegroundBubbles";
+import LabFloatingBackgroundBubbles from "./LabFloatingBackgroundBubbles";
+
+export default function ShowcaseGrowthContent() {
+  const shouldReduceMotion = useReducedMotion();
+
+  const makeCinematicProps = (delay: number, duration: number) => {
+    if (shouldReduceMotion) {
+      return {
+        initial: undefined,
+        animate: undefined,
+        transition: undefined as Transition | undefined,
+      };
+    }
+
+    return {
+      initial: { opacity: 0, y: 18 },
+      animate: { opacity: 1, y: 0 },
+      transition: {
+        duration,
+        delay,
+        ease: "easeOut",
+      } as Transition,
+    };
+  };
+
+  // Hybrid: cinematic feel + CTA tetap cepat muncul
+  const headlineMotion = makeCinematicProps(0.0, 0.36); // muncul dulu, cukup megah
+  const subheadlineMotion = makeCinematicProps(0.16, 0.36); // napas kedua
+  const ctaMotion = makeCinematicProps(0.28, 0.34); // mulai < 0.3s, settle ~0.6s
+  const trustMotion = makeCinematicProps(0.42, 0.32); // subtle di belakang CTA
+
+  return (
+    <section className="grid items-center gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+      {/* KIRI: TEKS */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          {/* HEADLINE — Poppins Medium */}
+          <motion.div {...headlineMotion}>
+            <h2 className="font-poppins font-medium text-xl tracking-tight text-slate-900 md:text-2xl">
+              AberoAI turns every customer chat into measurable growth with AI.
+            </h2>
+          </motion.div>
+
+          {/* SUBHEADLINE — Poppins Regular */}
+          <motion.div {...subheadlineMotion}>
+            <p className="font-poppins text-sm leading-relaxed text-slate-600 md:max-w-md">
+              Manage thousands of conversations effortlessly and never lose
+              another customer again — across all your clinics or locations.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* CTA + TRUST COPY */}
+        <div className="flex flex-col items-start gap-2">
+          <motion.div {...ctaMotion}>
+            <button
+              type="button"
+              className="
+                inline-flex items-center justify-center
+                rounded-full
+                bg-[#829EC0]
+                px-5 py-2
+                text-xs font-medium text-white
+                shadow-sm
+                transition
+                hover:bg-[#6f87a7]
+                active:translate-y-[1px]
+              "
+            >
+              See demo
+            </button>
+          </motion.div>
+
+          <motion.div {...trustMotion}>
+            <div className="flex items-center gap-3 text-[11px] text-slate-500">
+              <span>• No sign-up</span>
+              <span>• No credit card</span>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* KANAN: LAYER KEDUA (BACKGROUND) + LAYER PERTAMA (FOREGROUND) */}
+      <div className="relative h-64">
+        <div className="absolute inset-0">
+          <LabFloatingBackgroundBubbles />
+        </div>
+
+        <div className="absolute inset-0">
+          <LabFloatingForegroundBubbles />
+        </div>
+      </div>
+    </section>
+  );
+}
