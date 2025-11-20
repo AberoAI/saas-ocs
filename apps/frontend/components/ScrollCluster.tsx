@@ -1,3 +1,5 @@
+//apps/frontend/components/ScrollCluster.tsx
+
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -5,6 +7,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useReducedMotion } from "framer-motion";
 import AboutShowcase from "@/components/about/AboutShowcase";
+import { ShowcaseGrowthInner } from "@/components/showcase/ShowcaseGrowthContent";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -90,19 +93,8 @@ export default function ScrollCluster() {
       >
         <div className="mx-auto w-full max-w-6xl">
           <AboutShowcase aria-label="AberoAI • Value Promise">
-            <div className="mx-auto max-w-3xl py-12 text-center md:py-16">
-              <p className="mb-3 text-sm uppercase tracking-[0.2em] text-slate-500">
-                STEP 01 • VALUE PROMISE
-              </p>
-              <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl">
-                Turn chaotic WhatsApp chats into one disciplined operations
-                layer.
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">
-                AberoAI centralizes all conversations across your clinics or
-                locations, so every patient or guest is handled with the same
-                predictable standard — even during peak hours.
-              </p>
+            <div className="py-10 md:py-14 px-4 md:px-8">
+              <ShowcaseGrowthInner />
             </div>
           </AboutShowcase>
         </div>

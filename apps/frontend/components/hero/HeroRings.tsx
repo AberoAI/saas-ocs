@@ -1,3 +1,5 @@
+//apps/frontend/components/hero/HeroRings.tsx
+
 "use client";
 
 export default function HeroRings() {

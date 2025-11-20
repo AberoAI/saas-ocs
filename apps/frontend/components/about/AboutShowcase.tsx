@@ -1,3 +1,5 @@
+//apps/frontend/components/about/AboutShowcase.tsx
+
 import * as React from "react";
 
 type Props = React.HTMLAttributes<HTMLElement> & {

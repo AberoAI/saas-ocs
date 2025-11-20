@@ -1,3 +1,5 @@
+//apps/frontend/app/[locale]/page.tsx
+
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
