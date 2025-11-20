@@ -1,4 +1,4 @@
-//apps/frontend/app/[locale]/page.tsx
+// apps/frontend/app/[locale]/page.tsx
 
 "use client";
 
@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
-import ScrollCluster from "@/components/ScrollCluster";
+import PinnedClusterSection from "@/components/sections/PinnedClusterSection";
 
 export default function LocaleHomePage() {
   const t = useTranslations();
@@ -63,7 +63,7 @@ export default function LocaleHomePage() {
       <HeroRings />
 
       {/* PAGE 0: Hero (normal scroll) */}
-      <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
+      <section className="relative z-10 mx-auto flex min-h-[75vh] items-center px-4 md:min-h-[80vh] lg:px-6 max-w-6xl">
         <div className="max-w-3xl -mt-[22vh]">
           <motion.h1
             initial={
@@ -77,7 +77,7 @@ export default function LocaleHomePage() {
               delay: heroDelay,
               ease: "easeOut",
             }}
-            className="text-4xl md:text-5xl font-semibold text-[#585858]"
+            className="text-4xl font-semibold text-[#585858] md:text-5xl"
           >
             {renderHeadline()}
           </motion.h1>
@@ -108,7 +108,7 @@ export default function LocaleHomePage() {
 
         {/* Scroll hint → cluster page-1 */}
         <motion.div
-          className="pointer-events-auto absolute inset-x-0 bottom-[22vh] md:bottom-[24vh] flex justify-center"
+          className="pointer-events-auto absolute inset-x-0 bottom-[22vh] flex justify-center md:bottom-[24vh]"
           initial={
             prefersReducedMotion
               ? { opacity: 1, y: 0 }
@@ -128,8 +128,8 @@ export default function LocaleHomePage() {
       {/* Spacer tipis antara Hero (page-0) dan Cluster */}
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
-      {/* PAGE 1–3: pinned storytelling cluster (desktop only) */}
-      <ScrollCluster />
+      {/* PAGE 1–3: pinned storytelling cluster (desktop) / stacked (mobile/reduced-motion) */}
+      <PinnedClusterSection sectionId="page-1" />
 
       {/* PAGE 4+: scroll normal lagi */}
       <section id="page-4" className="bg-white py-24">

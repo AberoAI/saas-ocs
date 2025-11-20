@@ -1,3 +1,5 @@
+// apps/frontend/components/sections/PinnedClusterSection.tsx
+
 "use client";
 
 import { useRef } from "react";
@@ -17,29 +19,69 @@ type PinnedClusterSectionProps = {
 /**
  * PinnedClusterSection
  *
- * Cluster 3-step pinned:
- * - Wrapper internal: h-[320vh] = ruang scroll untuk 3 step.
- * - Sticky card: top-0 h-screen → tetap di viewport selama cluster.
+ * Framer Motion–based pinned storytelling cluster:
+ * - Desktop (md+):
+ *   - Pinned 3-step cluster:
+ *     01 • Operational Layer  → ShowcaseGrowthInner (operations & growth)
+ *     02 • AI Workflow Layer  → AI agents following SOPs
+ *     03 • Retention Layer    → Reactivation & multi-location insight
  *
- * Catatan agar sticky berfungsi:
- * - Jangan ada ancestor dengan:
- *   - overflow-y: hidden/auto/scroll (selain window utama)
- *   - transform / translate / scale / rotate / perspective
- *   - contain: layout/paint
+ * - Mobile (base):
+ *   - Fallback: stacked static layout (no pin) → lebih nyaman untuk jempol.
+ *
+ * - Aksesibilitas:
+ *   - Kalau prefers-reduced-motion = true → FULLY static stacked layout,
+ *     tidak ada scroll-based animation sama sekali (desktop & mobile).
  */
 export default function PinnedClusterSection({
   sectionId = "page-1",
 }: PinnedClusterSectionProps) {
   const prefersReducedMotion = useReducedMotion();
+
+  // === FULL STATIC MODE (aksesibilitas) ===
+  if (prefersReducedMotion) {
+    return (
+      <section
+        id={sectionId}
+        className="relative bg-white py-16 md:py-20"
+      >
+        <StaticClusterBody />
+      </section>
+    );
+  }
+
+  // === NORMAL MODE ===
+  // - Mobile: stacked static (md:hidden)
+  // - Desktop: pinned cluster (Framer Motion scroll) via PinnedClusterDesktop
+  return (
+    <section id={sectionId} className="relative bg-white">
+      {/* MOBILE (base): stacked static cluster, no pinned */}
+      <div className="md:hidden py-16">
+        <StaticClusterBody />
+      </div>
+
+      {/* DESKTOP (md+): pinned 3-step cluster */}
+      <PinnedClusterDesktop />
+    </section>
+  );
+}
+
+/**
+ * PinnedClusterDesktop
+ *
+ * Hanya dipakai saat prefersReducedMotion = false.
+ * Semua hook Framer Motion (useScroll/useTransform) aman dipanggil di sini,
+ * karena tidak ada early return sebelum hook.
+ */
+function PinnedClusterDesktop() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    // gunakan seluruh tinggi cluster sebagai timeline
     offset: ["start start", "end end"],
   });
 
-  // STEP 1
+  // STEP 1 (Operational Layer)
   const s1Opacity = useTransform(
     scrollYProgress,
     [0.0, 0.16, 0.30],
@@ -51,7 +93,7 @@ export default function PinnedClusterSection({
     ["0%", "0%", "-18%"]
   );
 
-  // STEP 2
+  // STEP 2 (AI Workflow Layer)
   const s2Opacity = useTransform(
     scrollYProgress,
     [0.24, 0.40, 0.64],
@@ -63,7 +105,7 @@ export default function PinnedClusterSection({
     ["18%", "0%", "-18%"]
   );
 
-  // STEP 3
+  // STEP 3 (Retention Layer)
   const s3Opacity = useTransform(
     scrollYProgress,
     [0.58, 0.74, 1.0],
@@ -75,89 +117,62 @@ export default function PinnedClusterSection({
     ["18%", "0%", "0%"]
   );
 
-  // === Reduced motion: versi statis ===
-  if (prefersReducedMotion) {
-    return (
-      <section
-        id={sectionId}
-        className="relative bg-white py-16 md:py-20"
-      >
-        <div className="mx-auto max-w-6xl px-4 lg:px-6">
-          <AboutShowcase aria-label="AberoAI layers">
-            <div className="flex flex-col gap-8 px-6 md:px-10 py-10">
-              <StaticStep
-                title="01 • Operational Layer"
-                body="Your reliable base for structured, repeatable day-to-day operations."
-              />
-              <StaticStep
-                title="02 • AI Workflow Layer"
-                body="AI that follows your playbook: flows for leads, booking, care, and escalation."
-              />
-              <StaticStep
-                title="03 • Retention Layer"
-                body="Insights and follow-ups that keep patients and guests coming back."
-              />
+  return (
+    <div
+      ref={containerRef}
+      className="relative hidden h-[320vh] md:block"
+    >
+      {/* Elemen sticky sepanjang cluster */}
+      <div className="sticky top-0 flex h-screen items-center">
+        <div className="mx-auto w-full max-w-6xl px-4 lg:px-6">
+          <AboutShowcase
+            aria-label="AberoAI layers"
+            className="relative flex items-center justify-center"
+          >
+            <div className="relative h-[320px] w-full overflow-hidden md:h-[420px] lg:h-[460px]">
+              {/* STEP 1 — Operational Layer (ShowcaseGrowthInner) */}
+              <motion.div
+                style={{ opacity: s1Opacity, y: s1Y }}
+                className="absolute inset-0 flex items-center justify-center px-4 md:px-10"
+              >
+                <div className="w-full">
+                  <BadgeStep
+                    index="01"
+                    label="Operational Layer"
+                    description="Structured base for high-volume, repeatable day-to-day operations."
+                  />
+                  <div className="mt-6">
+                    <ShowcaseGrowthInner />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* STEP 2 — AI Workflow Layer */}
+              <motion.div
+                style={{ opacity: s2Opacity, y: s2Y }}
+                className="absolute inset-0 flex items-center justify-center px-4 md:px-10"
+              >
+                <StepContent
+                  title="02 • AI Workflow Layer"
+                  body="AI agents that follow your SOPs end-to-end: triage, qualification, booking, reminders, after-care, and safe human handoff — across all your locations."
+                />
+              </motion.div>
+
+              {/* STEP 3 — Retention Layer */}
+              <motion.div
+                style={{ opacity: s3Opacity, y: s3Y }}
+                className="absolute inset-0 flex items-center justify-center px-4 md:px-10"
+              >
+                <StepContent
+                  title="03 • Retention Layer"
+                  body="Structured data and reactivation loops that keep patients and guests coming back — with multi-location insight instead of chaotic spreadsheets and screenshots."
+                />
+              </motion.div>
             </div>
           </AboutShowcase>
         </div>
-      </section>
-    );
-  }
-
-  // === Normal mode: pinned cluster ===
-  return (
-    <section
-      id={sectionId}
-      className="relative bg-white"
-    >
-      {/* Wrapper tinggi → ruang scroll cluster */}
-      <div
-        ref={containerRef}
-        className="relative h-[320vh]"
-      >
-        {/* Elemen sticky */}
-        <div className="sticky top-0 flex h-screen items-center">
-          <div className="mx-auto w-full max-w-6xl px-4 lg:px-6">
-            <AboutShowcase
-              aria-label="AberoAI layers"
-              className="relative flex items-center justify-center"
-            >
-              <div className="relative w-full h-[320px] md:h-[420px] lg:h-[460px] overflow-hidden">
-                {/* STEP 1 — pakai layout ShowcaseGrowth (teks + CTA + bubbles) */}
-                <motion.div
-                  style={{ opacity: s1Opacity, y: s1Y }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <ShowcaseGrowthInner />
-                </motion.div>
-
-                {/* STEP 2 */}
-                <motion.div
-                  style={{ opacity: s2Opacity, y: s2Y }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <StepContent
-                    title="02 • AI Workflow Layer"
-                    body="AI agents that follow your SOPs end-to-end: triage, qualification, booking, reminders, and safe human handoff."
-                  />
-                </motion.div>
-
-                {/* STEP 3 */}
-                <motion.div
-                  style={{ opacity: s3Opacity, y: s3Y }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <StepContent
-                    title="03 • Retention Layer"
-                    body="Structured data and loops for reactivation, after-care, and multi-location insight — so growth is controlled, not chaotic."
-                  />
-                </motion.div>
-              </div>
-            </AboutShowcase>
-          </div>
-        </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -169,10 +184,10 @@ type StepContentProps = {
 function StepContent({ title, body }: StepContentProps) {
   return (
     <div className="max-w-3xl text-center">
-      <h3 className="text-2xl md:text-3xl font-semibold text-slate-900">
+      <h3 className="text-2xl font-semibold text-slate-900 md:text-3xl">
         {title}
       </h3>
-      <p className="mt-3 text-sm md:text-base text-slate-700 leading-relaxed">
+      <p className="mt-3 text-sm leading-relaxed text-slate-700 md:text-base">
         {body}
       </p>
     </div>
@@ -182,11 +197,82 @@ function StepContent({ title, body }: StepContentProps) {
 function StaticStep({ title, body }: StepContentProps) {
   return (
     <div className="max-w-3xl">
-      <h3 className="text-lg md:text-xl font-semibold text-slate-900">
+      <h3 className="text-lg font-semibold text-slate-900 md:text-xl">
         {title}
       </h3>
-      <p className="mt-2 text-sm text-slate-700 leading-relaxed">
+      <p className="mt-2 text-sm leading-relaxed text-slate-700">
         {body}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * StaticClusterBody
+ *
+ * Dipakai untuk:
+ * - Mobile fallback (md:hidden)
+ * - prefers-reduced-motion (full static)
+ *
+ * Urutan:
+ * 1) Operational Layer → ShowcaseGrowthInner
+ * 2) AI Workflow Layer → text step
+ * 3) Retention Layer   → text step
+ */
+function StaticClusterBody() {
+  return (
+    <div className="mx-auto max-w-6xl px-4 lg:px-6">
+      <AboutShowcase aria-label="AberoAI layers">
+        <div className="flex flex-col gap-10 px-6 py-10 md:px-10 md:py-12">
+          {/* Step 1: Operational Layer (hero-style content) */}
+          <div className="space-y-4">
+            <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">
+              01 • Operational Layer
+            </p>
+            <p className="max-w-md text-sm leading-relaxed text-slate-600">
+              Your reliable base for structured, repeatable day-to-day
+              operations across clinics or locations — before AI workflows are
+              layered on top.
+            </p>
+            <ShowcaseGrowthInner />
+          </div>
+
+          {/* Step 2: AI Workflow Layer */}
+          <StaticStep
+            title="02 • AI Workflow Layer"
+            body="AI that follows your playbook end-to-end: triage, qualification, booking, reminders, after-care, and escalation to humans when it matters — not a generic FAQ bot."
+          />
+
+          {/* Step 3: Retention Layer */}
+          <StaticStep
+            title="03 • Retention Layer"
+            body="Retention and reactivation loops built on real conversation data — so you can see where you’re losing patients or guests, and fix it with targeted follow-ups."
+          />
+        </div>
+      </AboutShowcase>
+    </div>
+  );
+}
+
+type BadgeStepProps = {
+  index: string;
+  label: string;
+  description: string;
+};
+
+function BadgeStep({ index, label, description }: BadgeStepProps) {
+  return (
+    <div className="flex flex-col gap-1 text-left">
+      <div className="inline-flex items-center gap-3">
+        <span className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
+          {index}
+        </span>
+        <span className="text-xs font-medium uppercase tracking-[0.24em] text-slate-500">
+          {label}
+        </span>
+      </div>
+      <p className="max-w-md text-[12px] leading-relaxed text-slate-600">
+        {description}
       </p>
     </div>
   );
