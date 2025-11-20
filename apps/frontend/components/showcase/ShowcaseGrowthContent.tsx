@@ -2,14 +2,28 @@
 
 "use client";
 
-import { motion, useReducedMotion, type Transition } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useInView,
+  type Transition,
+} from "framer-motion";
+import { useRef } from "react";
 import FloatingForegroundBubbles from "./FloatingForegroundBubbles";
 import FloatingBackgroundBubbles from "./FloatingBackgroundBubbles";
 
 export function ShowcaseGrowthInner() {
   const shouldReduceMotion = useReducedMotion();
 
+  // ⬇️ Container untuk memicu animasi hanya saat page-1 benar-benar masuk viewport
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const isInView = useInView(containerRef, {
+    once: true,
+    margin: "-10% 0px -10% 0px",
+  });
+
   const makeCinematicProps = (delay: number, duration: number) => {
+    // Aksesibilitas: kalau user prefer reduced motion → matikan animasi
     if (shouldReduceMotion) {
       return {
         initial: undefined,
@@ -18,6 +32,20 @@ export function ShowcaseGrowthInner() {
       };
     }
 
+    // Sebelum container masuk viewport:
+    // elemen tetap dalam posisi "hidden" tapi tanpa animasi transisi
+    if (!isInView) {
+      return {
+        initial: { opacity: 0, y: 18 },
+        animate: { opacity: 0, y: 18 },
+        transition: {
+          duration: 0,
+          delay: 0,
+        } as Transition,
+      };
+    }
+
+    // Setelah pertama kali in-view → animasi cinematic dijalankan sekali
     return {
       initial: { opacity: 0, y: 18 },
       animate: { opacity: 1, y: 0 },
@@ -36,7 +64,10 @@ export function ShowcaseGrowthInner() {
   const trustMotion = makeCinematicProps(0.42, 0.32); // subtle di belakang CTA
 
   return (
-    <div className="grid items-center gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+    <div
+      ref={containerRef}
+      className="grid items-center gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
+    >
       {/* KIRI: TEKS */}
       <div className="space-y-4">
         <div className="space-y-2">
