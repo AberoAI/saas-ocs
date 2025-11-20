@@ -123,7 +123,7 @@ export default function PinnedClusterSection({
               className="relative flex items-center justify-center"
             >
               <div className="relative w-full h-[320px] md:h-[420px] lg:h-[460px] overflow-hidden">
-                {/* STEP 1 */}
+                {/* STEP 1 — pakai layout ShowcaseGrowth (teks + CTA + bubbles) */}
                 <motion.div
                   style={{ opacity: s1Opacity, y: s1Y }}
                   className="absolute inset-0 flex items-center justify-center"
