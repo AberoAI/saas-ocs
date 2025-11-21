@@ -15,17 +15,13 @@ import FloatingBackgroundBubbles from "./FloatingBackgroundBubbles";
 export function ShowcaseGrowthInner() {
   const shouldReduceMotion = useReducedMotion();
 
-  // ⬇️ Container untuk memicu animasi hanya saat page-1 benar-benar masuk viewport
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isInView = useInView(containerRef, {
     once: true,
-    // Sedikit lebih ketat: elemen harus lebih "masuk" ke viewport
-    // sebelum dianggap in-view → animasi mulai sedikit lebih telat.
     margin: "-18% 0px -18% 0px",
   });
 
   const makeCinematicProps = (delay: number, duration: number) => {
-    // Aksesibilitas: kalau user prefer reduced motion → matikan animasi
     if (shouldReduceMotion) {
       return {
         initial: undefined,
@@ -34,8 +30,6 @@ export function ShowcaseGrowthInner() {
       };
     }
 
-    // Sebelum container masuk viewport:
-    // elemen tetap dalam posisi "hidden" tapi tanpa animasi transisi
     if (!isInView) {
       return {
         initial: { opacity: 0, y: 18 },
@@ -47,7 +41,6 @@ export function ShowcaseGrowthInner() {
       };
     }
 
-    // Setelah pertama kali in-view → animasi cinematic dijalankan sekali
     return {
       initial: { opacity: 0, y: 18 },
       animate: { opacity: 1, y: 0 },
@@ -59,29 +52,25 @@ export function ShowcaseGrowthInner() {
     };
   };
 
-  // Dimundurkan sedikit lagi: semua delay +0.06s dari versi sebelumnya
-  // → memberi ekstra waktu supaya user benar-benar "landing" di page-1
-  const headlineMotion = makeCinematicProps(0.14, 0.36); // muncul dulu, tapi lebih santai
-  const subheadlineMotion = makeCinematicProps(0.30, 0.36); // napas kedua
-  const ctaMotion = makeCinematicProps(0.42, 0.34); // CTA muncul setelah user sempat baca
-  const trustMotion = makeCinematicProps(0.56, 0.32); // subtle di belakang CTA
+  // ✅ DELAY 1.5x dari versi sebelumnya
+  const headlineMotion = makeCinematicProps(0.21, 0.36);
+  const subheadlineMotion = makeCinematicProps(0.45, 0.36);
+  const ctaMotion = makeCinematicProps(0.63, 0.34);
+  const trustMotion = makeCinematicProps(0.84, 0.32);
 
   return (
     <div
       ref={containerRef}
       className="grid items-center gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
     >
-      {/* KIRI: TEKS */}
       <div className="space-y-4">
         <div className="space-y-2">
-          {/* HEADLINE — Poppins Medium */}
           <motion.div {...headlineMotion}>
             <h2 className="font-poppins font-medium text-xl tracking-tight text-slate-900 md:text-2xl">
               AberoAI turns every customer chat into measurable growth with AI.
             </h2>
           </motion.div>
 
-          {/* SUBHEADLINE — Poppins Regular */}
           <motion.div {...subheadlineMotion}>
             <p className="font-poppins text-sm leading-relaxed text-slate-600 md:max-w-md">
               Manage thousands of conversations effortlessly and never lose
@@ -90,7 +79,6 @@ export function ShowcaseGrowthInner() {
           </motion.div>
         </div>
 
-        {/* CTA + TRUST COPY */}
         <div className="flex flex-col items-start gap-2">
           <motion.div {...ctaMotion}>
             <button
@@ -120,7 +108,6 @@ export function ShowcaseGrowthInner() {
         </div>
       </div>
 
-      {/* KANAN: LAYER KEDUA (BACKGROUND) + LAYER PERTAMA (FOREGROUND) */}
       <div className="relative h-64">
         <div className="absolute inset-0">
           <FloatingBackgroundBubbles />
