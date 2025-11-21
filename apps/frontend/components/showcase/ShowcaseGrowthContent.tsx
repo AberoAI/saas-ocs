@@ -19,7 +19,9 @@ export function ShowcaseGrowthInner() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isInView = useInView(containerRef, {
     once: true,
-    margin: "-10% 0px -10% 0px",
+    // Sedikit lebih ketat: elemen harus lebih "masuk" ke viewport
+    // sebelum dianggap in-view → animasi mulai sedikit lebih telat.
+    margin: "-18% 0px -18% 0px",
   });
 
   const makeCinematicProps = (delay: number, duration: number) => {
@@ -57,11 +59,12 @@ export function ShowcaseGrowthInner() {
     };
   };
 
-  // Hybrid: cinematic feel + CTA tetap cepat muncul
-  const headlineMotion = makeCinematicProps(0.0, 0.36); // muncul dulu, cukup megah
-  const subheadlineMotion = makeCinematicProps(0.16, 0.36); // napas kedua
-  const ctaMotion = makeCinematicProps(0.28, 0.34); // mulai < 0.3s, settle ~0.6s
-  const trustMotion = makeCinematicProps(0.42, 0.32); // subtle di belakang CTA
+  // Sedikit dimundurkan: semua delay +0.08s
+  // → memberi waktu user benar-benar "landing" di page-1
+  const headlineMotion = makeCinematicProps(0.08, 0.36); // muncul dulu, tapi sedikit lebih telat
+  const subheadlineMotion = makeCinematicProps(0.24, 0.36); // napas kedua
+  const ctaMotion = makeCinematicProps(0.36, 0.34); // CTA tetap muncul cepat, tapi tidak terburu-buru
+  const trustMotion = makeCinematicProps(0.50, 0.32); // subtle di belakang CTA
 
   return (
     <div
