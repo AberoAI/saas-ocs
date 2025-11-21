@@ -59,12 +59,12 @@ export function ShowcaseGrowthInner() {
     };
   };
 
-  // Sedikit dimundurkan: semua delay +0.08s
-  // → memberi waktu user benar-benar "landing" di page-1
-  const headlineMotion = makeCinematicProps(0.08, 0.36); // muncul dulu, tapi sedikit lebih telat
-  const subheadlineMotion = makeCinematicProps(0.24, 0.36); // napas kedua
-  const ctaMotion = makeCinematicProps(0.36, 0.34); // CTA tetap muncul cepat, tapi tidak terburu-buru
-  const trustMotion = makeCinematicProps(0.50, 0.32); // subtle di belakang CTA
+  // Dimundurkan sedikit lagi: semua delay +0.06s dari versi sebelumnya
+  // → memberi ekstra waktu supaya user benar-benar "landing" di page-1
+  const headlineMotion = makeCinematicProps(0.14, 0.36); // muncul dulu, tapi lebih santai
+  const subheadlineMotion = makeCinematicProps(0.30, 0.36); // napas kedua
+  const ctaMotion = makeCinematicProps(0.42, 0.34); // CTA muncul setelah user sempat baca
+  const trustMotion = makeCinematicProps(0.56, 0.32); // subtle di belakang CTA
 
   return (
     <div
