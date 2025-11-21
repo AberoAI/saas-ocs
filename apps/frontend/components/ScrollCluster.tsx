@@ -52,7 +52,10 @@ export default function ScrollCluster() {
         showStep(0);
 
         const totalSegments = Math.max(stepsCount - 1, 1);
-        const endValue = `+=${totalSegments * 100}%`;
+
+        // ⬇️ Sedikit diperpanjang: 1 step = ~100% scroll
+        // 3 page → "+=300%" (lebih pelan, tidak terlalu sensitif)
+        const endValue = `+=${stepsCount * 100}%`;
 
         const snapPoints =
           stepsCount > 1 ? steps.map((_, i) => i / totalSegments) : [0];
@@ -63,19 +66,13 @@ export default function ScrollCluster() {
             : undefined;
 
         // FIRST STEP LOCK:
-        // Rasio seberapa besar porsi segment pertama yang harus dilewati
-        // sebelum STEP 1 (page-2) diizinkan muncul.
+        // Rasio berapa jauh user harus scroll di segment pertama
+        // sebelum STEP 1 boleh diakses.
         //
-        // Contoh:
-        // - totalSegments = 2 → tiap segment panjangnya 0.5 progress
-        // - FIRST_STEP_LOCK_RATIO = 0.75 → user harus melewati 75% segment 0
-        //
-        // Dengan ini, PAGE-1 terasa seperti "bab pertama" yang tenang,
-        // dan tidak langsung loncat ke PAGE-2 dengan scroll kecil.
-        const FIRST_STEP_LOCK_RATIO = 0.75;
-
+        // Dinaikkan dari 0.6 → 0.8 supaya PAGE-1 terasa lebih "tebal"
+        // dan tidak mudah terlewat hanya dengan scroll kecil.
+        const FIRST_STEP_LOCK_RATIO = 0.8;
         let firstStepReleased = false;
-        let firstStepBaseProgress: number | null = null;
 
         ScrollTrigger.create({
           trigger: cluster,
@@ -87,28 +84,19 @@ export default function ScrollCluster() {
             // totalSegments = stepsCount - 1 → tiap segment punya panjang sama.
             const segmentLength = 1 / totalSegments;
 
-            // Catat progress awal real saat cluster mulai aktif.
-            // Ini melindungi dari variasi kecil saat refresh / iOS bounce,
-            // sehingga lock tetap stabil dan tidak tergantung pada asumsi 0 persis.
-            if (firstStepBaseProgress === null) {
-              firstStepBaseProgress = self.progress;
-            }
+            // Selama progress masih di X% awal dari segment pertama,
+            // paksa tetap di STEP 0 (page-1).
+            const firstStepLockProgress =
+              segmentLength * FIRST_STEP_LOCK_RATIO;
 
-            // Progress maksimum di mana STEP 0 masih dikunci.
-            const firstStepLockEnd =
-              firstStepBaseProgress + segmentLength * FIRST_STEP_LOCK_RATIO;
-
-            // Selama lock belum dilepas, dan progress masih di zona "bab pertama",
-            // paksa tetap di STEP 0 (page-1) meskipun GSAP menghitung progress
-            // yang cukup besar karena satu gerakan scroll.
             if (!firstStepReleased) {
-              if (self.progress < firstStepLockEnd) {
+              if (self.progress < firstStepLockProgress) {
                 showStep(0);
                 return;
               }
 
-              // Setelah user melewati threshold dengan niat scroll yang jelas,
-              // lock dilepas dan perilaku kembali normal untuk semua step berikutnya.
+              // Setelah lewat threshold sekali, lock dilepas
+              // dan scroll bekerja normal selanjutnya.
               firstStepReleased = true;
             }
 
