@@ -1,4 +1,4 @@
-// apps/frontend/app/[locale]/page.tsx
+//apps/frontend/app/[locale]/page.tsx
 
 "use client";
 
@@ -6,7 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import HeroRings from "@/components/hero/HeroRings";
 import ScrollHint from "@/components/hero/ScrollHint";
-import PinnedClusterSection from "@/components/sections/PinnedClusterSection";
+import ScrollCluster from "@/components/ScrollCluster";
 
 export default function LocaleHomePage() {
   const t = useTranslations();
@@ -129,7 +129,7 @@ export default function LocaleHomePage() {
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
       {/* PAGE 1–3: pinned storytelling cluster (desktop only) */}
-      <PinnedClusterSection sectionId="page-1" />
+      <ScrollCluster />
 
       {/* PAGE 4+: scroll normal lagi */}
       <section id="page-4" className="bg-white py-24">
