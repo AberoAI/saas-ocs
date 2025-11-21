@@ -53,9 +53,12 @@ export default function ScrollCluster() {
 
         const totalSegments = Math.max(stepsCount - 1, 1);
 
-        // ⬇️ Sedikit diperpanjang: 1 step = ~100% scroll
-        // 3 page → "+=300%" (lebih pelan, tidak terlalu sensitif)
-        const endValue = `+=${stepsCount * 100}%`;
+        // ⬇️ Scroll dibuat lebih panjang & pelan:
+        // sebelumnya: stepsCount * 100%
+        // sekarang : stepsCount * 150%  → ~1.5x lebih jauh
+        // 3 page → "+=450%" → satu "step" butuh scroll lebih banyak,
+        // tidak ganti page hanya dengan scroll kecil sekali.
+        const endValue = `+=${stepsCount * 150}%`;
 
         const snapPoints =
           stepsCount > 1 ? steps.map((_, i) => i / totalSegments) : [0];
@@ -68,9 +71,6 @@ export default function ScrollCluster() {
         // FIRST STEP LOCK:
         // Rasio berapa jauh user harus scroll di segment pertama
         // sebelum STEP 1 boleh diakses.
-        //
-        // Dinaikkan dari 0.6 → 0.8 supaya PAGE-1 terasa lebih "tebal"
-        // dan tidak mudah terlewat hanya dengan scroll kecil.
         const FIRST_STEP_LOCK_RATIO = 0.8;
         let firstStepReleased = false;
 
@@ -100,8 +100,11 @@ export default function ScrollCluster() {
               firstStepReleased = true;
             }
 
+            // ⬇️ Dibuat kurang sensitif:
+            // - pakai floor, bukan round
+            // - kecilkan risiko "loncat step" saat progress di batas segment
             const raw = self.progress * totalSegments;
-            const stepIndex = Math.round(raw);
+            const stepIndex = Math.floor(raw + 0.001);
             showStep(stepIndex);
           },
           snap: snapConfig,
