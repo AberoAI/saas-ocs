@@ -1,4 +1,4 @@
-//apps/frontend/components/ScrollCluster.tsx
+// apps/frontend/components/ScrollCluster.tsx
 
 "use client";
 
@@ -48,6 +48,7 @@ export default function ScrollCluster() {
           });
         };
 
+        // Mulai dari STEP 0 (page-1)
         showStep(0);
 
         const totalSegments = Math.max(stepsCount - 1, 1);
@@ -61,6 +62,12 @@ export default function ScrollCluster() {
             ? { snapTo: snapPoints, duration: 0.3, ease: "power1.out" }
             : undefined;
 
+        // FIRST STEP LOCK:
+        // Rasio berapa jauh user harus scroll di segment pertama
+        // sebelum STEP 1 boleh diakses.
+        const FIRST_STEP_LOCK_RATIO = 0.6;
+        let firstStepReleased = false;
+
         ScrollTrigger.create({
           trigger: cluster,
           start: "top top",
@@ -68,6 +75,25 @@ export default function ScrollCluster() {
           pin: true,
           anticipatePin: 1,
           onUpdate: (self) => {
+            // totalSegments = stepsCount - 1 → tiap segment punya panjang sama.
+            const segmentLength = 1 / totalSegments;
+
+            // Selama progress masih di X% awal dari segment pertama,
+            // paksa tetap di STEP 0 (page-1).
+            const firstStepLockProgress =
+              segmentLength * FIRST_STEP_LOCK_RATIO;
+
+            if (!firstStepReleased) {
+              if (self.progress < firstStepLockProgress) {
+                showStep(0);
+                return;
+              }
+
+              // Setelah lewat threshold sekali, lock dilepas
+              // dan scroll bekerja normal selanjutnya.
+              firstStepReleased = true;
+            }
+
             const raw = self.progress * totalSegments;
             const stepIndex = Math.round(raw);
             showStep(stepIndex);
