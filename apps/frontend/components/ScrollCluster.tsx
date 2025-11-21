@@ -63,10 +63,19 @@ export default function ScrollCluster() {
             : undefined;
 
         // FIRST STEP LOCK:
-        // Rasio berapa jauh user harus scroll di segment pertama
-        // sebelum STEP 1 boleh diakses.
-        const FIRST_STEP_LOCK_RATIO = 0.6;
+        // Rasio seberapa besar porsi segment pertama yang harus dilewati
+        // sebelum STEP 1 (page-2) diizinkan muncul.
+        //
+        // Contoh:
+        // - totalSegments = 2 → tiap segment panjangnya 0.5 progress
+        // - FIRST_STEP_LOCK_RATIO = 0.75 → user harus melewati 75% segment 0
+        //
+        // Dengan ini, PAGE-1 terasa seperti "bab pertama" yang tenang,
+        // dan tidak langsung loncat ke PAGE-2 dengan scroll kecil.
+        const FIRST_STEP_LOCK_RATIO = 0.75;
+
         let firstStepReleased = false;
+        let firstStepBaseProgress: number | null = null;
 
         ScrollTrigger.create({
           trigger: cluster,
@@ -78,19 +87,28 @@ export default function ScrollCluster() {
             // totalSegments = stepsCount - 1 → tiap segment punya panjang sama.
             const segmentLength = 1 / totalSegments;
 
-            // Selama progress masih di X% awal dari segment pertama,
-            // paksa tetap di STEP 0 (page-1).
-            const firstStepLockProgress =
-              segmentLength * FIRST_STEP_LOCK_RATIO;
+            // Catat progress awal real saat cluster mulai aktif.
+            // Ini melindungi dari variasi kecil saat refresh / iOS bounce,
+            // sehingga lock tetap stabil dan tidak tergantung pada asumsi 0 persis.
+            if (firstStepBaseProgress === null) {
+              firstStepBaseProgress = self.progress;
+            }
 
+            // Progress maksimum di mana STEP 0 masih dikunci.
+            const firstStepLockEnd =
+              firstStepBaseProgress + segmentLength * FIRST_STEP_LOCK_RATIO;
+
+            // Selama lock belum dilepas, dan progress masih di zona "bab pertama",
+            // paksa tetap di STEP 0 (page-1) meskipun GSAP menghitung progress
+            // yang cukup besar karena satu gerakan scroll.
             if (!firstStepReleased) {
-              if (self.progress < firstStepLockProgress) {
+              if (self.progress < firstStepLockEnd) {
                 showStep(0);
                 return;
               }
 
-              // Setelah lewat threshold sekali, lock dilepas
-              // dan scroll bekerja normal selanjutnya.
+              // Setelah user melewati threshold dengan niat scroll yang jelas,
+              // lock dilepas dan perilaku kembali normal untuk semua step berikutnya.
               firstStepReleased = true;
             }
 
