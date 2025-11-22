@@ -68,7 +68,7 @@ export function ShowcaseGrowthInner() {
       <div className="space-y-4">
         <div className="space-y-2">
           <motion.div {...headlineMotion}>
-            <h2 className="font-poppins font-medium text-xl tracking-tight text-slate-900 md:text-2xl">
+            <h2 className="font-poppins font-medium text-[27px] tracking-tight text-slate-900 md:text-[31px]">
               {t("hero.showcase.headline")}
             </h2>
           </motion.div>
