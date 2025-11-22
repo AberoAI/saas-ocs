@@ -71,9 +71,8 @@ export default function ScrollCluster() {
 
         // FIRST STEP LOCK:
         // Rasio berapa jauh user harus scroll di segment pertama
-        // sebelum STEP 1 boleh diakses.
+        // sebelum bisa berpindah dari STEP 0 ke STEP berikutnya.
         const FIRST_STEP_LOCK_RATIO = 0.7;
-        let firstStepReleased = false;
 
         ScrollTrigger.create({
           trigger: cluster,
@@ -82,26 +81,44 @@ export default function ScrollCluster() {
           pin: true,
           anticipatePin: 1,
           onUpdate: (self) => {
-            const stepWidth = 1 / stepsCount;
+            /**
+             * PENTING:
+             * Di sini stepWidth menggunakan (stepsCount - 1),
+             * karena yang dibagi ke segmen progres adalah STEP 1..N.
+             * Ini membuat transisi dari STEP 0 ke STEP 1 lebih halus,
+             * tidak terasa seperti "dipaksa lompat" terlalu cepat.
+             */
+            const stepWidth = 1 / (stepsCount - 1);
+            const lockBoundary = stepWidth * FIRST_STEP_LOCK_RATIO;
 
-            const firstStepLockProgress =
-              stepWidth * FIRST_STEP_LOCK_RATIO;
-
-            if (!firstStepReleased) {
-              if (self.progress < firstStepLockProgress) {
-                showStep(0);
-                return;
-              }
-
-              firstStepReleased = true;
+            // Selama masih di area awal, paksa selalu STEP 0 (page-1)
+            if (self.progress < lockBoundary) {
+              showStep(0);
+              return;
             }
 
-            // Distribusi progres → step dibuat rata dan stabil
-            const raw = self.progress * stepsCount;
+            // Setelah melewati lockBoundary, distribusikan progres
+            // secara rata ke STEP 1..(stepsCount - 1)
+            const remainingProgress = 1 - lockBoundary;
+
+            // Hindari pembagian nol (harusnya tidak terjadi karena stepsCount >= 2)
+            if (remainingProgress <= 0) {
+              showStep(stepsCount - 1);
+              return;
+            }
+
+            const normalized =
+              (self.progress - lockBoundary) / remainingProgress;
+
+            // Clamp ke [0, 1]
+            const effectiveProgress = Math.min(Math.max(normalized, 0), 1);
+
+            const raw = effectiveProgress * (stepsCount - 1);
             const stepIndex = Math.min(
-              Math.floor(raw),
-              stepsCount - 1
+              stepsCount - 1,
+              1 + Math.floor(raw)
             );
+
             showStep(stepIndex);
           },
         });
