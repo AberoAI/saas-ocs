@@ -51,27 +51,28 @@ export default function ScrollCluster() {
         // Mulai dari STEP 0 (page-1)
         showStep(0);
 
-        const totalSegments = Math.max(stepsCount - 1, 1);
+        // Edge case: hanya 1 step → tetap pin, tapi tanpa kalkulasi segment.
+        if (stepsCount === 1) {
+          ScrollTrigger.create({
+            trigger: cluster,
+            start: "top top",
+            end: "+=70%",
+            pin: true,
+            anticipatePin: 1,
+            onUpdate: () => {
+              showStep(0);
+            },
+          });
+          return;
+        }
 
-        // ⬇️ Scroll dibuat lebih panjang & pelan:
-        // sebelumnya: stepsCount * 100%
-        // sekarang : stepsCount * 150%  → ~1.5x lebih jauh
-        // 3 page → "+=450%" → satu "step" butuh scroll lebih banyak,
-        // tidak ganti page hanya dengan scroll kecil sekali.
-        const endValue = `+=${stepsCount * 150}%`;
-
-        const snapPoints =
-          stepsCount > 1 ? steps.map((_, i) => i / totalSegments) : [0];
-
-        const snapConfig =
-          stepsCount > 1
-            ? { snapTo: snapPoints, duration: 0.3, ease: "power1.out" }
-            : undefined;
+        // Scroll distance dibuat lebih ringkas & tetap proporsional
+        const endValue = `+=${stepsCount * 70}%`;
 
         // FIRST STEP LOCK:
         // Rasio berapa jauh user harus scroll di segment pertama
         // sebelum STEP 1 boleh diakses.
-        const FIRST_STEP_LOCK_RATIO = 0.8;
+        const FIRST_STEP_LOCK_RATIO = 0.7;
         let firstStepReleased = false;
 
         ScrollTrigger.create({
@@ -81,13 +82,10 @@ export default function ScrollCluster() {
           pin: true,
           anticipatePin: 1,
           onUpdate: (self) => {
-            // totalSegments = stepsCount - 1 → tiap segment punya panjang sama.
-            const segmentLength = 1 / totalSegments;
+            const stepWidth = 1 / stepsCount;
 
-            // Selama progress masih di X% awal dari segment pertama,
-            // paksa tetap di STEP 0 (page-1).
             const firstStepLockProgress =
-              segmentLength * FIRST_STEP_LOCK_RATIO;
+              stepWidth * FIRST_STEP_LOCK_RATIO;
 
             if (!firstStepReleased) {
               if (self.progress < firstStepLockProgress) {
@@ -95,19 +93,17 @@ export default function ScrollCluster() {
                 return;
               }
 
-              // Setelah lewat threshold sekali, lock dilepas
-              // dan scroll bekerja normal selanjutnya.
               firstStepReleased = true;
             }
 
-            // ⬇️ Dibuat kurang sensitif:
-            // - pakai floor, bukan round
-            // - kecilkan risiko "loncat step" saat progress di batas segment
-            const raw = self.progress * totalSegments;
-            const stepIndex = Math.floor(raw + 0.001);
+            // Distribusi progres → step dibuat rata dan stabil
+            const raw = self.progress * stepsCount;
+            const stepIndex = Math.min(
+              Math.floor(raw),
+              stepsCount - 1
+            );
             showStep(stepIndex);
           },
-          snap: snapConfig,
         });
       });
     }, clusterRef);
