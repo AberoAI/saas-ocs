@@ -11,7 +11,11 @@
   "hero": {
     "headline": "Müşterilerin %65’i, geç yanıtlar yüzünden işlemi iptal ediyor",
     "sub": "AberoAI, 7/24 anında yanıtlar, çok dilli destek ve otomatik rezervasyon akışlarıyla bu sorunu çözer.",
-    "badge": "Şimdi yayında • WhatsApp Müşteri Hizmetleri Otomasyonu"
+    "badge": "Şimdi yayında • WhatsApp Müşteri Hizmetleri Otomasyonu",
+    "showcase": {
+      "headline": "AberoAI, her müşteri sohbetini yapay zekâ ile ölçülebilir büyümeye dönüştürür.",
+      "sub": "Binlerce konuşmayı zahmetsizce yönetin ve tüm kliniklerinizde veya şubelerinizde tek bir müşteriyi bile kaybetmeyin."
+    }
   },
   "cta": {
     "primary": "Otomatikleştirmeye başla",

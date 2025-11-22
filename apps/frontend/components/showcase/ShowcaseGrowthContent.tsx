@@ -9,11 +9,13 @@ import {
   type Transition,
 } from "framer-motion";
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import FloatingForegroundBubbles from "./FloatingForegroundBubbles";
 import FloatingBackgroundBubbles from "./FloatingBackgroundBubbles";
 
 export function ShowcaseGrowthInner() {
   const shouldReduceMotion = useReducedMotion();
+  const t = useTranslations();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isInView = useInView(containerRef, {
@@ -67,14 +69,13 @@ export function ShowcaseGrowthInner() {
         <div className="space-y-2">
           <motion.div {...headlineMotion}>
             <h2 className="font-poppins font-medium text-xl tracking-tight text-slate-900 md:text-2xl">
-              AberoAI turns every customer chat into measurable growth with AI.
+              {t("hero.showcase.headline")}
             </h2>
           </motion.div>
 
           <motion.div {...subheadlineMotion}>
             <p className="font-poppins text-sm leading-relaxed text-slate-600 md:max-w-md">
-              Manage thousands of conversations effortlessly and never lose
-              another customer again — across all your clinics or locations.
+              {t("hero.showcase.sub")}
             </p>
           </motion.div>
         </div>
@@ -95,14 +96,14 @@ export function ShowcaseGrowthInner() {
                 active:translate-y-[1px]
               "
             >
-              See demo
+              {t("cta.secondary")}
             </button>
           </motion.div>
 
           <motion.div {...trustMotion}>
             <div className="flex items-center gap-3 text-[11px] text-slate-500">
-              <span>• No sign-up</span>
-              <span>• No credit card</span>
+              <span>• {t("misc.cancelAnytime")}</span>
+              <span>• {t("misc.noCreditCard")}</span>
             </div>
           </motion.div>
         </div>
