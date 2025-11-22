@@ -9,6 +9,12 @@ import { useReducedMotion } from "framer-motion";
 import AboutShowcase from "@/components/about/AboutShowcase";
 import { ShowcaseGrowthInner } from "@/components/showcase/ShowcaseGrowthContent";
 
+// Scroll behavior constants for maintainability
+// Total scroll length per step (in % of viewport height) while pinned
+const SCROLL_CLUSTER_SEGMENT_PERCENT = 70;
+// How much of the first segment is "locked" to STEP 0 before transitioning
+const FIRST_STEP_LOCK_RATIO = 0.7;
+
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ScrollCluster() {
@@ -29,6 +35,12 @@ export default function ScrollCluster() {
         const steps = Array.from(
           cluster.querySelectorAll<HTMLElement>("[data-step]")
         );
+        /**
+         * IMPORTANT:
+         * - Step index is based on DOM order in `steps` (0, 1, 2, ...)
+         * - The `data-step="1|2|3"` attributes are only used as semantic markers
+         *   and for styling/debugging in the DOM, not for the logic.
+         */
 
         const stepsCount = steps.length;
         if (stepsCount === 0) return;
@@ -56,7 +68,7 @@ export default function ScrollCluster() {
           ScrollTrigger.create({
             trigger: cluster,
             start: "top top",
-            end: "+=70%",
+            end: `+=${SCROLL_CLUSTER_SEGMENT_PERCENT}%`,
             pin: true,
             anticipatePin: 1,
             onUpdate: () => {
@@ -67,13 +79,11 @@ export default function ScrollCluster() {
         }
 
         // Scroll distance dibuat lebih ringkas & tetap proporsional
-        const endValue = `+=${stepsCount * 70}%`;
+        const endValue = `+=${stepsCount * SCROLL_CLUSTER_SEGMENT_PERCENT}%`;
 
         // FIRST STEP LOCK:
         // Rasio berapa jauh user harus scroll di segment pertama
         // sebelum bisa berpindah dari STEP 0 ke STEP berikutnya.
-        const FIRST_STEP_LOCK_RATIO = 0.7;
-
         ScrollTrigger.create({
           trigger: cluster,
           start: "top top",
