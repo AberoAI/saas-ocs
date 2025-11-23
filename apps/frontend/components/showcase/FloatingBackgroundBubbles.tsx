@@ -58,7 +58,7 @@ export default function LabFloatingBackgroundBubbles() {
       >
         {/* 1) Bubble — Arabic (bubble 5 overall) */}
         <motion.div
-          className="absolute left-[-14%] top-[14%] flex items-start gap-2"
+          className="absolute left-[-4%] top-[19%] flex items-start gap-2"
           initial={bubble5.initial}
           animate={bubble5.animate}
           transition={bubble5.transition}
@@ -82,7 +82,7 @@ export default function LabFloatingBackgroundBubbles() {
 
         {/* 2) Bubble — German (bubble 6 overall) */}
         <motion.div
-          className="absolute right-[8%] top-[32%] flex items-start gap-2"
+          className="absolute right-[-2%] top-[37.5%] flex items-start gap-2"
           initial={bubble6.initial}
           animate={bubble6.animate}
           transition={bubble6.transition}
@@ -106,7 +106,7 @@ export default function LabFloatingBackgroundBubbles() {
 
         {/* 3) Bubble — Turkish (bubble 7 overall) */}
         <motion.div
-          className="absolute left-[-18%] top-[51%] flex items-start gap-2"
+          className="absolute left-[-8%] top-[57.1%] flex items-start gap-2"
           initial={bubble7.initial}
           animate={bubble7.animate}
           transition={bubble7.transition}
@@ -130,7 +130,7 @@ export default function LabFloatingBackgroundBubbles() {
 
         {/* 4) Bubble — English (bubble 8 overall) */}
         <motion.div
-          className="absolute right-[21%] top-[73%] flex items-start gap-2"
+          className="absolute right-[11%] top-[79.8%] flex items-start gap-2"
           initial={bubble8.initial}
           animate={bubble8.animate}
           transition={bubble8.transition}
