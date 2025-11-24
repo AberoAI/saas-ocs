@@ -44,7 +44,6 @@ export default function LabFloatingBackgroundBubbles() {
     };
   };
 
-  // Sequence continues from foreground: 0.4 → 0.7
   const bubble5 = makeBubbleMotion(0.4);
   const bubble6 = makeBubbleMotion(0.5);
   const bubble7 = makeBubbleMotion(0.6);
@@ -54,11 +53,15 @@ export default function LabFloatingBackgroundBubbles() {
     <div className="pointer-events-none relative h-full w-full select-none">
       <div
         ref={containerRef}
-        className="absolute inset-0 opacity-60 md:opacity-55 lg:opacity-50 xl:opacity-45 blur-[0.8px] md:blur-[1px] lg:blur-[1.2px] xl:blur-[1.4px]"
+        className="
+          absolute inset-0
+          opacity-[0.45125] md:opacity-[0.406125] lg:opacity-[0.361] xl:opacity-[0.315875]
+          blur-[1.05px] md:blur-[1.26px] lg:blur-[1.47px] xl:blur-[1.68px]
+        "
       >
-        {/* 1) Bubble — Arabic (bubble 5 overall) */}
+        {/* 1) Bubble — Arabic */}
         <motion.div
-          className="absolute left-[-4%] top-[19%] flex items-start gap-2"
+          className="absolute left-[-1%] top-[9%] flex items-start gap-2"
           initial={bubble5.initial}
           animate={bubble5.animate}
           transition={bubble5.transition}
@@ -80,9 +83,9 @@ export default function LabFloatingBackgroundBubbles() {
           </div>
         </motion.div>
 
-        {/* 2) Bubble — German (bubble 6 overall) */}
+        {/* 2) Bubble — German */}
         <motion.div
-          className="absolute right-[-2%] top-[37.5%] flex items-start gap-2"
+          className="absolute right-[5%] top-[32.5%] flex items-start gap-2"
           initial={bubble6.initial}
           animate={bubble6.animate}
           transition={bubble6.transition}
@@ -104,7 +107,7 @@ export default function LabFloatingBackgroundBubbles() {
           </div>
         </motion.div>
 
-        {/* 3) Bubble — Turkish (bubble 7 overall) */}
+        {/* 3) Bubble — Turkish */}
         <motion.div
           className="absolute left-[-8%] top-[57.1%] flex items-start gap-2"
           initial={bubble7.initial}
@@ -128,29 +131,31 @@ export default function LabFloatingBackgroundBubbles() {
           </div>
         </motion.div>
 
-        {/* 4) Bubble — English (bubble 8 overall) */}
-        <motion.div
-          className="absolute right-[11%] top-[79.8%] flex items-start gap-2"
-          initial={bubble8.initial}
-          animate={bubble8.animate}
-          transition={bubble8.transition}
-        >
-          <Image
-            src="/avatars/8.png"
-            alt="Customer avatar 8"
-            width={40}
-            height={40}
-            className="h-10 w-10 rounded-full object-cover"
-          />
-          <div className="relative rounded-2xl bg-white px-4 py-2 shadow-[0_26px_70px_rgba(15,23,42,0.16)] max-w-[230px] md:max-w-[260px]">
-            <span className="block pr-[29px] text-[13px] text-slate-700">
-              Do you have a doctor available on Monday?
-            </span>
-            <span className="absolute bottom-1 right-3 text-[10px] text-slate-400">
-              12:00
-            </span>
-          </div>
-        </motion.div>
+        {/* 4) Bubble — English (disabled) */}
+        {false && (
+          <motion.div
+            className="absolute right-[13%] top-[82.8%] flex items-start gap-2"
+            initial={bubble8.initial}
+            animate={bubble8.animate}
+            transition={bubble8.transition}
+          >
+            <Image
+              src="/avatars/8.png"
+              alt="Customer avatar 8"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+            <div className="relative rounded-2xl bg-white px-4 py-2 shadow-[0_26px_70px_rgba(15,23,42,0.16)] max-w-[230px] md:max-w-[260px]">
+              <span className="block pr-[29px] text-[13px] text-slate-700">
+                Do you have a doctor available on Monday?
+              </span>
+              <span className="absolute bottom-1 right-3 text-[10px] text-slate-400">
+                12:00
+              </span>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
