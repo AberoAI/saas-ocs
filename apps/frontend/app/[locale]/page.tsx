@@ -1,5 +1,3 @@
-//apps/frontend/app/[locale]/page.tsx
-
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
@@ -14,6 +12,7 @@ export default function LocaleHomePage() {
   const isEn = locale === "en";
   const isTr = locale === "tr";
   const brandBlue = "#26658C";
+  const foundationsColor = "#757575";
 
   const prefersReducedMotion = useReducedMotion();
 
@@ -25,37 +24,40 @@ export default function LocaleHomePage() {
   const scrollDelay = prefersReducedMotion ? 0 : subDelay + subDuration + 0.18;
 
   const renderHeadline = () => {
-    if (isEn) {
-      const line1 = t("hero.headlineLine1");
-      const highlight = "Over 65%";
-      const rest = line1.slice(highlight.length);
-      return (
-        <>
-          <span style={{ color: brandBlue }}>{highlight}</span>
-          {rest}
-          <br />
-          {t("hero.headlineLine2")}
-        </>
-      );
-    }
+    const line1 = t("hero.headlineLine1");
+    const line2 = t("hero.headlineLine2");
 
-    if (isTr) {
-      const full = t("hero.headline");
-      const target = "%65";
-      const idx = full.indexOf(target);
-      if (idx === -1) return <>{full}</>;
-      const before = full.slice(0, idx);
-      const after = full.slice(idx + target.length);
-      return (
-        <>
-          {before}
-          <span style={{ color: brandBlue }}>{target}</span>
-          {after}
-        </>
-      );
-    }
+    return (
+      <>
+        {/* Line 1: e.g. "65% of international patients don’t wait" */}
+        <span className="block mx-auto w-fit lg:whitespace-nowrap">
+          {line1}
+        </span>
+        {/* Line 2: e.g. "They move on" */}
+        <span className="block mx-auto w-fit" style={{ color: brandBlue }}>
+          {line2}
+        </span>
+      </>
+    );
+  };
 
-    return <>{t("hero.headline")}</>;
+  const renderSubHeadline = () => {
+    const before = t("home.subHeadlineBefore");
+    const foundations = t("home.subHeadlineFoundations");
+
+    return (
+      <>
+        {before}{" "}
+        <span
+          style={{
+            color: foundationsColor,
+            fontWeight: 600,
+          }}
+        >
+          {foundations}
+        </span>
+      </>
+    );
   };
 
   return (
@@ -63,8 +65,8 @@ export default function LocaleHomePage() {
       <HeroRings />
 
       {/* PAGE 0: Hero (normal scroll) */}
-      <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center max-w-6xl px-4 lg:px-6">
-        <div className="max-w-3xl -mt-[22vh]">
+      <section className="relative z-10 mx-auto flex min-h-[75vh] md:min-h-[80vh] items-center justify-center max-w-6xl px-4 lg:px-6">
+        <div className="max-w-3xl -mt-[22vh] text-center mx-auto">
           <motion.h1
             initial={
               prefersReducedMotion
@@ -100,19 +102,15 @@ export default function LocaleHomePage() {
                 : "mt-4 text-[16px] text-black/70"
             }
           >
-            {t("home.subHeadline")}
+            {renderSubHeadline()}
           </motion.p>
         </div>
 
-        <div className="hidden flex-1 lg:block" />
-
-        {/* Scroll hint → cluster page-1 */}
+        {/* Scroll hint → PAGE 1 (first normal section) */}
         <motion.div
           className="pointer-events-auto absolute inset-x-0 bottom-[22vh] md:bottom-[24vh] flex justify-center"
           initial={
-            prefersReducedMotion
-              ? { opacity: 1, y: 0 }
-              : { opacity: 0, y: 6 }
+            prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }
           }
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -125,14 +123,62 @@ export default function LocaleHomePage() {
         </motion.div>
       </section>
 
-      {/* Spacer tipis antara Hero (page-0) dan Cluster */}
+      {/* PAGE 1: normal scroll section */}
+      <section
+        id="page-1"
+        className="relative z-10 bg-white py-24 border-t border-slate-100"
+      >
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+            PAGE 01 • CONTEXT
+          </p>
+          <h2 className="mt-4 text-2xl md:text-3xl font-semibold text-slate-900">
+            {t("page1.headline")}
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-700">
+            {t("page1.body.0")}
+            <br />
+            {t("page1.body.1")}
+            <br />
+            {t("page1.body.2")}
+            <br />
+            {t("page1.body.3")}
+          </p>
+        </div>
+      </section>
+
+      {/* PAGE 2: normal scroll section */}
+      <section id="page-2" className="relative z-10 bg-white py-24">
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+            PAGE 02 • WHAT ABEROAI IS
+          </p>
+          <h2 className="mt-4 text-2xl md:text-3xl font-semibold text-slate-900">
+            {t("page2.headline")}
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-700">
+            {t("page2.subheadline")}
+          </p>
+          <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-700">
+            {t("page2.body.0")}
+            <br />
+            {t("page2.body.1")}
+            <br />
+            {t("page2.body.2")}
+            <br />
+            {t("page2.body.3")}
+          </p>
+          <p className="mt-4 max-w-2xl text-sm md:text-base leading-relaxed text-slate-700">
+            {t("page2.microline")}
+          </p>
+        </div>
+      </section>
+
       <div aria-hidden="true" className="h-[6vh] bg-white" />
 
-      {/* PAGE 1–3: pinned storytelling cluster (desktop only) */}
       <ScrollCluster />
 
-      {/* PAGE 4+: scroll normal lagi */}
-      <section id="page-4" className="bg-white py-24">
+      <section id="page-6" className="bg-white py-24">
         <div className="mx-auto max-w-6xl px-4 lg:px-6">
           <h2 className="text-3xl font-semibold text-slate-900">
             AberoAI in real operations.

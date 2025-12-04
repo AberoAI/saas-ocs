@@ -60,7 +60,7 @@ export default function ScrollCluster() {
           });
         };
 
-        // Mulai dari STEP 0 (page-1)
+        // Mulai dari STEP 0 (page-3)
         showStep(0);
 
         // Edge case: hanya 1 step → tetap pin, tapi tanpa kalkulasi segment.
@@ -101,7 +101,7 @@ export default function ScrollCluster() {
             const stepWidth = 1 / (stepsCount - 1);
             const lockBoundary = stepWidth * FIRST_STEP_LOCK_RATIO;
 
-            // Selama masih di area awal, paksa selalu STEP 0 (page-1)
+            // Selama masih di area awal, paksa selalu STEP 0 (page-3)
             if (self.progress < lockBoundary) {
               showStep(0);
               return;
@@ -124,10 +124,7 @@ export default function ScrollCluster() {
             const effectiveProgress = Math.min(Math.max(normalized, 0), 1);
 
             const raw = effectiveProgress * (stepsCount - 1);
-            const stepIndex = Math.min(
-              stepsCount - 1,
-              1 + Math.floor(raw)
-            );
+            const stepIndex = Math.min(stepsCount - 1, 1 + Math.floor(raw));
 
             showStep(stepIndex);
           },
@@ -143,9 +140,9 @@ export default function ScrollCluster() {
 
   return (
     <section ref={clusterRef} className="scroll-cluster relative bg-white">
-      {/* PAGE-1 */}
+      {/* PAGE-3 */}
       <div
-        id="page-1"
+        id="page-3"
         data-step="1"
         className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-10 pb-8 md:pt-16 md:pb-14 lg:px-6"
       >
@@ -158,15 +155,15 @@ export default function ScrollCluster() {
         </div>
 
         <div className="pointer-events-none absolute bottom-6 right-6 text-[11px] tracking-[0.28em] uppercase text-slate-500/80 md:bottom-8 md:right-10">
-          <span className="font-semibold">01</span>
+          <span className="font-semibold">03</span>
           <span className="mx-1 text-slate-400/80">/</span>
-          <span className="text-slate-400/80">03</span>
+          <span className="text-slate-400/80">05</span>
         </div>
       </div>
 
-      {/* PAGE-2 */}
+      {/* PAGE-4 */}
       <div
-        id="page-2"
+        id="page-4"
         data-step="2"
         className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-10 pb-8 md:pt-16 md:pb-14 lg:px-6"
       >
@@ -177,7 +174,8 @@ export default function ScrollCluster() {
                 STEP 02 • USE CASES
               </p>
               <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl">
-                AI that actually follows your playbook — from lead to after-care.
+                AI that actually follows your playbook — from lead to
+                after-care.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">
                 From qualification and booking to reminders and safe human
@@ -189,15 +187,15 @@ export default function ScrollCluster() {
         </div>
 
         <div className="pointer-events-none absolute bottom-6 right-6 text-[11px] tracking-[0.28em] uppercase text-slate-500/80 md:bottom-8 md:right-10">
-          <span className="font-semibold">02</span>
+          <span className="font-semibold">04</span>
           <span className="mx-1 text-slate-400/80">/</span>
-          <span className="text-slate-400/80">03</span>
+          <span className="text-slate-400/80">05</span>
         </div>
       </div>
 
-      {/* PAGE-3 */}
+      {/* PAGE-5 */}
       <div
-        id="page-3"
+        id="page-5"
         data-step="3"
         className="scroll-cluster-layer relative flex min-h-[100vh] items-start justify-center px-4 pt-10 pb-8 md:pt-16 md:pb-14 lg:px-6"
       >
@@ -221,9 +219,9 @@ export default function ScrollCluster() {
         </div>
 
         <div className="pointer-events-none absolute bottom-6 right-6 text-[11px] tracking-[0.28em] uppercase text-slate-500/80 md:bottom-8 md:right-10">
-          <span className="font-semibold">03</span>
+          <span className="font-semibold">05</span>
           <span className="mx-1 text-slate-400/80">/</span>
-          <span className="text-slate-400/80">03</span>
+          <span className="text-slate-400/80">05</span>
         </div>
       </div>
     </section>

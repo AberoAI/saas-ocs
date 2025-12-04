@@ -10,9 +10,11 @@
   },
   "hero": {
     "headline": "Over 65% of customers cancel due to slow responses",
-    "headlineLine1": "Over 65% of customers cancel",
-    "headlineLine2": "due to slow responses",
+    "headlineLine1": "65% of international patients don’t wait",
+    "headlineLine2": "They move on",
     "sub": "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
+    "subHeadlineBefore": "In global clinics, response and language are not features.",
+    "subHeadlineFoundations": "They are foundations",
     "badge": "Now live • Automate WhatsApp Customer Service",
     "showcase": {
       "headline": "AberoAI turns every customer chat into measurable growth with AI",
@@ -34,9 +36,18 @@
     "title": "Pricing",
     "subtitle": "Choose a plan that fits you.",
     "plans": {
-      "basic": { "name": "Basic", "desc": "Good for getting started" },
-      "pro": { "name": "Pro", "desc": "Best for growing teams" },
-      "enterprise": { "name": "Enterprise", "desc": "Custom needs & support" }
+      "basic": {
+        "name": "Basic",
+        "desc": "Good for getting started"
+      },
+      "pro": {
+        "name": "Pro",
+        "desc": "Best for growing teams"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "desc": "Custom needs & support"
+      }
     }
   },
   "mcui": {
@@ -62,6 +73,8 @@
   },
   "home": {
     "subHeadline": "Turn slow conversations into instant connections — without hiring more agents.",
+    "subHeadlineBefore": "In global clinics, response and language are not features.",
+    "subHeadlineFoundations": "They are foundations",
     "whyTitle": "Why {name}",
     "features": {
       "autoReplyTitle": "AI Autoreply",
@@ -78,15 +91,47 @@
     ],
     "faqTitle": "FAQ",
     "faq": [
-      { "q": "Do I need my own server?", "a": "No. Everything runs in the cloud. You just connect the WhatsApp Cloud API." },
-      { "q": "Can I manage multiple branches?", "a": "Yes. Multi-tenant makes it easy to manage many units in one account." },
-      { "q": "Is there a free trial?", "a": "Yes. Sign up and start a trial immediately without a credit card." },
-      { "q": "Can you integrate with internal systems?", "a": "Yes. Talk to us for custom integrations (CRM, ticketing, etc.)." }
+      {
+        "q": "Do I need my own server?",
+        "a": "No. Everything runs in the cloud. You just connect the WhatsApp Cloud API."
+      },
+      {
+        "q": "Can I manage multiple branches?",
+        "a": "Yes. Multi-tenant makes it easy to manage many units in one account."
+      },
+      {
+        "q": "Is there a free trial?",
+        "a": "Yes. Sign up and start a trial immediately without a credit card."
+      },
+      {
+        "q": "Can you integrate with internal systems?",
+        "a": "Yes. Talk to us for custom integrations (CRM, ticketing, etc.)."
+      }
     ],
     "footer": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service"
     }
+  },
+  "page1": {
+    "headline": "Does this feel familiar?",
+    "body": [
+      "Patients wait too long for replies",
+      "Conversation data gets scattered",
+      "Follow-up after treatment becomes weak",
+      "Time zone differences slow coordination"
+    ]
+  },
+  "page2": {
+    "headline": "Stability doesn’t come from working faster\nIt comes from removing structural strain",
+    "subheadline": "When conversation load is carried by a system — not individuals — pressure stops building at the human level",
+    "body": [
+      "Your team stops chasing messages",
+      "Conversations stop breaking between shifts",
+      "Work feels controlled, not rushed",
+      "Load feels shared, not overwhelming"
+    ],
+    "microline": "Relief is structural calm"
   },
   "login": {
     "subtitle": "Access your dashboard and manage conversations."

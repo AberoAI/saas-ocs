@@ -97,7 +97,7 @@ export default function LabFloatingForegroundBubbles() {
 
       {/* 2) Bubble — “Bonjour…” */}
       <motion.div
-        className="absolute right-[10%] top-[18%] flex items-center gap-2"
+        className="absolute right-[10%] top-[13%] flex items-center gap-2"
         initial={bubble2.initial}
         animate={bubble2.animate}
         transition={bubble2.transition}
@@ -121,7 +121,7 @@ export default function LabFloatingForegroundBubbles() {
 
       {/* 3) Bubble — “Merhaba…” */}
       <motion.div
-        className="absolute left-[-10%] top-[47%] flex items-center gap-2"
+        className="absolute left-[-10%] top-[37%] flex items-center gap-2"
         initial={bubble3.initial}
         animate={bubble3.animate}
         transition={bubble3.transition}
@@ -145,7 +145,7 @@ export default function LabFloatingForegroundBubbles() {
 
       {/* 4) Bubble — Chinese */}
       <motion.div
-        className="absolute left-[17.5%] top-[76%] flex items-center gap-2"
+        className="absolute left-[17.5%] top-[61%] flex items-center gap-2"
         initial={bubble4.initial}
         animate={bubble4.animate}
         transition={bubble4.transition}

@@ -10,6 +10,10 @@
   },
   "hero": {
     "headline": "Müşterilerin %65’i, geç yanıtlar yüzünden işlemi iptal ediyor",
+    "headlineLine1": "Uluslararası hastaların %65’i beklemez",
+    "headlineLine2": "Başka seçeneklere yönelir",
+    "subHeadlineBefore": "Küresel kliniklerde yanıt verme ve dil bütünlüğü bir özellik değil,",
+    "subHeadlineFoundations": "birer temeldir",
     "sub": "AberoAI, 7/24 anında yanıtlar, çok dilli destek ve otomatik rezervasyon akışlarıyla bu sorunu çözer.",
     "badge": "Şimdi yayında • WhatsApp Müşteri Hizmetleri Otomasyonu",
     "showcase": {
@@ -32,9 +36,18 @@
     "title": "Fiyatlar",
     "subtitle": "Size uyan planı seçin.",
     "plans": {
-      "basic": { "name": "Basic", "desc": "Başlamak için iyi" },
-      "pro": { "name": "Pro", "desc": "Büyüyen ekipler için en iyi" },
-      "enterprise": { "name": "Kurumsal", "desc": "Özel ihtiyaçlar ve destek" }
+      "basic": {
+        "name": "Basic",
+        "desc": "Başlamak için iyi"
+      },
+      "pro": {
+        "name": "Pro",
+        "desc": "Büyüyen ekipler için en iyi"
+      },
+      "enterprise": {
+        "name": "Kurumsal",
+        "desc": "Özel ihtiyaçlar ve destek"
+      }
     }
   },
   "mcui": {
@@ -60,6 +73,8 @@
   },
   "home": {
     "subHeadline": "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan.",
+    "subHeadlineBefore": "Küresel kliniklerde yanıt verme ve dil bütünlüğü bir özellik değil,",
+    "subHeadlineFoundations": "birer temeldir",
     "whyTitle": "Neden {name}",
     "features": {
       "autoReplyTitle": "YZ Otomatik Yanıt",
@@ -76,15 +91,47 @@
     ],
     "faqTitle": "SSS",
     "faq": [
-      { "q": "Kendi sunucuma ihtiyaç var mı?", "a": "Hayır. Her şey bulutta çalışır. Siz sadece WhatsApp Cloud API’yi bağlarsınız." },
-      { "q": "Birden çok şubeyi yönetebilir miyim?", "a": "Evet. Multi-tenant, çok sayıda birimi tek hesapta yönetmeyi kolaylaştırır." },
-      { "q": "Ücretsiz deneme var mı?", "a": "Evet. Kredi kartı gerekmeden hemen denemeye başlayın." },
-      { "q": "İç sistemlerle entegrasyon mümkün mü?", "a": "Evet. Özelleştirilmiş entegrasyonlar (CRM, ticketing, vb.) için bizimle görüşün." }
+      {
+        "q": "Kendi sunucuma ihtiyaç var mı?",
+        "a": "Hayır. Her şey bulutta çalışır. Siz sadece WhatsApp Cloud API’yi bağlarsınız."
+      },
+      {
+        "q": "Birden çok şubeyi yönetebilir miyim?",
+        "a": "Evet. Multi-tenant, çok sayıda birimi tek hesapta yönetmeyi kolaylaştırır."
+      },
+      {
+        "q": "Ücretsiz deneme var mı?",
+        "a": "Evet. Kredi kartı gerekmeden hemen denemeye başlayın."
+      },
+      {
+        "q": "İç sistemlerle entegrasyon mümkün mü?",
+        "a": "Evet. Özelleştirilmiş entegrasyonlar (CRM, ticketing, vb.) için bizimle görüşün."
+      }
     ],
     "footer": {
       "privacy": "Gizlilik Politikası",
       "terms": "Kullanım Koşulları"
     }
+  },
+  "page1": {
+    "headline": "Bu durum size tanıdık geliyor mu?",
+    "body": [
+      "Hastalar yanıt almak için çok uzun süre bekliyor",
+      "Konuşma verileri farklı yerlere dağılıyor",
+      "Tedavi sonrası takip zayıflıyor",
+      "Zaman farkları koordinasyonu yavaşlatıyor"
+    ]
+  },
+  "page2": {
+    "headline": "İstikrar daha hızlı çalışmakla gelmez\nYapısal baskıyı ortadan kaldırmakla gelir",
+    "subheadline": "İletişim yükünü bireyler değil bir sistem taşıdığında, baskı insan tarafında birikmeyi bırakır",
+    "body": [
+      "Ekibiniz mesajların peşinden koşmayı bırakır",
+      "Görüşmeler vardiyalar arasında kopmaz",
+      "İş aceleyle değil, kontrol altında ilerler",
+      "Yük paylaşılmış hissedilir, bunaltıcı değil"
+    ],
+    "microline": "Rahatlık, yapısal sükunettir."
   },
   "login": {
     "subtitle": "Panelinize erişin ve konuşmaları yönetin."
