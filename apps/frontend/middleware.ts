@@ -28,7 +28,7 @@ function detectLocale(req: NextRequest): "en" | "tr" {
   if (cookieLocale === "tr") return "tr";
   if (cookieLocale === "en") return "en";
 
-  // 3) Accept-Language (fallback ringan)
+  // 3) Accept-Language (fallback)
   const al = req.headers.get("accept-language")?.toLowerCase() || "";
   if (al.includes("tr")) return "tr";
 
@@ -38,17 +38,17 @@ function detectLocale(req: NextRequest): "en" | "tr" {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ✅ Global gate (bilingual): semua halaman diarahkan ke /{locale}/system-status
+  // ✅ Global gate: TIMPA SEMUA HALAMAN dengan status,
+  // tapi URL user tidak berubah (rewrite).
   if (isSystemStatusEnabled()) {
-    // Hindari loop untuk status page (kedua locale)
-    if (pathname === "/en/system-status" || pathname === "/tr/system-status") {
+    // Hindari loop untuk route internal system-status
+    if (pathname === "/system-status/en" || pathname === "/system-status/tr") {
       return NextResponse.next();
     }
 
     const loc = detectLocale(req);
-
     const url = req.nextUrl.clone();
-    url.pathname = `/${loc}/system-status`;
+    url.pathname = `/system-status/${loc}`;
     url.search = "";
     return NextResponse.rewrite(url);
   }
