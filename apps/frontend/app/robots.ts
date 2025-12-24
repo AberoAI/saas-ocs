@@ -13,15 +13,29 @@ function getBaseUrl(): string {
   return "https://aberoai.com";
 }
 
+function isSystemStatusEnabled(): boolean {
+  const raw = (process.env.ABEROAI_SYSTEM_STATUS || "").trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
 export default function robots(): MetadataRoute.Robots {
   const base = getBaseUrl();
   const isProd =
-    process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production";
 
   if (!isProd) {
     // Jangan index Preview/Dev (tetap)
     return {
       rules: [{ userAgent: "*", disallow: "/" }],
+    };
+  }
+
+  // ✅ Jika System Status Mode aktif di production, jangan index sama sekali
+  if (isSystemStatusEnabled()) {
+    return {
+      rules: [{ userAgent: "*", disallow: "/" }],
+      host: base,
     };
   }
 
