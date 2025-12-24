@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { trpc } from "lib/trpc";
@@ -28,6 +29,14 @@ const TRPC = trpc as unknown as {
 };
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // ✅ Status page harus "zero-dependency":
+  // Jangan boot NextAuth/tRPC/ReactQuery agar tidak bisa blank bila env/ws/url bermasalah.
+  if (pathname?.startsWith("/system-status/")) {
+    return <>{children}</>;
+  }
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -38,22 +47,24 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             retry: 1,
             // @tanstack/react-query v5
             staleTime: 10_000, // 10s
-            gcTime: 5 * 60 * 1000 // 5 menit
-          }
-        }
+            gcTime: 5 * 60 * 1000, // 5 menit
+          },
+        },
       })
   );
 
   const [trpcClient] = useState(() =>
     TRPC.createClient({
-      links: getWsEnabledLinks() as Links
+      links: getWsEnabledLinks() as Links,
     })
   );
 
   return (
     <SessionProvider>
       <TRPC.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       </TRPC.Provider>
     </SessionProvider>
   );
