@@ -11,7 +11,17 @@ const intl = createIntlMiddleware({
   localeDetection: true,
 });
 
+function isProdRuntime(): boolean {
+  return (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production"
+  );
+}
+
 function isSystemStatusEnabled(): boolean {
+  // ✅ Dev (localhost) tidak boleh kena gate
+  if (!isProdRuntime()) return false;
+
   const raw = (process.env.ABEROAI_SYSTEM_STATUS || "").trim().toLowerCase();
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 }
@@ -38,15 +48,26 @@ function detectLocale(req: NextRequest): "en" | "tr" {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ✅ Global gate: TIMPA SEMUA HALAMAN dengan status,
-  // tapi URL user tidak berubah (rewrite).
+  // ✅ Global gate (PROD only):
+  // - Root "/" -> redirect ke "/en" atau "/tr" (URL terlihat)
+  // - Semua route lain -> rewrite ke "/system-status/{locale}" (URL user tidak berubah)
   if (isSystemStatusEnabled()) {
+    const loc = detectLocale(req);
+
     // Hindari loop untuk route internal system-status
     if (pathname === "/system-status/en" || pathname === "/system-status/tr") {
       return NextResponse.next();
     }
 
-    const loc = detectLocale(req);
+    // Root: tampilkan URL locale (direct ke /en atau /tr)
+    if (pathname === "/") {
+      const url = req.nextUrl.clone();
+      url.pathname = `/${loc}`;
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    // Selain root: timpa konten dengan status view, tapi URL tidak berubah
     const url = req.nextUrl.clone();
     url.pathname = `/system-status/${loc}`;
     url.search = "";
