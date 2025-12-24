@@ -2,10 +2,6 @@
 import type { MetadataRoute } from "next";
 
 function getBaseUrl(): string {
-  // Urutan fallback (tetap dari kerangka kamu):
-  // 1) SITE_URL (set manual di Vercel, mis. https://aberoai.com)
-  // 2) VERCEL_URL (otomatis dari Vercel, tanpa protocol)
-  // 3) fallback hardcoded
   const site = process.env.SITE_URL?.trim();
   if (site) return site.replace(/\/+$/, "");
   const vu = process.env.VERCEL_URL?.trim();
@@ -25,13 +21,11 @@ export default function robots(): MetadataRoute.Robots {
     process.env.NODE_ENV === "production";
 
   if (!isProd) {
-    // Jangan index Preview/Dev (tetap)
     return {
       rules: [{ userAgent: "*", disallow: "/" }],
     };
   }
 
-  // ✅ Jika System Status Mode aktif di production, jangan index sama sekali
   if (isSystemStatusEnabled()) {
     return {
       rules: [{ userAgent: "*", disallow: "/" }],

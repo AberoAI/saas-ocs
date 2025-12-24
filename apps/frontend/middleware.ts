@@ -12,25 +12,45 @@ const intl = createIntlMiddleware({
 });
 
 function isSystemStatusEnabled(): boolean {
-  // "1", "true", "yes", "on" -> enabled
   const raw = (process.env.ABEROAI_SYSTEM_STATUS || "").trim().toLowerCase();
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
+function detectLocale(req: NextRequest): "en" | "tr" {
+  const { pathname } = req.nextUrl;
+
+  // 1) Prefix di URL (paling akurat)
+  if (pathname === "/tr" || pathname.startsWith("/tr/")) return "tr";
+  if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
+
+  // 2) Cookie locale (kalau ada)
+  const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value?.toLowerCase();
+  if (cookieLocale === "tr") return "tr";
+  if (cookieLocale === "en") return "en";
+
+  // 3) Accept-Language (fallback ringan)
+  const al = req.headers.get("accept-language")?.toLowerCase() || "";
+  if (al.includes("tr")) return "tr";
+
+  return "en";
 }
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ✅ Global gate: semua halaman diarahkan ke system-status
-  // Hindari loop untuk halaman status itu sendiri.
+  // ✅ Global gate (bilingual): semua halaman diarahkan ke /{locale}/system-status
   if (isSystemStatusEnabled()) {
-    if (pathname !== "/system-status") {
-      const url = req.nextUrl.clone();
-      url.pathname = "/system-status";
-      url.search = "";
-      return NextResponse.rewrite(url);
+    // Hindari loop untuk status page (kedua locale)
+    if (pathname === "/en/system-status" || pathname === "/tr/system-status") {
+      return NextResponse.next();
     }
-    // Jika sudah /system-status, lanjut normal (biar page bisa render)
-    return NextResponse.next();
+
+    const loc = detectLocale(req);
+
+    const url = req.nextUrl.clone();
+    url.pathname = `/${loc}/system-status`;
+    url.search = "";
+    return NextResponse.rewrite(url);
   }
 
   // Normal behavior (i18n routing)
