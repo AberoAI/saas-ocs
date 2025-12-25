@@ -23,7 +23,7 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
       */}
       <div className="w-full max-w-3xl px-6 text-center">
         {/* Konsisten spacing antar elemen */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <h1
             className="text-[33px] font-semibold tracking-tight sm:text-[39px]"
             style={{ color: SYSTEM_STATUS_COLORS.headline }}
