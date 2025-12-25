@@ -9,7 +9,7 @@ import { setRequestLocale } from "next-intl/server";
 import { I18nProvider } from "@/context/I18nContext";
 import Providers from "../providers";
 
-import Footer from "@/components/footer/Footer";
+import Footer from "@/components/footer";
 import { locales as supportedLocales } from "../../i18n/routing";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +54,7 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
     "product",
     "solutions",
   ] as const;
+
   const extraPairs = await Promise.all(
     namespaces.map(async (ns) => {
       try {
