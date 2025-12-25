@@ -19,9 +19,5 @@ export default function SystemStatusLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <main className="min-h-screen w-full bg-white text-neutral-900">
-      {children}
-    </main>
-  );
+  return <>{children}</>;
 }
