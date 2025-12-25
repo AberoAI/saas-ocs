@@ -30,13 +30,10 @@ const TRPC = trpc as unknown as {
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isSystemStatusRoute = !!pathname?.startsWith("/system-status/");
 
-  // ✅ Status page harus "zero-dependency":
-  // Jangan boot NextAuth/tRPC/ReactQuery agar tidak bisa blank bila env/ws/url bermasalah.
-  if (pathname?.startsWith("/system-status/")) {
-    return <>{children}</>;
-  }
-
+  // ✅ Hooks harus selalu dipanggil dalam urutan yang sama (Rules of Hooks).
+  // Jadi kita tetap inisialisasi QueryClient & (opsional) tRPC client via initializer yang aman.
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -53,11 +50,27 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  const [trpcClient] = useState(() =>
-    TRPC.createClient({
+  const [trpcClient] = useState<TrpcClient | null>(() => {
+    // ✅ Status page harus "zero-dependency":
+    // Jangan boot tRPC (yang bisa crash bila env/ws/url bermasalah).
+    if (isSystemStatusRoute) return null;
+
+    return TRPC.createClient({
       links: getWsEnabledLinks() as Links,
-    })
-  );
+    });
+  });
+
+  // ✅ Setelah hooks dipanggil, barulah boleh early-return.
+  // Status page: tampilkan konten murni tanpa NextAuth/tRPC/ReactQuery.
+  if (isSystemStatusRoute) {
+    return <>{children}</>;
+  }
+
+  // Safety net (harusnya tidak terjadi):
+  // kalau trpcClient null tapi route bukan system-status, jangan bikin halaman blank.
+  if (!trpcClient) {
+    return <>{children}</>;
+  }
 
   return (
     <SessionProvider>
