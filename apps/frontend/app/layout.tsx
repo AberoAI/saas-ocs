@@ -1,11 +1,7 @@
+// apps/frontend/app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Providers from "./providers";
-
-import { NextIntlClientProvider } from "next-intl";
-import type { AbstractIntlMessages } from "next-intl";
-import enMessages from "../messages/en.json";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +31,11 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const fallbackMessages = enMessages as unknown as AbstractIntlMessages;
-
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -48,9 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           "bg-[var(--background)] text-[var(--foreground)]",
         ].join(" ")}
       >
-        <NextIntlClientProvider locale="en" messages={fallbackMessages}>
-          <Providers>{children}</Providers>
-        </NextIntlClientProvider>
+        {children}
       </body>
     </html>
   );

@@ -1,13 +1,15 @@
 // apps/frontend/app/[locale]/layout.tsx
+
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { Metadata } from "next";
 import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import { setRequestLocale } from "next-intl/server";
-import { cookies } from "next/headers";
 import { I18nProvider } from "@/context/I18nContext";
+import Providers from "../providers";
 
+import Footer from "@/components/footer/Footer";
 import { locales as supportedLocales } from "../../i18n/routing";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +25,9 @@ const isLocale = (v: string | undefined): v is Locale =>
   !!v && (supportedLocales as readonly string[]).includes(v);
 
 export function generateStaticParams() {
-  return (supportedLocales as ReadonlyArray<Locale>).map((l) => ({ locale: l }));
+  return (supportedLocales as ReadonlyArray<Locale>).map((l) => ({
+    locale: l,
+  }));
 }
 
 function getAbsoluteSiteUrl(): string {
@@ -36,12 +40,20 @@ function getAbsoluteSiteUrl(): string {
 }
 
 async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
-  const base =
-    (await import(`../../messages/${loc}.json`)
-      .then((m) => m.default)
-      .catch(() => ({}))) as AbstractIntlMessages;
+  const common = (await import(`@/messages/${loc}/common.json`)
+    .then((m) => m.default)
+    .catch(() => ({}))) as AbstractIntlMessages;
 
-  const namespaces = ["features"] as const;
+  const landing = (await import(`@/messages/${loc}/landing.json`)
+    .then((m) => m.default)
+    .catch(() => ({}))) as AbstractIntlMessages;
+
+  const namespaces = [
+    "features",
+    "foundation",
+    "product",
+    "solutions",
+  ] as const;
   const extraPairs = await Promise.all(
     namespaces.map(async (ns) => {
       try {
@@ -53,12 +65,12 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
     })
   );
 
-  return Object.assign({}, base, ...extraPairs);
+  return Object.assign({}, common, landing, ...extraPairs);
 }
 
-export async function generateMetadata(
-  { params: { locale } }: Props
-): Promise<Metadata> {
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
   const routeLocale: Locale = isLocale(locale) ? locale : defaultLocale;
   const site = getAbsoluteSiteUrl();
 
@@ -86,32 +98,21 @@ export default async function LocaleLayout({
   const routeLocale: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!routeLocale) notFound();
 
-  // Beritahu next-intl tentang locale dari URL (untuk routing & SEO)
   setRequestLocale(routeLocale);
 
-  const flagOn = process.env.NEXT_PUBLIC_UI_LOCALE_COOKIE === "true";
-
-  const cookieStore = await cookies();
-
-  const cookieKey = `ui-locale-v2-${routeLocale}`;
-  const rawCookie = cookieStore.get(cookieKey)?.value;
-
-  const uiLocale: Locale =
-    flagOn && rawCookie && isLocale(rawCookie)
-      ? (rawCookie as Locale)
-      : routeLocale;
-
+  const uiLocale: Locale = routeLocale;
   const messages = (await loadMessages(uiLocale)) as AbstractIntlMessages;
   const site = getAbsoluteSiteUrl();
+  const showGlobalFooter = false;
 
   return (
-    <>
+    <Providers>
       <NextIntlClientProvider locale={uiLocale} messages={messages}>
         <I18nProvider routeLocale={routeLocale} uiLocale={uiLocale}>
           <Navbar />
-          {/* Offset konten agar tidak tertutup navbar fixed */}
           <div className="pt-[72px]">
             {children}
+            {showGlobalFooter ? <Footer /> : null}
           </div>
         </I18nProvider>
       </NextIntlClientProvider>
@@ -135,6 +136,6 @@ export default async function LocaleLayout({
           }),
         }}
       />
-    </>
+    </Providers>
   );
 }
