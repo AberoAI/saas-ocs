@@ -23,15 +23,14 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
       */}
       <div className="w-full max-w-3xl px-6 text-center">
         <h1
-          className="text-3xl font-semibold tracking-tight sm:text-4xl"
+          className="text-[33px] font-semibold tracking-tight sm:text-[39px]"
           style={{ color: SYSTEM_STATUS_COLORS.headline }}
         >
           {copy.headline}
         </h1>
 
-        {/* Subheadline dinaikkan +2px */}
         <p
-          className="mt-4 text-[18px] leading-relaxed sm:text-[20px]"
+          className="mt-4 text-[21px] leading-relaxed sm:text-[23px]"
           style={{ color: SYSTEM_STATUS_COLORS.text }}
         >
           {copy.subheadline}
@@ -39,7 +38,7 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
 
         <p
           className="mt-3 text-base leading-relaxed whitespace-pre-line"
-          style={{ color: SYSTEM_STATUS_COLORS.text }}
+          style={{ color: "#868889" }}
         >
           {copy.body}
         </p>
