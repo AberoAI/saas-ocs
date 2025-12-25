@@ -46,12 +46,13 @@ export function middleware(req: NextRequest) {
 
   // ✅ SYSTEM STATUS MODE (PROD ONLY)
   if (isSystemStatusEnabled()) {
-    // Allow internal assets & system-status itself
+    // Allow internal assets & system-status itself (+ NextAuth must NEVER be redirected)
     if (
       pathname.startsWith("/_next") ||
-      pathname.startsWith("/api") ||
-      pathname.startsWith("/_trpc") ||
       pathname.startsWith("/_vercel") ||
+      pathname.startsWith("/_trpc") ||
+      pathname.startsWith("/api/auth") || // ⬅️ penting: exclude NextAuth routes
+      pathname.startsWith("/api") ||
       pathname.startsWith("/system-status")
     ) {
       return NextResponse.next();
