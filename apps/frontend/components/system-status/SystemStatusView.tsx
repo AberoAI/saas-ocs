@@ -11,10 +11,10 @@ type Copy = {
 export default function SystemStatusView({ copy }: { copy: Copy }) {
   return (
     <main
-      className="min-h-screen w-full"
+      className="w-full min-h-[100svh]"
       style={{ background: SYSTEM_STATUS_COLORS.background }}
     >
-      <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6 py-16">
+      <div className="mx-auto flex min-h-[100svh] max-w-3xl items-center justify-center px-6">
         <section className="w-full text-center">
           <h1
             className="text-3xl font-semibold tracking-tight sm:text-4xl"
@@ -23,8 +23,9 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
             {copy.headline}
           </h1>
 
+          {/* +2px from previous sizes */}
           <p
-            className="mt-4 text-base leading-relaxed sm:text-lg"
+            className="mt-4 text-[18px] leading-relaxed sm:text-[20px]"
             style={{ color: SYSTEM_STATUS_COLORS.text }}
           >
             {copy.subheadline}
