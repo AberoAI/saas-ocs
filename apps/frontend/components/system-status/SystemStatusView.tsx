@@ -11,9 +11,27 @@ type Copy = {
 export default function SystemStatusView({ copy }: { copy: Copy }) {
   return (
     <main
-      className="fixed inset-0 flex items-center justify-center w-full"
-      style={{ background: SYSTEM_STATUS_COLORS.background }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: SYSTEM_STATUS_COLORS.background,
+        display: "grid",
+        placeItems: "center",
+      }}
     >
+      {/* DEBUG MARKER: kalau ini tidak terlihat, berarti bukan build terbaru */}
+      <div
+        style={{
+          position: "fixed",
+          top: 10,
+          left: 10,
+          fontSize: 12,
+          opacity: 0.5,
+        }}
+      >
+        centered-debug-v3
+      </div>
+
       <section className="w-full max-w-3xl px-6 text-center">
         <h1
           className="text-3xl font-semibold tracking-tight sm:text-4xl"
@@ -22,7 +40,6 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
           {copy.headline}
         </h1>
 
-        {/* +2px from previous sizes */}
         <p
           className="mt-4 text-[18px] leading-relaxed sm:text-[20px]"
           style={{ color: SYSTEM_STATUS_COLORS.text }}
