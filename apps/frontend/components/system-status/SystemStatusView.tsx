@@ -11,7 +11,7 @@ type Copy = {
 export default function SystemStatusView({ copy }: { copy: Copy }) {
   return (
     <main
-      className="fixed inset-0 flex w-full items-center justify-center"
+      className="fixed inset-0 flex items-center justify-center w-full"
       style={{ background: SYSTEM_STATUS_COLORS.background }}
     >
       <section className="w-full max-w-3xl px-6 text-center">
