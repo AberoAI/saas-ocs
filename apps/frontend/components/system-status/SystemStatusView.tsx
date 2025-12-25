@@ -22,26 +22,29 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
         - Ini penyebab utama konten selalu terdorong ke atas
       */}
       <div className="w-full max-w-3xl px-6 text-center">
-        <h1
-          className="text-[33px] font-semibold tracking-tight sm:text-[39px]"
-          style={{ color: SYSTEM_STATUS_COLORS.headline }}
-        >
-          {copy.headline}
-        </h1>
+        {/* Konsisten spacing antar elemen */}
+        <div className="space-y-4">
+          <h1
+            className="text-[33px] font-semibold tracking-tight sm:text-[39px]"
+            style={{ color: SYSTEM_STATUS_COLORS.headline }}
+          >
+            {copy.headline}
+          </h1>
 
-        <p
-          className="mt-4 text-[21px] leading-relaxed sm:text-[23px]"
-          style={{ color: SYSTEM_STATUS_COLORS.text }}
-        >
-          {copy.subheadline}
-        </p>
+          <p
+            className="text-[21px] leading-relaxed sm:text-[23px]"
+            style={{ color: SYSTEM_STATUS_COLORS.text }}
+          >
+            {copy.subheadline}
+          </p>
 
-        <p
-          className="mt-3 text-base leading-relaxed whitespace-pre-line"
-          style={{ color: "#868889" }}
-        >
-          {copy.body}
-        </p>
+          <p
+            className="text-base leading-relaxed whitespace-pre-line"
+            style={{ color: "#868889" }}
+          >
+            {copy.body}
+          </p>
+        </div>
       </div>
     </main>
   );
