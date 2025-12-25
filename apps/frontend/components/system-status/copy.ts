@@ -1,4 +1,4 @@
-//apps/frontend/components/system-stateus/copy.ts
+//apps/frontend/components/system-status/copy.ts
 
 export const SYSTEM_STATUS_COPY_BY_LOCALE = {
   en: {

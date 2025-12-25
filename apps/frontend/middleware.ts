@@ -19,7 +19,6 @@ function isProdRuntime(): boolean {
 }
 
 function isSystemStatusEnabled(): boolean {
-  // ✅ Dev (localhost) tidak boleh kena gate
   if (!isProdRuntime()) return false;
 
   const raw = (process.env.ABEROAI_SYSTEM_STATUS || "").trim().toLowerCase();
@@ -29,16 +28,13 @@ function isSystemStatusEnabled(): boolean {
 function detectLocale(req: NextRequest): "en" | "tr" {
   const { pathname } = req.nextUrl;
 
-  // 1) Prefix di URL (paling akurat)
   if (pathname === "/tr" || pathname.startsWith("/tr/")) return "tr";
   if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
 
-  // 2) Cookie locale (kalau ada)
   const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value?.toLowerCase();
   if (cookieLocale === "tr") return "tr";
   if (cookieLocale === "en") return "en";
 
-  // 3) Accept-Language (fallback)
   const al = req.headers.get("accept-language")?.toLowerCase() || "";
   if (al.includes("tr")) return "tr";
 
@@ -48,36 +44,30 @@ function detectLocale(req: NextRequest): "en" | "tr" {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ✅ Global gate (PROD only):
-  // - Root "/" -> redirect ke "/en" atau "/tr" (URL terlihat)
-  // - Semua route lain -> rewrite ke "/system-status/{locale}" (URL user tidak berubah)
+  // ✅ SYSTEM STATUS MODE (PROD ONLY)
   if (isSystemStatusEnabled()) {
-    const loc = detectLocale(req);
-
-    // Hindari loop untuk route internal system-status
-    if (pathname === "/system-status/en" || pathname === "/system-status/tr") {
+    // Allow internal assets & system-status itself
+    if (
+      pathname.startsWith("/_next") ||
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/_trpc") ||
+      pathname.startsWith("/_vercel") ||
+      pathname.startsWith("/system-status")
+    ) {
       return NextResponse.next();
     }
 
-    // Root: tampilkan URL locale (direct ke /en atau /tr)
-    if (pathname === "/") {
-      const url = req.nextUrl.clone();
-      url.pathname = `/${loc}`;
-      url.search = "";
-      return NextResponse.redirect(url);
-    }
-
-    // Selain root: timpa konten dengan status view, tapi URL tidak berubah
+    const loc = detectLocale(req);
     const url = req.nextUrl.clone();
     url.pathname = `/system-status/${loc}`;
     url.search = "";
-    return NextResponse.rewrite(url);
+    return NextResponse.redirect(url);
   }
 
-  // Normal behavior (i18n routing)
+  // ✅ NORMAL MODE
   return intl(req);
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|_trpc|_vercel|_not-found|.*\\..*).*)"],
+  matcher: ["/((?!.*\\..*).*)"],
 };

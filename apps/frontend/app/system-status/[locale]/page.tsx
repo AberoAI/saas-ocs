@@ -9,15 +9,6 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "AberoAI — System Status",
   description: "System status notification for AberoAI.",
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
-    },
-  },
 };
 
 export default function SystemStatusLocalePage({
