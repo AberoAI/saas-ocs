@@ -4,12 +4,12 @@ export const SYSTEM_STATUS_COPY_BY_LOCALE = {
   en: {
     headline: "System Preparation in Progress",
     subheadline: "AberoAI is preparing its operational environment.",
-    body: "We’re configuring the system for structured deployment. Access will resume once initialization is complete.",
+    body: "We’re configuring the system for structured deployment.\nAccess will resume once initialization is complete.",
   },
   tr: {
     headline: "Sistem Hazırlığı Devam Ediyor",
     subheadline: "AberoAI, operasyonel ortamını hazırlamaktadır.",
-    body: "Sistem, yapılandırılmış bir dağıtım için yapılandırılmaktadır. Başlatma tamamlandığında erişim yeniden sağlanacaktır.",
+    body: "Sistem, yapılandırılmış bir dağıtım için yapılandırılmaktadır.\nBaşlatma tamamlandığında erişim yeniden sağlanacaktır.",
   },
 } as const;
 
