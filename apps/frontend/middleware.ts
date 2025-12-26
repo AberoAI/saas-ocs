@@ -44,15 +44,22 @@ function detectLocale(req: NextRequest): "en" | "tr" {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  /**
+   * HARD GUARD:
+   * Jangan pernah sentuh /api dengan i18n middleware (next-intl).
+   * NextAuth client butuh JSON dari /api/auth/*.
+   */
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
   // ✅ SYSTEM STATUS MODE (PROD ONLY)
   if (isSystemStatusEnabled()) {
-    // Allow internal assets & system-status itself (+ NextAuth must NEVER be redirected)
+    // Allow internal assets & system-status itself
     if (
       pathname.startsWith("/_next") ||
-      pathname.startsWith("/_vercel") ||
       pathname.startsWith("/_trpc") ||
-      pathname.startsWith("/api/auth") || // ⬅️ penting: exclude NextAuth routes
-      pathname.startsWith("/api") ||
+      pathname.startsWith("/_vercel") ||
       pathname.startsWith("/system-status")
     ) {
       return NextResponse.next();
@@ -70,5 +77,13 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!.*\\..*).*)"],
+  /**
+   * IMPORTANT:
+   * Exclude:
+   * - /api (NextAuth)
+   * - /_next, /_trpc, /_vercel (internal)
+   * - /system-status (status routes)
+   * - static files (.*\..*)
+   */
+  matcher: ["/((?!api|_next|_trpc|_vercel|system-status|.*\\..*).*)"],
 };
