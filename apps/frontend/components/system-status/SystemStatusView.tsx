@@ -1,5 +1,6 @@
 //apps/frontend/components/system-status/SystemStatusView.tsx
 
+import Link from "next/link";
 import { SYSTEM_STATUS_COLORS } from "./copy";
 
 type Copy = {
@@ -14,6 +15,28 @@ export default function SystemStatusView({ copy }: { copy: Copy }) {
       className="fixed inset-0 flex items-center justify-center w-full"
       style={{ background: SYSTEM_STATUS_COLORS.background }}
     >
+      {/* Bottom-left: Contact */}
+      <div className="fixed bottom-6 left-6 z-50 text-sm">
+        <a
+          href="mailto:info@aberoai.com"
+          className="underline underline-offset-4 hover:opacity-80"
+          style={{ color: SYSTEM_STATUS_COLORS.text }}
+        >
+          info@aberoai.com
+        </a>
+      </div>
+
+      {/* Bottom-right: Privacy Policy */}
+      <div className="fixed bottom-6 right-6 z-50 text-sm">
+        <Link
+          href="/privacy"
+          className="underline underline-offset-4 hover:opacity-80"
+          style={{ color: SYSTEM_STATUS_COLORS.text }}
+        >
+          Privacy Policy
+        </Link>
+      </div>
+
       {/* 
         IMPORTANT:
         - Gunakan <div>, BUKAN <section>
