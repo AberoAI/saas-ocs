@@ -38,3 +38,9 @@ yarn-error.log*
 *.pem
 
 /generated/prisma
+
+# backend src build artifacts (do not commit)
+apps/backend/src/server/routers/*.js
+apps/backend/src/server/routers/*.js.map
+apps/backend/src/server/routers/*.d.ts
+
