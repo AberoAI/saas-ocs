@@ -197,9 +197,6 @@ importers:
       '@repo/api-types':
         specifier: workspace:*
         version: link:../../packages/api-types
-      '@repo/backend':
-        specifier: workspace:*
-        version: link:../backend
       '@studio-freight/lenis':
         specifier: ^1.0.42
         version: 1.0.42
