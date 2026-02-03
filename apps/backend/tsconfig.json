@@ -1,3 +1,4 @@
+//apps/backend/tsconfig.json
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {

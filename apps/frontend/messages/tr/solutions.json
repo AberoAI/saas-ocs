@@ -1,0 +1,45 @@
+{
+  "hero": {
+    "tagline": "İletişim sorunları, operasyonel sorunlardır.",
+    "headline": "Farklı klinikler.\nAynı yapısal zorluklar.",
+    "subheadline": "AberoAI, insan üzerindeki baskıyı azaltan\nve küresel klinik operasyonlarda iletişimi istikrarlı hale getiren\nsistem düzeyinde çözümler sunar.",
+    "body": "Klinik; uluslararası hastalarla çalışıyor,\nbirden fazla dili yönetiyor,\nyüksek mesaj hacmiyle karşılaşıyor\nya da karmaşık aftercare süreçlerini yürütüyor olsun —\nkarşılaşılan zorluklar kişisel değil, yapısaldır.\n\nAberoAI, bu zorlukları iletişimi\nsistem düzeyinde yeniden yapılandırarak çözer."
+  },
+  "page1": {
+    "headline": "KÜRESEL HASTA İLETİŞİMİ",
+    "body": "Problem:\nFarklı ülkelerden, dillerden ve zaman dilimlerinden gelen hastalar iletişim yükünü dengesiz hâle getirir.\n\nAberoAI Çözümü:\nYolculuk boyunca istikrarlı kalan çok dilli ve zaman dilimi farkındalıklı iletişim.\n\n• Çok dilli zekâ motoru\n• Zaman dilimi birleştirme\n• Diller arasında tutarlı klinik ton\n• Küresel sorgular için net yönlendirme\n• Sınır ötesi süreklilik",
+    "microline": "Köken, dil veya saat ne olursa olsun\nkliniğiniz tutarlı iletişim kurar."
+  },
+  "page2": {
+    "headline": "VARDİYA VE EKİP SÜREKLİLİĞİ",
+    "body": "Problem:\nVardiyalar değiştiğinde, ekip döndüğünde veya departmanlar kesiştiğinde bağlam kopar.\n\nAberoAI Çözümü:\nBağlamı insanlar ve zamanın ötesinde koruyan bir süreklilik motoru.\n\n• Vardiya devri istikrarı\n• Bellek katmanı birleştirme\n• Bağlam kasası\n• Kimlik çözümleme\n• Çoklu ekip koordinasyonu",
+    "microline": "Kadrolar değişse bile operasyonlar kesintisiz devam eder."
+  },
+  "page3": {
+    "headline": "AFTERCARE &\nUZUN DÖNEM TAKİP",
+    "body": "Problem:\nAftercare çoğu zaman işlemden sonra zayıflar; güven kaybı ve düşük geri dönüşlerle sonuçlanır.\n\nAberoAI Çözümü:\nOtomatik, çok dilli ve yapısal uzun dönem hasta istikrarı sağlar.\n\n• Aftercare iş akışları\n• Güvenlik kontrol dizileri\n• Duygusal güvence ritmi\n• Uzun dönem temas noktaları\n• Tutma (retention) haritalama",
+    "microline": "Hastalar aylar boyunca desteklendiğini hisseder —\nekibinize ek yük oluşturmadan."
+  },
+  "page4": {
+    "headline": "GELEN KUTUSU YÖNETİMİ & OPERASYONEL BERRAKLIK",
+    "body": "Problem:\nBirden fazla kanal, dağınık iletişim, kaybolan mesajlar ve operasyonel kaos yaratır.\n\nAberoAI Çözümü:\nİletişimi insan gücüyle değil, mantıkla düzenleyen birleşik ve yönetilen bir akış.\n\n• Çok kanallı konsolidasyon\n• Birleşik hasta ileti akışı\n• Öngörüsel sinyal ortaya çıkışı\n• Sorun öngörme\n• Net operasyonel görünürlük",
+    "microline": "Kaos yerini berraklığa bırakır."
+  },
+  "page5": {
+    "headline": "YÖNLENDİRME &\nÖN NİTELENDİRME",
+    "body": "Problem:\nHer mesajın aynı kişiye gitmesi gerekmez.\nEkipler, alakasız mesajlara cevap verirken saatlerini kaybeder.\n\nAberoAI Çözümü:\nMesajları iş yüküne göre değil, kural temelli dağıtan yönetilen bir yönlendirme katmanı.\n\n• Dil bazlı yönlendirme\n• Vaka temelli yönlendirme\n• Departman eşleştirme\n• Zaman dilimi farkındalıklı dağıtım\n• Ön nitelendirme akışları",
+    "microline": "Ekibiniz doğru hastayla — doğru zamanda konuşur."
+  },
+  "page6": {
+    "headline": "BASKI OLMADAN\nİLETİŞİMİ ÖLÇEKLEME",
+    "body": "Problem:\nDaha fazla hasta = daha fazla mesaj = daha fazla baskı.\n\nAberoAI Çözümü:\nİnsan yükünü artırmadan hacmi karşılayan yapısal bir iletişim temeli.\n\n• Otomatik gün bazlı yolculuklar\n• Yönlendirilmiş yanıtlar\n• Bağlamı koruyan bellek\n• Gürültü azaltma mantığı\n• Operasyonel sükûnet katmanı",
+    "microline": "Hacim artar. Baskı artmaz."
+  },
+  "page7": {
+    "headline": "Kliniklerin yaşadığı sorunlar sistemiktir.\nÇözümler de aynı düzeyde sistemik olmalıdır.",
+    "subheadline": "AberoAI semptomları yamalamaz.",
+    "body": "İletişimi temelinden yeniden yapılandırır —\nbaskıya dayalı iş akışlarını yönetilen, öngörülebilir operasyonlara dönüştürür.",
+    "cta": "Ürünü Keşfedin",
+    "footnote": "Bu çözümlerin altında sistemin nasıl çalıştığını görün."
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "hero": {
+    "kicker": "Ürün",
+    "headline": "İletişim yükünü omuzlayan bir sistem",
+    "subheadline": "Ne bir bot. Ne bir araç. Bir Hasta İletişimi Operasyon Sistemi."
+  },
+  "page1": {
+    "headline": "Sistem Nasıl Çalışır",
+    "subheadline": "İki katman. Tek bir yönetilen sistem.",
+    "body": "AberoAI, tek bir operasyonel gerçeğe dayanarak tasarlanmıştır:\n\nHasta iletişimi bireylere bağlı olmamalıdır.\nBağlamı, sürekliliği ve sorumluluğu varsayılan olarak taşıyan,\nyönetilen ve istikrarlı bir sisteme bağlı olmalıdır.\n\nBu sayfa şunları gösterir:\n\nEkibinizin yüzeyde etkileşime geçtiği katman\n(Pipeline 1: operasyonel özellikler)\n\nİletişiminizi altta istikrara kavuşturan sistem katmanı\n(Pipeline 2: sistem kabiliyetleri)\n\nİki katman.\nTek bir tutarlı, yönetilen iletişim sistemi."
+  },
+  "page2": {
+    "headline": "OPERASYONEL ÖZELLİKLER",
+    "subheadline": "Yüzeyde basit",
+    "microline": "Altında mimariyle istikrara kavuşturulmuş"
+  },
+  "page3": {
+    "block1": {
+      "headline": "Birleşik Hasta Gelen Kutusu",
+      "body": "Her mesaj — WhatsApp, web sohbeti, sosyal kanallar — tek bir tutarlı, yönetilen akışta birleşir\n\n• Çok kanallı konsolidasyon\n• Kimlik farkındalıklı konuşma dizileri\n• Otomatik görüşme gruplama\n• Kanallar arası süreklilik",
+      "microline": "Parçalanmış gelen kutularının yerini düzen alır"
+    },
+    "block2": {
+      "headline": "WhatsApp İş Akışı Katmanı",
+      "body": "Hazır yanıtlar değil.\nBot menüleri değil.\nKüresel hacmi yöneten klinikler için tasarlanmış yapılandırılmış bir iş akışı katmanı.\n\n• Bağlam farkındalıklı yönlendirilmiş yanıtlar\n• Belge ve medya işleme\n• Triyaja dayalı yönlendirme\n• Diller arasında tutarlı ton",
+      "microline": "İş akışları tepkisel değil, öngörülebilir olur"
+    },
+    "block3": {
+      "headline": "Çok Dilli Zekâ Motoru",
+      "body": "Dil farkı ne olursa olsun, hastalar sizi anlar — kliniğiniz de onları.\n\n• İngilizce, Türkçe, Arapça, Rusça, İspanyolca, Fransızca\n• Sağlık sektörüne uyarlanmış ton\n• Bağlamı koruyan ifadeler\n• Şablon hissi yaratmadan",
+      "microline": "Sınır ötesinde berraklık"
+    },
+    "block4": {
+      "headline": "Takip Yolculuğu Akışları",
+      "body": "Gerçek hasta yolculukları üzerinden tasarlandı — tedavi öncesi, sonrası, iyileşme ve uzun dönem ilişki yönetimi.\n\n• Gün bazlı check-in’ler\n• Aftercare talimatları\n• Planlanmış uzun dönem sinyaller\n• Güvence ve rahatlatma temas noktaları",
+      "microline": "Takip süreçleri manuel olmaktan çıkar, yapısal hâle gelir"
+    },
+    "block5": {
+      "headline": "Zaman Dilimi & Departman Yönlendirme",
+      "body": "Hastalar, doğru kişiye otomatik olarak ulaşır — ekibiniz nerede olursa olsun.\n\n• Zaman dilimi farkındalıklı dağıtım\n• Dile göre yönlendirme\n• Departman eşleştirme\n• Uzmanlığa dayalı iş akışı",
+      "microline": "Yönlendirme tahminle değil, kurallarla yapılır"
+    },
+    "block6": {
+      "headline": "Mesaj-Native CRM",
+      "body": "Biletlerle değil.\nFormlarla değil.\nDoğrudan görüşmelerden inşa edilmiş bir CRM.\n\n• Tedavi zaman çizelgesinin konsolidasyonu\n• Dosyalar, fotoğraflar, tıbbi bağlam\n• İlişki geçmişi deposu\n• Görüşme özetleri",
+      "microline": "Bir veri tabanı değil — bir bellek katmanı"
+    }
+  },
+  "page4": {
+    "headline": "SİSTEM KABİLİYETLERİ",
+    "subheadline": "AberoAI’yi esasen farklı kılan şey",
+    "microline": "Yüzeyin altında çalışan işletim katmanı"
+  },
+  "page5": {
+    "headline": "Bağlam Bellek Katmanı",
+    "subheadline": "AberoAI hatırlar — kanallar, vardiyalar, diller ve ekip değişiklikleri boyunca.",
+    "body": "• Kalıcı bağlam deposu\n• Tercih hatırlama\n• Vaka sürekliliği haritalama\n• Çok kaynaklı ileti dizilerini birleştirme",
+    "microline": "İnsanlar değişse bile görüşmeler sürer"
+  },
+  "page6": {
+    "headline": "Süreklilik Motoru",
+    "subheadline": "Vardiyalar, ekipler ve zaman dilimleri boyunca istikrar korunur.",
+    "body": "• Devretme yönetişimi\n• Zaman dilimi birleştirme\n• Yolculuk yeniden birleştirme\n• Oturum devamlılığı",
+    "microline": "Süreklilik insanlardan bağımsız, sistemin bir özelliği hâline gelir"
+  },
+  "page7": {
+    "headline": "Küresel Yönlendirme Yönetişimi",
+    "subheadline": "Karmaşıklığı insanlar değil, kurallar taşır.",
+    "body": "• Öncelik yönetişimi\n• Vaka temelli yönlendirme\n• Rol farkındalıklı dağıtım\n• Yük dengeleme mantığı\n• Dil farkındalıklı yollar",
+    "microline": "Bir sonraki yanıtlayanı sistem belirler —\nbelirsizlik değil"
+  },
+  "page8": {
+    "headline": "İlişki İstikrarı Katmanı",
+    "subheadline": "Uzun vadeli hasta güvenine dayanan klinikler için tasarlandı.",
+    "body": "• Erken kopma tespiti\n• Retention (tutma) sinyalleri\n• Takip istikrarı\n• Uzun dönem ilişki haritalama",
+    "microline": "İlişkiler zaman içinde sızmaz — istikrarlı kalır"
+  },
+  "page9": {
+    "headline": "Operasyonel Sükûnet Çerçevesi",
+    "subheadline": "Sükûnet bir estetik değil — mühendislik ürünüdür.",
+    "body": "• Gürültü filtreleme\n• Yinelenen mesaj önleme\n• Kanallar arası tutarlılık\n• Öngörülebilir sinyal görünürlüğü",
+    "microline": "Ekibiniz kaosla değil, berraklıkla çalışır"
+  },
+  "page10": {
+    "headline": "NEDEN ÖNEMLİ?",
+    "subheadline": "İnsanlar üzerindeki baskı azalır",
+    "microlineTop": "Klinik için istikrar artar",
+    "body": "AberoAI şunları mümkün kılar:\n\n• Tutarlı hasta yolculukları\n• Zaman boyunca istikrarlı iletişim\n• Öngörülebilir iç koordinasyon\n• Kaybolmayan bağlam\n• Çevrimiçi kişiye bağlı olmayan süreklilik\n• Dakikalarla değil, aylarla güçlenen güven",
+    "microlineBottom": "Ekipler yangın söndürmeyi bırakır.\nHastalar kaybolmuş hissetmez."
+  },
+  "page11": {
+    "headline": "TEKNİK TEMEL",
+    "subheadline": "Küresel bakım için\n altyapı seviyesinde güvenilirlik.",
+    "body": "• Gizlilik öncelikli mimari\n• Uçtan uca şifreleme\n• Hata toleranslı yönlendirme\n• Yüksek erişilebilir altyapı\n• Çok dilli zekâ motoru\n• Yedekli bellek kontrol noktaları\n• Uyumluluk farkındalıklı tasarım",
+    "microline": "Altyapı gibi inşa edildi.\nÇünkü klinikler araca değil — altyapıya ihtiyaç duyar."
+  }
+}

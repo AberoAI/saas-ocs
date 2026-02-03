@@ -4,18 +4,10 @@
 import Image from "next/image";
 import { NAV_LINKS } from "@/lib/nav";
 import { useTranslations } from "next-intl";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Link, usePathname as useIntlPathname } from "@/i18n/routing";
 import { useDismissable } from "@/hooks/useDismissable";
-import { useRouter } from "next/navigation";
-// ⬇️ PENTING: gunakan relative path dari /components ke /app/actions
-import { setUiLocale } from "../app/actions/setUiLocale";
+import { useRouter, usePathname } from "next/navigation";
 import { useI18n } from "@/context/I18nContext";
 
 type LinkHref = React.ComponentProps<typeof Link>["href"];
@@ -32,20 +24,20 @@ function normalizePath(p: string) {
   }
 }
 
-/** Locale dropdown: pakai context (routeLocale + uiLocale), set cookie per prefix tanpa ubah URL */
+/** Locale dropdown: switch bahasa = switch URL prefix (/en <-> /tr) */
 function LocaleDropdown() {
-  const { routeLocale, uiLocale } = useI18n();
+  const { uiLocale } = useI18n();
   const cur = uiLocale;
-  const LOCALES = ["en", "tr"] as const;
-  const choices = LOCALES.filter((lc) => lc !== cur);
-  const label = cur.toUpperCase() as "EN" | "TR";
+  const other: "en" | "tr" = cur === "en" ? "tr" : "en";
 
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const firstItemRef = useRef<HTMLAnchorElement | null>(null);
   const [pending, startTransition] = useTransition();
+
   const router = useRouter();
+  const pathname = usePathname() || "/";
 
   useDismissable<HTMLDivElement>(open, () => setOpen(false), menuRef);
 
@@ -58,18 +50,29 @@ function LocaleDropdown() {
     btnRef.current?.focus();
   };
 
-  async function onPick(lc: "en" | "tr") {
+  function buildNextPath(nextLocale: "en" | "tr") {
+    const p = normalizePath(pathname);
+    const base = p.replace(/^\/(en|tr)(?=\/|$)/, "") || "/";
+    if (base === "/" || base === "") return `/${nextLocale}`;
+    return `/${nextLocale}${base.startsWith("/") ? "" : "/"}${base}`;
+  }
+
+  function onPick(lc: "en" | "tr") {
     if (lc === cur) {
       setOpen(false);
       return;
     }
 
-    startTransition(async () => {
-      await setUiLocale(lc, routeLocale); // cookie khusus prefix aktif
+    const nextPath = buildNextPath(lc);
+
+    startTransition(() => {
       setOpen(false);
-      router.refresh(); // reload RSC → layout pakai ui-locale-* baru
+      router.push(nextPath);
     });
   }
+
+  const label = cur.toUpperCase() as "EN" | "TR";
+  const otherLabel = other.toUpperCase() as "EN" | "TR";
 
   return (
     <div className="relative inline-block align-middle" ref={menuRef}>
@@ -95,28 +98,20 @@ function LocaleDropdown() {
           className="absolute left-0 top-full mt-2 min-w-[64px] rounded-md border border-black/10 bg-white p-1 shadow-md z-20"
         >
           <ul>
-            {choices.map((lc, idx) => {
-              const up = lc.toUpperCase() as "EN" | "TR";
-              const itemCls =
-                "block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none";
-
-              return (
-                <li key={lc}>
-                  <a
-                    ref={idx === 0 ? firstItemRef : undefined}
-                    href="#"
-                    role="menuitem"
-                    className={itemCls}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onPick(lc);
-                    }}
-                  >
-                    {up}
-                  </a>
-                </li>
-              );
-            })}
+            <li>
+              <a
+                ref={firstItemRef}
+                href="#"
+                role="menuitem"
+                className="block rounded-[6px] px-2 py-1.5 text-xs font-medium uppercase text-foreground/70 hover:bg-black/5 hover:text-foreground focus:outline-none"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onPick(other);
+                }}
+              >
+                {otherLabel}
+              </a>
+            </li>
           </ul>
         </div>
       )}
@@ -134,19 +129,16 @@ export default function Navbar() {
 
   const isTR = locale === "tr";
   const LOGIN_LABEL = isTR ? "Giriş" : "Log in";
-  const SIGNIN_LABEL = isTR ? "Giriş yap" : "Sign in";
+  const DEMO_LABEL = isTR ? "Demo Talep Et" : "Book a Demo";
 
   const links = useMemo(
     () =>
       NAV_LINKS.map((l) => ({
         key: l.key,
-        label:
-          l.key === "contact"
-            ? t("cta.contact")
-            : t(`nav.${l.key}`),
+        label: t(`nav.${l.key}`),
         href: l.href,
       })),
-    [t]
+    [t],
   );
 
   const localePrefix = `/${locale}`;
@@ -154,7 +146,7 @@ export default function Navbar() {
 
   const isActive = (href: string) => {
     const target = normalizePath(
-      href.startsWith("/") ? `${localePrefix}${href}` : href
+      href.startsWith("/") ? `${localePrefix}${href}` : href,
     );
     if (target === "/" || target === localePrefix) {
       return current === "/" || current === localePrefix;
@@ -162,38 +154,10 @@ export default function Navbar() {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  const [openProduct, setOpenProduct] = useState(false);
-  const productMenuRef = useRef<HTMLDivElement | null>(null);
-  const productButtonRef = useRef<HTMLButtonElement | null>(null);
-  const firstMenuItemRef = useRef<HTMLAnchorElement | null>(null);
-  const menuId = "product-menu";
-
-  const handleEnter = () => setOpenProduct(true);
-  const handleLeave = () => setOpenProduct(false);
-
-  const openMenu = () => {
-    setOpenProduct(true);
-    queueMicrotask(() => firstMenuItemRef.current?.focus());
-  };
-  const closeMenu = () => {
-    setOpenProduct(false);
-    productButtonRef.current?.focus();
-  };
-
-  useDismissable<HTMLDivElement>(
-    openProduct,
-    () => setOpenProduct(false),
-    productMenuRef
-  );
-
-  const productActive = isActive("/features") || isActive("/solutions");
-
   const navItemClass = (active: boolean, hoverable: boolean) =>
     [
       "inline-flex items-center text-sm leading-none transition-colors",
-      active
-        ? "text-foreground font-medium"
-        : "text-foreground/70 font-normal",
+      active ? "text-foreground font-medium" : "text-foreground/70 font-normal",
       hoverable ? "hover:text-foreground" : "",
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md",
     ].join(" ");
@@ -204,30 +168,32 @@ export default function Navbar() {
   useDismissable<HTMLDivElement>(
     mobileOpen,
     () => setMobileOpen(false),
-    mobileRef
+    mobileRef,
   );
 
   useEffect(() => {
-    setOpenProduct(false);
     setMobileOpen(false);
   }, [pathname]);
 
   function AuthButtons({ onClick }: { onClick?: () => void }) {
     return (
       <>
+        {/* Log in as plain text (no container), same tone as navbar items */}
         <Link
           href="/login"
-          className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground transition bg-[#F7F7F7]"
+          className="inline-flex items-center text-sm leading-none text-foreground/70 font-normal hover:text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20 rounded-md"
           onClick={onClick}
         >
           {LOGIN_LABEL}
         </Link>
+
+        {/* CTA: smaller width/height; not round */}
         <Link
           href="/login"
-          className="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium text-white transition bg-[var(--brand)]"
+          className="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white transition bg-[var(--brand)] rounded-[12px] shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
           onClick={onClick}
         >
-          {SIGNIN_LABEL}
+          {DEMO_LABEL}
         </Link>
       </>
     );
@@ -252,14 +218,10 @@ export default function Navbar() {
               width={32}
               height={32}
               className="object-contain"
-              priority={
-                pathname === "/" || pathname === `/${locale}`
-              }
+              priority={pathname === "/" || pathname === `/${locale}`}
               sizes="32px"
             />
-            <span className="text-2xl font-medium text-navbar">
-              AberoAI
-            </span>
+            <span className="text-2xl font-medium text-navbar">AberoAI</span>
           </Link>
         </div>
 
@@ -268,102 +230,22 @@ export default function Navbar() {
           className="hidden md:flex items-center justify-center gap-6 justify-self-center"
           aria-label="Main"
         >
-          {links.map((l) =>
-            l.key === "product" ? (
-              <div
-                key="product-dropdown"
-                className="relative inline-flex items-center"
-                onPointerEnter={handleEnter}
-                onPointerLeave={handleLeave}
-                ref={productMenuRef}
-              >
-                <button
-                  ref={productButtonRef}
-                  type="button"
-                  aria-haspopup="menu"
-                  aria-expanded={openProduct}
-                  aria-controls={menuId}
-                  onClick={() =>
-                    openProduct ? closeMenu() : openMenu()
-                  }
-                  className="inline-flex items-center focus:outline-none"
-                >
-                  <span
-                    className={[
-                      "text-sm leading-none",
-                      productActive
-                        ? "text-foreground font-medium"
-                        : "text-foreground/70 font-normal",
-                    ].join(" ")}
-                  >
-                    {t("nav.product")}
-                  </span>
-                  <svg
-                    viewBox="0 0 20 20"
-                    className={[
-                      "ml-1 h-[1em] w-[1em] transition-transform duration-150",
-                      openProduct ? "rotate-180" : "",
-                    ].join(" ")}
-                  >
-                    <path
-                      d="M5.5 7.5L10 12l4.5-4.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-
-                {openProduct && (
-                  <div className="absolute left-0 top-full mt-3 min-w-[220px] rounded-md border border-black/10 bg-white p-2 shadow-xl z-10">
-                    <ul className="flex flex-col">
-                      <li>
-                        <Link
-                          ref={firstMenuItemRef}
-                          href="/features"
-                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
-                          onClick={() => setOpenProduct(false)}
-                        >
-                          {t("nav.features")}
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/solutions"
-                          className="block rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-black/5 hover:text-foreground"
-                          onClick={() => setOpenProduct(false)}
-                        >
-                          {t("nav.solutions")}
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                key={l.href}
-                href={l.href}
-                aria-current={
-                  isActive(l.href) ? "page" : undefined
-                }
-                className={navItemClass(
-                  isActive(l.href),
-                  true
-                )}
-              >
-                {l.label}
-              </Link>
-            )
-          )}
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              aria-current={isActive(l.href) ? "page" : undefined}
+              className={navItemClass(isActive(l.href), true)}
+            >
+              {l.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Right */}
         <div className="hidden md:flex items-center justify-self-end">
           <LocaleDropdown />
-          <div className="ml-[18px] flex items-center gap-3">
+          <div className="ml-[18px] flex items-center gap-6">
             <AuthButtons />
           </div>
         </div>
@@ -374,11 +256,7 @@ export default function Navbar() {
           className="md:hidden inline-flex items-center justify-center justify-self-end rounded-md p-2 text-foreground/80 hover:text-foreground focus:outline-none"
           onClick={() => setMobileOpen((v) => !v)}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-          >
+          <svg viewBox="0 0 24 24" width="24" height="24">
             <path
               d="M4 7h16M4 12h16M4 17h16"
               stroke="currentColor"

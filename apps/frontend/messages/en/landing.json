@@ -1,0 +1,211 @@
+{
+  "nav": {
+    "foundation": "Foundation",
+    "product": "Product",
+    "solutions": "Solutions",
+    "pricing": "Pricing",
+
+    "about": "Foundation",
+    "features": "Product",
+
+    "faq": "FAQ",
+    "signin": "Log in"
+  },
+  "hero": {
+    "headline": "Over 65% of customers cancel due to slow responses",
+    "headlineLine1": "65% of international patients don’t wait.",
+    "headlineLine2": "They move on",
+    "sub": "AberoAI automates customer service with 24/7 instant replies and AI that handles thousands of messages at once.",
+    "subHeadlineBefore": "In global clinics, response and language are not features.",
+    "subHeadlineFoundations": "They are foundations",
+    "badge": "Now live • Automate WhatsApp Customer Service",
+    "showcase": {
+      "headline": "The Patient Communication\nOperating System",
+      "sub": "AberoAI is built for clinics that operate globally",
+      "body": "It quietly handles routing, memory, follow-ups, and continuity —\nso relationships remain stable long after treatment ends",
+      "microline": "Designed for clinics that operate across borders\nBuilt for precision, scale, and operational calm",
+      "microlineLine1": "Designed for clinics that operate across borders",
+      "microlineLine2Normal": "Built for ",
+      "microlineLine2Em": "precision, scale, and operational calm",
+      "microlineLine2After": ""
+    }
+  },
+  "cta": {
+    "primary": "Start automation",
+    "secondary": "See demo",
+    "contact": "Contact",
+    "signin": "Sign in"
+  },
+  "misc": {
+    "noCard": "Live demo",
+    "cancelAnytime": "No sign-up",
+    "noCreditCard": "No credit card"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Choose a plan that fits you.",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "desc": "Good for getting started"
+      },
+      "pro": {
+        "name": "Pro",
+        "desc": "Best for growing teams"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "desc": "Custom needs & support"
+      }
+    }
+  },
+  "mcui": {
+    "title": "Your Company",
+    "status": "Online",
+    "today": "Today",
+    "user1": "Is it too late to book for tomorrow?",
+    "bot1": "No worries, I’m here 24/7. What time suits you?",
+    "user2": "10 AM would be great.",
+    "bot2": "Perfect, I’ve booked your appointment for 10 AM tomorrow.",
+    "bot3": "Would you like me to send you a reminder?",
+    "aiReplied": "AI replied in <1s",
+    "inputPlaceholder": "Type a message here...",
+    "footer": "Integrated with WhatsApp Cloud API • Demo Conversation"
+  },
+  "landing": {
+    "about": {
+      "title": "About AberoAI",
+      "text1": "AberoAI goes beyond generic chatbots. We specialize in AI-powered Online Customer Service for high-touch sectors like clinics and hospitality.",
+      "text2": "By integrating the official WhatsApp Cloud API, we help businesses deliver instant, multilingual, and 24/7 engagement — boosting bookings, reducing no-shows, and lowering operational costs.",
+      "cta": "Learn more →"
+    }
+  },
+  "home": {
+    "subHeadline": "Turn slow conversations into instant connections — without hiring more agents.",
+    "subHeadlineBefore": "In global clinics, response and language are not features.",
+    "subHeadlineFoundations": "They are foundations",
+    "whyTitle": "Why {name}",
+    "features": {
+      "autoReplyTitle": "AI Autoreply",
+      "autoReplyDesc": "Fast & consistent replies for common questions, integrated with WhatsApp Cloud API.",
+      "multiTenantTitle": "Multi-tenant",
+      "multiTenantDesc": "Ideal for clinics, hospitality, furniture — manage multiple business units.",
+      "realtimeTitle": "Realtime Analytics",
+      "realtimeDesc": "Track key metrics: SLA, response time, conversation topics."
+    },
+    "bullets": [
+      "WhatsApp Cloud API + AI for automated replies",
+      "Multi-tenant: perfect for clinics, hospitality, furniture",
+      "Realtime dashboard & analytics"
+    ],
+    "faqTitle": "FAQ",
+    "faq": [
+      {
+        "q": "Do I need my own server?",
+        "a": "No. Everything runs in the cloud. You just connect the WhatsApp Cloud API."
+      },
+      {
+        "q": "Can I manage multiple branches?",
+        "a": "Yes. Multi-tenant makes it easy to manage many units in one account."
+      },
+      {
+        "q": "Is there a free trial?",
+        "a": "Yes. Sign up and start a trial immediately without a credit card."
+      },
+      {
+        "q": "Can you integrate with internal systems?",
+        "a": "Yes. Talk to us for custom integrations (CRM, ticketing, etc.)."
+      }
+    ],
+    "footer": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
+  },
+  "page1": {
+    "headline": "Does this feel\nfamiliar?",
+    "body": [
+      "Patients wait too long for replies",
+      "Conversation data gets scattered",
+      "Follow-up after treatment becomes weak",
+      "Time zone differences slow coordination"
+    ]
+  },
+  "page2": {
+    "headline": "Stability doesn’t come from working faster\nIt comes from removing structural strain",
+    "subheadline": "When conversation load is carried by a system — not individuals — pressure stops building at the human level",
+    "body": [
+      "Your team stops chasing messages",
+      "Conversations stop breaking between shifts",
+      "Work feels controlled, not rushed",
+      "Load feels shared, not overwhelming"
+    ],
+    "microline": "Relief is structural calm"
+  },
+  "page4": {
+    "headline": "One system\nComplete operational clarity",
+    "subheadline": "AberoAI brings patient communication into a single governed flow \n— so visibility becomes natural, not manual.",
+    "body": [
+      "Patient journeys stay coherent across channels",
+      "Follow-ups surface when they matter",
+      "Operational signals appear before issues grow"
+    ],
+    "microline": "Structured flow, Calm visibility"
+  },
+  "page5": {
+    "headline": "Your clinic remembers —\nquietly, precisely, reliably",
+    "subheadline": "International care doesn’t end when the patient leaves",
+    "body": "AberoAI maintains continuity with multilingual follow-ups,\ncare reminders, and long-term touchpoints — without adding\noperational burden",
+    "microline": "Presence without pressure"
+  },
+  "page6": {
+    "headline": "Trusted by clinics\noperating with\ninternational precision",
+    "points": [
+      "Designed with international patient-care teams",
+      "Built to support multilingual and cross-border operations",
+      "Adopted in complex clinical communication environments"
+    ]
+  },
+  "page7": {
+    "headline": "Modern clinics don’t rely on chats\nThey rely on systems",
+    "subheadline": "Build a communication foundation that remains stable under scale",
+    "ctaPrimary": "Book a Demo",
+    "ctaSecondary": "Explore the system",
+    "footnote": "Built for international clinics           • Secure by design          • Infrastructure-grade reliability"
+  },
+  "page8": {
+    "headline": "Frequently\nasked questions",
+    "questions": [
+      "Is AberoAI a chatbot or a system?",
+      "Can AberoAI support multilingual and international clinics?",
+      "Does AberoAI replace our team or work alongside it?",
+      "How does AberoAI handle high message volume at scale?",
+      "How do clinics typically begin using AberoAI?"
+    ],
+    "items": [
+      {
+        "q": "Is AberoAI a chatbot or a system?",
+        "a": "AberoAI is <m>not a chatbot</m>.\n\nIt is a <m>Patient Communication Operating System</m> —\na system that governs how conversations are received, routed, remembered, and\nacted upon across time, channels, and teams.\n\nChatbots are features.\nAberoAI is the <m>infrastructure</m> that keeps communication stable, consistent, and\nreliable at scale."
+      },
+      {
+        "q": "Can AberoAI support multilingual and international clinics?",
+        "a": "Yes — AberoAI is designed specifically for <m>cross-border clinics</m>.\n\nIt supports multilingual conversations, international patients, time-zone differences, and language-specific workflows —\nwhile preserving conversation context and continuity across the entire patient journey.\n\nLanguage is treated as <m>a structural layer</m>, not an add-on."
+      },
+      {
+        "q": "Does AberoAI replace our team or work alongside it?",
+        "a": "AberoAI does <m>not replace your team</m>.\n\nIt removes structural pressure so your team can operate calmly and consistently.\n\nRoutine conversations, follow-ups, and information flow are handled by the system,\nwhile your staff remains in control of critical decisions, care, and human judgment.\n\nThink of AberoAI as <m>operational support</m>, not a substitute."
+      },
+      {
+        "q": "How does AberoAI handle high message volume at scale?",
+        "a": "AberoAI is built for <m>high-volume, multi-tenant environments</m>.\n\nMessages are processed through governed workflows, intelligent routing, and load-aware automation —\npreventing overload, missed conversations, or fragmented context.\n\nAs volume increases, the system absorbs the pressure —\nyour operations remain predictable."
+      },
+      {
+        "q": "How do clinics typically begin using AberoAI?",
+        "a": "Most clinics begin with <m>one operational layer</m> —\nsuch as WhatsApp response handling or patient follow-ups.\n\nFrom there, AberoAI expands gradually into booking workflows, aftercare, and retention analytics —\nwithout disrupting existing systems or staff.\n\nAdoption is <m>progressive, controlled, and system-driven</m>."
+      }
+    ]
+  },
+  "login": {
+    "subtitle": "Access your dashboard and manage conversations."
+  }
+}

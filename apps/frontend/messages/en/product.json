@@ -1,0 +1,97 @@
+{
+  "hero": {
+    "kicker": "Product",
+    "headline": "A system made to carry your communication load",
+    "subheadline": "Not a bot. Not a tool. A Patient Communication Operating System"
+  },
+  "page1": {
+    "headline": "How the system works",
+    "subheadline": "Two pipelines. One governed system.",
+    "body": "AberoAI is designed around a single operational truth:\n\nPatient communication should not depend on individuals.\nIt should depend on a governed, stable system that carries context, continuity, and responsibility by default.\n\nThis page shows:\n\nWhat your team interacts with on the surface\n(Pipeline 1: operational features)\n\nWhat stabilizes your communication underneath\n(Pipeline 2: system capabilities)\n\nTwo pipelines.\nOne coherent, governed communication system."
+  },
+  "page2": {
+    "headline": "OPERATIONAL FEATURES",
+    "subheadline": "Simple on the surface",
+    "microline": "Stabilized by architecture underneath"
+  },
+  "page3": {
+    "block1": {
+      "headline": "Unified Patient Inbox",
+      "body": "Every message — WhatsApp, web chat, social channels — arrives in one coherent, governed flow\n\n• Multi-channel consolidation\n• Identity-aware threading\n• Automatic conversation grouping\n• Cross-channel continuity",
+      "microline": "Order replaces inbox fragmentation"
+    },
+    "block2": {
+      "headline": "WhatsApp Workflow Layer",
+      "body": "Not quick replies.\nNot bot menus.\nBut a structured workflow layer designed for clinics handling global volume\n\n• Guided responses (context-aware)\n• Document & media handling\n• Triage-based routing\n• Consistent tone across languages",
+      "microline": "Workflow becomes predictable, not reactive."
+    },
+    "block3": {
+      "headline": "Multilingual Intelligence Engine",
+      "body": "Patients understand you — and your clinic understands them — regardless of language\n\n• English, Turkish, Arabic, Russian, Spanish, French\n• Healthcare-adapted tone\n• Context-retaining phrasing\n• No template feel",
+      "microline": "Clarity across borders"
+    },
+    "block4": {
+      "headline": "Follow-up Journey Flows",
+      "body": "Built around real patient journeys — pre-treatment, post-treatment, recovery, and retention.\n\n• Day-by-day check-ins\n• Aftercare instructions\n• Scheduled long-term signals\n• Safety & reassurance touchpoints",
+      "microline": "Follow-ups become structural, not manual"
+    },
+    "block5": {
+      "headline": "Time-Zone & Department Routing",
+      "body": "Patients reach the right person automatically — no matter where your team is located\n\n• Time-zone aware distribution\n• Language-based routing\n• Department mapping\n• Expertise-based workflow",
+      "microline": "Routing governed by logic, not guesswork"
+    },
+    "block6": {
+      "headline": "Message-Native CRM",
+      "body": "A CRM built from conversations — not tickets, not forms\n\n• Treatment timeline consolidation\n• Files, photos, medical context\n• Relationship history vault\n• Conversation summaries",
+      "microline": "A memory layer, not a database"
+    }
+  },
+  "page4": {
+    "headline": "SYSTEM CAPABILITIES",
+    "subheadline": "What makes AberoAI fundamentally different",
+    "microline": "The operating system beneath the surface"
+  },
+  "page5": {
+    "headline": "Context Memory Layer",
+    "subheadline": "AberoAI remembers — across channels, shifts, languages, and staff changes",
+    "body": "• Permanent context vault\n• Preference retention\n• Case continuity mapping\n• Multi-source thread stitching",
+    "microline": "Conversations continue, even when people change"
+  },
+  "page6": {
+    "headline": "Continuity Engine",
+    "subheadline": "Stability across shifts, teams, and time zones",
+    "body": "• Handover governance\n• Time-zone stitching\n• Journey reassembly\n• Session persistence",
+    "microline": "Continuity becomes part of the system —\nnot a human responsibility"
+  },
+  "page7": {
+    "headline": "Global Routing Governance",
+    "subheadline": "Complexity carried by rules, not people",
+    "body": "• Priority governance\n• Case-based routing\n• Role-aware distribution\n• Load-balancing logic\n• Language-aware pathways",
+    "microline": "Who responds next is a system rule —\nnot a guessing game"
+  },
+  "page8": {
+    "headline": "Relationship Stability Layer",
+    "subheadline": "Built for clinics whose value depends on long-term patient trust",
+    "body": "• Drop-off early detection\n• Retention signals\n• Follow-through stability\n• Long-term relationship mapping",
+    "microline": "Relationships stop leaking across time"
+  },
+  "page9": {
+    "headline": "Operational Calm Framework",
+    "subheadline": "Calm is engineered, not aesthetic",
+    "body": "• Noise filtering\n• Duplicate prevention\n• Cross-channel coherence\n• Predictable signal surfacing",
+    "microline": "Your team operates in clarity, not chaos"
+  },
+  "page10": {
+    "headline": "WHY IT MATTERS",
+    "subheadline": "Less pressure on people",
+    "microlineTop": "More stability for the clinic",
+    "body": "AberoAI enables:\n\n• Coherent patient journeys\n• Stable communication across time\n• Predictable internal coordination\n• Memory that does not disappear\n• Continuity that does not depend on who is online\n• Trust that compounds over months, not minutes",
+    "microlineBottom": "Teams stop firefighting.\nPatients stop feeling lost."
+  },
+  "page11": {
+    "headline": "TECHNICAL FOUNDATION",
+    "subheadline": "Infrastructure-grade reliability,\nbuilt for global care",
+    "body": "• Privacy-first architecture\n• End-to-end encryption\n• Fault-tolerant routing\n• High-availability infrastructure\n• Multilingual intelligence engine\n• Redundant memory checkpoints\n• Compliance-aware design",
+    "microline": "Built like infrastructure.\nBecause clinics deserve infrastructure — not tools"
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "nav": {
+    "foundation": "Sistemin Temeli",
+    "product": "Ürün",
+    "solutions": "Çözümler",
+    "pricing": "Fiyatlandırma",
+
+    "about": "Sistemin Temeli",
+    "features": "Ürün",
+
+    "faq": "SSS",
+    "signin": "Giriş"
+  },
+  "hero": {
+    "headline": "Müşterilerin %65’i, geç yanıtlar yüzünden işlemi iptal ediyor",
+    "headlineLine1": "Uluslararası hastaların %65’i beklemez.",
+    "headlineLine2": "Başka seçeneklere yönelir",
+    "subHeadlineBefore": "Küresel kliniklerde yanıt verme ve dil bütünlüğü bir özellik değil,",
+    "subHeadlineFoundations": "birer temeldir",
+    "sub": "AberoAI, 7/24 anında yanıtlar, çok dilli destek ve otomatik rezervasyon akışlarıyla bu sorunu çözer.",
+    "badge": "Şimdi yayında • WhatsApp Müşteri Hizmetleri Otomasyonu",
+    "showcase": {
+      "headline": "Hasta İletişimi Operasyon Sistemi",
+      "sub": "AberoAI, küresel ölçekte çalışan klinikler için inşa edildi",
+      "body": "Yönlendirme, bellek, takip ve sürekliliği sessizce yönetir — \nböylece ilişkiler tedavi sona erdikten sonra bile istikrarlı kalır",
+      "microline": "Sınır ötesinde çalışan klinikler için tasarlandı\nHassasiyet, ölçek ve operasyonel sükunet için geliştirildi",
+      "microlineLine1": "Sınır ötesinde çalışan klinikler için tasarlandı",
+      "microlineLine2Normal": "",
+      "microlineLine2Em": "Hassasiyet, ölçek ve operasyonel sükunet",
+      "microlineLine2After": " için geliştirildi"
+    }
+  },
+  "cta": {
+    "primary": "Otomatikleştirmeye başla",
+    "secondary": "Demoyu dene",
+    "contact": "İletişim",
+    "signin": "Giriş yap"
+  },
+  "misc": {
+    "noCard": "Canlı demo",
+    "cancelAnytime": "Üyelik gerekmez",
+    "noCreditCard": "Kredi kartı gerekmez"
+  },
+  "pricing": {
+    "title": "Fiyatlar",
+    "subtitle": "Size uyan planı seçin.",
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "desc": "Başlamak için iyi"
+      },
+      "pro": {
+        "name": "Pro",
+        "desc": "Büyüyen ekipler için en iyi"
+      },
+      "enterprise": {
+        "name": "Kurumsal",
+        "desc": "Özel ihtiyaçlar ve destek"
+      }
+    }
+  },
+  "mcui": {
+    "title": "Şirketiniz",
+    "status": "Çevrimiçi",
+    "today": "Bugün",
+    "user1": "Yarın için randevu almak için çok mu geç?",
+    "bot1": "Sorun değil, 7/24 buradayım. Size hangi saat uygundur?",
+    "user2": "Saat 10:00 uygundur.",
+    "bot2": "Harika, yarın saat 10:00 için randevunuzu ayarladım.",
+    "bot3": "Size bir hatırlatıcı göndermemi ister misiniz?",
+    "aiReplied": "YZ <1 sn'de cevapladı",
+    "inputPlaceholder": "Buraya mesaj yazın...",
+    "footer": "WhatsApp Cloud API ile entegre • Demo Konuşma"
+  },
+  "landing": {
+    "about": {
+      "title": "AberoAI Hakkında",
+      "text1": "AberoAI, sıradan chatbot’ların ötesine geçer. Klinikler ve turizm gibi yüksek temaslı sektörlere özel yapay zekâ destekli çevrim içi müşteri hizmetlerinde uzmanız.",
+      "text2": "Resmî WhatsApp Cloud API ile entegre çalışarak işletmelere anında, çok dilli ve 7/24 iletişim sunar — rezervasyonları artırır, iptalleri azaltır ve operasyonel maliyetleri düşürür.",
+      "cta": "Daha fazla bilgi →"
+    }
+  },
+  "home": {
+    "subHeadline": "Yavaş sohbetleri anında bağlantılara dönüştürün — daha fazla temsilci işe almadan.",
+    "subHeadlineBefore": "Küresel kliniklerde yanıt verme ve dil bütünlüğü bir özellik değil,",
+    "subHeadlineFoundations": "birer temeldir",
+    "whyTitle": "Neden {name}",
+    "features": {
+      "autoReplyTitle": "YZ Otomatik Yanıt",
+      "autoReplyDesc": "Sık sorulan sorulara hızlı ve tutarlı yanıtlar, WhatsApp Cloud API ile entegre.",
+      "multiTenantTitle": "Multi-tenant",
+      "multiTenantDesc": "Klinikler, turizm, mobilya için ideal — birden çok birimi yönetin.",
+      "realtimeTitle": "Gerçek Zamanlı Analitik",
+      "realtimeDesc": "Temel metrikleri izleyin: SLA, yanıt süresi, sohbet konuları."
+    },
+    "bullets": [
+      "WhatsApp Cloud API + YZ ile otomatik yanıtlar",
+      "Multi-tenant: klinikler, turizm, mobilya için ideal",
+      "Gerçek zamanlı gösterge paneli ve analitik"
+    ],
+    "faqTitle": "SSS",
+    "faq": [
+      {
+        "q": "Kendi sunucuma ihtiyaç var mı?",
+        "a": "Hayır. Her şey bulutta çalışır. Siz sadece WhatsApp Cloud API’yi bağlarsınız."
+      },
+      {
+        "q": "Birden çok şubeyi yönetebilir miyim?",
+        "a": "Evet. Multi-tenant, çok sayıda birimi tek hesapta yönetmeyi kolaylaştırır."
+      },
+      {
+        "q": "Ücretsiz deneme var mı?",
+        "a": "Evet. Kredi kartı gerekmeden hemen denemeye başlayın."
+      },
+      {
+        "q": "İç sistemlerle entegrasyon mümkün mü?",
+        "a": "Evet. Özelleştirilmiş entegrasyonlar (CRM, ticketing, vb.) için bizimle görüşün."
+      }
+    ],
+    "footer": {
+      "privacy": "Gizlilik Politikası",
+      "terms": "Kullanım Koşulları"
+    }
+  },
+  "page1": {
+    "headline": "Bu durum size\ntanıdık geliyor mu?",
+    "body": [
+      "Hastalar yanıt almak için çok uzun süre bekliyor",
+      "Konuşma verileri farklı yerlere dağılıyor",
+      "Tedavi sonrası takip zayıflıyor",
+      "Zaman farkları koordinasyonu yavaşlıyor"
+    ]
+  },
+  "page2": {
+    "headline": "İstikrar daha hızlı çalışmakla gelmez\nYapısal baskıyı ortadan kaldırmakla gelir",
+    "subheadline": "İletişim yükünü bireyler değil bir sistem taşıdığında, baskı insan tarafında birikmeyi bırakır",
+    "body": [
+      "Ekibiniz mesajların peşinden koşmayı bırakır",
+      "Görüşmeler vardiyalar arasında kopmaz",
+      "İş aceleyle değil, kontrol altında ilerler",
+      "Yük paylaşılmış hissedilir, bunaltıcı değil"
+    ],
+    "microline": "Rahatlık, yapısal sükunettir."
+  },
+  "page4": {
+    "headline": "Tek bir sistem\nTam operasyonel berraklık",
+    "subheadline": "AberoAI, hasta iletişimini tek, yönetilen bir akışa taşır —\nböylece görünürlük manuel değil, doğal hâle gelir",
+    "body": [
+      "Hasta yolculukları kanallar arasında tutarlı kalır",
+      "Takipler önemli olduğunda kendiliğinden ortaya çıkar",
+      "Operasyonel sinyaller sorunlar büyümeden belirir"
+    ],
+    "microline": "Yapılı akış Sakin görünürlük"
+  },
+  "page5": {
+    "headline": "Kliniğiniz hatırlar — sessizce,\nkesin olarak, güvenilir biçimde",
+    "subheadline": "Uluslararası bakım, hasta ayrıldığında sona ermez",
+    "body": "AberoAI çok dilli takipler, bakım hatırlatmaları ve uzun vadeli\ntemas noktalarıyla sürekliliği korur — üstelik operasyonel\nyük eklemeden",
+    "microline": "Yük oluşturmadan varlık"
+  },
+  "page6": {
+    "headline": "Uluslararası\nhassasiyetle çalışan\nkliniklerin güvendiği yapı",
+    "points": [
+      "Uluslararası hasta bakım ekipleriyle tasarlandı",
+      "Çok dilli ve sınır ötesi operasyonları desteklemek için inşa edildi",
+      "Karmaşık klinik iletişim ortamlarında benimsenmiştir"
+    ]
+  },
+  "page7": {
+    "headline": "Modern klinikler sohbetlere dayanmaz\nSistemlere dayanır",
+    "subheadline": "Ölçek altında da istikrarlı kalan bir iletişim temeli oluşturun",
+    "ctaPrimary": "Demo Talep Et",
+    "ctaSecondary": "Sistemi Keşfedin",
+    "footnote": "Uluslararası klinikler için tasarlandı           •  Tasarımında güvenlik öncelikli         • Altyapı seviyesinde güvenilirlik"
+  },
+  "page8": {
+    "headline": "Sıkça Sorulan Sorular",
+    "questions": [
+      "AberoAI bir sohbet aracı mıdır, yoksa bir iletişim sistemi olarak mı tasarlanmıştır?",
+      "AberoAI, çok dilli ve uluslararası çalışan klinikler için uygun mudur?",
+      "AberoAI ekibimizin yerini mi alır, yoksa ekibimizle birlikte mi çalışır?",
+      "AberoAI, artan mesaj hacmini ölçekli şekilde nasıl yönetir?",
+      "Klinikler AberoAI’yi genellikle nasıl devreye alır?"
+    ],
+    "items": [
+      {
+        "q": "AberoAI bir sohbet aracı mıdır, yoksa bir iletişim sistemi olarak mı tasarlanmıştır?",
+        "a": "AberoAI bir sohbet aracı değildir.\n\nKlinik iletişimini uçtan uca yöneten bir <m>Hasta İletişim İşletim Sistemidir</m> —\nkonuşmaların nasıl alındığını, yönlendirildiğini, hatırlandığını ve aksiyona dönüştürüldüğünü zaman, kanal ve ekipler boyunca yöneten bir yapı.\n\nSohbet botları birer özelliktir.\nAberoAI ise iletişimin ölçekli, tutarlı ve güvenilir kalmasını sağlayan <m>altyapıdır</m>."
+      },
+      {
+        "q": "AberoAI, çok dilli ve uluslararası çalışan klinikler için uygun mudur?",
+        "a": "Evet — AberoAI, özellikle <m>sınır ötesi çalışan klinikler</m> için tasarlanmıştır.\n\nÇok dilli hasta iletişimini, farklı zaman dilimlerini ve dile özel iş akışlarını destekler; tüm hasta yolculuğu boyunca konuşma bağlamını ve sürekliliğini korur.\n\nDil, AberoAI’de bir ek özellik değil, <m>yapısal bir katman</m> olarak ele alınır."
+      },
+      {
+        "q": "AberoAI ekibimizin yerini mi alır, yoksa ekibimizle birlikte mi çalışır?",
+        "a": "AberoAI ekibinizin yerini almaz.\n\nOperasyonel baskıyı azaltarak ekibinizin daha sakin, tutarlı ve kontrollü çalışmasını sağlar.\n\nRutin konuşmalar, takip süreçleri ve bilgi akışı sistem tarafından yönetilir; kritik kararlar, hasta bakımı ve insani değerlendirme ise ekibinizin kontrolünde kalır.\n\nAberoAI’yi bir ikame olarak değil, <m>operasyonel bir destek sistemi</m> olarak düşünün."
+      },
+      {
+        "q": "AberoAI, artan mesaj hacmini ölçekli şekilde nasıl yönetir?",
+        "a": "AberoAI, <m>yüksek hacimli ve çok kiracılı (multi-tenant) ortamlar</m> için tasarlanmıştır.\n\nMesajlar; yönetişim kurallarına sahip iş akışları, akıllı yönlendirme ve\nyük farkındalığı olan otomasyonlar üzerinden işlenir.\n\nMesaj hacmi arttıkça baskıyı sistem üstlenir —\noperasyonlarınız öngörülebilir ve kontrol altında kalır."
+      },
+      {
+        "q": "Klinikler AberoAI’yi genellikle nasıl devreye alır?",
+        "a": "Çoğu klinik, AberoAI’yi <m>tek bir operasyonel katman</m> ile kullanmaya başlar —\nörneğin WhatsApp yanıt yönetimi veya hasta takip süreçleriyle.\n\nZamanla sistem; randevu akışları, tedavi sonrası bakım ve\nhasta tutundurma analizlerine kademeli olarak genişler.\n\nDevreye alma süreci <m>aşamalı, kontrollü ve sistem odaklıdır</m>;\nmevcut ekipleri veya altyapıları kesintiye uğratmaz."
+      }
+    ]
+  },
+  "login": {
+    "subtitle": "Panelinize erişin ve konuşmaları yönetin."
+  }
+}

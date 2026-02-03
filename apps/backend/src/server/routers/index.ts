@@ -19,10 +19,10 @@ import { providerRouter } from "./provider";
 import { billingRouter } from "./billing";
 import { adminRouter } from "./admin";
 import { webhookRouter } from "./webhook";
-import { eventsRouter } from "./events"; // ✅ ditambahkan
+import { eventsRouter } from "./events";
 
-// ────────────────────────────────────────────────────────────────────────────────
-export const appRouter = router({
+// Buat dulu router internal (hindari export const inferred yang memicu TS2742)
+const appRouterInternal = router({
   system: systemRouter,
   chat: chatRouter,
   customer: customerRouter,
@@ -30,26 +30,23 @@ export const appRouter = router({
   billing: billingRouter,
   admin: adminRouter,
   webhook: webhookRouter,
-  events: eventsRouter, // ✅ didaftarkan
+  events: eventsRouter,
 });
 
-// ────────────────────────────────────────────────────────────────────────────────
-// Ekspor tipe publik untuk konsumen (frontend / packages/shared)
-// Menghindari impor langsung '@trpc/server' di FE dengan mengekspor helper types.
-// ────────────────────────────────────────────────────────────────────────────────
-export type AppRouter = typeof appRouter;
+// Export type publik (aman)
+export type AppRouter = typeof appRouterInternal;
 
-// Opsi: ekspor helper types agar FE bisa konsumsi tanpa mengimpor '@trpc/server'
+// Export value runtime dengan annotation type (menghindari TS2742)
+export const appRouter: AppRouter = appRouterInternal;
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Ekspor helper types
+// ────────────────────────────────────────────────────────────────────────────────
 export type {
   inferRouterInputs as _inferRouterInputs,
   inferRouterOutputs as _inferRouterOutputs,
 } from "@trpc/server";
 
-// Tipe util yang siap pakai di shared/frontend (tanpa mengimpor '@trpc/server' di FE):
-// Contoh penggunaan di shared/frontend:
-//   import type { RouterInputs, RouterOutputs } from "backend-path/router";
-//   type SendMsgInput = RouterInputs["chat"]["sendMessage"];
-//   type SendMsgOutput = RouterOutputs["chat"]["sendMessage"];
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;

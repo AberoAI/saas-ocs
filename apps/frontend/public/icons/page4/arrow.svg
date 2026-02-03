@@ -1,0 +1,45 @@
+<svg
+  width="176"
+  height="30"
+  viewBox="0 0 176 30"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <!-- IMPORTANT:
+         Duplicate this SVG 5x, but change the suffix:
+         arrow-reveal-0, arrow-reveal-1, arrow-reveal-2, arrow-reveal-3, arrow-reveal-4
+    -->
+    <clipPath id="arrow-reveal-0" clipPathUnits="userSpaceOnUse">
+      <rect class="arrow-reveal-rect" x="0" y="0" width="0" height="30" />
+    </clipPath>
+
+    <style>
+      /* Slow, continuous fill */
+      .arrow-reveal-rect {
+        animation: arrowLiquidFill 3200ms cubic-bezier(0.18, 0.85, 0.2, 1) both;
+        will-change: width;
+      }
+
+      @keyframes arrowLiquidFill {
+        0%   { width: 0px; }
+        98%  { width: 176px; }
+        100% { width: 176px; }
+      }
+    </style>
+  </defs>
+
+  <!-- Base: gray (always visible) -->
+  <path
+    d="M175.426 16.1427C176.207 15.3617 176.207 14.0954 175.426 13.3143L162.698 0.58638C161.917 -0.194669 160.65 -0.194669 159.869 0.58638C159.088 1.36743 159.088 2.63376 159.869 3.41481L171.183 14.7285L159.869 26.0422C159.088 26.8233 159.088 28.0896 159.869 28.8707C160.65 29.6517 161.917 29.6517 162.698 28.8707L175.426 16.1427ZM0 14.7285L0 16.7285H174.011V14.7285V12.7285H0L0 14.7285Z"
+    fill="#8A8A8A"
+  />
+
+  <!-- Flow: blue (revealed by clipPath) -->
+  <path
+    clipPath="url(#arrow-reveal-0)"
+    d="M175.426 16.1427C176.207 15.3617 176.207 14.0954 175.426 13.3143L162.698 0.58638C161.917 -0.194669 160.65 -0.194669 159.869 0.58638C159.088 1.36743 159.088 2.63376 159.869 3.41481L171.183 14.7285L159.869 26.0422C159.088 26.8233 159.088 28.0896 159.869 28.8707C160.65 29.6517 161.917 29.6517 162.698 28.8707L175.426 16.1427ZM0 14.7285L0 16.7285H174.011V14.7285V12.7285H0L0 14.7285Z"
+    fill="#26658C"
+  />
+</svg>

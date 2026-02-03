@@ -104,19 +104,6 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  /**
-   * ✅ COMPLIANCE ROUTES (ALWAYS PUBLIC, NO LOCALE PREFIX, NO SYSTEM-STATUS REDIRECT)
-   * - /privacy must stay reachable for Meta verification and general compliance.
-   */
-  if (
-    pathname === "/privacy" ||
-    pathname.startsWith("/privacy/") ||
-    pathname === "/privacy-policy" ||
-    pathname.startsWith("/privacy-policy/")
-  ) {
-    return NextResponse.next();
-  }
-
   // ✅ SYSTEM STATUS MODE (PROD ONLY)
   if (isSystemStatusEnabled()) {
     // Allow internal assets & system-status itself
@@ -185,11 +172,8 @@ export const config = {
    * - /api (NextAuth)
    * - /_next, /_trpc, /_vercel (internal)
    * - /system-status (status routes)
-   * - /privacy + /privacy-policy (compliance routes must stay public & unprefixed)
    * - /_healthz (healthcheck rewrite)
    * - static files (.*\..*)
    */
-  matcher: [
-    "/((?!api|_next|_trpc|_vercel|system-status|privacy|privacy-policy|_healthz|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api|_next|_trpc|_vercel|system-status|_healthz|.*\\..*).*)"],
 };

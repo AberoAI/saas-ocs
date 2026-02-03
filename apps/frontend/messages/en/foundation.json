@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "kicker": "Foundation",
+    "headline": "The principles behind the AberoAI system"
+  },
+  "page1": {
+    "headline": "AberoAI is not a chatbot company.\nWe build communication systems for clinics that operate across borders.",
+    "body": "Our purpose is simple:\nto ensure that relationships remain stable,\neven when people, time zones, and channels change.\n\nGlobal clinics don’t struggle because of effort.\nThey struggle because communication load is carried by individuals —\nnot by systems.\n\nAberoAI exists to reverse that."
+  },
+  "page2": {
+    "headline": "The System We Build\nPatient Communication Operating System",
+    "body": "AberoAI is a Patient Communication Operating System.\n\nIt governs:\n• routing across channels\n• continuity across shifts\n• memory across conversations\n• follow-ups across languages\n• visibility across complex operations\n\nQuietly, precisely, and reliably —\nwithout adding pressure on your team."
+  },
+  "page3": {
+    "headline": "Why Governance Matters",
+    "subheadline": "International patient care requires more than speed.",
+    "body": "It requires:\n• stable relationships\n• coherent journeys\n• consistent context\n• predictable operations\n• long-term trust\n\nWhen communication becomes a governed system,\nyour clinic operates with clarity instead of chaos."
+  },
+  "page4": {
+    "headline": "Our Philosophy",
+    "body": "We build with three principles:\n1. Calm over friction\n    Stability is not a feature — it is the foundation.\n\n2. Structure over speed\n    Fast work fails when context fractures.\n\n3. Continuity over moments\n    Relationships don’t end when the message ends."
+  },
+  "page5": {
+    "headline": "Our Commitment",
+    "body": "AberoAI is built with:\n• infrastructure-grade reliability\n• multilingual intelligence\n• privacy-first architecture\n• operational governance\n• long-term continuity\n• cross-border precision\n\nWe don’t optimize for rapid replies.\nWe optimize for stability that scales."
+  },
+  "page6": {
+    "headline": "Long-Term Vision",
+    "body": "A world where clinics operate with:\n• calm communication\n• predictable coordination\n• stable relationships\n• unified context\n• lasting trust\n\nA world where communication doesn’t depend on\nwho is online — but on the system that remembers everything."
+  }
+}

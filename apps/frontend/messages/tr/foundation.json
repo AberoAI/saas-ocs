@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "kicker": "Sistemin Temeli",
+    "headline": "AberoAI sisteminin temel ilkeleri"
+  },
+  "page1": {
+    "headline": "AberoAI bir chatbot şirketi değildir.\nSınır ötesinde çalışan klinikler için iletişim sistemleri inşa ederiz.",
+    "body": "Amacımız nettir:\nİlişkilerin istikrarlı kalmasını sağlamak,\ninsanlar, bağlam ve zaman dilimleri değişse bile.\n\nKüresel kliniklerin problem yaşamasının sebebi çaba eksikliği değildir.\nSorun, iletişim yükünün bireyler tarafından — sistemler tarafından değil\n— taşınmasıdır.\n\nAberoAI bunu tersine çevirmek için vardır."
+  },
+  "page2": {
+    "headline": "İnşa Ettiğimiz Sistem\nHasta İletişimi Operasyon Sistemi",
+    "body": "AberoAI bir Hasta İletişimi Operasyon Sistemidir.\n\nŞunları yönetir:\n• kanallar arası yönlendirme\n• vardiyalar arası süreklilik\n• konuşmalar arası bellek\n• çok dilli takipler\n• karmaşık operasyonlar için görünürlük\n\nSessizce, kesin bir şekilde ve güvenilir biçimde —\nekibinize yük eklemeden."
+  },
+  "page3": {
+    "headline": "Yönetişim Neden Önemlidir",
+    "subheadline": "Uluslararası hasta bakımı, hızdan fazlasını gerektirir.",
+    "body": "Şunları gerektirir:\n• istikrarlı ilişkiler\n• tutarlı yolculuklar\n• kaybolmayan bağlam\n• öngörülebilir operasyonlar\n• uzun vadeli güven\n\nİletişim yönetilen bir sistem olduğunda,\nkliniğiniz kaostan uzak, berraklık içinde çalışır."
+  },
+  "page4": {
+    "headline": "Felsefemiz",
+    "body": "Üç temel ilkeyle inşa ederiz:\n1. Sürtüşme değil, sükûnet\n    İstikrar bir özellik değil, temeldir.\n\n2. Hız değil, yapı\n    Bağlam dağıldığında hız işe yaramaz.\n\n3. Anlık değil, süreklilik\n    İlişkiler mesajla bitmez."
+  },
+  "page5": {
+    "headline": "Taahhüdümüz",
+    "body": "AberoAI şu temeller üzerine inşa edilmiştir:\n• altyapı seviyesinde güvenilirlik\n• çok dilli yetkinlik\n• gizlilik öncelikli mimari\n• operasyonel yönetişim\n• uzun vadeli süreklilik\n• sınır ötesi hassasiyet\n\nBiz hızlı cevap vermeyi değil,\nölçek altında da istikrarlı kalan bir yapıyı optimize ederiz."
+  },
+  "page6": {
+    "headline": "Uzun Vadeli Vizyon",
+    "body": "Kliniklerin:\n• sakin iletişimle\n• öngörülebilir koordinasyonla\n• istikrarlı ilişkilerle\n• birleşik bağlamla\n• kalıcı güvenle\n\nçalıştığı bir dünya.\n\nİletişimin “kim çevrimiçi” olduğuna değil,\nher şeyi hatırlayan sisteme dayandığı bir dünya."
+  }
+}

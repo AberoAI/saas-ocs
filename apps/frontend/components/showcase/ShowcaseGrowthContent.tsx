@@ -10,8 +10,6 @@ import {
 } from "framer-motion";
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
-import FloatingForegroundBubbles from "./FloatingForegroundBubbles";
-import FloatingBackgroundBubbles from "./FloatingBackgroundBubbles";
 
 export function ShowcaseGrowthInner() {
   const shouldReduceMotion = useReducedMotion();
@@ -54,70 +52,52 @@ export function ShowcaseGrowthInner() {
     };
   };
 
-  // ✅ DELAY 1.5x dari versi sebelumnya
   const headlineMotion = makeCinematicProps(0.21, 0.36);
   const subheadlineMotion = makeCinematicProps(0.45, 0.36);
-  const ctaMotion = makeCinematicProps(0.63, 0.34);
-  const trustMotion = makeCinematicProps(0.84, 0.32);
+  const bodyMotion = makeCinematicProps(0.63, 0.34);
+  const microlineMotion = makeCinematicProps(0.84, 0.32);
 
   return (
     <div
       ref={containerRef}
       className="grid items-center gap-8 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
     >
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <motion.div {...headlineMotion}>
-            <h2 className="font-poppins font-medium text-[27px] tracking-tight text-slate-900 md:text-[31px]">
+      <div className="space-y-5">
+        <motion.div {...headlineMotion}>
+          <div className="space-y-1">
+            {/* Brand label */}
+            <p className="font-poppins text-[24px] font-semibold tracking-wide text-[#26658C]">
+              AberoAI
+            </p>
+
+            {/* Main headline */}
+            <h2 className="font-poppins font-medium text-[29px] tracking-tight text-slate-900 md:text-[33px]">
               {t("hero.showcase.headline")}
             </h2>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          <motion.div {...subheadlineMotion}>
-            <p className="font-poppins text-sm leading-relaxed text-slate-600 md:max-w-md">
-              {t("hero.showcase.sub")}
-            </p>
-          </motion.div>
-        </div>
+        <motion.div {...subheadlineMotion}>
+          <p className="font-poppins text-[18px] leading-relaxed text-slate-700 md:text-[20px] md:max-w-xl">
+            {t("hero.showcase.sub")}
+          </p>
+        </motion.div>
 
-        <div className="flex flex-col items-start gap-2">
-          <motion.div {...ctaMotion}>
-            <button
-              type="button"
-              className="
-                inline-flex items-center justify-center
-                rounded-full
-                bg-[#829EC0]
-                px-5 py-2
-                text-xs font-medium text-white
-                shadow-sm
-                transition
-                hover:bg-[#6f87a7]
-                active:translate-y-[1px]
-              "
-            >
-              {t("cta.secondary")}
-            </button>
-          </motion.div>
+        <motion.div {...bodyMotion}>
+          <p className="font-poppins text-sm leading-relaxed text-slate-700 md:text-base md:max-w-2xl">
+            {t("hero.showcase.body")}
+          </p>
+        </motion.div>
 
-          <motion.div {...trustMotion}>
-            <div className="flex items-center gap-3 text-[11px] text-slate-500">
-              <span>• {t("misc.cancelAnytime")}</span>
-              <span>• {t("misc.noCreditCard")}</span>
-            </div>
-          </motion.div>
-        </div>
+        <motion.div {...microlineMotion}>
+          <p className="font-poppins text-[13px] leading-relaxed text-slate-400 md:max-w-md">
+            {t("hero.showcase.microline")}
+          </p>
+        </motion.div>
       </div>
 
-      <div className="relative h-64">
-        <div className="absolute inset-0">
-          <FloatingBackgroundBubbles />
-        </div>
-
-        <div className="absolute inset-0">
-          <FloatingForegroundBubbles />
-        </div>
-      </div>
+      {/* Kolom kanan dibiarkan kosong untuk menjaga komposisi & whitespace */}
+      <div />
     </div>
   );
 }

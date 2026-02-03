@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@repo/api-types": "workspace:*",
-    "@repo/backend": "workspace:*",
     "@studio-freight/lenis": "^1.0.42",
     "@tanstack/react-query": "^5.85.3",
     "@trpc/client": "11.4.4",

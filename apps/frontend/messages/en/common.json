@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "foundation": "Foundation",
+    "product": "Product",
+    "solutions": "Solutions",
+    "pricing": "Pricing",
+
+    "about": "Foundation",
+    "features": "Product",
+
+    "contact": "Contact",
+    "faq": "FAQ",
+    "demo": "Demo",
+    "login": "Log in"
+  },
+  "cta": {
+    "contact": "Contact"
+  }
+}

@@ -1,7 +1,7 @@
-// apps/frontend/src/lib/trpc.ts
+// saas-ocs/apps/frontend/src/lib/trpc.ts
 import { createTRPCReact } from "@trpc/react-query";
 import { httpBatchLink } from "@trpc/client";
-import type { AppRouter } from "@repo/backend"; // tipe asli dari backend
+import type { AppRouter } from "@repo/api-types";
 
 // Instance React hooks untuk tRPC dengan tipe AppRouter
 export const trpc = createTRPCReact<AppRouter>();

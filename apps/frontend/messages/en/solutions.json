@@ -1,0 +1,45 @@
+{
+  "hero": {
+    "tagline": "Communication problems are operational problems",
+    "headline": "Different clinics.\nSame structural challenges.",
+    "subheadline": "AberoAI delivers system-level solutions that reduce human pressure\nand stabilize communication across global clinic operations.",
+    "body": "Whether your clinic handles international patients,\nmultiple languages, high message volume, or complex aftercare —\nthe challenges are structural, not personal.\n\nAberoAI resolves them by restructuring communication at the system level."
+  },
+  "page1": {
+    "headline": "Global Patient Communication",
+    "body": "Problem:\nPatients from different countries, languages, and time zones create uneven communication load.\n\nAberoAI Solution:\nMultilingual, time-zone-aware communication that stays stable across the journey.\n\n• Multilingual intelligence\n• Time-zone stitching\n• Consistent clinical tone across languages\n• Clear routing for global inquiries\n• Cross-border continuity",
+    "microline": "Your clinic communicates consistently — regardless of origin, language, or hour."
+  },
+  "page2": {
+    "headline": "SHIFT & TEAM CONTINUITY",
+    "body": "Problem:\nContext breaks when shifts change, team members rotate, or departments overlap.\n\nAberoAI Solution:\nA continuity engine that preserves context beyond people and time.\n\n• Shift handover stability\n• Memory layer stitching\n• Context vault\n• Identity resolution\n• Multi-staff coordination",
+    "microline": "Operations stay continuous, even when staffing doesn’t"
+  },
+  "page3": {
+    "headline": "AFTERCARE & LONG-TERM FOLLOW-UP",
+    "body": "Problem:\nAftercare often fades after the procedure, leading to trust leakage and lower retention.\n\nAberoAI Solution:\nLong-term patient stability — automated, multilingual, and structured.\n\n• Aftercare workflows\n• Safety check sequences\n• Emotional reassurance cadence\n• Long-term touchpoints\n• Retention mapping",
+    "microline": "Patients feel supported for months —\nwithout adding burden to your team"
+  },
+  "page4": {
+    "headline": "INBOX CONTROL & OPERATIONAL CLARITY",
+    "body": "Problem:\nMultiple channels create scattered communication, lost messages, and operational chaos.\n\nAberoAI Solution:\nA unified, governed flow that organizes communication by logic — not manpower.\n\n• Multi-channel consolidation\n• Unified patient flow\n• Predictive signal surfacing\n• Issue prediction\n• Clean operational visibility",
+    "microline": "Chaos becomes clarity"
+  },
+  "page5": {
+    "headline": "ROUTING &\nPRE-QUALIFICATION",
+    "body": "Problem:\nNot every inquiry should go to the same person.\nTeams lose hours answering non-relevant messages.\n\nAberoAI Solution:\nA governed routing layer that distributes messages by logic, not workload.\n\n• Language routing\n• Case-based routing\n• Department mapping\n• Time-zone-aware distribution\n• Pre-qualification flows",
+    "microline": "Your team speaks only to the right patients —\nat the right time"
+  },
+  "page6": {
+    "headline": "SCALING COMMUNICATION WITHOUT SCALING PRESSURE",
+    "body": "Problem:\nMore patients = more messages = more pressure.\n\nAberoAI Solution:\nA structural communication foundation that absorbs volume without increasing human load.\n\n• Automated day-by-day journeys\n• Guided replies\n• Context-retaining memory\n• Noise-reduction logic\n• Operational calm layer",
+    "microline": "Volume increases. Pressure doesn’t"
+  },
+  "page7": {
+    "headline": "The problems clinics face are systemic.\nThe solutions must be systemic too.",
+    "subheadline": "AberoAI doesn’t fix symptoms.",
+    "body": "It restructures communication at its foundation —\nturning pressure-driven workflows into governed, predictable operations.",
+    "cta": "Explore the Product",
+    "footnote": "See how the system works beneath these solutions."
+  }
+}

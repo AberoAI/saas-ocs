@@ -1,10 +1,10 @@
-// apps/frontend/app/dashboard/DashboardClient.tsx
+// saas-ocs/apps/frontend/app/dashboard/DashboardClient.tsx
 "use client";
 
 import { useState, useCallback } from "react";
 import { trpc } from "lib/trpc";
 import { useWebSocket } from "hooks/useWebSocket";
-import type { RouterOutputs } from "@repo/backend";
+import type { RouterOutputs } from "@repo/api-types";
 
 type Message = RouterOutputs["chat"]["getMessages"][number];
 
@@ -18,21 +18,15 @@ export default function DashboardClient() {
   // Mutation kirim pesan
   const sendMessageMutation = trpc.chat.sendMessage.useMutation();
 
-  // ✅ Tentukan URL WS:
-  // 1) Pakai env NEXT_PUBLIC_WS_URL kalau ada
-  // 2) Fallback: asal domain yg sama → /ws (otomatis ws:// atau wss://)
-  // 3) Dev fallback terakhir: localhost:4000
   const WS_URL =
     process.env.NEXT_PUBLIC_WS_URL ||
     (typeof window !== "undefined"
       ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`
       : "ws://localhost:4000");
 
-  // Realtime: invalidasi cache saat ada notifikasi pesan baru
   useWebSocket(WS_URL, (data: unknown) => {
     if ((data as { type?: string })?.type === "new_message") {
       utils.chat.getMessages.invalidate();
-      // atau: utils.chat.getMessages.invalidate(undefined);
     }
   });
 
@@ -43,7 +37,6 @@ export default function DashboardClient() {
       { content },
       {
         onSuccess: () => {
-          // refresh daftar pesan setelah kirim
           utils.chat.getMessages.invalidate();
           setMessage("");
         },
@@ -56,7 +49,8 @@ export default function DashboardClient() {
   if (messagesQuery.error) {
     return (
       <div style={{ color: "crimson" }}>
-        Failed to load messages: {String(messagesQuery.error.message ?? "Unknown error")}
+        Failed to load messages:{" "}
+        {String(messagesQuery.error.message ?? "Unknown error")}
       </div>
     );
   }

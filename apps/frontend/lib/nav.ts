@@ -7,8 +7,8 @@ export interface NavItem {
 }
 
 export const NAV_LINKS: NavItem[] = [
-  { key: "about", href: "/about" },
-  { key: "product", href: "/product" }, // parent dropdown
+  { key: "foundation", href: "/foundation" },
+  { key: "product", href: "/product" },
+  { key: "solutions", href: "/solutions" },
   { key: "pricing", href: "/pricing" },
-  { key: "contact", href: "/contact" },
 ];

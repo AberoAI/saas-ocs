@@ -1,20 +1,20 @@
 // apps/frontend/app/[locale]/login/page.tsx
-'use client';
+"use client";
 
-import {useTranslations} from 'next-intl';
-import NextLink from 'next/link';
-import {Link} from '@/i18n/routing';
+import { useTranslations } from "next-intl";
+import NextLink from "next/link";
+import { Link } from "@/i18n/routing";
 
 export default function LoginPage() {
   const t = useTranslations();
-  const signInLabel = t('cta.signin');
-  const logInLabel = t('nav.signin');
+  const signInLabel = t("cta.signin");
+  const logInLabel = t("nav.signin");
 
   // Fallback aman jika key "login.subtitle" belum ada
-  let subtitle = 'Access your dashboard and manage conversations.';
+  let subtitle = "Access your dashboard and manage conversations.";
   try {
-    const maybe = t('login.subtitle');
-    if (maybe && typeof maybe === 'string') subtitle = maybe;
+    const maybe = t("login.subtitle");
+    if (maybe && typeof maybe === "string") subtitle = maybe;
   } catch {
     // ignore
   }
@@ -26,10 +26,9 @@ export default function LoginPage() {
         <p className="mt-1 text-sm text-black/60">{subtitle}</p>
 
         <div className="mt-5 flex flex-col gap-2">
-          {/* ✅ Gunakan NextLink + locale={false} agar tidak diprefix /en atau /tr */}
+          {/* ✅ App Router: jangan pakai prop `locale` di next/link */}
           <NextLink
             href="/api/auth/signin"
-            locale={false}
             className="inline-flex w-full items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
           >
             {signInLabel}
@@ -39,7 +38,7 @@ export default function LoginPage() {
             href="/"
             className="inline-flex w-full items-center justify-center rounded-full border px-4 py-2.5 text-sm font-medium text-foreground/80 hover:bg-black/5"
           >
-            {t('cta.secondary')}
+            {t("cta.secondary")}
           </Link>
         </div>
       </div>

@@ -1,4 +1,4 @@
-//apps/frontend/components/hero/HeroRings.tsx
+// apps/frontend/components/hero/HeroRings.tsx
 
 "use client";
 
@@ -6,9 +6,9 @@ export default function HeroRings() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 overflow-hidden"
-      // Fade bawah yang halus (multi-stop) agar menyatu dengan background
+      className="pointer-events-none flex w-full items-center justify-center"
       style={{
+        opacity: 0.4, // ↓ Mengurangi keseluruhan opacity menjadi 40% (pengurangan 60%)
         WebkitMaskImage:
           "linear-gradient(to bottom," +
           "rgba(0,0,0,1) 0%," +
@@ -28,10 +28,9 @@ export default function HeroRings() {
       <svg
         viewBox="0 0 576 560"
         role="presentation"
-        className="absolute right-[-2vw] top-[6vh] h-[56vh] w-auto min-h-[360px] min-w-[480px] xl:right-[-1vw] xl:top-[5vh] xl:h-[58vh]"
+        className="h-[120vh] w-auto max-w-[90vw] xl:h-[140vh]"
       >
         <defs>
-          {/* GRADIENT BESAR — dari screenshot #1 */}
           <linearGradient
             id="abero-ring-lg-grad"
             x1="238.5"
@@ -46,7 +45,6 @@ export default function HeroRings() {
             <stop offset="0.92" stopColor="#1F2846" stopOpacity="0.0" />
           </linearGradient>
 
-          {/* GRADIENT KECIL — dari screenshot #2 */}
           <linearGradient
             id="abero-ring-sm-grad"
             x1="513"
@@ -62,7 +60,7 @@ export default function HeroRings() {
           </linearGradient>
         </defs>
 
-        {/* Ring besar (statis) */}
+        {/* Ring besar */}
         <path
           d="M238.5 40.5C355.179 40.5 454.5 148.97 454.5 289C454.5 429.03 355.179 537.5 238.5 537.5C121.821 537.5 22.5 429.03 22.5 289C22.5 148.97 121.821 40.5 238.5 40.5Z"
           stroke="url(#abero-ring-lg-grad)"
@@ -71,7 +69,7 @@ export default function HeroRings() {
           fill="none"
         />
 
-        {/* Ring kecil (statis) */}
+        {/* Ring kecil */}
         <circle
           cx="513"
           cy="63"

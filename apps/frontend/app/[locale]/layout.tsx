@@ -10,16 +10,13 @@ import { I18nProvider } from "@/context/I18nContext";
 import Providers from "../providers";
 
 import Footer from "@/components/footer";
-import { locales as supportedLocales } from "../../i18n/routing";
+import {
+  locales as supportedLocales,
+  defaultLocale,
+  type Locale,
+} from "@/i18n/config";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
-
-type Locale = (typeof supportedLocales)[number];
 type Props = { children: React.ReactNode; params: { locale: string } };
-
-const defaultLocale: Locale = "en";
 
 const isLocale = (v: string | undefined): v is Locale =>
   !!v && (supportedLocales as readonly string[]).includes(v);
@@ -63,7 +60,7 @@ async function loadMessages(loc: Locale): Promise<AbstractIntlMessages> {
       } catch {
         return {} as AbstractIntlMessages;
       }
-    })
+    }),
   );
 
   return Object.assign({}, common, landing, ...extraPairs);
@@ -99,6 +96,7 @@ export default async function LocaleLayout({
   const routeLocale: Locale | undefined = isLocale(locale) ? locale : undefined;
   if (!routeLocale) notFound();
 
+  // ✅ Single source of truth for locale binding (DO NOT duplicate in pages)
   setRequestLocale(routeLocale);
 
   const uiLocale: Locale = routeLocale;

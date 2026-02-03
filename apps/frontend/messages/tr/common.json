@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "foundation": "Sistemin Temeli",
+    "product": "Ürün",
+    "solutions": "Çözümler",
+    "pricing": "Fiyatlandırma",
+
+    "about": "Sistemin Temeli",
+    "features": "Ürün",
+
+    "contact": "İletişim",
+    "faq": "SSS",
+    "demo": "Demo",
+    "login": "Giriş"
+  },
+  "cta": {
+    "contact": "İletişim"
+  }
+}

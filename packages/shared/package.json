@@ -3,10 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-
   "main": "dist/index.js",
   "types": "src/index.ts",
-
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -18,10 +16,10 @@
     },
     "./package.json": "./package.json"
   },
-
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
-
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "clean": "rimraf dist",

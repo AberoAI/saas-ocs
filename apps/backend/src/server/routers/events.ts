@@ -2,8 +2,17 @@
 import { observable } from "@trpc/server/observable";
 import { createTRPCRouter, publicProcedure } from "../../trpc/trpc";
 
-// Buat router lokal bertipe lengkap (jangan langsung export untuk hindari TS2742)
-const _eventsRouter = createTRPCRouter({
+/**
+ * Catatan TS2742:
+ * Jangan export router value dengan inferred type langsung (const) karena TS
+ * bisa mencoba “menamai” tipe internal tRPC yang tidak portable.
+ *
+ * Solusi: export sebagai type saja untuk kebutuhan tipe,
+ * dan untuk runtime export lewat konstanta yang “dibekukan” oleh annotation sederhana.
+ */
+
+// Router value (internal)
+const eventsRouterInternal = createTRPCRouter({
   /** Demo: broadcast timestamp tiap 1 detik */
   onTick: publicProcedure.subscription(() => {
     return observable<number>((emit) => {
@@ -11,11 +20,10 @@ const _eventsRouter = createTRPCRouter({
       return () => clearInterval(t);
     });
   }),
-} as const);
+});
 
-// Ekspor bentuk bertipe untuk dipakai internal (menjaga tipe lengkap)
-export const eventsRouterTyped = _eventsRouter;
-export type EventsRouter = typeof eventsRouterTyped;
+// Type publik (aman)
+export type EventsRouter = typeof eventsRouterInternal;
 
-// Ekspor nilai runtime untuk publik (tanpa cast AnyRouter agar tetap type-safe)
-export const eventsRouter = _eventsRouter;
+// Runtime export (tetap sama router-nya, tapi tidak memaksa TS menamai inferred export)
+export const eventsRouter: EventsRouter = eventsRouterInternal;
