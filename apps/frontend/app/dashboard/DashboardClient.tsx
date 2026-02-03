@@ -4,13 +4,24 @@
 import { useState, useCallback } from "react";
 import { trpc } from "lib/trpc";
 import { useWebSocket } from "hooks/useWebSocket";
+import { useQueryClient } from "@tanstack/react-query";
 import type { RouterOutputs } from "@repo/api-types";
 
 type Message = RouterOutputs["chat"]["getMessages"][number];
 
+function invalidateChatMessages(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({
+    predicate: (q) => {
+      const key = q.queryKey;
+      // tRPC query keys biasanya array dan bagian awalnya adalah path procedure
+      return Array.isArray(key) && key[0] === "chat" && key[1] === "getMessages";
+    },
+  });
+}
+
 export default function DashboardClient() {
   const [message, setMessage] = useState("");
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   // Query pesan (tanpa input → undefined)
   const messagesQuery = trpc.chat.getMessages.useQuery(undefined);
@@ -26,23 +37,24 @@ export default function DashboardClient() {
 
   useWebSocket(WS_URL, (data: unknown) => {
     if ((data as { type?: string })?.type === "new_message") {
-      utils.chat.getMessages.invalidate();
+      invalidateChatMessages(queryClient);
     }
   });
 
   const send = useCallback(() => {
     const content = message.trim();
     if (!content) return;
+
     sendMessageMutation.mutate(
       { content },
       {
         onSuccess: () => {
-          utils.chat.getMessages.invalidate();
+          invalidateChatMessages(queryClient);
           setMessage("");
         },
-      },
+      }
     );
-  }, [message, sendMessageMutation, utils]);
+  }, [message, sendMessageMutation, queryClient]);
 
   if (messagesQuery.isLoading) return <div>Loading...</div>;
 
